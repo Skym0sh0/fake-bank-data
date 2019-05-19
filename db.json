@@ -1,28 +1,46 @@
 {
-  "posts": [
+  "transactions": [
     {
       "id": 1,
-      "title": "Post 1"
+      "description": "My description",
+      "amount": 500
     },
     {
       "id": 2,
-      "title": "Post 2"
+      "description": "Bla bla bla",
+      "amount": -2500
     },
     {
       "id": 3,
-      "title": "Post 3"
+      "description": "Foo bar fooooobar",
+      "amount": 250000
     }
   ],
-  "comments": [
+  "statements": [
     {
       "id": 1,
-      "body": "some comment",
-      "postId": 1
+      "date": "2019-01-01",
+      "balance": 0
     },
     {
       "id": 2,
-      "body": "some comment",
-      "postId": 1
+      "date": "2019-02-01",
+      "balance": 500
+    },
+    {
+      "id": 3,
+      "date": "2019-03-01",
+      "balance": 500
+    },
+    {
+      "id": 4,
+      "date": "2019-04-01",
+      "balance": 2500
+    },
+    {
+      "id": 5,
+      "date": "2019-05-01",
+      "balance": -25000
     }
   ],
   "profile": {
