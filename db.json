@@ -25,7 +25,7 @@
       "id": 4,
       "date": "2019-03-18",
       "reason": "fooooobar",
-      "periodic": false,
+      "periodic": true,
       "amount": -5463
     },
     {
@@ -46,7 +46,7 @@
       "id": 7,
       "date": "2019-01-25",
       "reason": "no reason",
-      "periodic": false,
+      "periodic": true,
       "amount": -3532
     }
   ],
