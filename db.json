@@ -17,37 +17,37 @@
     {
       "id": 3,
       "date": "2019-03-18",
-      "reason": "Foo bar fooooobar",
+      "reason": "Foo bar ",
       "periodic": false,
       "amount": 250000
     },
     {
       "id": 4,
       "date": "2019-03-18",
-      "reason": "Foo bar fooooobar",
+      "reason": "fooooobar",
       "periodic": false,
-      "amount": 250000
+      "amount": -5463
     },
     {
       "id": 5,
       "date": "2019-04-30",
-      "reason": "Foo bar fooooobar",
+      "reason": "reason1 reason2",
       "periodic": false,
-      "amount": 250000
+      "amount": 87945
     },
     {
       "id": 6,
       "date": "2019-02-28",
-      "reason": "Foo bar fooooobar",
+      "reason": "my cat",
       "periodic": false,
-      "amount": 250000
+      "amount": 2353
     },
     {
       "id": 7,
       "date": "2019-01-25",
-      "reason": "Foo bar fooooobar",
+      "reason": "no reason",
       "periodic": false,
-      "amount": 250000
+      "amount": -3532
     }
   ],
   "statements": [
