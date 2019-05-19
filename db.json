@@ -1,14 +1,16 @@
-[
-  {
-    "id": 1,
-    "name": "first"
-  },
-  {
-    "id": 2,
-    "name": "2nd"
-  },
-  {
-    "id": 3,
-    "name": "third item"
-  }
-]
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "first"
+    },
+    {
+      "id": 2,
+      "name": "2nd"
+    },
+    {
+      "id": 3,
+      "name": "third item"
+    }
+  ]
+}
