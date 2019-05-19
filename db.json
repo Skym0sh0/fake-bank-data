@@ -1,0 +1,83 @@
+{
+  "transactions": [
+    {
+      "id": "b86c4f8e-bb17-40a4-a7fb-4300c304590b",
+      "date": "2019-01-05",
+      "reason": "My reason",
+      "periodic": true,
+      "amount": 500
+    },
+    {
+      "id": "aed9bfcb-2083-4a15-ba15-e6428f8765d4",
+      "date": "2019-02-06",
+      "reason": "Bla bla bla",
+      "periodic": true,
+      "amount": -2500
+    },
+    {
+      "id": "e3c028f8-ff1e-41cf-a824-4038cd73c9eb",
+      "date": "2019-03-18",
+      "reason": "Foo bar ",
+      "periodic": false,
+      "amount": 250000
+    },
+    {
+      "id": "ed4abf84-7d70-485c-9cd4-9e00cf4a370c",
+      "date": "2019-03-18",
+      "reason": "fooooobar",
+      "periodic": true,
+      "amount": -5463
+    },
+    {
+      "id": "fb6528ae-d9c2-46a6-b5d7-2337296f2a50",
+      "date": "2019-04-30",
+      "reason": "reason1 reason2",
+      "periodic": false,
+      "amount": 87945
+    },
+    {
+      "id": "e9f26b59-8143-4943-bcaa-e4df5557c6ec",
+      "date": "2019-02-28",
+      "reason": "my cat",
+      "periodic": false,
+      "amount": 2353
+    },
+    {
+      "id": "510737d0-5057-4862-a56b-f2318adb537f",
+      "date": "2019-01-25",
+      "reason": "no reason",
+      "periodic": true,
+      "amount": -3532
+    }
+  ],
+  "statements": [
+    {
+      "id": "52f56391-71fe-4b54-bab3-afabc115f16e",
+      "date": "2019-01-01",
+      "balance": 0
+    },
+    {
+      "id": "5ce518db-cfec-47b7-86c8-1b3e7f06e179",
+      "date": "2019-02-01",
+      "balance": 500
+    },
+    {
+      "id": "50d3c976-a9e0-4085-941a-b67000b4a503",
+      "date": "2019-03-01",
+      "balance": 500
+    },
+    {
+      "id": "20212e75-d585-45e7-85eb-f25cd3a564d3",
+      "date": "2019-04-01",
+      "balance": 2500
+    },
+    {
+      "id": "5d9e2097-a164-41d7-8893-9f8db95bdcd0",
+      "date": "2019-05-01",
+      "balance": -25000
+    }
+  ],
+  "profile": {
+    "name": "Skym0sh0"
+  }
+}
