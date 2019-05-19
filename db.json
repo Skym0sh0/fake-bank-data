@@ -2,17 +2,51 @@
   "transactions": [
     {
       "id": 1,
-      "description": "My description",
+      "date": "2019-01-05",
+      "reason": "My reason",
+      "periodic": true,
       "amount": 500
     },
     {
       "id": 2,
-      "description": "Bla bla bla",
+      "date": "2019-02-06",
+      "reason": "Bla bla bla",
+      "periodic": true,
       "amount": -2500
     },
     {
       "id": 3,
-      "description": "Foo bar fooooobar",
+      "date": "2019-03-18",
+      "reason": "Foo bar fooooobar",
+      "periodic": false,
+      "amount": 250000
+    },
+    {
+      "id": 4,
+      "date": "2019-03-18",
+      "reason": "Foo bar fooooobar",
+      "periodic": false,
+      "amount": 250000
+    },
+    {
+      "id": 5,
+      "date": "2019-04-30",
+      "reason": "Foo bar fooooobar",
+      "periodic": false,
+      "amount": 250000
+    },
+    {
+      "id": 6,
+      "date": "2019-02-28",
+      "reason": "Foo bar fooooobar",
+      "periodic": false,
+      "amount": 250000
+    },
+    {
+      "id": 7,
+      "date": "2019-01-25",
+      "reason": "Foo bar fooooobar",
+      "periodic": false,
       "amount": 250000
     }
   ],
