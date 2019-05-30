@@ -11,6 +11,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
 @RestController
+@RequestMapping("/transaction")
 public class TransactionsController {
     private static final Logger logger = LoggerFactory.getLogger(TransactionsController.class);
 
@@ -36,7 +37,7 @@ public class TransactionsController {
                 .forEachOrdered(transactions::add);
     }
 
-    @PostMapping("/transaction")
+    @PostMapping
     public Transaction createTransaction(@RequestBody Transaction t) {
         logger.info("Create {}", t);
 
@@ -45,14 +46,14 @@ public class TransactionsController {
         return t;
     }
 
-    @GetMapping("/transaction")
+    @GetMapping
     public List<Transaction> getAllTransactions() {
         logger.info("read all");
 
         return transactions;
     }
 
-    @GetMapping("/transaction/{id}")
+    @GetMapping("/{id}")
     public Transaction readTransaction(@PathVariable UUID id) {
         logger.info("Read {}", id);
 
@@ -62,7 +63,7 @@ public class TransactionsController {
                 .orElse(null);
     }
 
-    @PatchMapping("/transaction/{id}")
+    @PatchMapping("/{id}")
     public Transaction updateTransaction(@PathVariable UUID id, @RequestBody Transaction t) {
         logger.info("Update {} with {}", id, t);
 
@@ -71,7 +72,7 @@ public class TransactionsController {
         return createTransaction(t);
     }
 
-    @DeleteMapping("/transaction/{id}")
+    @DeleteMapping("/{id}")
     public void deleteTransaction(@PathVariable("id") UUID id) {
         logger.info("Delete {}", id);
 

@@ -28,12 +28,15 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-dependencies:2.1.5.RELEASE'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
+    implementation group: 'com.google.guava', name: 'guava', version: '27.1-jre'
 
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: "$junit_version"
     testRuntime group: 'org.junit.vintage', name: 'junit-vintage-engine', version: "$junit_version"
     testImplementation group: 'org.mockito', name: 'mockito-core', version: "$mockito_version"
     testImplementation group: 'org.assertj', name: 'assertj-core', version: "$assertj_version"
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 test {
