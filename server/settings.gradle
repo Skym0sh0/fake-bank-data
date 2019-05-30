@@ -1,1 +1,3 @@
 rootProject.name = 'regular-income-server'
+
+include 'api'
