@@ -9,16 +9,22 @@ plugins {
 group 'de.sky.regular.income.server'
 version '1.0-SNAPSHOT'
 
-mainClassName = 'de.sky.regular.income.Server'
-
 sourceCompatibility = JavaVersion.VERSION_12
 targetCompatibility = JavaVersion.VERSION_12
 
-repositories {
-    mavenCentral()
+allprojects {
+    repositories {
+        mavenCentral()
+    }
 }
 
 dependencies {
+    compile project(':api')
+
+    implementation 'org.slf4j:slf4j-api:1.7.25'
+    implementation group: 'ch.qos.logback', name: 'logback-core', version: "$logback_version"
+    implementation group: 'ch.qos.logback', name: 'logback-classic', version: "$logback_version"
+
     implementation 'org.springframework.boot:spring-boot-dependencies:2.1.5.RELEASE'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
@@ -26,9 +32,12 @@ dependencies {
 
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: "$junit_version"
     testRuntime group: 'org.junit.vintage', name: 'junit-vintage-engine', version: "$junit_version"
-
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: "$mockito_version"
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: "$assertj_version"
 }
 
 test {
     useJUnitPlatform()
 }
+
+mainClassName = 'de.sky.regular.income.Server'
