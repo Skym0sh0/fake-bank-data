@@ -8,40 +8,53 @@
 
         <table>
             <tr>
+                <th>Actions</th>
                 <th></th>
                 <!--<th>ID</th>-->
                 <th>Date</th>
                 <th>Income</th>
                 <th>Expenses</th>
-                <th>Reason</th>
                 <th>Periodic</th>
-                <th>Actions</th>
+                <th>Reason</th>
             </tr>
             <tr v-bind:key="transaction.id" v-for="(transaction, idx) in sortedTransactions">
+                <td>
+                    <span>
+                        <span v-if="transaction.isDirty" class="save dirty">X</span>
+                        <span v-else class="save clean">&#10003;</span>
+
+                        <input type="button" class="del" value="X"
+                               @click="$emit('delete-transaction', transaction)"/>
+                    </span>
+                </td>
                 <td>{{sortedTransactions.length - idx}}</td>
                 <td>
                     <Datepicker v-model="transaction.date" format="yyyy-MM-dd"
-                                @input="saveChange(transaction.id, 'date', transaction.date)"/>
+                                @input="setDirty(transaction); saveChange(transaction, 'date', transaction.date)"/>
                 </td>
-                <td class="income">
-                    <input type="text" v-model="transaction.amount"
-                           @change="saveChange(transaction.id, 'amount', transaction.amount)"/>
+                <td class="income monetary amount">
+                    <input class="monetary amount"
+                           type="text" v-model="transaction.amount"
+                           @keypress="setDirty(transaction)"
+                           @change="saveChange(transaction, 'amount', transaction.amount)"
+                           v-bind:disabled="transaction.amount < 0"/>
                 </td>
                 <td class="expenses">
-                    <input type="text" v-model="transaction.amount"
-                           @change="saveChange(transaction.id, '*amount', transaction.amount)"/>
-                </td>
-                <td>
-                    <input type="text" v-model="transaction.reason"
-                           @change="saveChange(transaction.id, 'reason', transaction.reason)"/>
+                    <input class="monetary amount"
+                           type="text" v-model="transaction.amount"
+                           @keypress="setDirty(transaction)"
+                           @change="saveChange(transaction, 'amount', transaction.amount)"
+                           v-bind:disabled="transaction.amount >= 0"/>
                 </td>
                 <td>
                     <input type="checkbox" v-model="transaction.periodic"
-                           @change="saveChange(transaction.id, 'periodic', transaction.periodic)"/>
+                           @keypress="setDirty(transaction)"
+                           @change="saveChange(transaction, 'periodic', transaction.periodic)"/>
                 </td>
                 <td>
-                    <input type="button" class="del" value="X"
-                           @click="$emit('delete-transaction', transaction)"/>
+                    <input type="text" v-model="transaction.reason"
+                           @keypress="setDirty(transaction)"
+                           @change="saveChange(transaction, 'reason', transaction.reason)"/>
                 </td>
             </tr>
         </table>
@@ -56,14 +69,19 @@
         name: 'TransactionOverview',
         props: ["transactions"],
         methods: {
-            saveChange(id, field, newValue) {
+            saveChange(transaction, field, newValue) {
                 const update = {
-                    id: id,
+                    id: transaction.id,
                     field: field,
                     value: newValue
                 }
 
                 this.$emit("update-transaction", update)
+
+                transaction.isDirty = false
+            },
+            setDirty(transaction) {
+                transaction.isDirty = true
             },
             formatAmount(amount) {
                 return `${parseFloat(amount / 100).toFixed(2)} €`
@@ -86,6 +104,9 @@
         components: {
             AddTransaction,
             Datepicker
+        },
+        mounted() {
+            this.transactions.forEach(t => t.isDirty = false)
         }
     }
 </script>
@@ -113,8 +134,12 @@
         cursor: pointer;
     }
 
-    input.save {
-        background: aqua;
+    span.save.dirty {
+        background: indianred;
+    }
+
+    span.save.clean {
+        background: limegreen;
     }
 
     input.del {

@@ -15,19 +15,9 @@
 </template>
 
 <script>
-    import axios from "axios";
     import TransactionOverview from "./TransactionOverview";
     import StatementOverview from "./StatementOverview";
-    import uuid from "uuid";
-
-    const client = axios.create({
-        baseURL: "https://my-json-server.typicode.com/Skym0sh0/fake-bank-data",
-        timeout: 1500,
-        headers: {
-            correlationid: uuid.v4()
-        },
-    })
-
+    import {api} from "../../api/RegularIncomeAPI";
 
     export default {
         name: "Overview",
@@ -41,25 +31,25 @@
         },
         methods: {
             initiallyLoadData() {
-                client.get('transactions')
+                api.getAllTransactions()
                     .then(res => this.transactions = res.data)
                     .catch(e => this.errorMessage += e)
 
-                client.get('statements')
+                api.getAllStatements()
                     .then(res => this.statements = res.data)
                     .catch(e => this.errorMessage += e)
             },
             addTransaction(newTransaction) {
-                client.post('transactions', newTransaction)
+                api.createTransaction(newTransaction)
                     .then(res => this.transactions = [res.data, ...this.transactions])
                     .catch(e => this.errorMessage = e)
             },
             updateTransaction(update) {
-                client.patch(`transactions/${update.id}`, update)
+                api.patchTransaction(update)
                     .then(res => {
                         const updatedTransaction = res.data
 
-                        let transaction = this.transactions.find(t => t.id === updatedTransaction.id)
+                        const transaction = this.transactions.find(t => t.id === updatedTransaction.id)
 
                         transaction.id = updatedTransaction.id
                         transaction.date = updatedTransaction.date
@@ -70,7 +60,7 @@
                     .catch(e => this.errorMessage = e)
             },
             deleteTransaction(transaction) {
-                client.delete(`transactions/${transaction.id}`)
+                api.deleteTransaction(transaction.id)
                     .then(() => this.transactions = this.transactions.filter(t => t.id !== transaction.id))
                     .catch(e => this.errorMessage = e)
             }
