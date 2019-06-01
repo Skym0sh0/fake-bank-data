@@ -1,4 +1,4 @@
-package de.sky.regular.income.rest;
+package de.sky.regular.income.server;
 
 import com.google.common.base.Stopwatch;
 import org.slf4j.Logger;

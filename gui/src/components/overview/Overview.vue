@@ -53,7 +53,7 @@
 
                         transaction.id = updatedTransaction.id
                         transaction.date = updatedTransaction.date
-                        transaction.amount = updatedTransaction.amount
+                        transaction.amountInCent = updatedTransaction.amountInCent
                         transaction.reason = updatedTransaction.reason
                         transaction.periodic = updatedTransaction.periodic
                     })
