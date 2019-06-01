@@ -10,7 +10,7 @@ class RegularIncomeAPI {
 
         this.client = axios.create({
             baseURL: baseUrl,
-            timeout: 1500,
+            // timeout: 1500,
             headers: {
                 correlationid: uuid.v4()
             },
@@ -26,12 +26,15 @@ class RegularIncomeAPI {
     }
 
     createTransaction(t) {
-        // return this.client.post(`transactions/${t.id}`, t)
         return this.client.post(`transactions`, t)
     }
 
     patchTransaction(t) {
-        return this.client.patch(`transactions/${t.id}`, t)
+        const patch = {
+            [t.field]: t.value
+        };
+
+        return this.client.patch(`transactions/${t.id}`, patch)
     }
 
     deleteTransaction(id) {
@@ -43,7 +46,7 @@ class RegularIncomeAPI {
     }
 }
 
-const api = new RegularIncomeAPI("https://my-json-server.typicode.com/Skym0sh0/fake-bank-data")
+const api = new RegularIncomeAPI("http://localhost:8081/")
 
 export {
     RegularIncomeAPI,

@@ -10,7 +10,6 @@
             <tr>
                 <th>Actions</th>
                 <th></th>
-                <!--<th>ID</th>-->
                 <th>Date</th>
                 <th>Income</th>
                 <th>Expenses</th>
@@ -32,7 +31,7 @@
                     <Datepicker v-model="transaction.date" format="yyyy-MM-dd"
                                 @input="setDirty(transaction); saveChange(transaction, 'date', transaction.date)"/>
                 </td>
-                <td class="income monetary amount">
+                <td class="income">
                     <input class="monetary amount"
                            type="text" v-model="transaction.amount"
                            @keypress="setDirty(transaction)"
@@ -67,13 +66,37 @@
 
     export default {
         name: 'TransactionOverview',
-        props: ["transactions"],
+        props: {
+            transactions: {
+                id: {
+                    type: String,
+                    required: true
+                },
+                amount: {
+                    type: Number,
+                    required: true
+                },
+                reason: {
+                    type: String,
+                    required: true,
+                },
+                date: {
+                    type: Date,
+                    required: true
+                },
+                isPeriodic: {
+                    type: Boolean,
+                    required: true
+                }
+            }
+        },
         methods: {
             saveChange(transaction, field, newValue) {
                 const update = {
                     id: transaction.id,
+                    obj: transaction,
                     field: field,
-                    value: newValue
+                    value: newValue,
                 }
 
                 this.$emit("update-transaction", update)
@@ -82,15 +105,6 @@
             },
             setDirty(transaction) {
                 transaction.isDirty = true
-            },
-            formatAmount(amount) {
-                return `${parseFloat(amount / 100).toFixed(2)} €`
-            },
-            formatIncome(amount) {
-                return amount < 0 ? '' : this.formatAmount(amount)
-            },
-            formatExpenses(amount) {
-                return amount > 0 ? '' : this.formatAmount(amount)
             },
             addTransaction(newTransaction) {
                 this.$emit("add-transaction", newTransaction)
@@ -106,7 +120,9 @@
             Datepicker
         },
         mounted() {
-            this.transactions.forEach(t => t.isDirty = false)
+            this.transactions.forEach(t => {
+                t.isDirty = false
+            })
         }
     }
 </script>
