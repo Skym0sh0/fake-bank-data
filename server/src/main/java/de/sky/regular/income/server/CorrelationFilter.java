@@ -2,6 +2,7 @@ package de.sky.regular.income.server;
 
 import com.google.common.base.Stopwatch;
 import org.slf4j.Logger;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.FilterChain;
@@ -15,6 +16,7 @@ import java.util.Optional;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Component
+@Order(0)
 public class CorrelationFilter extends HttpFilter {
     private static final Logger logger = getLogger(CorrelationFilter.class);
 
@@ -23,13 +25,12 @@ public class CorrelationFilter extends HttpFilter {
         String correlationid = Optional.ofNullable(request.getHeader("correlationid"))
                 .orElse("unknown");
 
-        logger.info(" >>> Request starts to {} - {}", request.getServletPath(), correlationid);
-
+        logger.info(" >>> {} {} - cor-id: {}", request.getMethod(), request.getServletPath(), correlationid);
         Stopwatch sw = Stopwatch.createStarted();
 
         super.doFilter(request, response, chain);
 
         sw.stop();
-        logger.info(" <<< Request finished in {} to {} {} - {}", sw, request.getServletPath(), response.getStatus(), correlationid);
+        logger.info(" <<< {} {} {} {} - cor-id: {}", request.getMethod(), request.getServletPath(), response.getStatus(), sw, correlationid);
     }
 }

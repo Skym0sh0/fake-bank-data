@@ -6,10 +6,8 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
-public class Transaction {
+public class Statement {
     public UUID id;
-    public Double amount;
     public LocalDate date;
-    public Boolean isPeriodic;
-    public String reason;
+    public Long balance;
 }
