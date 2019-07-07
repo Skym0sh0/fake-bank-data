@@ -56,3 +56,6 @@ output.json
 #NDK
 obj/
 .externalNativeBuild
+
+
+/**/db-data/
