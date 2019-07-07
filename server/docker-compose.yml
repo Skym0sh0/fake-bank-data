@@ -1,0 +1,35 @@
+version: "3.7"
+
+services:
+  database:
+    container_name: "postgres-database"
+    image: "postgres:11"
+    ports:
+      - "5432:5432"
+    networks:
+      - regular-income
+#    volumes:
+#      - "./db-data/postgres/:/var/lib/postgresql/data"
+#    user: "${UID}:${GID}"
+    environment:
+      POSTGRES_USER: "scott"
+      POSTGRES_PASSWORD: "tiger"
+#      LANG: "de_DE.utf8"
+
+  admin:
+    container_name: "pgadmin-panel"
+    image: "dpage/pgadmin4"
+    ports:
+      - "80:80"
+    networks:
+      - regular-income
+    volumes:
+      - "./db-data/pgadmin/:/var/lib/pgadmin"
+#    user: "${UID}:${GID}"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "bruce@scott.de"
+      PGADMIN_DEFAULT_PASSWORD: "tiger"
+
+networks:
+  regular-income:
+#    internal: 'true'
