@@ -2,7 +2,6 @@ plugins {
     id 'com.gradle.build-scan' version '2.3'
 }
 
-
 allprojects {
     group 'de.sky.regular.income.server'
     version '1.0-SNAPSHOT'
@@ -11,4 +10,3 @@ allprojects {
         mavenCentral()
     }
 }
-

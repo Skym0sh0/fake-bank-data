@@ -8,9 +8,8 @@ services:
       - "5432:5432"
     networks:
       - regular-income
-#    volumes:
-#      - "./db-data/postgres/:/var/lib/postgresql/data"
-#    user: "${UID}:${GID}"
+    volumes:
+      - db-data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: "scott"
       POSTGRES_PASSWORD: "tiger"
@@ -24,7 +23,8 @@ services:
     networks:
       - regular-income
     volumes:
-      - "./db-data/pgadmin/:/var/lib/pgadmin"
+      - db-admin-data:/var/lib/pgadmin
+#      - "./db-data/pgadmin/:/var/lib/pgadmin"
 #    user: "${UID}:${GID}"
     environment:
       PGADMIN_DEFAULT_EMAIL: "bruce@scott.de"
@@ -33,3 +33,7 @@ services:
 networks:
   regular-income:
 #    internal: 'true'
+
+volumes:
+  db-data:
+  db-admin-data:

@@ -1,3 +1,10 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+}
+
 plugins {
     id 'java'
     id 'application'
@@ -12,6 +19,7 @@ sourceCompatibility = JavaVersion.VERSION_12
 targetCompatibility = JavaVersion.VERSION_12
 
 dependencies {
+    compile project(':database')
     compile project(':api')
 
     implementation 'org.slf4j:slf4j-api:1.7.25'
@@ -30,6 +38,14 @@ dependencies {
     testImplementation group: 'org.assertj', name: 'assertj-core', version: "$assertj_version"
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'database/src/main/java'
+        }
+    }
 }
 
 test {
