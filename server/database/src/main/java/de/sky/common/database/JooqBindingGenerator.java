@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.PostgreSQLContainer;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
@@ -55,8 +54,6 @@ public class JooqBindingGenerator {
             psql.start();
 
             try {
-//                removeOldFiles();
-
                 migrateSchema(psql);
 
                 createJooqSources(psql);
@@ -68,23 +65,7 @@ public class JooqBindingGenerator {
         }
     }
 
-//    private void removeOldFiles() throws Exception {
-//        logger.info("Removing old jOOQ binding data in {}...", generatedBuildDir);
-//        if (Files.exists(generatedBuildDir))
-//            Files.walkFileTree(generatedBuildDir, RECURSIVE_DELETER);
-//
-//        logger.info("Removing old H2 data in {}...", localFileBuildDir);
-//        if (Files.exists(localFileBuildDir))
-//            Files.walkFileTree(localFileBuildDir, RECURSIVE_DELETER);
-//
-//        Files.walk(localBuildDir, 1)
-//                .map(Path::toFile)
-//                .filter(file -> file.getName().startsWith(this.getClass().getSimpleName()))
-//                .filter(file -> file.getName().endsWith(".db"))
-//                .forEach(File::delete);
-//    }
-
-    private void migrateSchema(PostgreSQLContainer psql)  {
+    private void migrateSchema(PostgreSQLContainer psql) {
         logger.info("Migrating schema with Flyway...");
 
         String descriptor = Location.FILESYSTEM_PREFIX + changeset.toString();
