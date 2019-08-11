@@ -1,5 +1,7 @@
 package de.sky.common.database;
 
+import de.sky.common.database.converters.DateConverter;
+import de.sky.common.database.converters.TimestampConverter;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.Location;
 import org.jooq.codegen.DefaultGeneratorStrategy;
@@ -21,10 +23,13 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class JooqBindingGenerator {
     private static final Logger logger = LoggerFactory.getLogger(JooqBindingGenerator.class);
@@ -104,22 +109,19 @@ public class JooqBindingGenerator {
                                         .withName(PostgresDatabase.class.getName())
                                         .withInputSchema("public")
                                         .withOutputSchema(this.schemaName)
-                                        .withExcludes("Flyway.*")
-                                        /*.withForcedTypes(
+                                        .withExcludes(getExcludes())
+                                        .withForcedTypes(
                                                 new ForcedType()
                                                         .withUserType(ZonedDateTime.class.getName())
                                                         .withTypes("TIMESTAMP.*")
                                                         .withExpression(".*")
                                                         .withConverter(TimestampConverter.class.getName()),
                                                 new ForcedType()
-                                                        .withUserType(Boolean.class.getName())
-                                                        .withTypes("CHAR")
+                                                        .withUserType(LocalDate.class.getName())
+                                                        .withTypes("DATE.*")
                                                         .withExpression(".*")
-                                                        .withConverter(BooleanConverter.class.getName()),
-                                                new ForcedType().withName(SQLDataType.DECIMAL_INTEGER.getTypeName())
-                                                        .withExpression(".*")
-                                                        .withTypes("INTEGER.*")
-                                        )*/
+                                                        .withConverter(DateConverter.class.getName())
+                                        )
                         ).withGenerate(
                                 new Generate()
                                         .withDeprecated(false)
@@ -134,6 +136,12 @@ public class JooqBindingGenerator {
                                         .withEncoding(StandardCharsets.UTF_8.name())
                         )
                 );
+    }
+
+    private String getExcludes() {
+        return DEFAULT_EXCLUDES.stream()
+                .map(String::toLowerCase)
+                .collect(Collectors.joining("|"));
     }
 
     private Connection createConnection(PostgreSQLContainer psql) throws SQLException {

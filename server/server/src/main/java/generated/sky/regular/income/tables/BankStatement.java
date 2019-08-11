@@ -4,12 +4,14 @@
 package generated.sky.regular.income.tables;
 
 
+import de.sky.common.database.converters.DateConverter;
+
 import generated.sky.regular.income.Indexes;
 import generated.sky.regular.income.Keys;
 import generated.sky.regular.income.RegularIncome;
 import generated.sky.regular.income.tables.records.BankStatementRecord;
 
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -42,7 +44,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class BankStatement extends TableImpl<BankStatementRecord> {
 
-    private static final long serialVersionUID = -652351441;
+    private static final long serialVersionUID = 2021946386;
 
     /**
      * The reference instance of <code>REGULAR_INCOME.bank_statement</code>
@@ -65,7 +67,7 @@ public class BankStatement extends TableImpl<BankStatementRecord> {
     /**
      * The column <code>REGULAR_INCOME.bank_statement.date_record</code>.
      */
-    public final TableField<BankStatementRecord, Date> DATE_RECORD = createField("date_record", org.jooq.impl.SQLDataType.DATE.nullable(false), this, "");
+    public final TableField<BankStatementRecord, LocalDate> DATE_RECORD = createField("date_record", org.jooq.impl.SQLDataType.DATE.nullable(false), this, "", new DateConverter());
 
     /**
      * The column <code>REGULAR_INCOME.bank_statement.amount_balance_cents</code>.
