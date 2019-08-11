@@ -13,7 +13,7 @@ dependencies {
 
     implementation("com.zaxxer", "HikariCP", "3.3.1")
 
-    implementation("org.flywaydb", "flyway-core", "5.2.4")
+    compile("org.flywaydb", "flyway-core", "5.2.4")
 
     implementation("org.postgresql", "postgresql", "42.2.6")
     implementation("com.h2database", "h2", "1.4.199")
