@@ -4,12 +4,14 @@
 package generated.sky.regular.income.tables;
 
 
+import de.sky.common.database.converters.DateConverter;
+
 import generated.sky.regular.income.Indexes;
 import generated.sky.regular.income.Keys;
 import generated.sky.regular.income.RegularIncome;
 import generated.sky.regular.income.tables.records.FinancialTransactionRecord;
 
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -42,7 +44,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class FinancialTransaction extends TableImpl<FinancialTransactionRecord> {
 
-    private static final long serialVersionUID = -1142623390;
+    private static final long serialVersionUID = 1689465011;
 
     /**
      * The reference instance of <code>REGULAR_INCOME.financial_transaction</code>
@@ -70,7 +72,7 @@ public class FinancialTransaction extends TableImpl<FinancialTransactionRecord> 
     /**
      * The column <code>REGULAR_INCOME.financial_transaction.date_record</code>.
      */
-    public final TableField<FinancialTransactionRecord, Date> DATE_RECORD = createField("date_record", org.jooq.impl.SQLDataType.DATE.nullable(false), this, "");
+    public final TableField<FinancialTransactionRecord, LocalDate> DATE_RECORD = createField("date_record", org.jooq.impl.SQLDataType.DATE.nullable(false), this, "", new DateConverter());
 
     /**
      * The column <code>REGULAR_INCOME.financial_transaction.amount_value_cents</code>.
