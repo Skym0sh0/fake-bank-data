@@ -1,6 +1,8 @@
 package de.sky.regular.income.dao;
 
 import de.sky.regular.income.api.Statement;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -9,7 +11,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class StatementDAO {
+@Component
+@Repository
+public class StatementDAO  {
     private final List<Statement> statements = IntStream.range(0, 3)
             .mapToObj(i -> {
                 Statement s = new Statement();

@@ -4,10 +4,12 @@ import de.sky.regular.income.api.Transaction;
 import de.sky.regular.income.dao.TransactionsDAO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @RestController
@@ -15,7 +17,12 @@ import java.util.UUID;
 public class TransactionsController {
     private static final Logger logger = LoggerFactory.getLogger(TransactionsController.class);
 
-    private final TransactionsDAO dao = new TransactionsDAO();
+    private final TransactionsDAO dao;
+
+    @Autowired
+    public TransactionsController(TransactionsDAO dao) {
+        this.dao = Objects.requireNonNull(dao);
+    }
 
     @PostMapping
     public Transaction createTransaction(HttpServletResponse response, @RequestBody Transaction t) {

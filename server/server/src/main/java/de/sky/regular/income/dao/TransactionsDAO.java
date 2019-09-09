@@ -1,6 +1,7 @@
 package de.sky.regular.income.dao;
 
 import de.sky.regular.income.api.Transaction;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -9,6 +10,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
+@Component
 public class TransactionsDAO {
     private final List<Transaction> transactions = new ArrayList<>();
 
