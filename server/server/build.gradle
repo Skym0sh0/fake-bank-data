@@ -28,6 +28,7 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-dependencies:2.1.5.RELEASE'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
     implementation group: 'com.google.guava', name: 'guava', version: '27.1-jre'

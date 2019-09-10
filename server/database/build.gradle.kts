@@ -13,6 +13,8 @@ dependencies {
 
     implementation("com.zaxxer", "HikariCP", "3.3.1")
 
+    implementation("org.slf4j", "slf4j-simple", "1.7.28")
+
     compile("org.flywaydb", "flyway-core", "5.2.4")
 
     implementation("org.postgresql", "postgresql", "42.2.6")

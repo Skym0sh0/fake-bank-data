@@ -1,76 +1,83 @@
 package de.sky.regular.income.dao;
 
 import de.sky.regular.income.api.Transaction;
+import generated.sky.regular.income.tables.records.FinancialTransactionRecord;
+import org.jooq.DSLContext;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
-import java.util.stream.IntStream;
+
+import static generated.sky.regular.income.Tables.FINANCIAL_TRANSACTION;
 
 @Component
 public class TransactionsDAO {
-    private final List<Transaction> transactions = new ArrayList<>();
 
-    public TransactionsDAO() {
-        ThreadLocalRandom rnd = ThreadLocalRandom.current();
+    public Transaction createTransaction(DSLContext ctx, Transaction t) {
+        FinancialTransactionRecord rec = ctx.newRecord(FINANCIAL_TRANSACTION);
 
-        IntStream.range(0, 3)
-                .mapToObj(i -> {
-                    Transaction t = new Transaction();
+        rec.setId(Optional.ofNullable(t.id).orElseGet(UUID::randomUUID));
+        rec.setDateRecord(t.date);
+        rec.setAmountValueCents((int) (t.amount * 100.0));
+        rec.setIsPeriodic(t.isPeriodic);
+        rec.setReason(t.reason);
 
-                    t.id = UUID.randomUUID();
+        rec.insert();
 
-                    t.amount = Math.round(((Math.random() * 10000) - 5000) * 100.0) / 100.0;
-                    t.isPeriodic = rnd.nextBoolean();
-                    t.date = LocalDate.now().minusDays(rnd.nextInt(1, 100));
-                    t.reason = "Reason " + i;
-
-                    return t;
-                })
-                .sorted(Comparator.comparing(t -> t.date))
-                .forEachOrdered(transactions::add);
+        return readTransaction(ctx, rec.getId());
     }
 
-    public Transaction createTransaction(Transaction t) {
-        transactions.add(t);
+    public Transaction patchTransaction(DSLContext ctx, UUID id, Transaction t) {
+        FinancialTransactionRecord rec = ctx.fetchOne(FINANCIAL_TRANSACTION, FINANCIAL_TRANSACTION.ID.eq(id));
+
+        if ( rec == null)
+            return null;
+
+        updateIfSet(rec, t, FinancialTransactionRecord::getAmountValueCents, Transaction::setAmount);
+        updateIfSet(rec, t, FinancialTransactionRecord::getDateRecord, Transaction::setDate);
+        updateIfSet(rec, t, FinancialTransactionRecord::getIsPeriodic, Transaction::setIsPeriodic);
+        updateIfSet(rec, t, FinancialTransactionRecord::getReason, Transaction::setReason);
+
+        rec.update();
+
+        return readTransaction(ctx, id);
+    }
+
+    public List<Transaction> readAllTransactions(DSLContext ctx) {
+        return ctx.fetch(FINANCIAL_TRANSACTION)
+                .map(TransactionsDAO::map);
+    }
+
+    public Transaction readTransaction(DSLContext ctx, UUID id) {
+        return map(ctx.fetchOne(FINANCIAL_TRANSACTION, FINANCIAL_TRANSACTION.ID.eq(id)));
+    }
+
+    private static Transaction map(FinancialTransactionRecord rec) {
+        if (rec == null)
+            return null;
+
+        Transaction t = new Transaction();
+
+        t.id = rec.getId();
+        t.date = rec.getDateRecord();
+        t.amount = rec.getAmountValueCents().longValue() / 100.0;
+        t.isPeriodic = rec.getIsPeriodic();
+        t.reason = rec.getReason();
 
         return t;
     }
 
-    public Transaction patchTransaction(UUID id, Transaction t) {
-        Transaction old = this.transactions.stream()
-                .filter(tr -> Objects.equals(tr.id, id))
-                .findAny()
-                .orElseThrow();
-
-        updateIfSet(old, t, Transaction::getAmount, Transaction::setAmount);
-        updateIfSet(old, t, Transaction::getDate, Transaction::setDate);
-        updateIfSet(old, t, Transaction::getIsPeriodic, Transaction::setIsPeriodic);
-        updateIfSet(old, t, Transaction::getReason, Transaction::setReason);
-
-        return old;
-    }
-
-    public List<Transaction> readAllTransactions() {
-        return this.transactions;
-    }
-
-    public Transaction readTransaction(UUID id) {
-        return transactions.stream()
-                .filter(t -> Objects.equals(t.id, id))
-                .findAny()
-                .orElse(null);
-    }
-
-    private static <T> void updateIfSet(Transaction oldTxn, Transaction newTxn, Function<Transaction, T> getter, BiConsumer<Transaction, T> setter) {
+    private static <T> void updateIfSet(FinancialTransactionRecord oldTxn, Transaction newTxn, Function<FinancialTransactionRecord, T> getter, BiConsumer<Transaction, T> setter) {
         Optional.ofNullable(getter.apply(newTxn))
                 .ifPresent(val -> setter.accept(oldTxn, val));
     }
 
-    public void deleteTransaction(UUID id) {
-        transactions.removeIf(t -> Objects.equals(t.id, id));
+    public void deleteTransaction(DSLContext ctx, UUID id) {
+        ctx.deleteFrom(FINANCIAL_TRANSACTION)
+                .where(FINANCIAL_TRANSACTION.ID.eq(id))
+                .execute();
     }
 }

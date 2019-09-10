@@ -1,7 +1,9 @@
 package de.sky.regular.income.rest;
 
+import de.sky.common.database.DatabaseConnection;
 import de.sky.regular.income.api.Transaction;
 import de.sky.regular.income.dao.TransactionsDAO;
+import de.sky.regular.income.database.DatabaseSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,11 +19,17 @@ import java.util.UUID;
 public class TransactionsController {
     private static final Logger logger = LoggerFactory.getLogger(TransactionsController.class);
 
+    private final DatabaseConnection db;
     private final TransactionsDAO dao;
 
-    @Autowired
-    public TransactionsController(TransactionsDAO dao) {
+    public TransactionsController(DatabaseConnection db, TransactionsDAO dao) {
+        this.db = Objects.requireNonNull(db);
         this.dao = Objects.requireNonNull(dao);
+    }
+
+    @Autowired
+    public TransactionsController(DatabaseSupplier supplier, TransactionsDAO dao) {
+        this(supplier.getDatabase(), dao);
     }
 
     @PostMapping
@@ -30,35 +38,35 @@ public class TransactionsController {
 
         response.setStatus(HttpServletResponse.SC_CREATED);
 
-        return dao.createTransaction(t);
+        return db.transactionWithResult(ctx -> dao.createTransaction(ctx, t));
     }
 
     @GetMapping
     public List<Transaction> getAllTransactions() {
         logger.info("read all");
 
-        return dao.readAllTransactions();
+        return db.transactionWithResult(dao::readAllTransactions);
     }
 
     @GetMapping("/{id}")
     public Transaction readTransaction(@PathVariable UUID id) {
         logger.info("Read {}", id);
 
-        return dao.readTransaction(id);
+        return db.transactionWithResult(ctx -> dao.readTransaction(ctx, id));
     }
 
     @PatchMapping("/{id}")
     public Transaction updateTransaction(HttpServletResponse response, @PathVariable UUID id, @RequestBody Transaction t) {
         logger.info("Update {} with {}", id, t);
 
-        return dao.patchTransaction(id, t);
+        return db.transactionWithResult(ctx -> dao.patchTransaction(ctx, id, t));
     }
 
     @DeleteMapping("/{id}")
     public void deleteTransaction(HttpServletResponse response, @PathVariable("id") UUID id) {
         logger.info("Delete {}", id);
 
-        dao.deleteTransaction(id);
+        db.transactionWithoutResult(ctx -> dao.deleteTransaction(ctx, id));
 
         response.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }

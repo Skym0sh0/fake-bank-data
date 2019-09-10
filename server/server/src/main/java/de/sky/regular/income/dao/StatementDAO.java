@@ -1,33 +1,31 @@
 package de.sky.regular.income.dao;
 
 import de.sky.regular.income.api.Statement;
+import generated.sky.regular.income.tables.records.BankStatementRecord;
+import org.jooq.DSLContext;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+
+import static generated.sky.regular.income.Tables.BANK_STATEMENT;
 
 @Component
 @Repository
-public class StatementDAO  {
-    private final List<Statement> statements = IntStream.range(0, 3)
-            .mapToObj(i -> {
-                Statement s = new Statement();
+public class StatementDAO {
+    public List<Statement> readAllStatements(DSLContext ctx) {
+        return ctx.selectFrom(BANK_STATEMENT)
+                .fetch()
+                .map(StatementDAO::map);
+    }
 
-                s.setId(UUID.randomUUID());
-                s.setDate(LocalDate.now().minusDays(i * 10));
-                s.setBalance(100000L - i * 1000L);
+    private static Statement map(BankStatementRecord rec) {
+        Statement stmt = new Statement();
 
-                return s;
-            })
-            .sorted(Comparator.comparing(Statement::getDate))
-            .collect(Collectors.toList());
+        stmt.id = rec.getId();
+        stmt.date = rec.getDateRecord();
+        stmt.balance = rec.getAmountBalanceCents().longValue();
 
-    public List<Statement> readAllStatements() {
-        return statements;
+        return stmt;
     }
 }
