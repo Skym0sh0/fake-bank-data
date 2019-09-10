@@ -8,7 +8,7 @@ import java.util.UUID;
 @Data
 public class Transaction {
     public UUID id;
-    public Double amount;
+    public Integer amount;
     public LocalDate date;
     public Boolean isPeriodic;
     public String reason;
