@@ -36,10 +36,10 @@ public class TransactionsDAO {
         if ( rec == null)
             return null;
 
-        updateIfSet(rec, t, FinancialTransactionRecord::getAmountValueCents, Transaction::setAmount);
-        updateIfSet(rec, t, FinancialTransactionRecord::getDateRecord, Transaction::setDate);
-        updateIfSet(rec, t, FinancialTransactionRecord::getIsPeriodic, Transaction::setIsPeriodic);
-        updateIfSet(rec, t, FinancialTransactionRecord::getReason, Transaction::setReason);
+        updateIfSet(rec, t, Transaction::getAmount, FinancialTransactionRecord::setAmountValueCents);
+        updateIfSet(rec, t, Transaction::getDate, FinancialTransactionRecord::setDateRecord);
+        updateIfSet(rec, t, Transaction::getIsPeriodic, FinancialTransactionRecord::setIsPeriodic);
+        updateIfSet(rec, t, Transaction::getReason, FinancialTransactionRecord::setReason);
 
         rec.update();
 
@@ -63,14 +63,14 @@ public class TransactionsDAO {
 
         t.id = rec.getId();
         t.date = rec.getDateRecord();
-        t.amount = rec.getAmountValueCents().longValue() / 100.0;
+        t.amount = rec.getAmountValueCents();
         t.isPeriodic = rec.getIsPeriodic();
         t.reason = rec.getReason();
 
         return t;
     }
 
-    private static <T> void updateIfSet(FinancialTransactionRecord oldTxn, Transaction newTxn, Function<FinancialTransactionRecord, T> getter, BiConsumer<Transaction, T> setter) {
+    private static <T> void updateIfSet(FinancialTransactionRecord oldTxn, Transaction newTxn, Function<Transaction, T> getter, BiConsumer<FinancialTransactionRecord, T> setter) {
         Optional.ofNullable(getter.apply(newTxn))
                 .ifPresent(val -> setter.accept(oldTxn, val));
     }

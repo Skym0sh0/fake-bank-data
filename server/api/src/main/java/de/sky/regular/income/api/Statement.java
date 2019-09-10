@@ -9,5 +9,5 @@ import java.util.UUID;
 public class Statement {
     public UUID id;
     public LocalDate date;
-    public Long balance;
+    public Integer balance;
 }
