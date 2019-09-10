@@ -15,6 +15,8 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class DatabaseConnection implements AutoCloseable {
     private final HikariDataSource datasource;
@@ -58,6 +60,26 @@ public class DatabaseConnection implements AutoCloseable {
 
     public Configuration getConfiguration() {
         return configuration.get();
+    }
+
+    public <T> T transactionWithResult(Function<DSLContext, T> func) {
+        try (DSLContext outerCtx = getContext()) {
+            return outerCtx.transactionResult(configuration -> {
+                try (DSLContext ctx = DSL.using(configuration)) {
+                    return func.apply(ctx);
+                }
+            });
+        }
+    }
+
+    public void transactionWithoutResult(Consumer<DSLContext> func) {
+        try (DSLContext outerCtx = getContext()) {
+            outerCtx.transaction(configuration -> {
+                try (DSLContext ctx = DSL.using(configuration)) {
+                    func.accept(ctx);
+                }
+            });
+        }
     }
 
     public static DatabaseConnection connect(String url, String user, String password, String inSchema, String outSchema) {
