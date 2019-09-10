@@ -24,7 +24,7 @@ public class StatementDAO {
 
         stmt.id = rec.getId();
         stmt.date = rec.getDateRecord();
-        stmt.balance = rec.getAmountBalanceCents().longValue();
+        stmt.balance = rec.getAmountBalanceCents();
 
         return stmt;
     }
