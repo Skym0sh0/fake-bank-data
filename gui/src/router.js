@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './views/Home.vue'
-import Overview from './components/overview/Overview'
+import StatementOverview from './components/overview/StatementOverview'
 
 Vue.use(Router)
 
@@ -13,9 +13,9 @@ export default new Router({
             component: Home
         },
         {
-            path: '/overview',
-            name: 'overview',
-            component: Overview
+            path: '/statement-overview',
+            name: 'statement-overview',
+            component: StatementOverview
         },
         {
             path: '/about',
