@@ -5,6 +5,7 @@ import de.sky.regular.income.api.StatementTransactionSummary;
 import de.sky.regular.income.api.Transaction;
 import generated.sky.regular.income.tables.records.BankStatementRecord;
 import org.jooq.DSLContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -17,6 +18,7 @@ import static generated.sky.regular.income.Tables.BANK_STATEMENT;
 public class StatementDAO {
     private final TransactionsDAO transactionsDAO;
 
+    @Autowired
     public StatementDAO(TransactionsDAO transactionsDAO) {
         this.transactionsDAO = Objects.requireNonNull(transactionsDAO);
     }

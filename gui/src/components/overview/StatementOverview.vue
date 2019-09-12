@@ -2,12 +2,20 @@
     <b-card>
         <h1>Statement Overview</h1>
 
-        <b-btn id="statement-overview-refresh"
-               class="mb-2"
-               variant="primary"
-               @click="initiallyLoadData">
-            Refresh
-        </b-btn>
+        <b-row align-h="end" class="col-auto">
+            <b-btn id="statement-overview-refresh"
+                   class="mb-2"
+                   variant="primary"
+                   @click="initiallyLoadData">
+                Refresh
+            </b-btn>
+
+            <b-btn id="statement-overview-create-new-statement"
+                   class="mb-2"
+                   variant="secondary">
+                Create
+            </b-btn>
+        </b-row>
 
         <b-table striped hover bordered small responsive="sm"
                  id="bank-statements-table"

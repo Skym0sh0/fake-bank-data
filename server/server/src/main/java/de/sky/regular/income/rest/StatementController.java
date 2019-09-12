@@ -32,7 +32,7 @@ public class StatementController {
         this(supplier.getDatabase(), dao);
     }
 
-    @GetMapping
+    @GetMapping("/")
     public List<Statement> getAllStatements() {
         return db.transactionWithResult(dao::readAllStatements);
     }
