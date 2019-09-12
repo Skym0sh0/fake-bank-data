@@ -19,6 +19,10 @@
                 {{row.index + 1}}
             </template>
 
+            <template v-slot:cell(date)="row">
+                {{new Date(row.item.date).toLocaleDateString()}}
+            </template>
+
             <template v-slot:cell(current_balance)="row">
                 {{formatBalance(row.item.balance)}}
             </template>
@@ -42,8 +46,8 @@
 </template>
 
 <script>
-    import {api} from "../../api/RegularIncomeAPI";
-    import StatementTableDetails from "./StatementTableDetails";
+    import {api} from "../../api/RegularIncomeAPI"
+    import StatementTableDetails from "./StatementTableDetails"
     import {moneyFormat} from '../../util/Formatters'
 
     export default {

@@ -41,6 +41,14 @@ class RegularIncomeAPI {
         return this.client.delete(`transactions/${id}`)
     }
 
+    getTransactionsForStatement(stmtId) {
+        return this.client.get(`statements/${stmtId}/transactions`)
+    }
+
+    getStatementSummary(stmtId) {
+        return this.client.get(`statements/${stmtId}/summary`)
+    }
+
     getAllStatements() {
         return this.client.get('statements')
     }
