@@ -78,7 +78,7 @@
         data() {
             return {
                 transactions: [],
-                summaries: {income: {}, expense: {}},
+                summaries: {},
             }
         },
         methods: {
