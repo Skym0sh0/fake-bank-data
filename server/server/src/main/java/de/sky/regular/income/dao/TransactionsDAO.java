@@ -1,10 +1,15 @@
 package de.sky.regular.income.dao;
 
+import de.sky.regular.income.api.StatementTransactionSummary;
 import de.sky.regular.income.api.Transaction;
 import generated.sky.regular.income.tables.records.FinancialTransactionRecord;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Record6;
+import org.jooq.impl.DSL;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -33,7 +38,7 @@ public class TransactionsDAO {
     public Transaction patchTransaction(DSLContext ctx, UUID id, Transaction t) {
         FinancialTransactionRecord rec = ctx.fetchOne(FINANCIAL_TRANSACTION, FINANCIAL_TRANSACTION.ID.eq(id));
 
-        if ( rec == null)
+        if (rec == null)
             return null;
 
         updateIfSet(rec, t, Transaction::getAmount, FinancialTransactionRecord::setAmountValueCents);
@@ -79,5 +84,42 @@ public class TransactionsDAO {
         ctx.deleteFrom(FINANCIAL_TRANSACTION)
                 .where(FINANCIAL_TRANSACTION.ID.eq(id))
                 .execute();
+    }
+
+    public StatementTransactionSummary fetchStatementSummaryFor(DSLContext ctx, UUID id) {
+        StatementTransactionSummary summary = new StatementTransactionSummary();
+
+        summary.income = fetchSummary(ctx, id, FINANCIAL_TRANSACTION.AMOUNT_VALUE_CENTS.greaterOrEqual(0));
+        summary.expense = fetchSummary(ctx, id, FINANCIAL_TRANSACTION.AMOUNT_VALUE_CENTS.lessThan(0));
+        summary.total = fetchSummary(ctx, id);
+
+        return summary;
+    }
+
+    private static StatementTransactionSummary.Summary fetchSummary(DSLContext ctx, UUID id, Condition... c) {
+        Record6<Integer, BigDecimal, BigDecimal, BigDecimal, Integer, Integer> rec = ctx.select(
+                DSL.count(),
+                DSL.sum(FINANCIAL_TRANSACTION.AMOUNT_VALUE_CENTS),
+                DSL.avg(FINANCIAL_TRANSACTION.AMOUNT_VALUE_CENTS),
+                DSL.median(FINANCIAL_TRANSACTION.AMOUNT_VALUE_CENTS),
+                DSL.min(FINANCIAL_TRANSACTION.AMOUNT_VALUE_CENTS),
+                DSL.max(FINANCIAL_TRANSACTION.AMOUNT_VALUE_CENTS)
+        )
+                .from(FINANCIAL_TRANSACTION)
+                .where(FINANCIAL_TRANSACTION.BANK_STATEMENT_ID.eq(id))
+                .and(DSL.and(c))
+                .groupBy(FINANCIAL_TRANSACTION.BANK_STATEMENT_ID)
+                .fetchOne();
+
+        StatementTransactionSummary.Summary sum = new StatementTransactionSummary.Summary();
+
+        sum.count = rec.value1();
+        sum.total = rec.value2().intValue();
+        sum.average = rec.value3().intValue();
+        sum.median = rec.value4().intValue();
+        sum.min = rec.value5();
+        sum.max = rec.value6();
+
+        return sum;
     }
 }
