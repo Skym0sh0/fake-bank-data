@@ -52,6 +52,7 @@ build/
 .navigation
 captures/
 output.json 
+**/out/
 
 #NDK
 obj/
