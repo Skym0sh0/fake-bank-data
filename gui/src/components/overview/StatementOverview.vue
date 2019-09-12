@@ -2,13 +2,27 @@
     <b-card>
         <h1>Statement Overview</h1>
 
-        <b-btn @click="initiallyLoadData">Refresh</b-btn>
+        <b-btn id="statement-overview-refresh"
+               class="mb-2"
+               variant="primary"
+               @click="initiallyLoadData">
+            Refresh
+        </b-btn>
 
-        <b-table striped hover responsive="sm"
+        <b-table striped hover bordered small responsive="sm"
                  id="bank-statements-table"
                  primary-key="id"
-                 :fields="['index', 'date', 'balance', 'show_details']"
+                 :fields="['index', 'date', 'current_balance', 'show_details']"
                  :items="statements">
+
+            <template v-slot:cell(index)="row">
+                {{row.index + 1}}
+            </template>
+
+            <template v-slot:cell(current_balance)="row">
+                {{formatBalance(row.item.balance)}}
+            </template>
+
             <template v-slot:cell(show_details)="row">
                 <b-button :id="`bank-statement-details-btn-${row.item.id}`"
                           size="sm"
@@ -30,6 +44,7 @@
 <script>
     import {api} from "../../api/RegularIncomeAPI";
     import StatementTableDetails from "./StatementTableDetails";
+    import {moneyFormat} from '../../util/Formatters'
 
     export default {
         name: "StatementOverview",
@@ -37,7 +52,6 @@
         data() {
             return {
                 errorMessage: '',
-                selectedIndex: null,
                 statements: [],
             }
         },
@@ -45,13 +59,13 @@
             initiallyLoadData() {
                 api.getAllStatements()
                     .then(res => {
-                        this.statements = res.data.sort((a, b) => b.date.localeCompare(a.date)).map((val, idx) => {
-                            val.index = idx
-                            return val
-                        })
+                        this.statements = res.data.sort((a, b) => b.date.localeCompare(a.date))
                     })
                     .catch(e => this.errorMessage += e)
             },
+            formatBalance(amount) {
+                return moneyFormat.formatCents(amount)
+            }
         },
         created() {
             this.initiallyLoadData()
