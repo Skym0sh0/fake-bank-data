@@ -16,8 +16,8 @@
                                           horizontal>
                                 <b-form-select id="previous-statement-select"
                                                :options="prevStatementOptions"
-                                               v-model="previousStatement"
-                                               :state="!!previousStatement"
+                                               v-model="statement.previousStatement"
+                                               :state="!!statement.previousStatement"
                                                class="statement-selection"/>
                             </b-form-group>
                         </b-col>
@@ -28,11 +28,11 @@
                                           label="Previous Balance"
                                           label-for="previous-statement-balance-input"
                                           horizontal
-                                          :description="formatBalance(previousStatement.balance)">
+                                          :description="formatBalance(statement.previousStatement.balance)">
                                 <b-form-input id="previous-statement-balance-input"
                                               type="number"
                                               :formatter="formatBalance"
-                                              v-model="previousStatement.balance"
+                                              v-model="statement.previousStatement.balance"
                                               disabled/>
                             </b-form-group>
                         </b-col>
@@ -150,6 +150,20 @@
                         </template>
                     </b-table>
                 </b-card>
+
+                <b-row align-h="end" class="mt-2">
+                    <b-col cols="auto">
+                        <b-btn-group>
+                            <b-btn variant="primary"
+                                   @click="saveModel">
+                                Save
+                            </b-btn>
+                            <b-btn variant="secondary">
+                                Cancel
+                            </b-btn>
+                        </b-btn-group>
+                    </b-col>
+                </b-row>
             </b-card>
         </b-form>
     </b-container>
@@ -165,7 +179,6 @@
         data() {
             return {
                 previousStatementOptions: [],
-                previousStatement: {},
                 statement: {},
                 transactions: [],
             }
@@ -182,8 +195,12 @@
                         this.previousStatementOptions.sort((a, b) => -a.date.diff(b.date))
 
                         if (this.previousStatementOptions.length > 0)
-                            this.previousStatement = this.previousStatementOptions[0]
+                            this.statement.previousStatement = this.previousStatementOptions[0]
                     })
+            },
+            saveModel() {
+                // eslint-disable-next-line
+                console.log('Save', this.statement)
             },
             addNewTransaction(index) {
                 this.transactions.splice(index, 0, {})
@@ -207,14 +224,26 @@
             },
             prevStatementOptions() {
                 return this.previousStatementOptions.map(stmt => {
-                    const d = `${dateFormat.formatDate(stmt.date)} [${moneyFormat.formatCents(stmt.balance)}]`
+                    const text = `${dateFormat.formatDate(stmt.date)} [${moneyFormat.formatCents(stmt.balance)}]`
 
-                    return {text: d, value: stmt, order: stmt.date.utc()}
+                    return {
+                        text: text,
+                        value: stmt,
+                        order: stmt.date.utc()
+                    }
                 })
             },
         },
         mounted() {
             this.loadStatements()
+        },
+        created() {
+            this.statement = {
+                previousStatement: {
+                    date: null,
+                    balance: null,
+                },
+            }
         }
     }
 </script>
