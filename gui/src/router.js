@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './views/Home.vue'
 import StatementOverview from './components/overview/StatementOverview'
+import StatementEntering from "./components/enterings/StatementEntering";
 
 Vue.use(Router)
 
@@ -11,6 +12,11 @@ export default new Router({
             path: '/',
             name: 'home',
             component: Home
+        },
+        {
+            path: '/enter-statement',
+            name: 'enter-statement',
+            component: StatementEntering
         },
         {
             path: '/statement-overview',

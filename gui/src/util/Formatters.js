@@ -1,3 +1,5 @@
+import moment from "moment";
+
 class MoneyFormatter {
     constructor() {
         this.frmt = new Intl.NumberFormat('de-DE', {
@@ -15,9 +17,26 @@ class MoneyFormatter {
     }
 }
 
+class DateFormatter {
+    constructor() {
+    }
+
+    formatDate(date) {
+        if (!date)
+            return null
+
+        const transformed = moment(date)
+
+        return transformed.format("ddd YYYY-MM-DD")
+    }
+}
+
 const moneyFormat = new MoneyFormatter()
+const dateFormat = new DateFormatter()
 
 export {
     MoneyFormatter,
-    moneyFormat
+    DateFormatter,
+    moneyFormat,
+    dateFormat
 }
