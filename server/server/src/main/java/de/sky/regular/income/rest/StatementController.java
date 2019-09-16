@@ -6,19 +6,21 @@ import de.sky.regular.income.api.StatementTransactionSummary;
 import de.sky.regular.income.api.Transaction;
 import de.sky.regular.income.dao.StatementDAO;
 import de.sky.regular.income.database.DatabaseSupplier;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 @RestController
 @RequestMapping("/statements")
 public class StatementController {
+    private static final Logger logger = getLogger(StatementController.class);
+
     private final DatabaseConnection db;
     private final StatementDAO dao;
 
@@ -35,6 +37,13 @@ public class StatementController {
     @GetMapping("")
     public List<Statement> getAllStatements() {
         return db.transactionWithResult(dao::readAllStatements);
+    }
+
+    @PostMapping("{id}")
+    public Statement postStatement(@PathVariable("id") UUID id, @RequestBody Statement stmt) {
+        logger.info("Posting Statement {} - {}", id, stmt);
+
+        return db.transactionWithResult(ctx -> dao.createStatement(ctx, id, stmt));
     }
 
     @GetMapping("{id}/summary")

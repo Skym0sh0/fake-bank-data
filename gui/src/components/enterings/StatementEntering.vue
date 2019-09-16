@@ -17,7 +17,7 @@
                                 <b-form-select id="previous-statement-select"
                                                :options="prevStatementOptions"
                                                v-model="statement.previousStatement"
-                                               :state="!!statement.previousStatement"
+                                               :state="!$v.statement.previousStatement.$invalid"
                                                class="statement-selection"/>
                             </b-form-group>
                         </b-col>
@@ -47,7 +47,7 @@
                                 <b-form-input id="statement-date-input"
                                               type="date"
                                               v-model="statement.date"
-                                              :state="!!statement.date"/>
+                                              :state="!$v.statement.date.$invalid"/>
                             </b-form-group>
                         </b-col>
 
@@ -57,11 +57,11 @@
                                           label="Balance"
                                           label-for="statement-balance-input"
                                           horizontal
-                                          :description="formatBalance(statement.balance)">
+                                          :description="`In Euro: ${formatBalance(statement.balance)}`">
                                 <b-form-input id="statement-balance-input"
                                               type="number"
                                               v-model="statement.balance"
-                                              :state="!!statement.balance"/>
+                                              :state="!$v.statement.balance.$invalid"/>
                             </b-form-group>
                         </b-col>
                     </b-row>
@@ -155,7 +155,8 @@
                     <b-col cols="auto">
                         <b-btn-group>
                             <b-btn variant="primary"
-                                   @click="saveModel">
+                                   @click="saveModel"
+                                   :disabled="$v.statement.$invalid">
                                 Save
                             </b-btn>
                             <b-btn variant="secondary">
@@ -173,6 +174,10 @@
     import {api} from "../../api/RegularIncomeAPI"
     import {dateFormat, moneyFormat} from '../../util/Formatters'
     import moment from "moment";
+    import {normalizeStatement} from "../../util/Normalizer";
+    import * as uuid from "uuid";
+    import {required} from 'vuelidate/dist/validators.min'
+    import {validationMixin} from 'vuelidate'
 
     export default {
         name: "StatementEntering",
@@ -180,7 +185,19 @@
             return {
                 previousStatementOptions: [],
                 statement: {},
-                transactions: [],
+            }
+        },
+        validations: {
+            statement: {
+                previousStatement: {
+                    required,
+                },
+                date: {
+                    required,
+                },
+                balance: {
+                    required,
+                },
             }
         },
         methods: {
@@ -199,14 +216,28 @@
                     })
             },
             saveModel() {
+                const normalizedStatement = normalizeStatement(this.statement)
+
                 // eslint-disable-next-line
-                console.log('Save', this.statement)
+                console.log('Save', normalizedStatement)
+
+                api.postStatement(normalizedStatement)
+                    .catch(e => {
+                        // eslint-disable-next-line
+                        console.log('Post failed', e)
+                    })
             },
             addNewTransaction(index) {
-                this.transactions.splice(index, 0, {})
+                this.statement.transactions.splice(index, 0, {
+                    id: uuid.v4(),
+                    date: null,
+                    amount: null,
+                    isPeriodic: false,
+                    reason: null,
+                })
             },
             deleteTransaction(index) {
-                this.transactions.splice(index, 1)
+                this.statement.transactions.splice(index, 1)
             },
             shiftTransaction(index, offset) {
                 const newIndex = index + offset
@@ -215,12 +246,15 @@
                 console.log('Swap', index, newIndex)
             },
             formatBalance(amount) {
+                if (!amount)
+                    return ""
+
                 return moneyFormat.formatCents(amount)
             },
         },
         computed: {
             sortedTransactions() {
-                return this.transactions
+                return this.statement.transactions
             },
             prevStatementOptions() {
                 return this.previousStatementOptions.map(stmt => {
@@ -239,12 +273,19 @@
         },
         created() {
             this.statement = {
+                id: uuid.v4(),
+                date: null,
+                balance: null,
                 previousStatement: {
                     date: null,
                     balance: null,
                 },
+                transactions: [],
             }
-        }
+        },
+        mixins: [
+            validationMixin,
+        ],
     }
 </script>
 
