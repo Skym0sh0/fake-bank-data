@@ -2,7 +2,7 @@
     <b-container fluid>
         <b-form>
             <b-card>
-                <h3>New Statement</h3>
+                <h3>{{isNew ? 'Create' : 'Edit'}} Statement</h3>
 
                 <b-card class="mb-2">
                     <h4>Statement Information</h4>
@@ -44,10 +44,18 @@
                                           label-cols="4"
                                           label-for="statement-date-input"
                                           horizontal>
-                                <b-form-input id="statement-date-input"
-                                              type="date"
-                                              v-model="statement.date"
-                                              :state="!$v.statement.date.$invalid"/>
+                                <b-input-group>
+                                    <b-btn id="statement-date-input-btn-today"
+                                           class="mr-2"
+                                           size="sm"
+                                           @click="setDateToToday">
+                                        &#128197;
+                                    </b-btn>
+                                    <b-form-input id="statement-date-input"
+                                                  type="date"
+                                                  v-model="statement.date"
+                                                  :state="!$v.statement.date.$invalid"/>
+                                </b-input-group>
                             </b-form-group>
                         </b-col>
 
@@ -174,16 +182,23 @@
     import {api} from "../../api/RegularIncomeAPI"
     import {dateFormat, moneyFormat} from '../../util/Formatters'
     import moment from "moment";
-    import {normalizeStatement} from "../../util/Normalizer";
+    import {denormalizeStatement, normalizeStatement} from "../../util/Normalizer";
     import * as uuid from "uuid";
     import {required} from 'vuelidate/dist/validators.min'
     import {validationMixin} from 'vuelidate'
 
     export default {
         name: "StatementEntering",
+        props: {
+            id: {
+                required: true,
+                type: String,
+            },
+        },
         data() {
             return {
                 previousStatementOptions: [],
+                isNew: false,
                 statement: {},
             }
         },
@@ -204,10 +219,11 @@
             loadStatements() {
                 api.getAllStatements()
                     .then(res => {
-                        this.previousStatementOptions = res.data.map(s => {
-                            s.date = moment(s.date)
-                            return s
-                        })
+                        this.previousStatementOptions = res.data.filter(stmt => this.isNew || stmt.id !== this.id)
+                            .map(s => {
+                                s.date = moment(s.date)
+                                return s
+                            })
 
                         this.previousStatementOptions.sort((a, b) => -a.date.diff(b.date))
 
@@ -218,14 +234,14 @@
             saveModel() {
                 const normalizedStatement = normalizeStatement(this.statement)
 
-                // eslint-disable-next-line
-                console.log('Save', normalizedStatement)
-
                 api.postStatement(normalizedStatement)
                     .catch(e => {
                         // eslint-disable-next-line
                         console.log('Post failed', e)
                     })
+            },
+            setDateToToday() {
+                this.statement.date = dateFormat.formatIsoDate(moment())
             },
             addNewTransaction(index) {
                 this.statement.transactions.splice(index, 0, {
@@ -258,7 +274,10 @@
             },
             prevStatementOptions() {
                 return this.previousStatementOptions.map(stmt => {
-                    const text = `${dateFormat.formatDate(stmt.date)} [${moneyFormat.formatCents(stmt.balance)}]`
+                    const isBefore = (a, b) => a.diff(b) < 0
+                    const indexIndicator = this.statement.date ? (isBefore(moment(this.statement.date), stmt.date) ? "\u2193" : "\u2191") : "#"
+
+                    const text = `${indexIndicator} ${dateFormat.formatDate(stmt.date)} [${moneyFormat.formatCents(stmt.balance)}]`
 
                     return {
                         text: text,
@@ -272,8 +291,10 @@
             this.loadStatements()
         },
         created() {
-            this.statement = {
-                id: uuid.v4(),
+            this.isNew = this.$route.query.isNew
+
+            this.$set(this, 'statement', {
+                id: this.id,
                 date: null,
                 balance: null,
                 previousStatement: {
@@ -281,6 +302,16 @@
                     balance: null,
                 },
                 transactions: [],
+            })
+
+            if (!this.isNew) {
+                api.readStatement(this.id)
+                    .then(res => {
+                        const svrStmt = denormalizeStatement(res.data)
+
+                        this.$set(this.statement, 'date', svrStmt.date)
+                        this.$set(this.statement, 'balance', svrStmt.balance)
+                    })
             }
         },
         mixins: [

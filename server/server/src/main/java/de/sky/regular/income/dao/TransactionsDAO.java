@@ -111,6 +111,19 @@ public class TransactionsDAO {
                 .groupBy(FINANCIAL_TRANSACTION.BANK_STATEMENT_ID)
                 .fetchOne();
 
+        if (rec == null) {
+            StatementTransactionSummary.Summary sum = new StatementTransactionSummary.Summary();
+
+            sum.count = 0;
+            sum.total = 0;
+            sum.average = null;
+            sum.median = null;
+            sum.min = null;
+            sum.max = null;
+
+            return sum;
+        }
+
         StatementTransactionSummary.Summary sum = new StatementTransactionSummary.Summary();
 
         sum.count = rec.value1();

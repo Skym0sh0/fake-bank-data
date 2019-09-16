@@ -8,6 +8,10 @@ function normalizeTransaction(t) {
     }
 }
 
+function denormalizeTransaction(t) {
+    return t
+}
+
 function normalizeStatement(stmt) {
     const transactions = (stmt.transactions || []).map(t => normalizeTransaction(t))
 
@@ -19,6 +23,13 @@ function normalizeStatement(stmt) {
     }
 }
 
+function denormalizeStatement(stmt) {
+    return stmt
+}
+
 export {
-    normalizeStatement
+    normalizeTransaction,
+    denormalizeTransaction,
+    normalizeStatement,
+    denormalizeStatement,
 }

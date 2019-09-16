@@ -19,6 +19,29 @@ class RegularIncomeAPI {
         })
     }
 
+    getTransactionsForStatement(stmtId) {
+        return this.getClient().get(`statements/${stmtId}/transactions`)
+    }
+
+    getStatementSummary(stmtId) {
+        return this.getClient().get(`statements/${stmtId}/summary`)
+    }
+
+    getAllStatements() {
+        return this.getClient().get('statements')
+    }
+
+    readStatement(id) {
+        return this.getClient().get(`statements/${id}`)
+    }
+
+    postStatement(stmt) {
+        return this.getClient().post(`statements/${stmt.id}`, stmt)
+    }
+
+
+
+
     getAllTransactions() {
         return this.getClient().get('transactions')
     }
@@ -41,22 +64,6 @@ class RegularIncomeAPI {
 
     deleteTransaction(id) {
         return this.getClient().delete(`transactions/${id}`)
-    }
-
-    getTransactionsForStatement(stmtId) {
-        return this.getClient().get(`statements/${stmtId}/transactions`)
-    }
-
-    getStatementSummary(stmtId) {
-        return this.getClient().get(`statements/${stmtId}/summary`)
-    }
-
-    getAllStatements() {
-        return this.getClient().get('statements')
-    }
-
-    postStatement(stmt) {
-        return this.getClient().post(`statements/${stmt.id}`, stmt)
     }
 }
 
