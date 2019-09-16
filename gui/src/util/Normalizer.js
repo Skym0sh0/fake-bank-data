@@ -20,6 +20,7 @@ function normalizeStatement(stmt) {
         date: stmt.date,
         balance: parseInt(stmt.balance),
         transactions: transactions,
+        previousStatementId: (stmt.previousStatement && stmt.previousStatement.id) || null
     }
 }
 

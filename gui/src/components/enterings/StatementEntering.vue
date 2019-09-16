@@ -223,15 +223,6 @@
             }
         },
         methods: {
-            inputMoneyFormat(value, event) {
-                // eslint-disable-next-line
-                console.log(value, event.data)
-
-                if (event.data === ',')
-                    return value * 100
-
-                return value
-            },
             loadStatements() {
                 api.getAllStatements()
                     .then(res => {
@@ -265,6 +256,12 @@
             },
             abort() {
                 this.$router.back()
+            },
+            inputMoneyFormat(value, event) {
+                if (event.data === ',')
+                    return value * 100
+
+                return value
             },
             setDateToToday() {
                 this.statement.date = dateFormat.formatIsoDate(moment())
