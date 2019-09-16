@@ -48,9 +48,14 @@
                                     <b-btn id="statement-date-input-btn-today"
                                            class="mr-2"
                                            size="sm"
+                                           :variant="!$v.statement.date.$invalid ? 'success' : 'danger'"
                                            @click="setDateToToday">
-                                        &#128197;
+                                        &#128198;
                                     </b-btn>
+                                    <b-tooltip target="statement-date-input-btn-today">
+                                        Set to Today
+                                    </b-tooltip>
+
                                     <b-form-input id="statement-date-input"
                                                   type="date"
                                                   v-model="statement.date"
@@ -69,6 +74,7 @@
                                 <b-form-input id="statement-balance-input"
                                               type="number"
                                               v-model="statement.balance"
+                                              :formatter="inputMoneyFormat"
                                               :state="!$v.statement.balance.$invalid"/>
                             </b-form-group>
                         </b-col>
@@ -167,7 +173,8 @@
                                    :disabled="$v.statement.$invalid">
                                 Save
                             </b-btn>
-                            <b-btn variant="secondary">
+                            <b-btn variant="secondary"
+                                   @click="abort">
                                 Cancel
                             </b-btn>
                         </b-btn-group>
@@ -216,6 +223,15 @@
             }
         },
         methods: {
+            inputMoneyFormat(value, event) {
+                // eslint-disable-next-line
+                console.log(value, event.data)
+
+                if (event.data === ',')
+                    return value * 100
+
+                return value
+            },
             loadStatements() {
                 api.getAllStatements()
                     .then(res => {
@@ -235,10 +251,20 @@
                 const normalizedStatement = normalizeStatement(this.statement)
 
                 api.postStatement(normalizedStatement)
+                    .then(res => {
+                        this.$router.replace({
+                            name: "statement-edit",
+                            params: {id: res.data.id},
+                            // query: {isNew: false,}
+                        })
+                    })
                     .catch(e => {
                         // eslint-disable-next-line
                         console.log('Post failed', e)
                     })
+            },
+            abort() {
+                this.$router.back()
             },
             setDateToToday() {
                 this.statement.date = dateFormat.formatIsoDate(moment())
@@ -291,7 +317,7 @@
             this.loadStatements()
         },
         created() {
-            this.isNew = this.$route.query.isNew
+            this.isNew = this.$route.query.isNew || false
 
             this.$set(this, 'statement', {
                 id: this.id,
