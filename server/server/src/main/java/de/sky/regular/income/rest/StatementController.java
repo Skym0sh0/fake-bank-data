@@ -39,6 +39,17 @@ public class StatementController {
         return db.transactionWithResult(dao::readAllStatements);
     }
 
+    @GetMapping("{id}")
+    public Statement getStatementByID(@PathVariable("id") UUID id) {
+        return db.transactionWithResult(ctx -> {
+            return dao.readAllStatements(ctx)
+                    .stream()
+                    .filter(stmt -> Objects.equals(id, stmt.getId()))
+                    .findAny()
+                    .orElseThrow();
+        });
+    }
+
     @PostMapping("{id}")
     public Statement postStatement(@PathVariable("id") UUID id, @RequestBody Statement stmt) {
         logger.info("Posting Statement {} - {}", id, stmt);

@@ -9,9 +9,8 @@ class MoneyFormatter {
     }
 
     formatCents(amount) {
-        if (!amount)
+        if (!amount && amount !== 0)
             return null
-
 
         return this.frmt.format(amount / (100))
     }
@@ -19,6 +18,15 @@ class MoneyFormatter {
 
 class DateFormatter {
     constructor() {
+    }
+
+    formatIsoDate(date) {
+        if (!date)
+            return null
+
+        const transformed = moment(date)
+
+        return transformed.format("YYYY-MM-DD")
     }
 
     formatDate(date) {

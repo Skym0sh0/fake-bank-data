@@ -14,13 +14,14 @@ export default new Router({
             component: Home
         },
         {
-            path: '/enter-statement',
-            name: 'enter-statement',
+            path: '/statements/:id',
+            name: 'statement-edit',
+            props: true,
             component: StatementEntering
         },
         {
-            path: '/statement-overview',
-            name: 'statement-overview',
+            path: '/statements/',
+            name: 'statements-overview',
             component: StatementOverview
         },
         {
