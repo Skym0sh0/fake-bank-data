@@ -4,7 +4,7 @@ function normalizeTransaction(t) {
         date: t.date,
         amount: t.amount,
         isPeriodic: t.isPeriodic,
-        reason: t.reason,
+        reason: [t.reason],
     }
 }
 

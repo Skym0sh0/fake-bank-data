@@ -94,20 +94,22 @@
                              :fields="['order', 'index', 'date', 'amount', 'periodic', 'reason', 'actions']"
                              :items="sortedTransactions">
                         <template v-slot:cell(order)="row">
-                            <b-btn class="mr-1"
-                                   size="sm"
-                                   variant="primary"
-                                   @click="shiftTransaction(row.index, -1)"
-                                   disabled>
-                                &#8593;
-                            </b-btn>
+                            <div v-if="false">
+                                <b-btn class="mr-1"
+                                       size="sm"
+                                       variant="primary"
+                                       @click="shiftTransaction(row.index, -1)"
+                                       disabled>
+                                    &#8593;
+                                </b-btn>
 
-                            <b-btn size="sm"
-                                   variant="primary"
-                                   @click="shiftTransaction(row.index, +1)"
-                                   disabled>
-                                &#8595;
-                            </b-btn>
+                                <b-btn size="sm"
+                                       variant="primary"
+                                       @click="shiftTransaction(row.index, +1)"
+                                       disabled>
+                                    &#8595;
+                                </b-btn>
+                            </div>
                         </template>
 
                         <template v-slot:cell(index)="row">
@@ -246,7 +248,6 @@
                         this.$router.replace({
                             name: "statement-edit",
                             params: {id: res.data.id},
-                            // query: {isNew: false,}
                         })
                     })
                     .catch(e => {
