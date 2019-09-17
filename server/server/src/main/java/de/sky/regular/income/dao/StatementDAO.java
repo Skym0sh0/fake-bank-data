@@ -1,6 +1,7 @@
 package de.sky.regular.income.dao;
 
 import de.sky.regular.income.api.Statement;
+import de.sky.regular.income.api.StatementPatch;
 import de.sky.regular.income.api.StatementTransactionSummary;
 import de.sky.regular.income.api.Transaction;
 import generated.sky.regular.income.tables.records.BankStatementRecord;
@@ -23,59 +24,71 @@ public class StatementDAO {
         this.transactionsDAO = Objects.requireNonNull(transactionsDAO);
     }
 
-    public Statement createStatement(DSLContext ctx, UUID id, Statement stmt) {
-        {
-            BankStatementRecord rec = ctx.selectFrom(BANK_STATEMENT)
-                    .where(BANK_STATEMENT.ID.eq(id))
-                    .forUpdate()
-                    .fetchOne();
-
-            if (rec != null) {
-                rec.setDateRecord(stmt.getDate());
-                rec.setAmountBalanceCents(stmt.getBalance());
-
-                // update transactions
-
-                rec.update();
-
-                return map(rec);
-            }
-        }
-
-        BankStatementRecord rec = ctx.newRecord(BANK_STATEMENT);
+    public Statement createStatement(DSLContext ctx, UUID id, StatementPatch patch) {
+        BankStatementRecord rec = ctx.selectFrom(BANK_STATEMENT)
+                .where(BANK_STATEMENT.ID.eq(id))
+                .forUpdate()
+                .fetchOptional()
+                .orElseGet(() -> ctx.newRecord(BANK_STATEMENT));
 
         rec.setId(id);
-        rec.setDateRecord(stmt.getDate());
-        rec.setAmountBalanceCents(stmt.getBalance());
 
-        // update transactions
+        rec.setDateRecord(patch.getDate());
+        rec.setAmountBalanceCents(patch.getBalanceInCents());
+        rec.setPreviousStatementId(patch.getPreviousStatementId());
 
-        rec.insert();
+        rec.store();
 
-        return map(rec);
+        transactionsDAO.updateTransactionsFor(ctx, id, patch.transactions);
+
+        return readStatement(ctx, id);
+    }
+
+    public Statement readStatement(DSLContext ctx, UUID id) {
+        BankStatementRecord rec = ctx.selectFrom(BANK_STATEMENT)
+                .where(BANK_STATEMENT.ID.eq(id))
+                .fetchOne();
+
+        return mapFromRecord(ctx, rec, true);
     }
 
     public List<Statement> readAllStatements(DSLContext ctx) {
         return ctx.selectFrom(BANK_STATEMENT)
                 .fetch()
-                .map(StatementDAO::map);
-    }
-
-    private static Statement map(BankStatementRecord rec) {
-        Statement stmt = new Statement();
-
-        stmt.id = rec.getId();
-        stmt.date = rec.getDateRecord();
-        stmt.balance = rec.getAmountBalanceCents();
-
-        return stmt;
+                .map(rec -> mapFromRecord(ctx, rec, false));
     }
 
     public List<Transaction> readTransactionsFor(DSLContext ctx, UUID id) {
-        return transactionsDAO.readAllTransactions(ctx);
+        return transactionsDAO.fetchTransactionsForStatement(ctx, id);
     }
 
     public StatementTransactionSummary fetchSummaryFor(DSLContext ctx, UUID id) {
         return transactionsDAO.fetchStatementSummaryFor(ctx, id);
+    }
+
+    private Statement mapFromRecord(DSLContext ctx, BankStatementRecord rec, boolean resolve) {
+        Statement stmt = new Statement();
+
+        stmt.setId(rec.getId());
+        stmt.setDate(rec.getDateRecord());
+        stmt.setBalanceInCents(rec.getAmountBalanceCents());
+
+        {
+            BankStatementRecord previous = ctx.selectFrom(BANK_STATEMENT)
+                    .where(BANK_STATEMENT.ID.eq(rec.getPreviousStatementId()))
+                    .fetchOne();
+
+            if (previous != null)
+                stmt.setPreviousStatement(mapFromRecord(ctx, previous, false));
+        }
+
+        if (resolve)
+            stmt.setTransactions(transactionsDAO.fetchTransactionsForStatement(ctx, rec.getId()));
+
+        return stmt;
+    }
+
+    public boolean existsAnyStatement(DSLContext ctx) {
+        return ctx.fetchExists(BANK_STATEMENT);
     }
 }

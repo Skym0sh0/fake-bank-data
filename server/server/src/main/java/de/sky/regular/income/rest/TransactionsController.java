@@ -7,9 +7,11 @@ import de.sky.regular.income.database.DatabaseSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -32,15 +34,6 @@ public class TransactionsController {
         this(supplier.getDatabase(), dao);
     }
 
-    @PostMapping
-    public Transaction createTransaction(HttpServletResponse response, @RequestBody Transaction t) {
-        logger.info("Create {}", t);
-
-        response.setStatus(HttpServletResponse.SC_CREATED);
-
-        return db.transactionWithResult(ctx -> dao.createTransaction(ctx, t));
-    }
-
     @GetMapping
     public List<Transaction> getAllTransactions() {
         logger.info("read all");
@@ -53,21 +46,5 @@ public class TransactionsController {
         logger.info("Read {}", id);
 
         return db.transactionWithResult(ctx -> dao.readTransaction(ctx, id));
-    }
-
-    @PatchMapping("/{id}")
-    public Transaction updateTransaction(HttpServletResponse response, @PathVariable UUID id, @RequestBody Transaction t) {
-        logger.info("Update {} with {}", id, t);
-
-        return db.transactionWithResult(ctx -> dao.patchTransaction(ctx, id, t));
-    }
-
-    @DeleteMapping("/{id}")
-    public void deleteTransaction(HttpServletResponse response, @PathVariable("id") UUID id) {
-        logger.info("Delete {}", id);
-
-        db.transactionWithoutResult(ctx -> dao.deleteTransaction(ctx, id));
-
-        response.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
 }

@@ -1,13 +1,13 @@
 package de.sky.regular.income.api;
 
-import de.sky.regular.income.api.detail.MetaInformation;
+import de.sky.regular.income.api.detail.PatchInformation;
 import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Data
-public class Transaction extends MetaInformation {
+public class TransactionPatch extends PatchInformation {
     public Integer amountInCents;
 
     public LocalDate date;

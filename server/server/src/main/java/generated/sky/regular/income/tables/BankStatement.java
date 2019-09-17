@@ -44,7 +44,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class BankStatement extends TableImpl<BankStatementRecord> {
 
-    private static final long serialVersionUID = 2021946386;
+    private static final long serialVersionUID = 846205934;
 
     /**
      * The reference instance of <code>REGULAR_INCOME.bank_statement</code>
@@ -73,6 +73,11 @@ public class BankStatement extends TableImpl<BankStatementRecord> {
      * The column <code>REGULAR_INCOME.bank_statement.amount_balance_cents</code>.
      */
     public final TableField<BankStatementRecord, Integer> AMOUNT_BALANCE_CENTS = createField("amount_balance_cents", org.jooq.impl.SQLDataType.INTEGER.nullable(false), this, "");
+
+    /**
+     * The column <code>REGULAR_INCOME.bank_statement.previous_statement_id</code>.
+     */
+    public final TableField<BankStatementRecord, UUID> PREVIOUS_STATEMENT_ID = createField("previous_statement_id", org.jooq.impl.SQLDataType.UUID, this, "");
 
     /**
      * Create a <code>REGULAR_INCOME.bank_statement</code> table reference
@@ -120,7 +125,7 @@ public class BankStatement extends TableImpl<BankStatementRecord> {
      */
     @Override
     public List<Index> getIndexes() {
-        return Arrays.<Index>asList(Indexes.BANK_STATEMENT_PKEY);
+        return Arrays.<Index>asList(Indexes.BANK_STATEMENT_PKEY, Indexes.BANK_STATEMENT_PREVIOUS_STATEMENT_ID_KEY);
     }
 
     /**
@@ -136,7 +141,19 @@ public class BankStatement extends TableImpl<BankStatementRecord> {
      */
     @Override
     public List<UniqueKey<BankStatementRecord>> getKeys() {
-        return Arrays.<UniqueKey<BankStatementRecord>>asList(Keys.BANK_STATEMENT_PKEY);
+        return Arrays.<UniqueKey<BankStatementRecord>>asList(Keys.BANK_STATEMENT_PKEY, Keys.BANK_STATEMENT_PREVIOUS_STATEMENT_ID_KEY);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<ForeignKey<BankStatementRecord, ?>> getReferences() {
+        return Arrays.<ForeignKey<BankStatementRecord, ?>>asList(Keys.BANK_STATEMENT__BANK_STATEMENT_PREVIOUS_STATEMENT_ID_FKEY);
+    }
+
+    public generated.sky.regular.income.tables.BankStatement bankStatement() {
+        return new generated.sky.regular.income.tables.BankStatement(this, Keys.BANK_STATEMENT__BANK_STATEMENT_PREVIOUS_STATEMENT_ID_FKEY);
     }
 
     /**

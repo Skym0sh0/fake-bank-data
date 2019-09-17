@@ -1,55 +1,30 @@
 package de.sky.regular.income.dao;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 import de.sky.regular.income.api.StatementTransactionSummary;
 import de.sky.regular.income.api.Transaction;
+import de.sky.regular.income.api.TransactionPatch;
+import de.sky.regular.income.utils.TransactionChecksumCalculator;
 import generated.sky.regular.income.tables.records.FinancialTransactionRecord;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record6;
 import org.jooq.impl.DSL;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static generated.sky.regular.income.Tables.FINANCIAL_TRANSACTION;
 
 @Component
 public class TransactionsDAO {
-
-    public Transaction createTransaction(DSLContext ctx, Transaction t) {
-        FinancialTransactionRecord rec = ctx.newRecord(FINANCIAL_TRANSACTION);
-
-        rec.setId(Optional.ofNullable(t.id).orElseGet(UUID::randomUUID));
-        rec.setDateRecord(t.date);
-        rec.setAmountValueCents((int) (t.amount * 100.0));
-        rec.setIsPeriodic(t.isPeriodic);
-        rec.setReason(t.reason);
-
-        rec.insert();
-
-        return readTransaction(ctx, rec.getId());
-    }
-
-    public Transaction patchTransaction(DSLContext ctx, UUID id, Transaction t) {
-        FinancialTransactionRecord rec = ctx.fetchOne(FINANCIAL_TRANSACTION, FINANCIAL_TRANSACTION.ID.eq(id));
-
-        if (rec == null)
-            return null;
-
-        updateIfSet(rec, t, Transaction::getAmount, FinancialTransactionRecord::setAmountValueCents);
-        updateIfSet(rec, t, Transaction::getDate, FinancialTransactionRecord::setDateRecord);
-        updateIfSet(rec, t, Transaction::getIsPeriodic, FinancialTransactionRecord::setIsPeriodic);
-        updateIfSet(rec, t, Transaction::getReason, FinancialTransactionRecord::setReason);
-
-        rec.update();
-
-        return readTransaction(ctx, id);
-    }
+    private final TransactionChecksumCalculator checksumCalculator = new TransactionChecksumCalculator();
 
     public List<Transaction> readAllTransactions(DSLContext ctx) {
         return ctx.fetch(FINANCIAL_TRANSACTION)
@@ -60,29 +35,9 @@ public class TransactionsDAO {
         return map(ctx.fetchOne(FINANCIAL_TRANSACTION, FINANCIAL_TRANSACTION.ID.eq(id)));
     }
 
-    private static Transaction map(FinancialTransactionRecord rec) {
-        if (rec == null)
-            return null;
-
-        Transaction t = new Transaction();
-
-        t.id = rec.getId();
-        t.date = rec.getDateRecord();
-        t.amount = rec.getAmountValueCents();
-        t.isPeriodic = rec.getIsPeriodic();
-        t.reason = rec.getReason();
-
-        return t;
-    }
-
-    private static <T> void updateIfSet(FinancialTransactionRecord oldTxn, Transaction newTxn, Function<Transaction, T> getter, BiConsumer<FinancialTransactionRecord, T> setter) {
-        Optional.ofNullable(getter.apply(newTxn))
-                .ifPresent(val -> setter.accept(oldTxn, val));
-    }
-
-    public void deleteTransaction(DSLContext ctx, UUID id) {
+    public void deleteTransactionForStatement(DSLContext ctx, UUID stmtId) {
         ctx.deleteFrom(FINANCIAL_TRANSACTION)
-                .where(FINANCIAL_TRANSACTION.ID.eq(id))
+                .where(FINANCIAL_TRANSACTION.BANK_STATEMENT_ID.eq(stmtId))
                 .execute();
     }
 
@@ -94,6 +49,58 @@ public class TransactionsDAO {
         summary.total = fetchSummary(ctx, id);
 
         return summary;
+    }
+
+    public void updateTransactionsFor(DSLContext ctx, UUID stmtId, List<TransactionPatch> transactions) {
+        this.deleteTransactionForStatement(ctx, stmtId);
+
+        if (CollectionUtils.isEmpty(transactions))
+            return;
+
+        List<FinancialTransactionRecord> transactionRecords = transactions.stream()
+                .map(t -> {
+                    FinancialTransactionRecord rec = ctx.newRecord(FINANCIAL_TRANSACTION);
+
+                    rec.setId(t.id);
+                    rec.setBankStatementId(stmtId);
+
+                    rec.setAmountValueCents(t.amountInCents);
+                    rec.setDateRecord(t.date);
+                    //t.dateRank
+                    rec.setIsPeriodic(t.isPeriodic);
+                    rec.setReason(String.join(";", t.reasons));
+
+                    rec.setChecksum(checksumCalculator.calculateChecksum(t));
+
+                    return rec;
+                })
+                .collect(Collectors.toList());
+
+        ctx.batchStore(transactionRecords)
+                .execute();
+    }
+
+    public List<Transaction> fetchTransactionsForStatement(DSLContext ctx, UUID stmtId) {
+        return ctx.selectFrom(FINANCIAL_TRANSACTION)
+                .where(FINANCIAL_TRANSACTION.BANK_STATEMENT_ID.eq(stmtId))
+                .fetch()
+                .map(TransactionsDAO::map);
+    }
+
+    private static Transaction map(FinancialTransactionRecord rec) {
+        if (rec == null)
+            return null;
+
+        Transaction t = new Transaction();
+
+        t.setId(rec.getId());
+        t.setDate(rec.getDateRecord());
+        // date rank
+        t.setAmountInCents(rec.getAmountValueCents());
+        t.setIsPeriodic(rec.getIsPeriodic());
+        t.setReasons(Arrays.asList(Iterables.toArray(Splitter.on(";").split(rec.getReason()), String.class)));
+
+        return t;
     }
 
     private static StatementTransactionSummary.Summary fetchSummary(DSLContext ctx, UUID id, Condition... c) {

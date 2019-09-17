@@ -33,6 +33,7 @@ public class Indexes {
     // -------------------------------------------------------------------------
 
     public static final Index BANK_STATEMENT_PKEY = Indexes0.BANK_STATEMENT_PKEY;
+    public static final Index BANK_STATEMENT_PREVIOUS_STATEMENT_ID_KEY = Indexes0.BANK_STATEMENT_PREVIOUS_STATEMENT_ID_KEY;
     public static final Index FINANCIAL_TRANSACTION_PKEY = Indexes0.FINANCIAL_TRANSACTION_PKEY;
 
     // -------------------------------------------------------------------------
@@ -41,6 +42,7 @@ public class Indexes {
 
     private static class Indexes0 {
         public static Index BANK_STATEMENT_PKEY = Internal.createIndex("bank_statement_pkey", BankStatement.BANK_STATEMENT, new OrderField[] { BankStatement.BANK_STATEMENT.ID }, true);
+        public static Index BANK_STATEMENT_PREVIOUS_STATEMENT_ID_KEY = Internal.createIndex("bank_statement_previous_statement_id_key", BankStatement.BANK_STATEMENT, new OrderField[] { BankStatement.BANK_STATEMENT.PREVIOUS_STATEMENT_ID }, true);
         public static Index FINANCIAL_TRANSACTION_PKEY = Internal.createIndex("financial_transaction_pkey", FinancialTransaction.FINANCIAL_TRANSACTION, new OrderField[] { FinancialTransaction.FINANCIAL_TRANSACTION.ID }, true);
     }
 }

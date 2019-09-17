@@ -40,12 +40,14 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     public static final UniqueKey<BankStatementRecord> BANK_STATEMENT_PKEY = UniqueKeys0.BANK_STATEMENT_PKEY;
+    public static final UniqueKey<BankStatementRecord> BANK_STATEMENT_PREVIOUS_STATEMENT_ID_KEY = UniqueKeys0.BANK_STATEMENT_PREVIOUS_STATEMENT_ID_KEY;
     public static final UniqueKey<FinancialTransactionRecord> FINANCIAL_TRANSACTION_PKEY = UniqueKeys0.FINANCIAL_TRANSACTION_PKEY;
 
     // -------------------------------------------------------------------------
     // FOREIGN KEY definitions
     // -------------------------------------------------------------------------
 
+    public static final ForeignKey<BankStatementRecord, BankStatementRecord> BANK_STATEMENT__BANK_STATEMENT_PREVIOUS_STATEMENT_ID_FKEY = ForeignKeys0.BANK_STATEMENT__BANK_STATEMENT_PREVIOUS_STATEMENT_ID_FKEY;
     public static final ForeignKey<FinancialTransactionRecord, BankStatementRecord> FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_BANK_STATEMENT_ID_FKEY = ForeignKeys0.FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_BANK_STATEMENT_ID_FKEY;
 
     // -------------------------------------------------------------------------
@@ -54,10 +56,12 @@ public class Keys {
 
     private static class UniqueKeys0 {
         public static final UniqueKey<BankStatementRecord> BANK_STATEMENT_PKEY = Internal.createUniqueKey(BankStatement.BANK_STATEMENT, "bank_statement_pkey", BankStatement.BANK_STATEMENT.ID);
+        public static final UniqueKey<BankStatementRecord> BANK_STATEMENT_PREVIOUS_STATEMENT_ID_KEY = Internal.createUniqueKey(BankStatement.BANK_STATEMENT, "bank_statement_previous_statement_id_key", BankStatement.BANK_STATEMENT.PREVIOUS_STATEMENT_ID);
         public static final UniqueKey<FinancialTransactionRecord> FINANCIAL_TRANSACTION_PKEY = Internal.createUniqueKey(FinancialTransaction.FINANCIAL_TRANSACTION, "financial_transaction_pkey", FinancialTransaction.FINANCIAL_TRANSACTION.ID);
     }
 
     private static class ForeignKeys0 {
+        public static final ForeignKey<BankStatementRecord, BankStatementRecord> BANK_STATEMENT__BANK_STATEMENT_PREVIOUS_STATEMENT_ID_FKEY = Internal.createForeignKey(generated.sky.regular.income.Keys.BANK_STATEMENT_PKEY, BankStatement.BANK_STATEMENT, "bank_statement__bank_statement_previous_statement_id_fkey", BankStatement.BANK_STATEMENT.PREVIOUS_STATEMENT_ID);
         public static final ForeignKey<FinancialTransactionRecord, BankStatementRecord> FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_BANK_STATEMENT_ID_FKEY = Internal.createForeignKey(generated.sky.regular.income.Keys.BANK_STATEMENT_PKEY, FinancialTransaction.FINANCIAL_TRANSACTION, "financial_transaction__financial_transaction_bank_statement_id_fkey", FinancialTransaction.FINANCIAL_TRANSACTION.BANK_STATEMENT_ID);
     }
 }

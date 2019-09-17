@@ -2,25 +2,25 @@ package de.sky.regular.income.rest;
 
 import de.sky.common.database.DatabaseConnection;
 import de.sky.regular.income.api.Statement;
+import de.sky.regular.income.api.StatementPatch;
 import de.sky.regular.income.api.StatementTransactionSummary;
 import de.sky.regular.income.api.Transaction;
 import de.sky.regular.income.dao.StatementDAO;
 import de.sky.regular.income.database.DatabaseSupplier;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import static org.slf4j.LoggerFactory.getLogger;
+import static de.sky.regular.income.rest.Validations.requireNonNull;
+import static de.sky.regular.income.rest.Validations.requireNonNullAndEquality;
 
 @RestController
 @RequestMapping("/statements")
 public class StatementController {
-    private static final Logger logger = getLogger(StatementController.class);
-
     private final DatabaseConnection db;
     private final StatementDAO dao;
 
@@ -34,6 +34,25 @@ public class StatementController {
         this(supplier.getDatabase(), dao);
     }
 
+    @PostMapping("{id}")
+    public Statement postStatement(@PathVariable("id") UUID id, @RequestBody StatementPatch patch) {
+        requireNonNullAndEquality(id, patch.id);
+        requireNonNull(patch.date, "date");
+        requireNonNull(patch.balanceInCents, "balanceInCents");
+
+        return db.transactionWithResult(ctx -> {
+            if (patch.previousStatementId == null) {
+                if (!CollectionUtils.isEmpty(patch.transactions))
+                    throw new IllegalArgumentException("Initial Statement must not contain transactions");
+
+                if (dao.existsAnyStatement(ctx))
+                    throw new IllegalArgumentException("Initial Statement can only created if there are no previous statements");
+            }
+
+            return dao.createStatement(ctx, id, patch);
+        });
+    }
+
     @GetMapping("")
     public List<Statement> getAllStatements() {
         return db.transactionWithResult(dao::readAllStatements);
@@ -41,20 +60,7 @@ public class StatementController {
 
     @GetMapping("{id}")
     public Statement getStatementByID(@PathVariable("id") UUID id) {
-        return db.transactionWithResult(ctx -> {
-            return dao.readAllStatements(ctx)
-                    .stream()
-                    .filter(stmt -> Objects.equals(id, stmt.getId()))
-                    .findAny()
-                    .orElseThrow();
-        });
-    }
-
-    @PostMapping("{id}")
-    public Statement postStatement(@PathVariable("id") UUID id, @RequestBody Statement stmt) {
-        logger.info("Posting Statement {} - {}", id, stmt);
-
-        return db.transactionWithResult(ctx -> dao.createStatement(ctx, id, stmt));
+        return db.transactionWithResult(ctx -> dao.readStatement(ctx, id));
     }
 
     @GetMapping("{id}/summary")
