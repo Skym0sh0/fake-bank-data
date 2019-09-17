@@ -9,7 +9,13 @@ function normalizeTransaction(t) {
 }
 
 function denormalizeTransaction(t) {
-    return t
+    return {
+        id: t.id,
+        date: t.date,
+        amount: t.amountInCents,
+        isPeriodic: t.isPeriodic,
+        reason: t.reasons[0],
+    }
 }
 
 function normalizeStatement(stmt) {
@@ -29,7 +35,7 @@ function denormalizeStatement(stmt) {
         id: stmt.id,
         date: stmt.date,
         balance: stmt.balanceInCents,
-        transactions: stmt.transactions,
+        transactions: stmt.transactions && stmt.transactions.map(t => denormalizeTransaction(t)),
         previousStatement: stmt.previousStatement,
     }
 }

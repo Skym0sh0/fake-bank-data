@@ -1,5 +1,6 @@
 import axios from "axios";
 import uuid from "uuid";
+import {denormalizeStatement, denormalizeTransaction} from "../util/Normalizer";
 
 class RegularIncomeAPI {
     constructor(baseUrl) {
@@ -21,6 +22,7 @@ class RegularIncomeAPI {
 
     getTransactionsForStatement(stmtId) {
         return this.getClient().get(`statements/${stmtId}/transactions`)
+            .then(res => res.data.map(stmt => denormalizeTransaction(stmt)))
     }
 
     getStatementSummary(stmtId) {
@@ -29,41 +31,16 @@ class RegularIncomeAPI {
 
     getAllStatements() {
         return this.getClient().get('statements')
+            .then(res => res.data.map(stmt => denormalizeStatement(stmt)))
     }
 
     readStatement(id) {
         return this.getClient().get(`statements/${id}`)
+            .then(res => denormalizeStatement(res.data))
     }
 
     postStatement(stmt) {
         return this.getClient().post(`statements/${stmt.id}`, stmt)
-    }
-
-
-
-
-    getAllTransactions() {
-        return this.getClient().get('transactions')
-    }
-
-    getTransaction(id) {
-        return this.getClient().get(`transactions/${id}`)
-    }
-
-    createTransaction(t) {
-        return this.getClient().post(`transactions`, t)
-    }
-
-    patchTransaction(t) {
-        const patch = {
-            [t.field]: t.value
-        };
-
-        return this.getClient().patch(`transactions/${t.id}`, patch)
-    }
-
-    deleteTransaction(id) {
-        return this.getClient().delete(`transactions/${id}`)
     }
 }
 

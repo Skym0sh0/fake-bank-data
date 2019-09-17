@@ -192,7 +192,7 @@
     import {api} from "../../api/RegularIncomeAPI"
     import {dateFormat, moneyFormat} from '../../util/Formatters'
     import moment from "moment";
-    import {denormalizeStatement, normalizeStatement} from "../../util/Normalizer";
+    import {normalizeStatement} from "../../util/Normalizer";
     import * as uuid from "uuid";
     import {required} from 'vuelidate/dist/validators.min'
     import {validationMixin} from 'vuelidate'
@@ -229,9 +229,7 @@
             loadEntity() {
                 if (!this.isNew) {
                     api.readStatement(this.id)
-                        .then(res => {
-                            const svrStmt = denormalizeStatement(res.data)
-
+                        .then(svrStmt => {
                             this.$set(this.statement, 'date', svrStmt.date)
                             this.$set(this.statement, 'balance', svrStmt.balance)
 
@@ -249,8 +247,7 @@
                         const isSameID = stmt => stmt.id === this.id
                         const isSuccessorID = stmt => stmt.previousStatement && stmt.previousStatement.id === this.id
 
-                        this.previousStatementOptions = res.data.map(stmt => denormalizeStatement(stmt))
-                            .filter(stmt => {
+                        this.previousStatementOptions = res.filter(stmt => {
                                 const isNew = this.isNew
                                 const isSame = isSameID(stmt)
                                 const isSuccessor = isSuccessorID(stmt)
