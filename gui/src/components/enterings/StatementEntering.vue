@@ -30,9 +30,8 @@
                                           horizontal
                                           :description="formatBalance(statement.previousStatement.balance)">
                                 <b-form-input id="previous-statement-balance-input"
-                                              type="number"
-                                              :formatter="formatBalance"
-                                              v-model="statement.previousStatement.balance"
+                                              :state="true"
+                                              :value="formatBalance(statement.previousStatement.balance)"
                                               disabled/>
                             </b-form-group>
                         </b-col>
@@ -92,25 +91,24 @@
                     </b-btn>
 
                     <b-table bordered small striped sticky-header
-                             :fields="['order', 'index', 'date', 'amount', 'periodic', 'reason', 'actions']"
+                             :fields="[/*'order',*/ 'index', 'date', 'amount', 'periodic', 'reason', 'actions']"
                              :items="sortedTransactions">
-                        <template v-slot:cell(order)="row">
-                            <div v-if="false">
-                                <b-btn class="mr-1"
-                                       size="sm"
-                                       variant="primary"
-                                       @click="shiftTransaction(row.index, -1)"
-                                       disabled>
-                                    &#8593;
-                                </b-btn>
+                        <template v-if="false"
+                                  v-slot:cell(order)="row">
+                            <b-btn class="mr-1"
+                                   size="sm"
+                                   variant="primary"
+                                   @click="shiftTransaction(row.index, -1)"
+                                   disabled>
+                                &#8593;
+                            </b-btn>
 
-                                <b-btn size="sm"
-                                       variant="primary"
-                                       @click="shiftTransaction(row.index, +1)"
-                                       disabled>
-                                    &#8595;
-                                </b-btn>
-                            </div>
+                            <b-btn size="sm"
+                                   variant="primary"
+                                   @click="shiftTransaction(row.index, +1)"
+                                   disabled>
+                                &#8595;
+                            </b-btn>
                         </template>
 
                         <template v-slot:cell(index)="row">
@@ -146,32 +144,78 @@
                         </template>
 
                         <template v-slot:cell(actions)="row">
-                            <span class="mr-2">
-                                <b-btn size="sm"
-                                       variant="primary"
+                            <b-button-group size="sm" class="mr-2">
+                                <b-btn variant="primary"
                                        @click="addNewTransaction(row.index)">
                                     &#8593;+
                                 </b-btn>
-                                <b-btn size="sm"
-                                       variant="primary"
+                                <b-btn variant="primary"
                                        @click="addNewTransaction(row.index + 1)">
                                     &#8595;+
                                 </b-btn>
-                            </span>
+                            </b-button-group>
 
-                            <b-btn size="sm"
-                                   variant="secondary"
-                                   @click="deleteTransaction(row.index)">
-                                &#128465;
-                            </b-btn>
+                            <b-button-group size="sm">
+                                <b-btn variant="secondary"
+                                       @click="deleteTransaction(row.index)">
+                                    &#128465;
+                                </b-btn>
+                            </b-button-group>
                         </template>
                     </b-table>
+
+                    <b-row>
+                        <b-col>
+                            <b-form-group :label-cols="6"
+                                          label-size="sm"
+                                          label-for="expected-transaction-sum"
+                                          label="Expected Sum"
+
+                                          horizontal>
+                                <b-form-input id="expected-transaction-sum"
+                                              :value="formatBalance(calculateExpectedTransactionSum)"
+                                              :state="!!calculateExpectedTransactionSum"
+                                              size="sm"
+                                              disabled/>
+                            </b-form-group>
+                        </b-col>
+                        <b-col>
+                            <b-form-group :label-cols="6"
+                                          label-size="sm"
+                                          label-for="actual-transaction-sum"
+                                          label="Actual Sum"
+                                          horizontal>
+                                <b-form-input id="actual-transaction-sum"
+                                              :value="formatBalance(calculateActualTransactionSum)"
+                                              :state="!!calculateActualTransactionSum"
+                                              size="sm"
+                                              disabled/>
+                            </b-form-group>
+                        </b-col>
+
+                        <b-col>
+                            <b-form-group :label-cols="6"
+                                          label-size="sm"
+                                          label-for="transaction-sum-deviation"
+                                          label="Deviation"
+                                          horizontal>
+                                <b-form-input id="transaction-sum-deviation"
+                                              :value="formatBalance(calculateTransactionDeviation)"
+                                              :state="isExpectedTransactionSumMatching"
+                                              size="sm"
+                                              disabled/>
+                                <b-tooltip target="transaction-sum-deviation" triggers="hover">
+                                    asfhjsdfhj
+                                </b-tooltip>
+                            </b-form-group>
+                        </b-col>
+                    </b-row>
                 </b-card>
 
                 <b-row align-h="end" class="mt-2">
                     <b-col cols="auto">
                         <b-btn-group>
-                            <b-btn variant="primary"
+                            <b-btn :variant="isExpectedTransactionSumMatching ? 'primary' : 'danger'"
                                    @click="saveModel"
                                    :disabled="$v.statement.$invalid">
                                 Save
@@ -248,14 +292,14 @@
                         const isSuccessorID = stmt => stmt.previousStatement && stmt.previousStatement.id === this.id
 
                         this.previousStatementOptions = res.filter(stmt => {
-                                const isNew = this.isNew
-                                const isSame = isSameID(stmt)
-                                const isSuccessor = isSuccessorID(stmt)
+                            const isNew = this.isNew
+                            const isSame = isSameID(stmt)
+                            const isSuccessor = isSuccessorID(stmt)
 
-                                const isNotSameOrSuccessor =!isSame && !isSuccessor
+                            const isNotSameOrSuccessor = !isSame && !isSuccessor
 
-                                return isNew || isNotSameOrSuccessor
-                            })
+                            return isNew || isNotSameOrSuccessor
+                        })
                             .map(s => {
                                 s.date = moment.utc(s.date)
                                 return s
@@ -313,9 +357,6 @@
                 console.log('Swap', index, newIndex)
             },
             formatBalance(amount) {
-                if (!amount)
-                    return ""
-
                 return moneyFormat.formatCents(amount)
             },
         },
@@ -337,14 +378,34 @@
                     }
                 })
             },
-        },
+            calculateExpectedTransactionSum() {
+                if (!this.statement.balance || !this.statement.previousStatement)
+                    return null
+
+                return this.statement.balance - this.statement.previousStatement.balance
+            },
+            calculateActualTransactionSum() {
+                return this.statement.transactions.map(t => t.amount)
+                    .filter(x => !!x)
+                    .map(x => parseInt(x))
+                    .reduce((a, b) => a + b, 0)
+            },
+            calculateTransactionDeviation() {
+                return this.calculateExpectedTransactionSum - this.calculateActualTransactionSum
+            },
+            isExpectedTransactionSumMatching() {
+                return this.calculateTransactionDeviation === 0
+            },
+        }
+        ,
         mounted() {
             this.loadEntity()
 
             this.loadStatements()
-        },
+        }
+        ,
         created() {
-            this.isNew = JSON.parse(this.$route.query.isNew) || false
+            this.isNew = (this.$route.query.isNew && JSON.parse(this.$route.query.isNew)) || false
 
             this.$set(this, 'statement', {
                 id: this.id,
@@ -356,7 +417,8 @@
                 },
                 transactions: [],
             })
-        },
+        }
+        ,
         mixins: [
             validationMixin,
         ],
