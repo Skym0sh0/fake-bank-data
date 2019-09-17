@@ -2,9 +2,9 @@ function normalizeTransaction(t) {
     return {
         id: t.id,
         date: t.date,
-        amount: t.amount,
+        amountInCents: t.amount,
         isPeriodic: t.isPeriodic,
-        reason: [t.reason],
+        reasons: [t.reason],
     }
 }
 
@@ -18,14 +18,20 @@ function normalizeStatement(stmt) {
     return {
         id: stmt.id,
         date: stmt.date,
-        balance: parseInt(stmt.balance),
+        balanceInCents: parseInt(stmt.balance),
         transactions: transactions,
         previousStatementId: (stmt.previousStatement && stmt.previousStatement.id) || null
     }
 }
 
 function denormalizeStatement(stmt) {
-    return stmt
+    return {
+        id: stmt.id,
+        date: stmt.date,
+        balance: stmt.balanceInCents,
+        transactions: stmt.transactions,
+        previousStatement: stmt.previousStatement,
+    }
 }
 
 export {

@@ -86,7 +86,8 @@
 
                     <b-btn variant="primary"
                            class="mb-2"
-                           @click="addNewTransaction(0)">
+                           @click="addNewTransaction(0)"
+                           :disabled="!statement.previousStatement.id">
                         +
                     </b-btn>
 
@@ -225,12 +226,41 @@
             }
         },
         methods: {
+            loadEntity() {
+                if (!this.isNew) {
+                    api.readStatement(this.id)
+                        .then(res => {
+                            const svrStmt = denormalizeStatement(res.data)
+
+                            this.$set(this.statement, 'date', svrStmt.date)
+                            this.$set(this.statement, 'balance', svrStmt.balance)
+
+                            if (svrStmt.previousStatement)
+                                this.$set(this.statement, 'previousStatement', svrStmt.previousStatement)
+
+                            if (svrStmt.transactions)
+                                this.$set(this.statement, 'transactions', svrStmt.transactions)
+                        })
+                }
+            },
             loadStatements() {
                 api.getAllStatements()
                     .then(res => {
-                        this.previousStatementOptions = res.data.filter(stmt => this.isNew || stmt.id !== this.id)
+                        const isSameID = stmt => stmt.id === this.id
+                        const isSuccessorID = stmt => stmt.previousStatement && stmt.previousStatement.id === this.id
+
+                        this.previousStatementOptions = res.data.map(stmt => denormalizeStatement(stmt))
+                            .filter(stmt => {
+                                const isNew = this.isNew
+                                const isSame = isSameID(stmt)
+                                const isSuccessor = isSuccessorID(stmt)
+
+                                const isNotSameOrSuccessor =!isSame && !isSuccessor
+
+                                return isNew || isNotSameOrSuccessor
+                            })
                             .map(s => {
-                                s.date = moment(s.date)
+                                s.date = moment.utc(s.date)
                                 return s
                             })
 
@@ -312,10 +342,12 @@
             },
         },
         mounted() {
+            this.loadEntity()
+
             this.loadStatements()
         },
         created() {
-            this.isNew = this.$route.query.isNew || false
+            this.isNew = JSON.parse(this.$route.query.isNew) || false
 
             this.$set(this, 'statement', {
                 id: this.id,
@@ -327,16 +359,6 @@
                 },
                 transactions: [],
             })
-
-            if (!this.isNew) {
-                api.readStatement(this.id)
-                    .then(res => {
-                        const svrStmt = denormalizeStatement(res.data)
-
-                        this.$set(this.statement, 'date', svrStmt.date)
-                        this.$set(this.statement, 'balance', svrStmt.balance)
-                    })
-            }
         },
         mixins: [
             validationMixin,
