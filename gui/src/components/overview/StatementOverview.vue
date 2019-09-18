@@ -55,6 +55,7 @@
 
             <template v-slot:row-details="row">
                 <statement-table-details :id="`bank-statement-details-${row.item.id}`"
+                                         :index="row.index"
                                          :bank-statement="row.item"/>
             </template>
         </b-table>

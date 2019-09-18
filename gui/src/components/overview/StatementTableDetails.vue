@@ -1,65 +1,69 @@
 <template>
     <div>
-        <h5>Summary</h5>
-        <b-table :id="`state-table-details-summary-table-${bankStatement.id}`"
-                 :fields="['type', 'count', 'total', 'average', 'median', 'min', 'max']"
-                 :items="summary">
-            <template v-slot:cell(type)="row">
-                <b>
-                    {{row.item.type}}
-                </b>
-            </template>
+        <div>
+            <h5>Summary</h5>
+            <b-table :id="`state-table-details-summary-table-${bankStatement.id}`"
+                     :fields="['type', 'count', 'total', 'average', 'median', 'min', 'max']"
+                     :items="summary">
+                <template v-slot:cell(type)="row">
+                    <b>
+                        {{row.item.type}}
+                    </b>
+                </template>
 
-            <template v-slot:cell(count)="row">
+                <template v-slot:cell(count)="row">
                 <span>
                     {{row.value}}
                 </span>
-            </template>
+                </template>
 
-            <template v-slot:cell()="row">
+                <template v-slot:cell()="row">
                 <span>
                     {{formatBalance(row.value)}}
                 </span>
-            </template>
-        </b-table>
+                </template>
+            </b-table>
+        </div>
 
-        <h5>Transactions</h5>
-        <b-table :id="`statement-table-details-transactions-table-${bankStatement.id}`"
-                 :fields="['row', 'date', 'income', 'expense', 'periodic', 'reason']"
-                 :items="transactions">
-            <template v-slot:cell(row)="row">
-                {{row.index + 1}}
-            </template>
+        <div v-if="existTransactions">
+            <h5>Transactions</h5>
+            <b-table :id="`statement-table-details-transactions-table-${bankStatement.id}`"
+                     :fields="['row', 'date', 'income', 'expense', 'periodic', 'reason']"
+                     :items="transactions">
+                <template v-slot:cell(row)="row">
+                    {{`${index + 1}.${row.index + 1}`}}
+                </template>
 
-            <template v-slot:cell(date)="row">
-                {{new Date(row.item.date).toLocaleDateString()}}
-            </template>
+                <template v-slot:cell(date)="row">
+                    {{new Date(row.item.date).toLocaleDateString()}}
+                </template>
 
-            <template v-slot:cell(income)="row">
+                <template v-slot:cell(income)="row">
             <span v-if="row.item.amount >= 0" class="income">
                 {{formatBalance(row.item.amount)}}
             </span>
-            </template>
+                </template>
 
-            <template v-slot:cell(expense)="row">
+                <template v-slot:cell(expense)="row">
             <span v-if="row.item.amount < 0" class="expense">
                 {{formatBalance(row.item.amount)}}
             </span>
-            </template>
+                </template>
 
-            <template v-slot:cell(periodic)="row">
+                <template v-slot:cell(periodic)="row">
             <span v-if="row.item.isPeriodic" class="periodic">
                 &#10003;
             </span>
-                <span v-else></span>
-            </template>
+                    <span v-else></span>
+                </template>
 
-            <template v-slot:cell(reason)="row">
+                <template v-slot:cell(reason)="row">
             <span>
                 {{row.item.reason}}
             </span>
-            </template>
-        </b-table>
+                </template>
+            </b-table>
+        </div>
     </div>
 </template>
 
@@ -73,7 +77,11 @@
             bankStatement: {
                 required: true,
                 type: Object,
-            }
+            },
+            index: {
+                required: true,
+                type: Number,
+            },
         },
         data() {
             return {
@@ -108,7 +116,10 @@
                     {type: 'Expenses', ...this.summaries.expense},
                     {type: 'Total', ...this.summaries.total},
                 ]
-            }
+            },
+            existTransactions() {
+                return this.transactions.length > 0
+            },
         },
         mounted() {
             this.loadData()

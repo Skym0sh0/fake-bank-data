@@ -56,6 +56,7 @@
                                     </b-tooltip>
 
                                     <b-form-input id="statement-date-input"
+                                                  ref="statement-date-input"
                                                   type="date"
                                                   v-model="statement.date"
                                                   :state="!$v.statement.date.$invalid"/>
@@ -69,7 +70,7 @@
                                           label="Balance"
                                           label-for="statement-balance-input"
                                           horizontal
-                                          :description="`In Euro: ${formatBalance(statement.balance)}`">
+                                          :description="`In Euro: ${formatBalance(statement.balance) || ''}`">
                                 <b-form-input id="statement-balance-input"
                                               type="number"
                                               v-model="statement.balance"
@@ -91,72 +92,66 @@
                     </b-btn>
 
                     <b-table bordered small striped sticky-header
-                             :fields="[/*'order',*/ 'index', 'date', 'amount', 'periodic', 'reason', 'actions']"
+                             :fields="['index', 'date', 'amount', 'periodic', 'reason', 'actions']"
                              :items="sortedTransactions">
-                        <template v-if="false"
-                                  v-slot:cell(order)="row">
-                            <b-btn class="mr-1"
-                                   size="sm"
-                                   variant="primary"
-                                   @click="shiftTransaction(row.index, -1)"
-                                   disabled>
-                                &#8593;
-                            </b-btn>
-
-                            <b-btn size="sm"
-                                   variant="primary"
-                                   @click="shiftTransaction(row.index, +1)"
-                                   disabled>
-                                &#8595;
-                            </b-btn>
-                        </template>
-
                         <template v-slot:cell(index)="row">
-                            <span>
+                            <span :id="`transactions-table-index-${row.index}`">
                                 {{row.index + 1}}
                             </span>
                         </template>
 
                         <template v-slot:cell(date)="row">
-                            <b-form-input type="date"
+                            <b-form-input :id="`transactions-table-input-date-${row.index}`"
+                                          :ref="`transactions-table-input-date-${row.index}`"
+                                          type="date"
                                           size="sm"
-                                          :state="!!row.item.date"
+                                          :state="!$v.statement.transactions.$each.$iter[row.index].date.$invalid"
                                           v-model="row.item.date"/>
                         </template>
 
                         <template v-slot:cell(amount)="row">
-                            <b-form-input type="number"
+                            <b-form-input :id="`transactions-table-input-amount-${row.index}`"
+                                          :ref="`transactions-table-input-amount-${row.index}`"
+                                          type="number"
                                           size="sm"
-                                          :state="!!row.item.amount"
+                                          :state="!$v.statement.transactions.$each.$iter[row.index].amount.$invalid"
                                           v-model="row.item.amount"/>
                         </template>
 
                         <template v-slot:cell(periodic)="row">
-                            <b-form-checkbox size="sm"
+                            <b-form-checkbox :id="`transactions-table-input-periodic-${row.index}`"
+                                             :ref="`transactions-table-input-periodic-${row.index}`"
+                                             size="sm"
+                                             :state="!$v.statement.transactions.$each.$iter[row.index].isPeriodic.$invalid"
                                              v-model="row.item.isPeriodic"/>
                         </template>
 
                         <template v-slot:cell(reason)="row">
-                            <b-form-input type="text"
+                            <b-form-input :id="`transactions-table-input-reason-${row.index}`"
+                                          :ref="`transactions-table-input-reason-${row.index}`"
+                                          type="text"
                                           size="sm"
-                                          :state="!!row.item.reason"
+                                          :state="!$v.statement.transactions.$each.$iter[row.index].reason.$invalid"
                                           v-model="row.item.reason"/>
                         </template>
 
                         <template v-slot:cell(actions)="row">
                             <b-button-group size="sm" class="mr-2">
-                                <b-btn variant="primary"
+                                <b-btn :id="`transactions-table-input-add-new-transaction-before-${row.index}`"
+                                       variant="primary"
                                        @click="addNewTransaction(row.index)">
                                     &#8593;+
                                 </b-btn>
-                                <b-btn variant="primary"
+                                <b-btn :id="`transactions-table-input-add-new-transaction-after-${row.index}`"
+                                       variant="primary"
                                        @click="addNewTransaction(row.index + 1)">
                                     &#8595;+
                                 </b-btn>
                             </b-button-group>
 
                             <b-button-group size="sm">
-                                <b-btn variant="secondary"
+                                <b-btn :id="`transactions-table-input-delete-transaction-${row.index}`"
+                                       variant="secondary"
                                        @click="deleteTransaction(row.index)">
                                     &#128465;
                                 </b-btn>
@@ -238,7 +233,7 @@
     import moment from "moment";
     import {normalizeStatement} from "../../util/Normalizer";
     import * as uuid from "uuid";
-    import {required} from 'vuelidate/dist/validators.min'
+    import {integer, required} from 'vuelidate/dist/validators.min'
     import {validationMixin} from 'vuelidate'
 
     export default {
@@ -266,6 +261,25 @@
                 },
                 balance: {
                     required,
+                    integer,
+                },
+                transactions: {
+                    $each: {
+                        date: {
+                            required,
+                        },
+                        amount: {
+                            required,
+                            integer,
+                            notNull: val => parseInt(val) !== 0,
+                        },
+                        isPeriodic: {
+                            required,
+                        },
+                        reason: {
+                            required,
+                        },
+                    },
                 },
             }
         },
@@ -274,14 +288,19 @@
                 if (!this.isNew) {
                     api.readStatement(this.id)
                         .then(svrStmt => {
-                            this.$set(this.statement, 'date', svrStmt.date)
-                            this.$set(this.statement, 'balance', svrStmt.balance)
+                            this.statement.date = svrStmt.date
+                            this.statement.balance = svrStmt.balance
 
-                            if (svrStmt.previousStatement)
-                                this.$set(this.statement, 'previousStatement', svrStmt.previousStatement)
+                            if (svrStmt.previousStatement) {
+                                const selected = this.previousStatementOptions.filter(stmt => stmt.id === svrStmt.previousStatement.id)
 
-                            if (svrStmt.transactions)
-                                this.$set(this.statement, 'transactions', svrStmt.transactions)
+                                if (selected.length > 0)
+                                    this.statement.previousStatement = selected[0]
+                            }
+
+                            this.statement.transactions = svrStmt.transactions.sort((a, b) => {
+                                return -moment.utc(a.date).diff(moment.utc(b.date))
+                            })
                         })
                 }
             },
@@ -316,10 +335,15 @@
 
                 api.postStatement(normalizedStatement)
                     .then(res => {
+                        this.isNew = false
+
                         this.$router.replace({
                             name: "statement-edit",
                             params: {id: res.data.id},
                         })
+
+                        this.loadStatements()
+                        this.loadEntity()
                     })
                     .catch(e => {
                         // eslint-disable-next-line
@@ -346,15 +370,11 @@
                     isPeriodic: false,
                     reason: null,
                 })
+
+                this.$nextTick(() => this.$refs[`transactions-table-input-date-${index}`].focus())
             },
             deleteTransaction(index) {
                 this.statement.transactions.splice(index, 1)
-            },
-            shiftTransaction(index, offset) {
-                const newIndex = index + offset
-
-                // eslint-disable-next-line
-                console.log('Swap', index, newIndex)
             },
             formatBalance(amount) {
                 return moneyFormat.formatCents(amount)
@@ -396,14 +416,14 @@
             isExpectedTransactionSumMatching() {
                 return this.calculateTransactionDeviation === 0
             },
-        }
-        ,
+        },
         mounted() {
             this.loadEntity()
 
             this.loadStatements()
-        }
-        ,
+
+            this.$refs['statement-date-input'].focus()
+        },
         created() {
             this.isNew = (this.$route.query.isNew && JSON.parse(this.$route.query.isNew)) || false
 
@@ -417,8 +437,7 @@
                 },
                 transactions: [],
             })
-        }
-        ,
+        },
         mixins: [
             validationMixin,
         ],
