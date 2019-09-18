@@ -9,14 +9,8 @@
 </template>
 
 <script>
-    import * as uuid from "uuid";
-
     export default {
-        methods: {
-            newId() {
-                return uuid.v4()
-            },
-        },
+        name: 'Header',
     }
 </script>
 
