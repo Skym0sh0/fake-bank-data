@@ -8,8 +8,8 @@ buildscript {
 plugins {
     id 'java'
     id 'application'
-    id 'org.springframework.boot' version '2.1.5.RELEASE'
-    id 'io.spring.dependency-management' version '1.0.7.RELEASE'
+    id 'org.springframework.boot' version '2.1.8.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.8.RELEASE'
 }
 
 group 'de.sky.regular.income.server'
@@ -22,25 +22,23 @@ dependencies {
     compile project(':database')
     compile project(':api')
 
-    implementation 'org.slf4j:slf4j-api:1.7.25'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.28'
     implementation group: 'ch.qos.logback', name: 'logback-core', version: "$logback_version"
     implementation group: 'ch.qos.logback', name: 'logback-classic', version: "$logback_version"
 
-    compile 'org.zalando:logbook-spring-boot-starter:1.5.0'
-
-    implementation 'org.springframework.boot:spring-boot-dependencies:2.1.5.RELEASE'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-dependencies', version: "$springboot_version"
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: "$springboot_version"
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: "$springboot_version"
 
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
-    implementation group: 'com.google.guava', name: 'guava', version: '27.1-jre'
+    implementation group: 'com.google.guava', name: 'guava', version: '28.1-jre'
 
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: "$junit_version"
     testRuntime group: 'org.junit.vintage', name: 'junit-vintage-engine', version: "$junit_version"
     testImplementation group: 'org.mockito', name: 'mockito-core', version: "$mockito_version"
     testImplementation group: 'org.assertj', name: 'assertj-core', version: "$assertj_version"
 
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: "$springboot_version"
 }
 
 sourceSets {

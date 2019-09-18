@@ -83,6 +83,7 @@ public class TransactionsDAO {
     public List<Transaction> fetchTransactionsForStatement(DSLContext ctx, UUID stmtId) {
         return ctx.selectFrom(FINANCIAL_TRANSACTION)
                 .where(FINANCIAL_TRANSACTION.BANK_STATEMENT_ID.eq(stmtId))
+                .orderBy(FINANCIAL_TRANSACTION.DATE_RECORD.desc())
                 .fetch()
                 .map(TransactionsDAO::map);
     }
