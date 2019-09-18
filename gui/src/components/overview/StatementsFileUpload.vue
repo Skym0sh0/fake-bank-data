@@ -11,7 +11,7 @@
                                  v-model="selection"
                                  placeholder="Select file to import"
                                  drop-placeholder="Drop file here to import"
-                                 :state="!$v.selection.$invalid"
+                                 :state="!$v.selection.$invalid && !errorMessage"
                                  accept=".xls"/>
                 </b-form-group>
             </b-col>
@@ -31,18 +31,27 @@
                 </b-button-group>
             </b-col>
         </b-row>
+        <b-row v-if="errorMessage">
+            <b-col>
+                <div class="error-text">
+                    {{errorMessage}}
+                </div>
+            </b-col>
+        </b-row>
     </b-card>
 </template>
 
 <script>
     import {required} from 'vuelidate/dist/validators.min'
     import {dateFormat, formatBytes} from "../../util/Formatters";
+    import {api} from "../../api/RegularIncomeAPI";
 
     export default {
         name: "StatementsFileUpload",
         data() {
             return {
                 selection: null,
+                errorMessage: null,
             }
         },
         validations: {
@@ -55,10 +64,20 @@
                 this.selection = null
             },
             upload() {
-                // eslint-disable-next-line
-                console.log(this.selection)
+                api.putFileToImport(this.selection)
+                    .then(() => {
+                        this.$emit('uploadSucceeded')
 
-                this.$emit('uploadSucceeded')
+                        this.selection = null
+                    })
+                    .catch(e => {
+                        // eslint-disable-next-line
+                        console.log(e.response)
+
+                        const error = e.response.data
+
+                        this.errorMessage = `${error.path} \u2192 ${error.status} (${error.error})\n${error.message}`
+                    })
             },
         },
         computed: {
@@ -73,5 +92,8 @@
 </script>
 
 <style scoped>
-
+    .error-text {
+        background-color: wheat;
+        color: red;
+    }
 </style>
