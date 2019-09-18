@@ -42,6 +42,21 @@ class RegularIncomeAPI {
     postStatement(stmt) {
         return this.getClient().post(`statements/${stmt.id}`, stmt)
     }
+
+    putFileToImport(file) {
+        const formData = new FormData()
+        formData.append('file', file)
+
+        return this.getClient().put(
+            'statements/import',
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            }
+        )
+    }
 }
 
 const api = new RegularIncomeAPI("http://localhost:8081/")

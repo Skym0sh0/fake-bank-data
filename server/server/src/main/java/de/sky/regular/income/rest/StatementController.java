@@ -10,10 +10,12 @@ import de.sky.regular.income.database.DatabaseSupplier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static de.sky.regular.income.rest.Validations.requireNonNull;
 import static de.sky.regular.income.rest.Validations.requireNonNullAndEquality;
@@ -71,5 +73,22 @@ public class StatementController {
     @GetMapping("{id}/transactions")
     public List<Transaction> getTransactionsForStatement(@PathVariable("id") UUID id) {
         return db.transactionWithResult(ctx -> dao.readTransactionsFor(ctx, id));
+    }
+
+    @PutMapping("/import")
+    public void importFile(@RequestParam("file") MultipartFile file) throws Exception {
+        System.out.println(file);
+
+        Stream.of(
+                file.getContentType(),
+                file.getName(),
+                file.getOriginalFilename(),
+                String.valueOf(file.getResource()),
+                String.valueOf(file.getSize())
+        )
+                .forEach(System.out::println);
+
+        Object o = file;
+        System.out.println((Long) o);
     }
 }
