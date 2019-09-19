@@ -34,11 +34,13 @@ dependencies {
     implementation group: 'com.google.guava', name: 'guava', version: '28.1-jre'
 
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: "$junit_version"
-    testRuntime group: 'org.junit.vintage', name: 'junit-vintage-engine', version: "$junit_version"
+//    testRuntime group: 'org.junit.vintage', name: 'junit-vintage-engine', version: "$junit_version"
     testImplementation group: 'org.mockito', name: 'mockito-core', version: "$mockito_version"
     testImplementation group: 'org.assertj', name: 'assertj-core', version: "$assertj_version"
 
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: "$springboot_version"
+
+    compile group: 'org.apache.poi', name: 'poi', version: '4.1.0'
 }
 
 sourceSets {
