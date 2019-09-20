@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -51,7 +52,7 @@ public class TransactionsDAO {
         return summary;
     }
 
-    public void updateTransactionsFor(DSLContext ctx, UUID stmtId, List<TransactionPatch> transactions) {
+    public void updateTransactionsFor(DSLContext ctx, UUID stmtId, ZonedDateTime timestamp, List<TransactionPatch> transactions) {
         this.deleteTransactionForStatement(ctx, stmtId);
 
         if (CollectionUtils.isEmpty(transactions))
@@ -62,6 +63,9 @@ public class TransactionsDAO {
                     FinancialTransactionRecord rec = ctx.newRecord(FINANCIAL_TRANSACTION);
 
                     rec.setId(t.id);
+
+                    rec.setCreatedAt(timestamp);
+
                     rec.setBankStatementId(stmtId);
 
                     rec.setAmountValueCents(t.amountInCents);
@@ -95,6 +99,9 @@ public class TransactionsDAO {
         Transaction t = new Transaction();
 
         t.setId(rec.getId());
+
+        t.setCreatedAt(rec.getCreatedAt());
+
         t.setDate(rec.getDateRecord());
         // date rank
         t.setAmountInCents(rec.getAmountValueCents());
