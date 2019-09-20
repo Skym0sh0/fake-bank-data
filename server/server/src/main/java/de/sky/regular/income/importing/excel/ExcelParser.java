@@ -8,6 +8,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.slf4j.Logger;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
@@ -18,6 +19,7 @@ import java.util.Optional;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
+@Component
 public class ExcelParser {
 
     private static final Logger logger = getLogger(ExcelParser.class);
