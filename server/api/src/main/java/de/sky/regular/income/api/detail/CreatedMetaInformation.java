@@ -7,12 +7,9 @@ import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Data
-public abstract class MetaInformation {
+public abstract class CreatedMetaInformation {
     public UUID id;
 
     public ZonedDateTime createdAt;
-    public UserInfo createdBy;
-
-    public ZonedDateTime updatedAt;
-    public UserInfo updatedBy;
+//    public UserInfo createdBy;
 }
