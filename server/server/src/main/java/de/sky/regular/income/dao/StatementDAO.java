@@ -91,4 +91,12 @@ public class StatementDAO {
     public boolean existsAnyStatement(DSLContext ctx) {
         return ctx.fetchExists(BANK_STATEMENT);
     }
+
+    public void deleteStatement(DSLContext ctx, UUID id) {
+        transactionsDAO.deleteTransactionForStatement(ctx, id);
+
+        ctx.deleteFrom(BANK_STATEMENT)
+                .where(BANK_STATEMENT.ID.eq(id))
+                .execute();
+    }
 }
