@@ -1,95 +1,115 @@
 <template>
-    <b-card>
-        <h1>Statement Overview</h1>
+    <div>
 
-        <b-row align-h="between">
-            <b-col cols="1">
-                <b-button class="mb-2"
-                          v-b-toggle="'statement-file-upload-collapse'"
-                          variant="primary">
-                    {{true ? 'Upload' : 'Abort Upload'}}
-                </b-button>
-            </b-col>
+        <b-card>
+            <h1>Statement Overview</h1>
 
-            <b-col class="col-auto">
-                <b-button-group>
-                    <b-btn id="statement-overview-refresh"
-                           class="mb-2"
-                           variant="primary"
-                           @click="initiallyLoadData">
-                        Refresh
-                    </b-btn>
+            <b-row align-h="between">
+                <b-col cols="1">
+                    <b-button v-if="statements.length === 0"
+                              class="mb-2"
+                              v-b-toggle="'statement-file-upload-collapse'"
+                              variant="primary">
+                        {{true ? 'Upload' : 'Abort Upload'}}
+                    </b-button>
+                </b-col>
 
-                    <b-btn id="statement-overview-create-new-statement"
-                           class="mb-2"
-                           variant="secondary"
-                           @click="toStatementDialog(null)">
-                        Create
-                    </b-btn>
-                </b-button-group>
-            </b-col>
-        </b-row>
+                <b-col class="col-auto">
+                    <b-button-group>
+                        <b-btn id="statement-overview-refresh"
+                               class="mb-2"
+                               variant="primary"
+                               @click="initiallyLoadData">
+                            Refresh
+                        </b-btn>
 
-        <b-collapse id="statement-file-upload-collapse"
-                    ref="statement-file-upload-collapse"
-                    visible>
-            <b-row>
-                <b-col>
-                    <statements-file-upload @uploadSucceeded="uploadSuccess"/>
+                        <b-btn id="statement-overview-create-new-statement"
+                               class="mb-2"
+                               variant="secondary"
+                               @click="toStatementDialog(null)">
+                            Create
+                        </b-btn>
+                    </b-button-group>
                 </b-col>
             </b-row>
-        </b-collapse>
 
-        <div class="mt-2">
-            <b-table striped hover bordered small responsive="sm"
-                     id="bank-statements-table"
-                     primary-key="id"
-                     :fields="['index', 'date', 'current_balance', 'actions']"
-                     :items="statements">
+            <b-collapse id="statement-file-upload-collapse"
+                        ref="statement-file-upload-collapse">
+                <b-row>
+                    <b-col>
+                        <statements-file-upload @uploadSucceeded="uploadSuccess"/>
+                    </b-col>
+                </b-row>
+            </b-collapse>
 
-                <template v-slot:cell(index)="row">
-                    {{row.index + 1}}
-                </template>
+            <div class="mt-2">
+                <b-table striped hover bordered small responsive="sm"
+                         id="bank-statements-table"
+                         primary-key="id"
+                         :fields="['index', 'date', 'current_balance', 'actions']"
+                         :items="statements">
 
-                <template v-slot:cell(date)="row">
-                    {{new Date(row.item.date).toLocaleDateString()}}
-                </template>
+                    <template v-slot:cell(index)="row">
+                        {{row.index + 1}}
+                    </template>
 
-                <template v-slot:cell(current_balance)="row">
-                    {{formatBalance(row.item.balance)}}
-                </template>
+                    <template v-slot:cell(date)="row">
+                        {{formatDate(row.item.date)}}
+                    </template>
 
-                <template v-slot:cell(actions)="row">
-                    <b-button :id="`bank-statement-details-btn-${row.item.id}`"
-                              size="sm"
-                              class="mr-2"
-                              variant="info"
-                              @click="row.toggleDetails">
-                        {{row.detailsShowing ? 'Hide' : ' Show'}} Transactions
-                    </b-button>
+                    <template v-slot:cell(current_balance)="row">
+                        {{formatBalance(row.item.balance)}}
+                    </template>
 
-                    <b-button :id="`bank-statement-edit-btn-${row.item.id}`"
-                              size="sm"
-                              variant="success"
-                              @click="toStatementDialog(row.item.id)">
-                        Edit Transaction
-                    </b-button>
-                </template>
+                    <template v-slot:cell(actions)="row">
+                        <b-button-group size="sm">
+                            <b-button :id="`bank-statement-details-btn-${row.item.id}`"
+                                      class="mr-2"
+                                      variant="info"
+                                      @click="row.toggleDetails">
+                                {{row.detailsShowing ? 'Hide' : ' Expand'}}
+                            </b-button>
 
-                <template v-slot:row-details="row">
-                    <statement-table-details :id="`bank-statement-details-${row.item.id}`"
-                                             :index="row.index"
-                                             :bank-statement="row.item"/>
-                </template>
-            </b-table>
-        </div>
-    </b-card>
+                            <b-button :id="`bank-statement-edit-btn-${row.item.id}`"
+                                      class="mr-2"
+                                      variant="success"
+                                      @click="toStatementDialog(row.item.id)">
+                                Edit
+                            </b-button>
+
+                            <b-button :id="`bank-statement-delete-btn-${row.item.id}`"
+                                      variant="danger"
+                                      :disabled="row.index !== 0"
+                                      @click="$bvModal.show(`bank-statement-delete-modal-${row.item.id}`)">
+                                Delete
+                            </b-button>
+
+                            <b-modal :id="`bank-statement-delete-modal-${row.item.id}`"
+                                     @ok="deleteStatement(row.item.id)"
+                                     title="Confirm Statement Deletion">
+                                <div>
+                                    Do you really want to delete the Statement
+                                    '<span class="confirm-date">{{formatDate(row.item.date)}}</span>' ?
+                                </div>
+                            </b-modal>
+                        </b-button-group>
+                    </template>
+
+                    <template v-slot:row-details="row">
+                        <statement-table-details :id="`bank-statement-details-${row.item.id}`"
+                                                 :index="row.index"
+                                                 :bank-statement="row.item"/>
+                    </template>
+                </b-table>
+            </div>
+        </b-card>
+    </div>
 </template>
 
 <script>
     import {api} from "../../api/RegularIncomeAPI"
     import StatementTableDetails from "./StatementTableDetails"
-    import {moneyFormat} from '../../util/Formatters'
+    import {dateFormat, moneyFormat} from '../../util/Formatters'
     import * as uuid from "uuid";
     import StatementsFileUpload from "./StatementsFileUpload";
 
@@ -113,11 +133,18 @@
             formatBalance(amount) {
                 return moneyFormat.formatCents(amount)
             },
+            formatDate(date) {
+                return dateFormat.formatIsoDate(date)
+            },
             toStatementDialog(id) {
                 const isNew = id == null
                 const realId = id ? id : uuid.v4()
 
                 this.$router.push({name: "statement-edit", params: {id: realId}, query: {isNew: isNew,}})
+            },
+            deleteStatement(id) {
+                api.deleteStatement(id)
+                    .then(() => this.initiallyLoadData())
             },
             uploadSuccess() {
                 this.initiallyLoadData()
@@ -132,4 +159,7 @@
 </script>
 
 <style scoped>
+    .confirm-date {
+        color: red;
+    }
 </style>

@@ -39,6 +39,10 @@ class RegularIncomeAPI {
             .then(res => denormalizeStatement(res.data))
     }
 
+    deleteStatement(id) {
+        return this.getClient().delete(`statements/${id}`)
+    }
+
     postStatement(stmt) {
         return this.getClient().post(`statements/${stmt.id}`, stmt)
     }

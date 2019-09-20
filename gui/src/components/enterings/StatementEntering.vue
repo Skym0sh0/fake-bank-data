@@ -208,7 +208,7 @@
                 </b-card>
 
                 <b-row align-h="end" class="mt-2">
-                    <b-col cols="auto">
+                    <b-col cols="auto" class="col-auto">
                         <b-btn-group>
                             <b-btn :variant="isExpectedTransactionSumMatching ? 'primary' : 'danger'"
                                    @click="saveModel"
