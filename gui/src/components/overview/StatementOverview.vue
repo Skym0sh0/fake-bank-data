@@ -126,7 +126,7 @@
             initiallyLoadData() {
                 api.getAllStatements()
                     .then(res => {
-                        this.statements = res.sort((a, b) => b.date.localeCompare(a.date))
+                        this.statements = res
                     })
                     .catch(e => this.errorMessage += e)
             },

@@ -68,6 +68,11 @@ public class StatementController {
         return db.transactionWithResult(ctx -> dao.readStatement(ctx, id));
     }
 
+    @DeleteMapping("{id}")
+    public void deleteStatementByID(@PathVariable("id") UUID id) {
+        db.transactionWithoutResult(ctx -> dao.deleteStatement(ctx, id));
+    }
+
     @GetMapping("{id}/summary")
     public StatementTransactionSummary getStatementSummary(@PathVariable("id") UUID id) {
         return db.transactionWithResult(ctx -> dao.fetchSummaryFor(ctx, id));
