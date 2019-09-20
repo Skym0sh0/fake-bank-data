@@ -7,6 +7,7 @@ import de.sky.regular.income.api.StatementTransactionSummary;
 import de.sky.regular.income.api.Transaction;
 import de.sky.regular.income.dao.StatementDAO;
 import de.sky.regular.income.database.DatabaseSupplier;
+import de.sky.regular.income.importing.excel.ExcelImporter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import static de.sky.regular.income.rest.Validations.requireNonNull;
 import static de.sky.regular.income.rest.Validations.requireNonNullAndEquality;
@@ -26,14 +26,17 @@ public class StatementController {
     private final DatabaseConnection db;
     private final StatementDAO dao;
 
-    public StatementController(DatabaseConnection db, StatementDAO dao) {
+    private final ExcelImporter importer;
+
+    public StatementController(DatabaseConnection db, StatementDAO dao, ExcelImporter importer) {
         this.db = Objects.requireNonNull(db);
         this.dao = Objects.requireNonNull(dao);
+        this.importer = Objects.requireNonNull(importer);
     }
 
     @Autowired
-    public StatementController(DatabaseSupplier supplier, StatementDAO dao) {
-        this(supplier.getDatabase(), dao);
+    public StatementController(DatabaseSupplier supplier, StatementDAO dao, ExcelImporter importer) {
+        this(supplier.getDatabase(), dao, importer);
     }
 
     @PostMapping("{id}")
@@ -76,19 +79,14 @@ public class StatementController {
     }
 
     @PutMapping("/import")
-    public void importFile(@RequestParam("file") MultipartFile file) throws Exception {
-        System.out.println(file);
+    public void importFile(@RequestParam("file") MultipartFile file) {
+        db.transactionWithoutResult(ctx -> {
+            if (dao.existsAnyStatement(ctx))
+                throw new IllegalStateException("Import can only be used as initial Statement Creation");
 
-        Stream.of(
-                file.getContentType(),
-                file.getName(),
-                file.getOriginalFilename(),
-                String.valueOf(file.getResource()),
-                String.valueOf(file.getSize())
-        )
-                .forEach(System.out::println);
+            List<StatementPatch> statements = importer.prepareExcelImport(file);
 
-        Object o = file;
-        System.out.println((Long) o);
+            statements.forEach(stmt -> this.dao.createStatement(ctx, stmt.getId(), stmt));
+        });
     }
 }
