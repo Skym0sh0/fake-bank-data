@@ -6,6 +6,7 @@ package generated.sky.regular.income;
 
 import generated.sky.regular.income.tables.BankStatement;
 import generated.sky.regular.income.tables.FinancialTransaction;
+import generated.sky.regular.income.tables.VOrderedBankStatements;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +32,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class RegularIncome extends SchemaImpl {
 
-    private static final long serialVersionUID = -829517180;
+    private static final long serialVersionUID = 1961819705;
 
     /**
      * The reference instance of <code>REGULAR_INCOME</code>
@@ -47,6 +48,11 @@ public class RegularIncome extends SchemaImpl {
      * The table <code>REGULAR_INCOME.financial_transaction</code>.
      */
     public final FinancialTransaction FINANCIAL_TRANSACTION = generated.sky.regular.income.tables.FinancialTransaction.FINANCIAL_TRANSACTION;
+
+    /**
+     * The table <code>REGULAR_INCOME.v_ordered_bank_statements</code>.
+     */
+    public final VOrderedBankStatements V_ORDERED_BANK_STATEMENTS = generated.sky.regular.income.tables.VOrderedBankStatements.V_ORDERED_BANK_STATEMENTS;
 
     /**
      * No further instances allowed
@@ -74,6 +80,7 @@ public class RegularIncome extends SchemaImpl {
     private final List<Table<?>> getTables0() {
         return Arrays.<Table<?>>asList(
             BankStatement.BANK_STATEMENT,
-            FinancialTransaction.FINANCIAL_TRANSACTION);
+            FinancialTransaction.FINANCIAL_TRANSACTION,
+            VOrderedBankStatements.V_ORDERED_BANK_STATEMENTS);
     }
 }
