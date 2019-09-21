@@ -52,6 +52,8 @@ public class StatementDAO {
 
         transactionsDAO.updateTransactionsFor(ctx, id, ts, patch.transactions);
 
+        shiftOldPredecessorToThis(ctx, id, patch.getPreviousStatementId());
+
         return readStatement(ctx, id);
     }
 
@@ -76,6 +78,15 @@ public class StatementDAO {
 
     public StatementTransactionSummary fetchSummaryFor(DSLContext ctx, UUID id) {
         return transactionsDAO.fetchStatementSummaryFor(ctx, id);
+    }
+
+    private void shiftOldPredecessorToThis(DSLContext ctx, UUID id, UUID prevId) {
+        if (prevId != null)
+            ctx.update(BANK_STATEMENT)
+                    .set(BANK_STATEMENT.PREVIOUS_STATEMENT_ID, id)
+                    .where(BANK_STATEMENT.PREVIOUS_STATEMENT_ID.eq(prevId))
+                    .and(BANK_STATEMENT.ID.ne(id))
+                    .execute();
     }
 
     private Statement mapFromRecord(DSLContext ctx, VOrderedBankStatementsRecord rec) {

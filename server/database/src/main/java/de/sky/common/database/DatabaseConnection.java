@@ -10,15 +10,22 @@ import org.jooq.conf.RenderMapping;
 import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultConfiguration;
+import org.slf4j.Logger;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 public class DatabaseConnection implements AutoCloseable {
+    private static final Logger logger = getLogger(DatabaseConnection.class);
+
     private final HikariDataSource datasource;
 
     private final ThreadLocal<Configuration> configuration;
@@ -63,22 +70,34 @@ public class DatabaseConnection implements AutoCloseable {
     }
 
     public <T> T transactionWithResult(Function<DSLContext, T> func) {
+        Instant t0 = Instant.now();
+
         try (DSLContext outerCtx = getContext()) {
             return outerCtx.transactionResult(configuration -> {
                 try (DSLContext ctx = DSL.using(configuration)) {
                     return func.apply(ctx);
                 }
             });
+        } finally {
+            Instant t1 = Instant.now();
+
+            logger.info("Database Result-Transaction took {} ms", Duration.between(t0, t1).toMillis());
         }
     }
 
     public void transactionWithoutResult(Consumer<DSLContext> func) {
+        Instant t0 = Instant.now();
+
         try (DSLContext outerCtx = getContext()) {
             outerCtx.transaction(configuration -> {
                 try (DSLContext ctx = DSL.using(configuration)) {
                     func.accept(ctx);
                 }
             });
+        } finally {
+            Instant t1 = Instant.now();
+
+            logger.info("Database Void-Transaction took {} ms", Duration.between(t0, t1).toMillis());
         }
     }
 

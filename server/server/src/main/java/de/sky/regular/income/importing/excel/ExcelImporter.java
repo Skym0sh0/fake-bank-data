@@ -52,10 +52,6 @@ public class ExcelImporter {
             }
         }
 
-        statements.stream()
-                .map(stmt -> String.format("%s -> %d", stmt.getDate(), Optional.ofNullable(stmt.getTransactions()).map(List::size).orElse(null)))
-                .forEach(System.out::println);
-
         return statements;
     }
 
@@ -72,7 +68,7 @@ public class ExcelImporter {
                         .findAny()
                         .orElseThrow()
         );
-        t.setIsPeriodic(rec.getPeriodic());
+        t.setIsPeriodic(Optional.ofNullable(rec.getPeriodic()).orElse(false));
         t.setReasons(Collections.singletonList(rec.getReason()));
 
         return t;
