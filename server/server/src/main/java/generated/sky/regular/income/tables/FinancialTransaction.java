@@ -45,7 +45,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class FinancialTransaction extends TableImpl<FinancialTransactionRecord> {
 
-    private static final long serialVersionUID = 326246216;
+    private static final long serialVersionUID = 1256266761;
 
     /**
      * The reference instance of <code>REGULAR_INCOME.financial_transaction</code>
@@ -83,7 +83,7 @@ public class FinancialTransaction extends TableImpl<FinancialTransactionRecord> 
     /**
      * The column <code>REGULAR_INCOME.financial_transaction.is_periodic</code>.
      */
-    public final TableField<FinancialTransactionRecord, Boolean> IS_PERIODIC = createField("is_periodic", org.jooq.impl.SQLDataType.BOOLEAN, this, "");
+    public final TableField<FinancialTransactionRecord, Boolean> IS_PERIODIC = createField("is_periodic", org.jooq.impl.SQLDataType.BOOLEAN.nullable(false), this, "");
 
     /**
      * The column <code>REGULAR_INCOME.financial_transaction.reason</code>.
