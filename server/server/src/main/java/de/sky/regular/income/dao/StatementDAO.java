@@ -5,6 +5,7 @@ import de.sky.regular.income.api.StatementPatch;
 import de.sky.regular.income.api.StatementTransactionSummary;
 import de.sky.regular.income.api.Transaction;
 import generated.sky.regular.income.tables.records.BankStatementRecord;
+import generated.sky.regular.income.tables.records.VOrderedBankStatementsRecord;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static generated.sky.regular.income.Tables.BANK_STATEMENT;
+import static generated.sky.regular.income.Tables.V_ORDERED_BANK_STATEMENTS;
 
 @Component
 public class StatementDAO {
@@ -62,10 +64,10 @@ public class StatementDAO {
     }
 
     public List<Statement> readAllStatements(DSLContext ctx) {
-        return ctx.selectFrom(BANK_STATEMENT)
-                .orderBy(BANK_STATEMENT.DATE_RECORD.desc())
+        return ctx.selectFrom(V_ORDERED_BANK_STATEMENTS)
+                .orderBy(V_ORDERED_BANK_STATEMENTS.RANK.desc())
                 .fetch()
-                .map(rec -> mapFromRecord(ctx, rec, false, true));
+                .map(rec -> mapFromRecord(ctx, rec));
     }
 
     public List<Transaction> readTransactionsFor(DSLContext ctx, UUID id) {
@@ -74,6 +76,29 @@ public class StatementDAO {
 
     public StatementTransactionSummary fetchSummaryFor(DSLContext ctx, UUID id) {
         return transactionsDAO.fetchStatementSummaryFor(ctx, id);
+    }
+
+    private Statement mapFromRecord(DSLContext ctx, VOrderedBankStatementsRecord rec) {
+        Statement stmt = new Statement();
+
+        stmt.setId(rec.getId());
+
+        stmt.setCreatedAt(rec.getCreatedAt().toZonedDateTime());
+        stmt.setUpdatedAt(rec.getUpdatedAt().toZonedDateTime());
+
+        stmt.setDate(rec.getDateRecord());
+        stmt.setBalanceInCents(rec.getAmountBalanceCents());
+
+        BankStatementRecord previous = ctx.selectFrom(BANK_STATEMENT)
+                .where(BANK_STATEMENT.ID.eq(rec.getPreviousStatementId()))
+                .fetchOne();
+
+        if (previous != null)
+            stmt.setPreviousStatement(mapFromRecord(ctx, previous, false, false));
+
+        stmt.setTransactions(null);
+
+        return stmt;
     }
 
     private Statement mapFromRecord(DSLContext ctx, BankStatementRecord rec, boolean fetchTransactions, boolean fetchPredecessor) {

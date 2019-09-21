@@ -6,6 +6,7 @@ package generated.sky.regular.income;
 
 import generated.sky.regular.income.tables.BankStatement;
 import generated.sky.regular.income.tables.FinancialTransaction;
+import generated.sky.regular.income.tables.VOrderedBankStatements;
 
 import javax.annotation.Generated;
 
@@ -32,4 +33,9 @@ public class Tables {
      * The table <code>REGULAR_INCOME.financial_transaction</code>.
      */
     public static final FinancialTransaction FINANCIAL_TRANSACTION = generated.sky.regular.income.tables.FinancialTransaction.FINANCIAL_TRANSACTION;
+
+    /**
+     * The table <code>REGULAR_INCOME.v_ordered_bank_statements</code>.
+     */
+    public static final VOrderedBankStatements V_ORDERED_BANK_STATEMENTS = generated.sky.regular.income.tables.VOrderedBankStatements.V_ORDERED_BANK_STATEMENTS;
 }
