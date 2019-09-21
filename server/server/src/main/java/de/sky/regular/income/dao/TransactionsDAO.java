@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -52,7 +53,7 @@ public class TransactionsDAO {
         return summary;
     }
 
-    public void updateTransactionsFor(DSLContext ctx, UUID stmtId, ZonedDateTime timestamp, List<TransactionPatch> transactions) {
+    public void updateTransactionsFor(DSLContext ctx, UUID stmtId, OffsetDateTime timestamp, List<TransactionPatch> transactions) {
         this.deleteTransactionForStatement(ctx, stmtId);
 
         if (CollectionUtils.isEmpty(transactions))
@@ -100,7 +101,7 @@ public class TransactionsDAO {
 
         t.setId(rec.getId());
 
-        t.setCreatedAt(rec.getCreatedAt());
+        t.setCreatedAt(rec.getCreatedAt().toZonedDateTime());
 
         t.setDate(rec.getDateRecord());
         // date rank

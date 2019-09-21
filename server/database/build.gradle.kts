@@ -7,9 +7,9 @@ plugins {
 //name = "database-commons"
 
 dependencies {
-    api("org.jooq", "jooq", "3.12.1")
-    implementation("org.jooq", "jooq-meta", "3.12.1")
-    implementation("org.jooq", "jooq-codegen", "3.12.1")
+    api("org.jooq", "jooq", "3.11.12")
+    implementation("org.jooq", "jooq-meta", "3.11.12")
+    implementation("org.jooq", "jooq-codegen", "3.11.12")
 
     implementation("com.zaxxer", "HikariCP", "3.4.0")
 

@@ -9,6 +9,7 @@ import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -26,7 +27,7 @@ public class StatementDAO {
     }
 
     public Statement createStatement(DSLContext ctx, UUID id, StatementPatch patch) {
-        ZonedDateTime ts = ZonedDateTime.now();
+        OffsetDateTime ts = ZonedDateTime.now().toOffsetDateTime();
 
         BankStatementRecord rec = ctx.selectFrom(BANK_STATEMENT)
                 .where(BANK_STATEMENT.ID.eq(id))
@@ -47,7 +48,7 @@ public class StatementDAO {
 
         rec.store();
 
-        transactionsDAO.updateTransactionsFor(ctx, id,ts, patch.transactions);
+        transactionsDAO.updateTransactionsFor(ctx, id, ts, patch.transactions);
 
         return readStatement(ctx, id);
     }
@@ -62,6 +63,7 @@ public class StatementDAO {
 
     public List<Statement> readAllStatements(DSLContext ctx) {
         return ctx.selectFrom(BANK_STATEMENT)
+                .orderBy(BANK_STATEMENT.DATE_RECORD.desc())
                 .fetch()
                 .map(rec -> mapFromRecord(ctx, rec, false, true));
     }
@@ -79,8 +81,8 @@ public class StatementDAO {
 
         stmt.setId(rec.getId());
 
-        stmt.setCreatedAt(rec.getCreatedAt());
-        stmt.setUpdatedAt(rec.getUpdatedAt());
+        stmt.setCreatedAt(rec.getCreatedAt().toZonedDateTime());
+        stmt.setUpdatedAt(rec.getUpdatedAt().toZonedDateTime());
 
         stmt.setDate(rec.getDateRecord());
         stmt.setBalanceInCents(rec.getAmountBalanceCents());
