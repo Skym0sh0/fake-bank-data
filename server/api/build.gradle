@@ -3,7 +3,5 @@ plugins {
     id 'java-library'
 }
 
-dependencies{
-    compile group: 'org.projectlombok', name: 'lombok', version: "$version_lombok"
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: "$version_lombok"
+dependencies {
 }
