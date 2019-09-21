@@ -10,3 +10,12 @@ allprojects {
         mavenCentral()
     }
 }
+
+subprojects {
+    apply plugin: 'java'
+
+    dependencies {
+        compileOnly group: 'org.projectlombok', name: 'lombok', version: "$version_lombok"
+        annotationProcessor group: 'org.projectlombok', name: 'lombok', version: "$version_lombok"
+    }
+}
