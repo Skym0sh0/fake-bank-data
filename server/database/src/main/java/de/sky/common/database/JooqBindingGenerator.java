@@ -111,11 +111,11 @@ public class JooqBindingGenerator {
                                         .withOutputSchema(this.schemaName)
                                         .withExcludes(getExcludes())
                                         .withForcedTypes(
-                                                new ForcedType()
+                                                /*new ForcedType()
                                                         .withUserType(ZonedDateTime.class.getName())
                                                         .withTypes("TIMESTAMP.*")
                                                         .withExpression(".*")
-                                                        .withConverter(TimestampConverter.class.getName()),
+                                                        .withConverter(TimestampConverter.class.getName()),*/
                                                 new ForcedType()
                                                         .withUserType(LocalDate.class.getName())
                                                         .withTypes("DATE.*")
