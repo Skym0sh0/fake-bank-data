@@ -10,13 +10,11 @@ plugins {
     id 'application'
     id 'org.springframework.boot' version '2.1.8.RELEASE'
     id 'io.spring.dependency-management' version '1.0.8.RELEASE'
+    id 'com.google.cloud.tools.jib' version '1.6.1'
 }
 
 group 'de.sky.regular.income.server'
 version '1.0-SNAPSHOT'
-
-sourceCompatibility = JavaVersion.VERSION_12
-targetCompatibility = JavaVersion.VERSION_12
 
 dependencies {
     compile project(':database')
@@ -56,3 +54,20 @@ test {
 }
 
 mainClassName = 'de.sky.regular.income.Server'
+
+jib {
+    container {
+        mainClass = mainClassName
+        ports = ['8080']
+        // environment = []
+
+        creationTime = 'USE_CURRENT_TIMESTAMP'
+    }
+    from {
+        image = 'gcr.io/distroless/java:11'
+    }
+    to {
+        image = 'regular-income-backend'
+        tags = ['latest']
+    }
+}
