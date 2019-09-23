@@ -4,6 +4,9 @@ import {denormalizeStatement, denormalizeTransaction} from "../util/Normalizer";
 
 class RegularIncomeAPI {
     constructor(baseUrl) {
+        // eslint-disable-next-line
+        console.log(process.env.VUE_APP_CONFIG_BACKEND_URL, process.env)
+
         if (!baseUrl)
             throw Error(`baseUrl '${baseUrl}' must be set`)
 
