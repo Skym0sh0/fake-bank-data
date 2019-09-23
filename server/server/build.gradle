@@ -27,6 +27,8 @@ dependencies {
     implementation group: 'org.springframework.boot', name: 'spring-boot-dependencies', version: "$springboot_version"
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: "$springboot_version"
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: "$springboot_version"
+    compileOnly group: 'org.springframework.boot', name: 'spring-boot-configuration-processor', version: "$springboot_version"
+    annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor', version: "$springboot_version"
 
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
     implementation group: 'com.google.guava', name: 'guava', version: '28.1-jre'
@@ -59,7 +61,10 @@ jib {
     container {
         mainClass = mainClassName
         ports = ['8080']
-        // environment = []
+        environment = [
+                JVM_PARAMETERS: '',
+                CMD_ARGS      : '',
+        ]
 
         creationTime = 'USE_CURRENT_TIMESTAMP'
     }

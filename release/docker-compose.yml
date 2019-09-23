@@ -1,0 +1,58 @@
+version: "3.7"
+
+services:
+  database:
+    container_name: "postgresql-database-release"
+    image: "postgres:11"
+    #ports:
+      #- "5432:5432"
+    networks:
+      - release-regular-income
+    volumes:
+      - release-db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: "scott"
+      POSTGRES_PASSWORD: "tiger"
+
+  admin:
+    container_name: "pgadmin-panel-release"
+    image: "dpage/pgadmin4"
+    ports:
+      - "40010:80"
+    networks:
+      - release-regular-income
+    volumes:
+      - release-db-admin-data:/var/lib/pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "bruce@scott.de"
+      PGADMIN_DEFAULT_PASSWORD: "tiger"
+
+  backend:
+    container_name: "regular-income-backend"
+    image: "regular-income-backend:latest"
+    ports:
+      - "40001:8080"
+    networks:
+      - release-regular-income
+    environment:
+      config.jdbc.url: "jdbc:postgresql://postgresql-database-release:5432/scott"
+      config.jdbc.user: "scott"
+      config.jdbc.password: "tiger"
+      config.jdbc.schema: "public"
+
+  frontend:
+    container_name: "regular-income-frontend"
+    image: "regular-income-frontend:latest"
+    ports:
+      - "40000:8080"
+    networks:
+      - release-regular-income
+    environment:
+      VUE_APP_CONFIG_BACKEND_URL: "http://regular-income-backend:8080"
+
+networks:
+  release-regular-income:
+
+volumes:
+  release-db-data:
+  release-db-admin-data:

@@ -4,13 +4,13 @@ import de.sky.common.database.DatabaseConnection;
 import org.flywaydb.core.Flyway;
 
 public class ConnectDatabase {
-    public static DatabaseConnection connect() {
+    public static DatabaseConnection connect(String url, String user, String password, String schema) {
         return DatabaseConnection.connect(
-                "jdbc:postgresql://localhost:5432/scott",
-                "scott",
-                "tiger",
+                url,
+                user,
+                password,
                 "REGULAR_INCOME",
-                "public"
+                schema
         );
     }
 

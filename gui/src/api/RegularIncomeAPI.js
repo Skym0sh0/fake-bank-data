@@ -5,7 +5,7 @@ import {denormalizeStatement, denormalizeTransaction} from "../util/Normalizer";
 class RegularIncomeAPI {
     constructor(baseUrl) {
         if (!baseUrl)
-            throw Error("baseUrl must be set")
+            throw Error(`baseUrl '${baseUrl}' must be set`)
 
         this.baseUrl = baseUrl
     }
@@ -63,7 +63,7 @@ class RegularIncomeAPI {
     }
 }
 
-const api = new RegularIncomeAPI("http://localhost:8081/")
+const api = new RegularIncomeAPI(process.env.VUE_APP_CONFIG_BACKEND_URL)
 
 export {
     RegularIncomeAPI,
