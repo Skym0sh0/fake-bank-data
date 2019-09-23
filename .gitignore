@@ -59,4 +59,4 @@ obj/
 .externalNativeBuild
 
 
-/**/db-data/
+/**/*.tgz
