@@ -10,10 +10,9 @@ RUN npm install
 
 ADD regular-income-gui-*.tgz .
 
-RUN mv ./package/* . \
-    && rm -rf package
-
-RUN npm run build
+RUN mv -f ./package/* ./package/.env* . \
+    && rm -rf package \
+    && npm run build
 
 EXPOSE 8080
 
