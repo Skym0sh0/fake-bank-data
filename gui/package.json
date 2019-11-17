@@ -7,7 +7,7 @@
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "prepack": "rm -f regular-income-gui-*.tgz",
-    "postpack": "docker build -t regular-income-frontend:latest ."
+    "postpack": "docker build -t 192.168.1.2:5000/regular-income-frontend:latest . && docker push 192.168.1.2:5000/regular-income-frontend:latest"
   },
   "dependencies": {
     "axios": "0.19.0",

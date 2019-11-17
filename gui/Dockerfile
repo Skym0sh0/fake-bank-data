@@ -1,4 +1,4 @@
-FROM node:lts-alpine
+FROM arm32v7/node:13.0.1-alpine
 
 RUN npm install -g http-server
 
