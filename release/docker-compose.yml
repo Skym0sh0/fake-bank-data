@@ -4,8 +4,8 @@ services:
   database:
     container_name: "postgresql-database-release"
     image: "postgres:11"
-    #ports:
-      #- "5432:5432"
+    ports:
+      - "40010:5432"
     networks:
       - release-regular-income
     volumes:
@@ -14,22 +14,9 @@ services:
       POSTGRES_USER: "scott"
       POSTGRES_PASSWORD: "tiger"
 
-  admin:
-    container_name: "pgadmin-panel-release"
-    image: "dpage/pgadmin4"
-    ports:
-      - "40010:80"
-    networks:
-      - release-regular-income
-    volumes:
-      - release-db-admin-data:/var/lib/pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: "bruce@scott.de"
-      PGADMIN_DEFAULT_PASSWORD: "tiger"
-
   backend:
     container_name: "regular-income-backend"
-    image: "regular-income-backend:latest"
+    image: "${DOCKER_REGISTRY}/regular-income-backend:${REGULAR_INCOME_TAG}"
     ports:
       - "40001:8080"
     networks:
@@ -42,7 +29,7 @@ services:
 
   frontend:
     container_name: "regular-income-frontend"
-    image: "regular-income-frontend:latest"
+    image: "${DOCKER_REGISTRY}/regular-income-frontend:${REGULAR_INCOME_TAG}"
     ports:
       - "40000:8080"
     networks:
@@ -55,4 +42,3 @@ networks:
 
 volumes:
   release-db-data:
-  release-db-admin-data:

@@ -69,10 +69,12 @@ jib {
         creationTime = 'USE_CURRENT_TIMESTAMP'
     }
     from {
-        image = 'gcr.io/distroless/java:11'
+//        image = 'gcr.io/distroless/java:11'
+        image = 'registry://arm32v7/adoptopenjdk:12-hotspot-bionic'
     }
     to {
-        image = 'regular-income-backend'
-        tags = ['latest']
+        image = "${docker_registry}/regular-income-backend"
+        tags = ['latest'/*, 'dev'*/]
     }
+    allowInsecureRegistries = true
 }

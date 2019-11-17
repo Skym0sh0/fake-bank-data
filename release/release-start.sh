@@ -3,6 +3,4 @@
 set -e
 set -x
 
-./release.sh
-
-./start.sh
+./release.sh && ./start.sh
