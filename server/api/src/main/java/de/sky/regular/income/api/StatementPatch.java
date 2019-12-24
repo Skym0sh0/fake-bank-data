@@ -10,9 +10,10 @@ import java.util.UUID;
 @Data
 public class StatementPatch extends PatchInformation {
     public LocalDate date;
-    public Integer balanceInCents;
+    public Integer finalBalanceInCents;
 
     public UUID previousStatementId;
+    public Integer previousBalanceInCents;
 
     public List<TransactionPatch> transactions;
 }
