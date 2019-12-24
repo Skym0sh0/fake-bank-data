@@ -9,7 +9,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 
-import java.io.ByteArrayInputStream;
 import java.util.Objects;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -29,14 +28,6 @@ public class BackupService {
 
     private static final String CRON_FULL = CRON_PART_SECOND + " " + CRON_PART_MINUTE + " " + CRON_PART_HOUR + " " + CRON_PART_DAY_OF_MONTH + " " + CRON_PART_MONTH + " " + CRON_PART_DAY_OF_WEEK;
 
-    //@Scheduled(cron = CRON_FULL)
-    @Scheduled(cron = "* * * * * *")
-    public void doBackup() {
-        sender.doBackupSend(() -> {
-            return new ByteArrayInputStream("bla bla bla".getBytes());
-        });
-    }
-
     private final DatabaseConnection db;
     private final BackupSender sender;
 
@@ -48,5 +39,18 @@ public class BackupService {
     @Autowired
     public BackupService(DatabaseSupplier supplier, BackupSender sender) {
         this(supplier.getDatabase(), sender);
+    }
+
+    @Scheduled(cron = CRON_FULL)
+    public void doBackup() {
+        logger.info("Starting scheduled Backup...");
+
+        try {
+            sender.fetchDataAndBackup();
+        } catch (Exception e) {
+            logger.error("Scheduled Backup encountered an Error", e);
+        }
+
+        logger.info("Scheduled Backup finished");
     }
 }
