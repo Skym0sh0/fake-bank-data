@@ -24,7 +24,7 @@ function normalizeStatement(stmt) {
     return {
         id: stmt.id,
         date: stmt.date,
-        balanceInCents: parseInt(stmt.balance),
+        finalBalanceInCents: parseInt(stmt.balance),
         transactions: transactions,
         previousStatementId: (stmt.previousStatement && stmt.previousStatement.id) || null
     }
@@ -34,7 +34,7 @@ function denormalizeStatement(stmt) {
     return {
         id: stmt.id,
         date: stmt.date,
-        balance: stmt.balanceInCents,
+        balance: stmt.finalBalanceInCents,
         transactions: stmt.transactions && stmt.transactions.map(t => denormalizeTransaction(t)),
         previousStatement: stmt.previousStatement,
     }

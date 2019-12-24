@@ -43,7 +43,7 @@ public class StatementController {
     public Statement postStatement(@PathVariable("id") UUID id, @RequestBody StatementPatch patch) {
         requireNonNullAndEquality(id, patch.id);
         requireNonNull(patch.date, "date");
-        requireNonNull(patch.balanceInCents, "balanceInCents");
+        requireNonNull(patch.finalBalanceInCents, "finalBalanceInCents");
 
         return db.transactionWithResult(ctx -> {
             if (patch.previousStatementId == null) {

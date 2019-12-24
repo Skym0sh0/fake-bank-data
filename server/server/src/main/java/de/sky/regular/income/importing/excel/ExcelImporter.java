@@ -2,7 +2,6 @@ package de.sky.regular.income.importing.excel;
 
 import de.sky.regular.income.api.StatementPatch;
 import de.sky.regular.income.api.TransactionPatch;
-import de.sky.regular.income.api.detail.PatchInformation;
 import de.sky.regular.income.importing.excel.model.ExcelBankStatementRecord;
 import de.sky.regular.income.importing.excel.model.ExcelRecord;
 import de.sky.regular.income.importing.excel.model.ExcelTransactionRecord;
@@ -27,12 +26,16 @@ public class ExcelImporter {
 
     public List<StatementPatch> prepareExcelImport(MultipartFile file) {
         try (InputStream is = file.getInputStream()) {
-            List<ExcelRecord> records = parser.parseWorkbookFromStream(is);
-
-            return transform(records);
+            return prepareExcelImport(is);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public List<StatementPatch> prepareExcelImport(InputStream is) {
+        List<ExcelRecord> records = parser.parseWorkbookFromStream(is);
+
+        return transform(records);
     }
 
     private List<StatementPatch> transform(List<ExcelRecord> records) {
@@ -43,10 +46,12 @@ public class ExcelImporter {
         for (int i = 0; i < records.size(); i++) {
             ExcelRecord current = records.get(i);
 
-            if (!current.getIsStatement())
-                currentTransactions.add(transform(current.getTransaction()));
-            else {
-                statements.add(transform(current.getStatement(), currentTransactions, last(statements)));
+            if (!current.getIsStatement()) {
+                TransactionPatch transform = transform(current.getTransaction());
+                currentTransactions.add(validator.validate(transform));
+            } else {
+                StatementPatch transform = transform(current.getStatement(), currentTransactions, last(statements));
+                statements.add(validator.validate(transform));
 
                 currentTransactions = new ArrayList<>();
             }
@@ -64,7 +69,8 @@ public class ExcelImporter {
                 Stream.of(rec.getIncome(), rec.getExpense())
                         .filter(Objects::nonNull)
                         .map(d -> d * 100.0)
-                        .mapToInt(Double::intValue)
+                        .map(Math::round)
+                        .mapToInt(Number::intValue)
                         .findAny()
                         .orElseThrow()
         );
@@ -79,10 +85,13 @@ public class ExcelImporter {
 
         stmt.setId(UUID.randomUUID());
         stmt.setDate(rec.getDate());
-        stmt.setBalanceInCents((int) (rec.getBalance() * 100.0));
+        stmt.setFinalBalanceInCents((int) Math.round(rec.getBalance() * 100.0));
         stmt.setTransactions(transactions);
 
-        stmt.setPreviousStatementId(predecessor.map(PatchInformation::getId).orElse(null));
+        predecessor.ifPresent(pre -> {
+            stmt.setPreviousStatementId(pre.getId());
+            stmt.setPreviousBalanceInCents(pre.getFinalBalanceInCents());
+        });
 
         return stmt;
     }

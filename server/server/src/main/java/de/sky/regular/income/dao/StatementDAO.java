@@ -40,7 +40,7 @@ public class StatementDAO {
         rec.setId(id);
 
         rec.setDateRecord(patch.getDate());
-        rec.setAmountBalanceCents(patch.getBalanceInCents());
+        rec.setAmountBalanceCents(patch.getFinalBalanceInCents());
         rec.setPreviousStatementId(patch.getPreviousStatementId());
 
         if (rec.getCreatedAt() == null)
