@@ -31,7 +31,7 @@ public class BackupService {
         this.sender = Objects.requireNonNull(sender);
     }
 
-    @Scheduled(cron = CRON_FULL)
+    @Scheduled(cron = CRON_FULL, zone = "UTC")
     public void doBackup() {
         logger.info("Starting scheduled [{}] Backup...", CRON_FULL);
 
