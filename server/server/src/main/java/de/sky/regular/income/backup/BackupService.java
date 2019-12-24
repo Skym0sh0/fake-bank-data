@@ -1,9 +1,6 @@
 package de.sky.regular.income.backup;
 
-import de.sky.common.database.DatabaseConnection;
-import de.sky.regular.income.database.DatabaseSupplier;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -28,22 +25,15 @@ public class BackupService {
 
     private static final String CRON_FULL = CRON_PART_SECOND + " " + CRON_PART_MINUTE + " " + CRON_PART_HOUR + " " + CRON_PART_DAY_OF_MONTH + " " + CRON_PART_MONTH + " " + CRON_PART_DAY_OF_WEEK;
 
-    private final DatabaseConnection db;
     private final BackupSender sender;
 
-    public BackupService(DatabaseConnection db, BackupSender sender) {
+    public BackupService(BackupSender sender) {
         this.sender = Objects.requireNonNull(sender);
-        this.db = Objects.requireNonNull(db);
-    }
-
-    @Autowired
-    public BackupService(DatabaseSupplier supplier, BackupSender sender) {
-        this(supplier.getDatabase(), sender);
     }
 
     @Scheduled(cron = CRON_FULL)
     public void doBackup() {
-        logger.info("Starting scheduled Backup...");
+        logger.info("Starting scheduled [{}] Backup...", CRON_FULL);
 
         try {
             sender.fetchDataAndBackup();
