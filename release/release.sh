@@ -5,7 +5,7 @@ set -x
 
 echo "Building Backend Image..."
 cd ../server \
-  && ./gradlew jibDockerBuild \
+  && ./gradlew jib \
   && cd ../release
 echo "Backend Image built"
 
