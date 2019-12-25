@@ -19,7 +19,7 @@ public class BackupService implements InitializingBean {
     private final BackupSender sender;
 
     @Value("${backup.process.time}")
-    private LocalTime backupTime;
+    private String backupTimeString;
 
     public BackupService(TaskScheduler scheduler, BackupSender sender) {
         this.scheduler = Objects.requireNonNull(scheduler);
@@ -28,7 +28,8 @@ public class BackupService implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        Duration period = Duration.ofDays(1);
+        final var period = Duration.ofDays(1);
+        final var backupTime = LocalTime.parse(backupTimeString);
 
         var now = ZonedDateTime.now(ZoneId.of("UTC"));
         var scheduled = ZonedDateTime.of(LocalDate.now(), backupTime, now.getZone());
