@@ -2,6 +2,7 @@ package de.sky.regular.income.dao;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
+import de.sky.regular.income.api.Reason;
 import de.sky.regular.income.api.StatementTransactionSummary;
 import de.sky.regular.income.api.Transaction;
 import de.sky.regular.income.api.TransactionPatch;
@@ -16,7 +17,6 @@ import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -91,6 +91,20 @@ public class TransactionsDAO {
                 .orderBy(FINANCIAL_TRANSACTION.DATE_RECORD.desc())
                 .fetch()
                 .map(TransactionsDAO::map);
+    }
+
+    public List<Reason> fetchReasons(DSLContext ctx) {
+        return ctx.selectDistinct(FINANCIAL_TRANSACTION.REASON)
+                .from(FINANCIAL_TRANSACTION)
+                .fetch()
+                .into(String.class)
+                .stream()
+                .map(str -> {
+                    Reason r = new Reason();
+                    r.reason = str;
+                    return r;
+                })
+                .collect(Collectors.toList());
     }
 
     private static Transaction map(FinancialTransactionRecord rec) {

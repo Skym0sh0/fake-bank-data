@@ -1,6 +1,7 @@
 package de.sky.regular.income.rest;
 
 import de.sky.common.database.DatabaseConnection;
+import de.sky.regular.income.api.Reason;
 import de.sky.regular.income.api.Transaction;
 import de.sky.regular.income.dao.TransactionsDAO;
 import de.sky.regular.income.database.DatabaseSupplier;
@@ -46,5 +47,12 @@ public class TransactionsController {
         logger.info("Read {}", id);
 
         return db.transactionWithResult(ctx -> dao.readTransaction(ctx, id));
+    }
+
+    @GetMapping("/reasons")
+    public List<Reason> getRecommendations() {
+        logger.info("Fetch Reasons");
+
+        return db.transactionWithResult(dao::fetchReasons);
     }
 }
