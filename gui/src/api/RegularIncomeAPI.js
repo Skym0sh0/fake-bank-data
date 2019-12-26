@@ -1,6 +1,6 @@
 import axios from "axios";
 import uuid from "uuid";
-import {denormalizeStatement, denormalizeTransaction} from "../util/Normalizer";
+import {denormalizeReason, denormalizeStatement, denormalizeTransaction} from "../util/Normalizer";
 
 class RegularIncomeAPI {
     constructor(baseUrl) {
@@ -23,6 +23,11 @@ class RegularIncomeAPI {
     getTransactionsForStatement(stmtId) {
         return this.getClient().get(`statements/${stmtId}/transactions`)
             .then(res => res.data.map(stmt => denormalizeTransaction(stmt)))
+    }
+
+    getReasonsForTransactions() {
+        return this.getClient().get('transactions/reasons')
+            .then(res => res.data.map(rsn => denormalizeReason(rsn)))
     }
 
     getStatementSummary(stmtId) {

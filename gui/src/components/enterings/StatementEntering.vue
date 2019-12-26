@@ -115,7 +115,8 @@
                                           type="number"
                                           size="sm"
                                           :state="!$v.statement.transactions.$each.$iter[row.index].amount.$invalid"
-                                          v-model="row.item.amount"/>
+                                          v-model="row.item.amount"
+                                          placeholder="Amount"/>
                         </template>
 
                         <template v-slot:cell(periodic)="row">
@@ -131,8 +132,13 @@
                                           :ref="`transactions-table-input-reason-${row.index}`"
                                           type="text"
                                           size="sm"
+                                          :list="`transactions-table-input-reason-datalist-${row.index}`"
                                           :state="!$v.statement.transactions.$each.$iter[row.index].reason.$invalid"
-                                          v-model="row.item.reason"/>
+                                          v-model="row.item.reason"
+                                          placeholder="Reason"/>
+
+                            <b-datalist :id="`transactions-table-input-reason-datalist-${row.index}`"
+                                        :options="reasonOptions"/>
                         </template>
 
                         <template v-slot:cell(actions)="row">
@@ -247,6 +253,7 @@
         data() {
             return {
                 previousStatementOptions: [],
+                reasonOptions: [],
                 isNew: false,
                 statement: {},
             }
@@ -330,6 +337,14 @@
                             this.statement.previousStatement = this.previousStatementOptions[0]
                     })
             },
+            loadReasons() {
+                api.getReasonsForTransactions()
+                    .then(res => this.reasonOptions = res.map(r => r.reason))
+            },
+            loadOtherEntities() {
+                this.loadStatements()
+                this.loadReasons()
+            },
             saveModel() {
                 const normalizedStatement = normalizeStatement(this.statement)
 
@@ -340,7 +355,8 @@
                         this.$router.replace({
                             name: "statement-edit",
                             params: {id: res.data.id},
-                        }).catch(() => {})
+                        }).catch(() => {
+                        })
 
                         this.loadStatements()
                         this.loadEntity()
@@ -420,7 +436,7 @@
         mounted() {
             this.loadEntity()
 
-            this.loadStatements()
+            this.loadOtherEntities()
 
             this.$refs['statement-date-input'].focus()
         },
