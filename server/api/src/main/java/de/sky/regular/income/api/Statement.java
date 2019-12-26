@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 public class Statement extends UpdatedMetaInformation {
     public LocalDate date;
-    public Integer balanceInCents;
+    public Integer finalBalanceInCents;
 
     public Statement previousStatement;
 

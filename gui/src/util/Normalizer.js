@@ -26,7 +26,8 @@ function normalizeStatement(stmt) {
         date: stmt.date,
         finalBalanceInCents: parseInt(stmt.balance),
         transactions: transactions,
-        previousStatementId: (stmt.previousStatement && stmt.previousStatement.id) || null
+        previousStatementId: (stmt.previousStatement && stmt.previousStatement.id) || null,
+        previousBalanceInCents: (stmt.previousStatement && stmt.previousStatement.balance) || null,
     }
 }
 

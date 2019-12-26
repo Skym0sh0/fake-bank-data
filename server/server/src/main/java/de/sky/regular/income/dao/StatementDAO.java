@@ -98,7 +98,7 @@ public class StatementDAO {
         stmt.setUpdatedAt(rec.getUpdatedAt().toZonedDateTime());
 
         stmt.setDate(rec.getDateRecord());
-        stmt.setBalanceInCents(rec.getAmountBalanceCents());
+        stmt.setFinalBalanceInCents(rec.getAmountBalanceCents());
 
         BankStatementRecord previous = ctx.selectFrom(BANK_STATEMENT)
                 .where(BANK_STATEMENT.ID.eq(rec.getPreviousStatementId()))
@@ -121,7 +121,7 @@ public class StatementDAO {
         stmt.setUpdatedAt(rec.getUpdatedAt().toZonedDateTime());
 
         stmt.setDate(rec.getDateRecord());
-        stmt.setBalanceInCents(rec.getAmountBalanceCents());
+        stmt.setFinalBalanceInCents(rec.getAmountBalanceCents());
 
         if (fetchPredecessor) {
             BankStatementRecord previous = ctx.selectFrom(BANK_STATEMENT)

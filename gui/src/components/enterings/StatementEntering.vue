@@ -340,7 +340,7 @@
                         this.$router.replace({
                             name: "statement-edit",
                             params: {id: res.data.id},
-                        })
+                        }).catch(() => {})
 
                         this.loadStatements()
                         this.loadEntity()
