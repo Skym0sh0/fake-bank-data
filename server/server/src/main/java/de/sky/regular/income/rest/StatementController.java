@@ -52,6 +52,13 @@ public class StatementController {
 
                 if (dao.existsAnyStatement(ctx))
                     throw new IllegalArgumentException("Initial Statement can only created if there are no previous statements");
+            } else {
+                requireNonNull(patch.previousBalanceInCents, "previousBalanceInCents");
+
+                Statement prev = dao.readStatement(ctx, patch.previousStatementId);
+
+                if (!Objects.equals(patch.previousBalanceInCents, prev.finalBalanceInCents))
+                    throw new IllegalArgumentException(String.format("Previous balance [%d] must match with previous statement [%d]", patch.previousBalanceInCents, prev.finalBalanceInCents));
             }
 
             return dao.createStatement(ctx, id, patch);
