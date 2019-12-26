@@ -1,6 +1,5 @@
 package de.sky.regular.income.api.detail;
 
-import de.sky.regular.income.api.UserInfo;
 import lombok.Data;
 
 import java.time.ZonedDateTime;
