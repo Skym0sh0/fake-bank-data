@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import static generated.sky.regular.income.Tables.BANK_STATEMENT;
-import static generated.sky.regular.income.Tables.V_ORDERED_BANK_STATEMENTS;
+import static generated.sky.regular.income.Tables.*;
+import static org.jooq.impl.DSL.*;
 
 @Component
 public class StatementDAO {
@@ -102,12 +102,15 @@ public class StatementDAO {
 
         BankStatementRecord previous = ctx.selectFrom(BANK_STATEMENT)
                 .where(BANK_STATEMENT.ID.eq(rec.getPreviousStatementId()))
+                .limit(1)
                 .fetchOne();
 
         if (previous != null)
             stmt.setPreviousStatement(mapFromRecord(ctx, previous, false, false));
 
         stmt.setTransactions(null);
+
+        stmt.setVolumeInCents(fetchVolume(ctx, rec.getId()));
 
         return stmt;
     }
@@ -135,7 +138,21 @@ public class StatementDAO {
         if (fetchTransactions)
             stmt.setTransactions(transactionsDAO.fetchTransactionsForStatement(ctx, rec.getId()));
 
+        stmt.setVolumeInCents(fetchVolume(ctx, rec.getId()));
+
         return stmt;
+    }
+
+    private int fetchVolume(DSLContext ctx, UUID stmtId) {
+        var sum = coalesce(sum(FINANCIAL_TRANSACTION.AMOUNT_VALUE_CENTS), value(0));
+
+        var transactionsVolume = ctx.select(sum)
+                .from(FINANCIAL_TRANSACTION)
+                .where(FINANCIAL_TRANSACTION.BANK_STATEMENT_ID.eq(stmtId))
+                .limit(1)
+                .fetchOne(sum);
+
+        return transactionsVolume.intValue();
     }
 
     public boolean existsAnyStatement(DSLContext ctx) {

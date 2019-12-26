@@ -14,4 +14,6 @@ public class Statement extends UpdatedMetaInformation {
     public Statement previousStatement;
 
     public List<Transaction> transactions;
+
+    public Integer volumeInCents;
 }

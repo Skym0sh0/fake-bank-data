@@ -32,12 +32,16 @@ function normalizeStatement(stmt) {
 }
 
 function denormalizeStatement(stmt) {
+    if (!stmt)
+        return null
+
     return {
         id: stmt.id,
         date: stmt.date,
         balance: stmt.finalBalanceInCents,
         transactions: stmt.transactions && stmt.transactions.map(t => denormalizeTransaction(t)),
-        previousStatement: stmt.previousStatement,
+        previousStatement: denormalizeStatement(stmt.previousStatement),
+        volume: stmt.volumeInCents,
     }
 }
 

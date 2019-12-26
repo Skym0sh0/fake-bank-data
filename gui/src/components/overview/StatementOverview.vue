@@ -46,8 +46,8 @@
                 <b-table striped hover bordered small responsive="sm"
                          id="bank-statements-table"
                          primary-key="id"
-                         :fields="['index', 'date', 'current_balance', 'actions']"
-                         :items="statements">
+                         :fields="['index', 'date', 'current_balance', 'volume', 'difference', 'actions']"
+                         :items="getStatements">
 
                     <template v-slot:cell(index)="row">
                         {{row.index + 1}}
@@ -59,6 +59,16 @@
 
                     <template v-slot:cell(current_balance)="row">
                         {{formatBalance(row.item.balance)}}
+                    </template>
+
+                    <template v-slot:cell(volume)="row">
+                        {{formatBalance(row.item.volume)}}
+                    </template>
+
+                    <template v-slot:cell(difference)="row">
+                        <div v-if="row.item.hasDeviation">
+                            {{formatBalance(row.item.deviation)}}
+                        </div>
                     </template>
 
                     <template v-slot:cell(actions)="row">
@@ -122,6 +132,22 @@
                 statements: [],
             }
         },
+        computed: {
+            getStatements() {
+                return this.statements.map(stmt => {
+                    return {
+                        ...stmt,
+                        deviation: this.calculateStatementDeviation(stmt),
+                        hasDeviation: this.calculateStatementDeviation(stmt) !== 0,
+                        _cellVariants: {
+                            balance: stmt.balance < 0 ? 'danger' : null,
+                            volume: stmt.volume < 0 ? 'warning' : null,
+                            difference: this.calculateStatementDeviation(stmt) !== 0 ? 'danger' : null,
+                        },
+                    }
+                })
+            },
+        },
         methods: {
             initiallyLoadData() {
                 api.getAllStatements()
@@ -151,6 +177,11 @@
 
                 this.$refs['statement-file-upload-collapse'].toggle()
             },
+            calculateStatementDeviation(stmt) {
+                const prev = (stmt.previousStatement && stmt.previousStatement.balance) || 0
+
+                return stmt.balance - (prev + stmt.volume)
+            }
         },
         created() {
             this.initiallyLoadData()
@@ -160,6 +191,10 @@
 
 <style scoped>
     .confirm-date {
+        color: red;
+    }
+
+    .error-text {
         color: red;
     }
 </style>
