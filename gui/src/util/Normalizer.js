@@ -1,4 +1,7 @@
 function normalizeTransaction(t) {
+    if (!t)
+        return null
+
     return {
         id: t.id,
         date: t.date,
@@ -9,6 +12,9 @@ function normalizeTransaction(t) {
 }
 
 function denormalizeTransaction(t) {
+    if (!t)
+        return null
+
     return {
         id: t.id,
         date: t.date,
@@ -19,6 +25,9 @@ function denormalizeTransaction(t) {
 }
 
 function normalizeStatement(stmt) {
+    if (!stmt)
+        return null
+
     const transactions = (stmt.transactions || []).map(t => normalizeTransaction(t))
 
     return {
@@ -45,9 +54,19 @@ function denormalizeStatement(stmt) {
     }
 }
 
+function denormalizeReason(rsn) {
+    if (!rsn)
+        return null
+
+    return {
+        ...rsn
+    }
+}
+
 export {
     normalizeTransaction,
     denormalizeTransaction,
     normalizeStatement,
     denormalizeStatement,
+    denormalizeReason,
 }
