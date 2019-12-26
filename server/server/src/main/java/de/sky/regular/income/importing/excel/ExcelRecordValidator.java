@@ -27,8 +27,6 @@ public class ExcelRecordValidator {
 
             if (stmt.previousBalanceInCents + sum != stmt.finalBalanceInCents)
                 System.err.printf("%s: Expected %d but was %d + %d = %d Difference=%d%n",stmt.getDate(), stmt.finalBalanceInCents, stmt.previousBalanceInCents, sum, stmt.previousBalanceInCents + sum, stmt.finalBalanceInCents - (stmt.previousBalanceInCents + sum));
-            else
-                System.err.println("... ");
         }
 
         return stmt;
