@@ -62,6 +62,9 @@
             value() {
                 this.rawInput = this.forRawInput()
             },
+            isFocused() {
+                this.rawInput = this.forRawInput()
+            },
         },
         methods: {
             amountInCents() {
@@ -80,7 +83,7 @@
                 if (!this.isFocused)
                     return this.amountFormatted()
 
-                return this.amountInDecimal()
+                return this.amountInDecimal().toFixed(2)
             },
             formatCentsToMoney(value) {
                 return moneyFormat.formatCents(value * 100)
@@ -93,7 +96,11 @@
             onFocusLost() {
                 this.isFocused = false
 
-                const newCents = moneyFormat.parseToCents(this.rawInput)
+                const parser = str => {
+                    return parseFloat(str.replace(',', '.'))
+                }
+
+                const newCents = Math.round(parser(this.rawInput) * 100)
                 this.$emit('input', newCents)
             },
         },
