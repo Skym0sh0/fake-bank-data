@@ -29,10 +29,10 @@
                                           label-for="previous-statement-balance-input"
                                           horizontal
                                           :description="formatBalance(statement.previousStatement.balance)">
-                                <b-form-input id="previous-statement-balance-input"
-                                              :state="true"
-                                              :value="formatBalance(statement.previousStatement.balance)"
-                                              disabled/>
+                                <monetary-input id="previous-statement-balance-input"
+                                                :state="true"
+                                                :value="statement.previousStatement.balance"
+                                                disabled/>
                             </b-form-group>
                         </b-col>
                     </b-row>
@@ -71,11 +71,9 @@
                                           label-for="statement-balance-input"
                                           horizontal
                                           :description="`In Euro: ${formatBalance(statement.balance) || ''}`">
-                                <b-form-input id="statement-balance-input"
-                                              type="number"
-                                              v-model="statement.balance"
-                                              :formatter="inputMoneyFormat"
-                                              :state="!$v.statement.balance.$invalid"/>
+                                <monetary-input id="statement-balance-input"
+                                                v-model="statement.balance"
+                                                :state="!$v.statement.balance.$invalid"/>
                             </b-form-group>
                         </b-col>
                     </b-row>
@@ -110,13 +108,12 @@
                         </template>
 
                         <template v-slot:cell(amount)="row">
-                            <b-form-input :id="`transactions-table-input-amount-${row.index}`"
-                                          :ref="`transactions-table-input-amount-${row.index}`"
-                                          type="number"
-                                          size="sm"
-                                          :state="!$v.statement.transactions.$each.$iter[row.index].amount.$invalid"
-                                          v-model="row.item.amount"
-                                          placeholder="Amount"/>
+                            <monetary-input :id="`transactions-table-input-amount-${row.index}`"
+                                            :ref="`transactions-table-input-amount-${row.index}`"
+                                            size="sm"
+                                            :state="!$v.statement.transactions.$each.$iter[row.index].amount.$invalid"
+                                            v-model="row.item.amount"
+                                            placeholder="Amount"/>
                         </template>
 
                         <template v-slot:cell(periodic)="row">
@@ -232,7 +229,6 @@
         </b-form>
     </b-container>
 </template>
-
 <script>
     import {api} from "../../api/RegularIncomeAPI"
     import {dateFormat, moneyFormat} from '../../util/Formatters'
@@ -241,9 +237,13 @@
     import * as uuid from "uuid";
     import {integer, required} from 'vuelidate/dist/validators.min'
     import {validationMixin} from 'vuelidate'
+    import MonetaryInput from "./MonetaryInput";
 
     export default {
         name: "StatementEntering",
+        components: {
+            MonetaryInput
+        },
         props: {
             id: {
                 required: true,
@@ -368,12 +368,6 @@
             },
             abort() {
                 this.$router.back()
-            },
-            inputMoneyFormat(value, event) {
-                if (event.data === ',')
-                    return value * 100
-
-                return value
             },
             setDateToToday() {
                 this.statement.date = dateFormat.formatIsoDate(moment())
