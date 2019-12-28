@@ -1,6 +1,5 @@
 <template>
     <div>
-
         <b-card>
             <h1>Statement Overview</h1>
 
@@ -125,7 +124,10 @@
 
     export default {
         name: "StatementOverview",
-        components: {StatementsFileUpload, StatementTableDetails},
+        components: {
+            StatementsFileUpload,
+            StatementTableDetails
+        },
         data() {
             return {
                 errorMessage: '',
