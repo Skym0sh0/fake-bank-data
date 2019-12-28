@@ -1,6 +1,6 @@
 <template>
-    <div>
-        <div>
+    <b-card>
+        <b-card>
             <h5>Summary</h5>
             <b-table :id="`state-table-details-summary-table-${bankStatement.id}`"
                      :fields="['type', 'count', 'total', 'average', 'median', 'min', 'max']"
@@ -23,9 +23,9 @@
                 </span>
                 </template>
             </b-table>
-        </div>
+        </b-card>
 
-        <div v-if="existTransactions">
+        <b-card v-if="existTransactions">
             <h5>Transactions</h5>
             <b-table :id="`statement-table-details-transactions-table-${bankStatement.id}`"
                      :fields="['row', 'date', 'income', 'expense', 'periodic', 'reason']"
@@ -63,8 +63,8 @@
             </span>
                 </template>
             </b-table>
-        </div>
-    </div>
+        </b-card>
+    </b-card>
 </template>
 
 <script>
