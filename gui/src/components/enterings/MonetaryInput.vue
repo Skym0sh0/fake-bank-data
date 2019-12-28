@@ -96,6 +96,9 @@
             onFocusLost() {
                 this.isFocused = false
 
+                if (!this.rawInput && this.rawInput !== 0)
+                    return;
+
                 const parser = str => {
                     return parseFloat(str.replace(',', '.'))
                 }
