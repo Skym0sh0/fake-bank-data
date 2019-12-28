@@ -27,8 +27,7 @@
                                           label-cols="4"
                                           label="Previous Balance"
                                           label-for="previous-statement-balance-input"
-                                          horizontal
-                                          :description="formatBalance(statement.previousStatement.balance)">
+                                          horizontal>
                                 <monetary-input id="previous-statement-balance-input"
                                                 :state="true"
                                                 :value="statement.previousStatement.balance"
@@ -69,8 +68,7 @@
                                           label-cols="4"
                                           label="Balance"
                                           label-for="statement-balance-input"
-                                          horizontal
-                                          :description="`In Euro: ${formatBalance(statement.balance) || ''}`">
+                                          horizontal>
                                 <monetary-input id="statement-balance-input"
                                                 v-model="statement.balance"
                                                 :state="!$v.statement.balance.$invalid"/>
