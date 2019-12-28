@@ -4,6 +4,8 @@
         |
         <router-link to="/statements">Statement Overview</router-link>
         |
+        <router-link to="/graphs">Graph Overview</router-link>
+        |
         <router-link to="/about">About</router-link>
     </div>
 </template>
