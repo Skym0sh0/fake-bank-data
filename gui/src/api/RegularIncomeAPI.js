@@ -66,6 +66,15 @@ class RegularIncomeAPI {
             }
         )
     }
+
+    fetchStatementsReport(begin, end) {
+        return this.getClient().get('reports/statements', {
+            params: {
+                begin: begin,
+                end: end,
+            }
+        }).then(res => res.data)
+    }
 }
 
 const api = new RegularIncomeAPI(process.env.VUE_APP_CONFIG_BACKEND_URL)
