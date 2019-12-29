@@ -3,7 +3,7 @@ import Router from 'vue-router'
 import Home from './views/Home.vue'
 import StatementOverview from './components/overview/StatementOverview'
 import StatementEntering from "./components/enterings/StatementEntering";
-import ChartSpike from "./components/overview/ChartSpike";
+import ReportOverview from "./components/reports/ReportOverview";
 
 Vue.use(Router)
 
@@ -26,9 +26,9 @@ export default new Router({
             component: StatementEntering,
         },
         {
-            path: '/graphs/',
-            name: 'graphs-overview',
-            component: ChartSpike,
+            path: '/reports/',
+            name: 'reports-overview',
+            component: ReportOverview,
         },
         {
             path: '/about',
