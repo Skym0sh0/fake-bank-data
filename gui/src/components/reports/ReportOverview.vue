@@ -1,9 +1,5 @@
 <template>
     <div v-show="records">
-        <div class="border chart">
-            <c3-charts :records="records"/>
-        </div>
-
         <div class="mb-2"/>
 
         <div class="border chart">
@@ -14,14 +10,12 @@
 
 <script>
     import D3Charts from "./d3Charts";
-    import C3Charts from "./c3Charts";
     import {api} from "../../api/RegularIncomeAPI";
 
     export default {
         name: "ReportOverview",
         components: {
-            C3Charts,
-            D3Charts
+            D3Charts,
         },
         data() {
             return {
