@@ -4,8 +4,10 @@
 package generated.sky.regular.income;
 
 
+import generated.sky.regular.income.tables.BackupHistory;
 import generated.sky.regular.income.tables.BankStatement;
 import generated.sky.regular.income.tables.FinancialTransaction;
+import generated.sky.regular.income.tables.records.BackupHistoryRecord;
 import generated.sky.regular.income.tables.records.BankStatementRecord;
 import generated.sky.regular.income.tables.records.FinancialTransactionRecord;
 
@@ -39,6 +41,7 @@ public class Keys {
     // UNIQUE and PRIMARY KEY definitions
     // -------------------------------------------------------------------------
 
+    public static final UniqueKey<BackupHistoryRecord> BACKUP_HISTORY_PKEY = UniqueKeys0.BACKUP_HISTORY_PKEY;
     public static final UniqueKey<BankStatementRecord> BANK_STATEMENT_PKEY = UniqueKeys0.BANK_STATEMENT_PKEY;
     public static final UniqueKey<BankStatementRecord> BANK_STATEMENT_PREVIOUS_STATEMENT_ID_KEY = UniqueKeys0.BANK_STATEMENT_PREVIOUS_STATEMENT_ID_KEY;
     public static final UniqueKey<FinancialTransactionRecord> FINANCIAL_TRANSACTION_PKEY = UniqueKeys0.FINANCIAL_TRANSACTION_PKEY;
@@ -55,6 +58,7 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     private static class UniqueKeys0 {
+        public static final UniqueKey<BackupHistoryRecord> BACKUP_HISTORY_PKEY = Internal.createUniqueKey(BackupHistory.BACKUP_HISTORY, "backup_history_pkey", BackupHistory.BACKUP_HISTORY.ID);
         public static final UniqueKey<BankStatementRecord> BANK_STATEMENT_PKEY = Internal.createUniqueKey(BankStatement.BANK_STATEMENT, "bank_statement_pkey", BankStatement.BANK_STATEMENT.ID);
         public static final UniqueKey<BankStatementRecord> BANK_STATEMENT_PREVIOUS_STATEMENT_ID_KEY = Internal.createUniqueKey(BankStatement.BANK_STATEMENT, "bank_statement_previous_statement_id_key", BankStatement.BANK_STATEMENT.PREVIOUS_STATEMENT_ID);
         public static final UniqueKey<FinancialTransactionRecord> FINANCIAL_TRANSACTION_PKEY = Internal.createUniqueKey(FinancialTransaction.FINANCIAL_TRANSACTION, "financial_transaction_pkey", FinancialTransaction.FINANCIAL_TRANSACTION.ID);

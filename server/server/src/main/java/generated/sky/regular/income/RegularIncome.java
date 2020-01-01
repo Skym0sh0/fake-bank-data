@@ -4,6 +4,7 @@
 package generated.sky.regular.income;
 
 
+import generated.sky.regular.income.tables.BackupHistory;
 import generated.sky.regular.income.tables.BankStatement;
 import generated.sky.regular.income.tables.FinancialTransaction;
 import generated.sky.regular.income.tables.VOrderedBankStatements;
@@ -32,12 +33,17 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class RegularIncome extends SchemaImpl {
 
-    private static final long serialVersionUID = 1961819705;
+    private static final long serialVersionUID = 421043858;
 
     /**
      * The reference instance of <code>REGULAR_INCOME</code>
      */
     public static final RegularIncome REGULAR_INCOME = new RegularIncome();
+
+    /**
+     * The table <code>REGULAR_INCOME.backup_history</code>.
+     */
+    public final BackupHistory BACKUP_HISTORY = generated.sky.regular.income.tables.BackupHistory.BACKUP_HISTORY;
 
     /**
      * The table <code>REGULAR_INCOME.bank_statement</code>.
@@ -79,6 +85,7 @@ public class RegularIncome extends SchemaImpl {
 
     private final List<Table<?>> getTables0() {
         return Arrays.<Table<?>>asList(
+            BackupHistory.BACKUP_HISTORY,
             BankStatement.BANK_STATEMENT,
             FinancialTransaction.FINANCIAL_TRANSACTION,
             VOrderedBankStatements.V_ORDERED_BANK_STATEMENTS);

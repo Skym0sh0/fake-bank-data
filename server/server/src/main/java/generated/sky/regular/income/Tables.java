@@ -4,6 +4,7 @@
 package generated.sky.regular.income;
 
 
+import generated.sky.regular.income.tables.BackupHistory;
 import generated.sky.regular.income.tables.BankStatement;
 import generated.sky.regular.income.tables.FinancialTransaction;
 import generated.sky.regular.income.tables.VOrderedBankStatements;
@@ -23,6 +24,11 @@ import javax.annotation.Generated;
 )
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Tables {
+
+    /**
+     * The table <code>REGULAR_INCOME.backup_history</code>.
+     */
+    public static final BackupHistory BACKUP_HISTORY = generated.sky.regular.income.tables.BackupHistory.BACKUP_HISTORY;
 
     /**
      * The table <code>REGULAR_INCOME.bank_statement</code>.
