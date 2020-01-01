@@ -42,7 +42,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class BackupHistory extends TableImpl<BackupHistoryRecord> {
 
-    private static final long serialVersionUID = -707353730;
+    private static final long serialVersionUID = -1450250404;
 
     /**
      * The reference instance of <code>REGULAR_INCOME.backup_history</code>
@@ -71,6 +71,16 @@ public class BackupHistory extends TableImpl<BackupHistoryRecord> {
      * The column <code>REGULAR_INCOME.backup_history.had_work_to_do</code>.
      */
     public final TableField<BackupHistoryRecord, Boolean> HAD_WORK_TO_DO = createField("had_work_to_do", org.jooq.impl.SQLDataType.BOOLEAN.nullable(false), this, "");
+
+    /**
+     * The column <code>REGULAR_INCOME.backup_history.success</code>.
+     */
+    public final TableField<BackupHistoryRecord, Boolean> SUCCESS = createField("success", org.jooq.impl.SQLDataType.BOOLEAN.nullable(false), this, "");
+
+    /**
+     * The column <code>REGULAR_INCOME.backup_history.error_details</code>.
+     */
+    public final TableField<BackupHistoryRecord, String> ERROR_DETAILS = createField("error_details", org.jooq.impl.SQLDataType.CLOB, this, "");
 
     /**
      * Create a <code>REGULAR_INCOME.backup_history</code> table reference
