@@ -1,6 +1,7 @@
 package de.sky.regular.income.rest;
 
 import de.sky.common.database.DatabaseConnection;
+import de.sky.regular.income.api.reports.MonthlyIncomeExpenseReport;
 import de.sky.regular.income.api.reports.StatementsReport;
 import de.sky.regular.income.dao.ReportsDAO;
 import de.sky.regular.income.database.DatabaseSupplier;
@@ -39,5 +40,12 @@ public class ReportsController {
         logger.info("Fetch StatementsReport between [{}, {})", begin, end);
 
         return db.transactionWithResult(ctx -> dao.doStatementsReport(ctx, begin, end));
+    }
+
+    @GetMapping("/montly-income-expenses")
+    public MonthlyIncomeExpenseReport fetchMonthlyIncomeExpenseReport() {
+        logger.info("Fetch monthly IncomeExpenseReport");
+
+        return db.transactionWithResult(dao::doMonthlyIncomeExpenseReport);
     }
 }
