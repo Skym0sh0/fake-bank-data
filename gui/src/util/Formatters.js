@@ -16,20 +16,24 @@ class MoneyFormatter {
     constructor() {
         this.regex = /(\d+(,\d*)?)\s*€/;
 
-        this.frmt = new Intl.NumberFormat('de-DE', {
+        this.options = {
             style: 'currency',
             currency: 'EUR',
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
-        })
+        }
+        this.frmt = new Intl.NumberFormat('de-DE', this.options)
+    }
+
+    getStyle() {
+        return this.options
     }
 
     formatCents(amount) {
         if (!amount && amount !== 0)
             return null
 
-        const result = this.frmt.format(amount / 100);
-        return result
+        return this.frmt.format(amount / 100)
     }
 
     parseToCents(frmt) {
