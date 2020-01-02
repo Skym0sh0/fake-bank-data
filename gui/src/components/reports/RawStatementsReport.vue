@@ -28,7 +28,7 @@
             }
         },
         watch: {
-            records() {
+            statements() {
                 this.draw()
             },
         },
