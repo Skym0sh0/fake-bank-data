@@ -75,6 +75,11 @@ class RegularIncomeAPI {
             }
         }).then(res => res.data)
     }
+
+    fetchIncomeExpenseReport() {
+        return this.getClient().get('reports/monthly-income-expenses')
+            .then(res => res.data)
+    }
 }
 
 const api = new RegularIncomeAPI(process.env.VUE_APP_CONFIG_BACKEND_URL)

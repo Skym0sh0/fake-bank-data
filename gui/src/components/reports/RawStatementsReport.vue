@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div :id="target" :style="{width: getWidth, height: getHeight}"/>
+        <div v-show="isReportPresent" :id="target" :style="{width: getWidth, height: getHeight}"/>
     </div>
 </template>
 
@@ -33,6 +33,9 @@
             },
         },
         computed: {
+            isReportPresent() {
+                return this.statements && this.statements.length > 0
+            },
             getWidth() {
                 if (!this.width)
                     return '100%'
@@ -45,7 +48,10 @@
         },
         methods: {
             draw() {
-                if (!this.statements)
+                if (this.chart)
+                    this.chart.dispose()
+
+                if (!this.isReportPresent)
                     return
 
                 const chart = am4core.create(this.target, am4charts.XYChart)
@@ -89,9 +95,6 @@
 
                 chart.legend = new am4charts.Legend()
                 chart.legend.position = "bottom"
-
-                if (this.chart)
-                    this.chart.dispose()
 
                 this.chart = chart
             },
