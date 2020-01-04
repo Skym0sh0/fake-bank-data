@@ -8,18 +8,8 @@ import java.util.UUID;
 public class StatementTransactionSummary {
     public UUID statementId;
 
-    public Summary income;
-    public Summary expense;
+    public StatisticalSummary income;
+    public StatisticalSummary expense;
 
-    public Summary total;
-
-    @Data
-    public static class Summary {
-        public Integer count;
-        public Integer total;
-        public Integer average;
-        public Integer median;
-        public Integer min;
-        public Integer max;
-    }
+    public StatisticalSummary total;
 }

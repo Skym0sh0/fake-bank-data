@@ -42,7 +42,7 @@ public class ReportsController {
         return db.transactionWithResult(ctx -> dao.doStatementsReport(ctx, begin, end));
     }
 
-    @GetMapping("/montly-income-expenses")
+    @GetMapping("/monthly-income-expenses")
     public MonthlyIncomeExpenseReport fetchMonthlyIncomeExpenseReport() {
         logger.info("Fetch monthly IncomeExpenseReport");
 
