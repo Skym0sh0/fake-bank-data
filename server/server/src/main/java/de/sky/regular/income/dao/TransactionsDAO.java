@@ -2,10 +2,7 @@ package de.sky.regular.income.dao;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
-import de.sky.regular.income.api.Reason;
-import de.sky.regular.income.api.StatementTransactionSummary;
-import de.sky.regular.income.api.Transaction;
-import de.sky.regular.income.api.TransactionPatch;
+import de.sky.regular.income.api.*;
 import de.sky.regular.income.utils.TransactionChecksumCalculator;
 import generated.sky.regular.income.tables.records.FinancialTransactionRecord;
 import org.jooq.Condition;
@@ -126,7 +123,7 @@ public class TransactionsDAO {
         return t;
     }
 
-    private static StatementTransactionSummary.Summary fetchSummary(DSLContext ctx, UUID id, Condition... c) {
+    private static StatisticalSummary fetchSummary(DSLContext ctx, UUID id, Condition... c) {
         Record6<Integer, BigDecimal, BigDecimal, BigDecimal, Integer, Integer> rec = ctx.select(
                 DSL.count(),
                 DSL.sum(FINANCIAL_TRANSACTION.AMOUNT_VALUE_CENTS),
@@ -142,7 +139,7 @@ public class TransactionsDAO {
                 .fetchOne();
 
         if (rec == null) {
-            StatementTransactionSummary.Summary sum = new StatementTransactionSummary.Summary();
+            StatisticalSummary sum = new StatisticalSummary();
 
             sum.count = 0;
             sum.total = 0;
@@ -154,7 +151,7 @@ public class TransactionsDAO {
             return sum;
         }
 
-        StatementTransactionSummary.Summary sum = new StatementTransactionSummary.Summary();
+        StatisticalSummary sum = new StatisticalSummary();
 
         sum.count = rec.value1();
         sum.total = rec.value2().intValue();
