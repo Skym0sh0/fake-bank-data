@@ -65,7 +65,7 @@ public class ReportsDAO {
 
                     point.month = rec.get(month);
                     point.incomeInCents = rec.get(positiveSum).intValue();
-                    point.expenseInCents = rec.get(negativeSum).intValue();
+                    point.expenseInCents = -rec.get(negativeSum).intValue();
 
                     return point;
                 });
