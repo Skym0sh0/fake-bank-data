@@ -1,6 +1,6 @@
 <template>
     <b-card>
-        <b-card v-if="statements && false" class="mb-2">
+        <b-card v-if="statements" class="mb-2">
             <div class="chart">
                 <raw-statements-report :statements="statements"/>
             </div>
