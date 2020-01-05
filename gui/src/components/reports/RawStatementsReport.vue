@@ -9,6 +9,7 @@
     import * as am4charts from "@amcharts/amcharts4/charts";
     import am4themes_amcharts from "@amcharts/amcharts4/themes/amcharts";
     import {moneyFormat} from "../../util/Formatters";
+    import {setInitialZoom} from "./ZoomUtil";
 
     am4core.useTheme(am4themes_amcharts);
 
@@ -95,6 +96,8 @@
 
                 chart.legend = new am4charts.Legend()
                 chart.legend.position = "bottom"
+
+                setInitialZoom(chart, dateAxis)
 
                 this.chart = chart
             },

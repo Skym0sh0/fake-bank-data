@@ -40,12 +40,17 @@ public class DatabaseConnection implements AutoCloseable {
                 new DefaultConfiguration()
                         .set(datasource)
                         .set(SQLDialect.POSTGRES)
-                        .set(new Settings().withRenderMapping(
-                                new RenderMapping().withSchemata(
-                                        new MappedSchema()
-                                                .withInput(inSchema)
-                                                .withOutput(outSchema)
-                                ))));
+                        .set(new Settings()
+                                .withRenderMapping(
+                                        new RenderMapping()
+                                                .withSchemata(
+                                                        new MappedSchema()
+                                                                .withInput(inSchema)
+                                                                .withOutput(outSchema)
+                                                )
+                                )
+                        )
+        );
     }
 
     @Override

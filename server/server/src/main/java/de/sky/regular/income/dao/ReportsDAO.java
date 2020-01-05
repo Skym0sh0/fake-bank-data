@@ -48,14 +48,28 @@ public class ReportsDAO {
     }
 
     public MonthlyIncomeExpenseReport doMonthlyIncomeExpenseReport(DSLContext ctx) {
-        var month = trunc(FINANCIAL_TRANSACTION.DATE_RECORD, DatePart.MONTH);
-        var positiveSum = sum(when(FINANCIAL_TRANSACTION.AMOUNT_VALUE_CENTS.greaterOrEqual(0), FINANCIAL_TRANSACTION.AMOUNT_VALUE_CENTS).otherwise(0));
-        var negativeSum = sum(when(FINANCIAL_TRANSACTION.AMOUNT_VALUE_CENTS.lessThan(0), FINANCIAL_TRANSACTION.AMOUNT_VALUE_CENTS).otherwise(0));
+        var date = FINANCIAL_TRANSACTION.DATE_RECORD.as("date");
+        var amount = FINANCIAL_TRANSACTION.AMOUNT_VALUE_CENTS.as("amount");
+
+        var month = trunc(date, DatePart.MONTH);
+        var positiveSum = sum(when(amount.greaterOrEqual(0), amount).otherwise(0));
+        var negativeSum = sum(when(amount.lessThan(0), amount).otherwise(0));
 
         MonthlyIncomeExpenseReport rprt = new MonthlyIncomeExpenseReport();
 
         rprt.data = ctx.select(month, positiveSum, negativeSum)
-                .from(FINANCIAL_TRANSACTION)
+                .from(
+                        select(date, amount)
+                                .from(FINANCIAL_TRANSACTION)
+                                .unionAll(
+                                        select(
+                                                BANK_STATEMENT.DATE_RECORD.as(date),
+                                                BANK_STATEMENT.AMOUNT_BALANCE_CENTS.as(amount)
+                                        )
+                                                .from(BANK_STATEMENT)
+                                                .where(BANK_STATEMENT.PREVIOUS_STATEMENT_ID.isNull())
+                                )
+                )
                 .groupBy(month)
                 .orderBy(month)
                 .limit(MAX_NUMBER_RECORDS + 1)
