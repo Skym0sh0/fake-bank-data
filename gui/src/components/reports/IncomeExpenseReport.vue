@@ -10,7 +10,7 @@
     import * as am4charts from "@amcharts/amcharts4/charts";
     import {moneyFormat} from "../../util/Formatters";
     import am4themes_animated from "@amcharts/amcharts4/themes/animated";
-    import * as moment from "moment";
+    import {setInitialZoom} from "./ZoomUtil";
 
     am4core.useTheme(am4themes_animated);
 
@@ -108,7 +108,7 @@
                 expenseSeries.name = "Expenses per Month"
                 expenseSeries.dataFields.dateX = "month"
                 expenseSeries.dataFields.valueY = "expense"
-                 expenseSeries.dataFields.openValueY = "income"
+                expenseSeries.dataFields.openValueY = "income"
                 expenseSeries.sequencedInterpolation = true
                 expenseSeries.tooltipText = "{dateX}: -{valueY}"
                 expenseSeries.stroke = chart.colors.getIndex(1).brighten(0.1)
@@ -141,18 +141,7 @@
                         seriesRange.contents.fillOpacity = 0.8
                     })
 
-                chart.events.on("ready", () => {
-                    const start = moment("2020-06-17")
-                        .add(-3, 'years')
-                        .month(0).date(0)
-                        .hour(0).minute(0).second(0).millisecond(0)
-                        .add(-1, "months")
-
-                    const end = moment()
-                        .add(1, "months")
-
-                    dateAxis.zoomToDates(start.toDate(), end.toDate())
-                })
+                setInitialZoom(chart, dateAxis)
 
                 this.chart = chart
             },
