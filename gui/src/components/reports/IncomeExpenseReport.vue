@@ -88,39 +88,37 @@
                 valueAxis.cursorTooltipEnabled = false
                 valueAxis.tooltip.disabled = true
 
-                const valueAxisRange = valueAxis.axisRanges.create()
-                valueAxisRange.value = 400
-                valueAxisRange.bullet = new am4core.Triangle()
-                valueAxisRange.bullet.width = 15;
-                valueAxisRange.bullet.height = 11;
-                valueAxisRange.bullet.fill = am4core.color("#c00");
-                valueAxisRange.grid.disabled = true
-                valueAxisRange.bullet.horizontalCenter = "left"
-                valueAxisRange.bullet.rotation = 90
-
                 const incomeSeries = chart.series.push(new am4charts.LineSeries())
                 incomeSeries.name = "Income per Month"
                 incomeSeries.dataFields.dateX = "month"
                 incomeSeries.dataFields.valueY = "income"
+                // incomeSeries.dataFields.openValueY = "expense"
+                incomeSeries.sequencedInterpolation = true
                 incomeSeries.tooltipText = "{dateX}: {valueY}"
-                incomeSeries.stroke = /*chart.colors.getIndex(0)*/ am4core.color("#00FF00").brighten(-0.0)
+                incomeSeries.stroke = chart.colors.getIndex(0)
                 incomeSeries.strokeWidth = 3
                 incomeSeries.minBulletDistance = 15
+                incomeSeries.fill = incomeSeries.stroke
+                incomeSeries.fillOpacity = 0.3
+                incomeSeries.tensionX = 0.9
                 const incomeBullets = incomeSeries.bullets.push(new am4charts.CircleBullet())
-                incomeBullets.fill = am4core.color("#FFFFFF")
-                incomeBullets.strokeWidth = 3
+                incomeBullets.circle.radius = 3
 
                 const expenseSeries = chart.series.push(new am4charts.LineSeries())
                 expenseSeries.name = "Expenses per Month"
                 expenseSeries.dataFields.dateX = "month"
                 expenseSeries.dataFields.valueY = "expense"
+                 expenseSeries.dataFields.openValueY = "income"
+                expenseSeries.sequencedInterpolation = true
                 expenseSeries.tooltipText = "{dateX}: -{valueY}"
-                expenseSeries.stroke = /*chart.colors.getIndex(1)*/ am4core.color("#FFFF00").brighten(-0.1)
+                expenseSeries.stroke = chart.colors.getIndex(1).brighten(0.1)
                 expenseSeries.strokeWidth = 3
+                // expenseSeries.fill = expenseSeries.stroke
+                // expenseSeries.fillOpacity = 1.0
                 expenseSeries.minBulletDistance = 15
+                expenseSeries.tensionX = 0.9
                 const expenseBullet = expenseSeries.bullets.push(new am4charts.CircleBullet())
-                expenseBullet.fill = am4core.color("#FFFFFF")
-                expenseBullet.strokeWidth = 3
+                expenseBullet.circle.radius = 3
 
                 chart.cursor = new am4charts.XYCursor();
                 chart.cursor.xAxis = dateAxis
@@ -131,14 +129,16 @@
 
                 chart.legend = new am4charts.Legend()
 
-                const zeroIncomeRange = valueAxis.createSeriesRange(incomeSeries)
-                zeroIncomeRange.value = 0
-                zeroIncomeRange.endValue = valueAxisRange.value
-                zeroIncomeRange.contents.stroke = am4core.color("#000000")
-
-                this.findTooNegativeDifferenceRanges(chart, dateAxis, expenseSeries)
+                this.findTooNegativeDifferenceRanges(chart, dateAxis)
                     .forEach(range => {
-                        range.contents.stroke = am4core.color("#FF0000")
+                        const seriesRange = dateAxis.createSeriesRange(expenseSeries)
+
+                        seriesRange.date = range.begin
+                        seriesRange.endDate = range.end
+
+                        // seriesRange.contents.stroke = am4core.color("#FF0000")
+                        seriesRange.contents.fill = expenseSeries.stroke
+                        seriesRange.contents.fillOpacity = 0.8
                     })
 
                 chart.events.on("ready", () => {
@@ -156,21 +156,47 @@
 
                 this.chart = chart
             },
-            findTooNegativeDifferenceRanges(chart, axis, series) {
+            findTooNegativeDifferenceRanges(chart, axis) {
+                const findStartTime = (i, current) => {
+                    if (i < 1)
+                        return current.month
+
+                    const previous = chart.data[i - 1]
+
+                    const previousPoint = {
+                        x: am4core.time.round(previous.month, axis.baseInterval.timeUnit, axis.baseInterval.count).getTime() + axis.baseDuration / 2,
+                        y1: previous.income,
+                        y2: previous.expense,
+                    }
+                    const currentPoint = {
+                        x: am4core.time.round(current.month, axis.baseInterval.timeUnit, axis.baseInterval.count).getTime() + axis.baseDuration / 2,
+                        y1: current.income,
+                        y2: current.expense,
+                    }
+
+                    const intersection = am4core.math.getLineIntersection(
+                        {x: previousPoint.x, y: previousPoint.y1}, {x: currentPoint.x, y: currentPoint.y1},
+                        {x: previousPoint.x, y: previousPoint.y2}, {x: currentPoint.x, y: currentPoint.y2},
+                    )
+
+                    return new Date(Math.round(intersection.x))
+                }
+
                 const ranges = []
 
                 let tooHighExpensesRange = null
                 for (let i = 0; i < chart.data.length; i++) {
                     const current = chart.data[i]
 
+                    const startTime = findStartTime(i, current)
+
                     if (current.isAlerting()) {
                         if (!tooHighExpensesRange) {
-                            tooHighExpensesRange = axis.createSeriesRange(series)
-                            tooHighExpensesRange.date = current.month
+                            tooHighExpensesRange = {begin: new Date(startTime), end: null}
                         }
                     } else {
                         if (tooHighExpensesRange) {
-                            tooHighExpensesRange.endDate = current.month
+                            tooHighExpensesRange.end = new Date(startTime)
                             ranges.push(tooHighExpensesRange)
 
                             tooHighExpensesRange = null
@@ -179,7 +205,9 @@
                 }
 
                 if (tooHighExpensesRange) {
-                    tooHighExpensesRange.endDate = chart.data[chart.data.length - 1].month
+                    const last = chart.data[chart.data.length - 1]
+                    tooHighExpensesRange.end = new Date(last.month.getTime() + axis.baseDuration / 2);
+
                     ranges.push(tooHighExpensesRange)
 
                     tooHighExpensesRange = null
