@@ -114,12 +114,13 @@ public class BackupSender {
         }
 
         return sendMail(timestamp, () -> {
-            Set<Table<?>> excludes = Sets.newHashSet(Tables.V_ORDERED_BANK_STATEMENTS);
+            Set<Table<?>> excludes = Sets.newHashSet(Tables.V_ORDERED_BANK_STATEMENTS, BACKUP_HISTORY);
 
             logger.info("Fetching data from Database");
 
             return RegularIncome.REGULAR_INCOME.tableStream()
                     .filter(t -> !excludes.contains(t))
+                    .filter(t -> !t.getName().toUpperCase().startsWith("V_"))
                     .collect(Collectors.toMap(Table::getName, table -> ctx.fetch(table).formatCSV()));
         });
     }
