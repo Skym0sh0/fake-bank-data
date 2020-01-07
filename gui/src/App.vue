@@ -1,9 +1,19 @@
 <template>
-    <div id="app" class="p-2">
-        <Header/>
+    <v-app id="app">
+        <v-app-bar app color="primary" dark>
+            <Header/>
+        </v-app-bar>
 
-        <router-view/>
-    </div>
+        <v-navigation-drawer app/>
+
+        <v-content>
+            <v-container class="fill-height" fluid>
+                <router-view/>
+            </v-container>
+        </v-content>
+
+        <v-footer/>
+    </v-app>
 </template>
 
 <script>
@@ -12,8 +22,8 @@
     export default {
         name: "App",
         components: {
-            Header
-        }
+            Header,
+        },
     }
 </script>
 
@@ -24,6 +34,5 @@
         -moz-osx-font-smoothing: grayscale;
         text-align: center;
         color: #2c3e50;
-        margin-top: 60px;
     }
 </style>
