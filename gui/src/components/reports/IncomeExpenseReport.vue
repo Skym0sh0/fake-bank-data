@@ -1,7 +1,6 @@
 <template>
-    <div v-show="isReportPresent" ref="chartDiv" :style="{width: getWidth, height: getHeight}">
-        bla bla bla
-        {{incomeExpenses.length}}
+    <div>
+        <div v-show="isReportPresent" ref="chartDiv" :style="{width: getWidth, height: getHeight}"/>
     </div>
 </template>
 
@@ -20,11 +19,14 @@
             incomeExpenses: {
                 type: Array,
             },
+            height: {
+                type: Number,
+                required: true,
+            },
         },
         data() {
             return {
                 width: null,
-                height: 800,
                 chart: null,
             }
         },
