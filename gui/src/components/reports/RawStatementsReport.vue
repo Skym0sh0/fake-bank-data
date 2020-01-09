@@ -19,12 +19,15 @@
             statements: {
                 type: Array,
             },
+            height: {
+                type: Number,
+                required: true,
+            },
         },
         data() {
             return {
                 target: `chart-target-div-${Math.round(Math.random() * 1000000)}`,
                 width: null,
-                height: 600,
                 chart: null,
             }
         },
