@@ -2,10 +2,22 @@
     <v-app id="app">
         <!--<v-system-bar app fixed window/>-->
         <v-app-bar app color="primary" dark>
-            <Header/>
+            <v-app-bar-nav-icon @click.stop="drawer = !drawer"/>
+
+            <v-icon class="mx-4">
+                regular-income
+            </v-icon>
+
+            <v-toolbar-title class="mr-12 align-center">
+                <span class="title">
+                    Regular Income
+                </span>
+            </v-toolbar-title>
         </v-app-bar>
 
-        <!--<v-navigation-drawer app/>-->
+        <v-navigation-drawer app v-model="drawer">
+            <sky-navigation/>
+        </v-navigation-drawer>
 
         <v-content app>
             <v-container fluid>
@@ -19,12 +31,17 @@
 </template>
 
 <script>
-    import Header from './components/layout/Header'
+    import SkyNavigation from "./components/layout/SkyNavigation";
 
     export default {
         name: "App",
+        data() {
+            return {
+                drawer: true,
+            }
+        },
         components: {
-            Header,
+            SkyNavigation,
         },
     }
 </script>
