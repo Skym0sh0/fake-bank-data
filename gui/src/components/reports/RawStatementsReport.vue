@@ -93,8 +93,7 @@
                 chart.cursor = new am4charts.XYCursor();
                 chart.cursor.behavior = "zoomXY"
 
-                chart.scrollbarX = new am4charts.XYChartScrollbar()
-                chart.scrollbarX.series.push(series)
+                chart.scrollbarX = new am4core.Scrollbar()
                 chart.scrollbarY = new am4core.Scrollbar()
 
                 chart.legend = new am4charts.Legend()
