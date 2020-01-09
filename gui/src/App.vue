@@ -1,18 +1,20 @@
 <template>
     <v-app id="app">
+        <!--<v-system-bar app fixed window/>-->
         <v-app-bar app color="primary" dark>
             <Header/>
         </v-app-bar>
 
         <!--<v-navigation-drawer app/>-->
 
-        <v-content>
-            <v-container class="fill-height" fluid>
+        <v-content app>
+            <v-container fluid>
                 <router-view/>
             </v-container>
         </v-content>
 
-        <v-footer/>
+        <!--<v-footer app/>-->
+        <!--<v-bottom-navigation app/>-->
     </v-app>
 </template>
 
