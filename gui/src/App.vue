@@ -4,7 +4,7 @@
             <Header/>
         </v-app-bar>
 
-        <v-navigation-drawer app/>
+        <!--<v-navigation-drawer app/>-->
 
         <v-content>
             <v-container class="fill-height" fluid>

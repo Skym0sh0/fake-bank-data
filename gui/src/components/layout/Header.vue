@@ -1,13 +1,24 @@
 <template>
     <div class="d-inline-flex align-center justify-content-center">
-        <v-card-text>
-            Regular Income
-        </v-card-text>
+        <div>
+            <v-img src="../../assets/icons8-finance-document-100.png"
+                   lazy-src="../../assets/icons8-finance-document-100.png"
+                   :max-width="64"
+                   :max-height="64"
+                   :aspect-ratio="1.0"/>
+
+            <v-toolbar-title class="ma-2 pa-2">
+                Regular Income
+            </v-toolbar-title>
+        </div>
 
         <v-spacer/>
 
         <div v-for="(link, idx) in links" :key="idx">
-            <v-btn :to="link.link" class="mr-2">
+            <v-btn :to="link.link" class="ma-2">
+                <v-icon class="mr-2" v-if="link.icon">
+                    {{link.icon}}
+                </v-icon>
                 {{link.title}}
             </v-btn>
         </div>
@@ -20,10 +31,10 @@
         data() {
             return {
                 links: [
-                    {link: "/", title: "Home",},
-                    {link: "/statements", title: "Statement Overview",},
-                    {link: "/reports", title: "Reports",},
-                    {link: "/about", title: "About",},
+                    {link: "/", title: "Home", icon: 'mdi-apps',},
+                    {link: "/statements", title: "Statement Overview", icon: 'mdi-file-document-box',},
+                    {link: "/reports", title: "Reports", icon: 'mdi-graphql',},
+                    {link: "/about", title: "About", icon: 'mdi-help-circle',},
                 ]
             }
         },
