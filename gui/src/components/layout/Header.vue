@@ -1,16 +1,14 @@
 <template>
     <div class="d-inline-flex align-center justify-content-center">
-        <div>
-            <v-img src="../../assets/icons8-finance-document-100.png"
-                   lazy-src="../../assets/icons8-finance-document-100.png"
-                   :max-width="64"
-                   :max-height="64"
-                   :aspect-ratio="1.0"/>
+        <v-img src="../../assets/icons8-finance-document-100.png"
+               lazy-src="../../assets/icons8-finance-document-100.png"
+               :max-width="64"
+               :max-height="64"
+               :aspect-ratio="1.0"/>
 
-            <v-toolbar-title class="ma-2 pa-2">
-                Regular Income
-            </v-toolbar-title>
-        </div>
+        <v-toolbar-title class="ma-2 pa-2">
+            Regular Income
+        </v-toolbar-title>
 
         <v-spacer/>
 
