@@ -6,6 +6,7 @@ package generated.sky.regular.income;
 
 import generated.sky.regular.income.tables.BackupHistory;
 import generated.sky.regular.income.tables.BankStatement;
+import generated.sky.regular.income.tables.Category;
 import generated.sky.regular.income.tables.FinancialTransaction;
 import generated.sky.regular.income.tables.VOrderedBankStatements;
 
@@ -34,6 +35,11 @@ public class Tables {
      * The table <code>REGULAR_INCOME.bank_statement</code>.
      */
     public static final BankStatement BANK_STATEMENT = generated.sky.regular.income.tables.BankStatement.BANK_STATEMENT;
+
+    /**
+     * The table <code>REGULAR_INCOME.category</code>.
+     */
+    public static final Category CATEGORY = generated.sky.regular.income.tables.Category.CATEGORY;
 
     /**
      * The table <code>REGULAR_INCOME.financial_transaction</code>.
