@@ -45,7 +45,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class FinancialTransaction extends TableImpl<FinancialTransactionRecord> {
 
-    private static final long serialVersionUID = 1256266761;
+    private static final long serialVersionUID = -422689294;
 
     /**
      * The reference instance of <code>REGULAR_INCOME.financial_transaction</code>
@@ -99,6 +99,11 @@ public class FinancialTransaction extends TableImpl<FinancialTransactionRecord> 
      * The column <code>REGULAR_INCOME.financial_transaction.created_at</code>.
      */
     public final TableField<FinancialTransactionRecord, OffsetDateTime> CREATED_AT = createField("created_at", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE.nullable(false).defaultValue(org.jooq.impl.DSL.field("now()", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+
+    /**
+     * The column <code>REGULAR_INCOME.financial_transaction.category_id</code>.
+     */
+    public final TableField<FinancialTransactionRecord, UUID> CATEGORY_ID = createField("category_id", org.jooq.impl.SQLDataType.UUID, this, "");
 
     /**
      * Create a <code>REGULAR_INCOME.financial_transaction</code> table reference
@@ -170,11 +175,15 @@ public class FinancialTransaction extends TableImpl<FinancialTransactionRecord> 
      */
     @Override
     public List<ForeignKey<FinancialTransactionRecord, ?>> getReferences() {
-        return Arrays.<ForeignKey<FinancialTransactionRecord, ?>>asList(Keys.FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_BANK_STATEMENT_ID_FKEY);
+        return Arrays.<ForeignKey<FinancialTransactionRecord, ?>>asList(Keys.FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_BANK_STATEMENT_ID_FKEY, Keys.FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_CATEGORY_ID_FKEY);
     }
 
     public BankStatement bankStatement() {
         return new BankStatement(this, Keys.FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_BANK_STATEMENT_ID_FKEY);
+    }
+
+    public Category category() {
+        return new Category(this, Keys.FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_CATEGORY_ID_FKEY);
     }
 
     /**

@@ -6,9 +6,11 @@ package generated.sky.regular.income;
 
 import generated.sky.regular.income.tables.BackupHistory;
 import generated.sky.regular.income.tables.BankStatement;
+import generated.sky.regular.income.tables.Category;
 import generated.sky.regular.income.tables.FinancialTransaction;
 import generated.sky.regular.income.tables.records.BackupHistoryRecord;
 import generated.sky.regular.income.tables.records.BankStatementRecord;
+import generated.sky.regular.income.tables.records.CategoryRecord;
 import generated.sky.regular.income.tables.records.FinancialTransactionRecord;
 
 import javax.annotation.Generated;
@@ -44,6 +46,8 @@ public class Keys {
     public static final UniqueKey<BackupHistoryRecord> BACKUP_HISTORY_PKEY = UniqueKeys0.BACKUP_HISTORY_PKEY;
     public static final UniqueKey<BankStatementRecord> BANK_STATEMENT_PKEY = UniqueKeys0.BANK_STATEMENT_PKEY;
     public static final UniqueKey<BankStatementRecord> BANK_STATEMENT_PREVIOUS_STATEMENT_ID_KEY = UniqueKeys0.BANK_STATEMENT_PREVIOUS_STATEMENT_ID_KEY;
+    public static final UniqueKey<CategoryRecord> CATEGORY_PKEY = UniqueKeys0.CATEGORY_PKEY;
+    public static final UniqueKey<CategoryRecord> CATEGORY_NAME_KEY = UniqueKeys0.CATEGORY_NAME_KEY;
     public static final UniqueKey<FinancialTransactionRecord> FINANCIAL_TRANSACTION_PKEY = UniqueKeys0.FINANCIAL_TRANSACTION_PKEY;
 
     // -------------------------------------------------------------------------
@@ -51,7 +55,9 @@ public class Keys {
     // -------------------------------------------------------------------------
 
     public static final ForeignKey<BankStatementRecord, BankStatementRecord> BANK_STATEMENT__BANK_STATEMENT_PREVIOUS_STATEMENT_ID_FKEY = ForeignKeys0.BANK_STATEMENT__BANK_STATEMENT_PREVIOUS_STATEMENT_ID_FKEY;
+    public static final ForeignKey<CategoryRecord, CategoryRecord> CATEGORY__CATEGORY_PARENT_CATEGORY_FKEY = ForeignKeys0.CATEGORY__CATEGORY_PARENT_CATEGORY_FKEY;
     public static final ForeignKey<FinancialTransactionRecord, BankStatementRecord> FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_BANK_STATEMENT_ID_FKEY = ForeignKeys0.FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_BANK_STATEMENT_ID_FKEY;
+    public static final ForeignKey<FinancialTransactionRecord, CategoryRecord> FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_CATEGORY_ID_FKEY = ForeignKeys0.FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_CATEGORY_ID_FKEY;
 
     // -------------------------------------------------------------------------
     // [#1459] distribute members to avoid static initialisers > 64kb
@@ -61,11 +67,15 @@ public class Keys {
         public static final UniqueKey<BackupHistoryRecord> BACKUP_HISTORY_PKEY = Internal.createUniqueKey(BackupHistory.BACKUP_HISTORY, "backup_history_pkey", BackupHistory.BACKUP_HISTORY.ID);
         public static final UniqueKey<BankStatementRecord> BANK_STATEMENT_PKEY = Internal.createUniqueKey(BankStatement.BANK_STATEMENT, "bank_statement_pkey", BankStatement.BANK_STATEMENT.ID);
         public static final UniqueKey<BankStatementRecord> BANK_STATEMENT_PREVIOUS_STATEMENT_ID_KEY = Internal.createUniqueKey(BankStatement.BANK_STATEMENT, "bank_statement_previous_statement_id_key", BankStatement.BANK_STATEMENT.PREVIOUS_STATEMENT_ID);
+        public static final UniqueKey<CategoryRecord> CATEGORY_PKEY = Internal.createUniqueKey(Category.CATEGORY, "category_pkey", Category.CATEGORY.ID);
+        public static final UniqueKey<CategoryRecord> CATEGORY_NAME_KEY = Internal.createUniqueKey(Category.CATEGORY, "category_name_key", Category.CATEGORY.NAME);
         public static final UniqueKey<FinancialTransactionRecord> FINANCIAL_TRANSACTION_PKEY = Internal.createUniqueKey(FinancialTransaction.FINANCIAL_TRANSACTION, "financial_transaction_pkey", FinancialTransaction.FINANCIAL_TRANSACTION.ID);
     }
 
     private static class ForeignKeys0 {
         public static final ForeignKey<BankStatementRecord, BankStatementRecord> BANK_STATEMENT__BANK_STATEMENT_PREVIOUS_STATEMENT_ID_FKEY = Internal.createForeignKey(generated.sky.regular.income.Keys.BANK_STATEMENT_PKEY, BankStatement.BANK_STATEMENT, "bank_statement__bank_statement_previous_statement_id_fkey", BankStatement.BANK_STATEMENT.PREVIOUS_STATEMENT_ID);
+        public static final ForeignKey<CategoryRecord, CategoryRecord> CATEGORY__CATEGORY_PARENT_CATEGORY_FKEY = Internal.createForeignKey(generated.sky.regular.income.Keys.CATEGORY_PKEY, Category.CATEGORY, "category__category_parent_category_fkey", Category.CATEGORY.PARENT_CATEGORY);
         public static final ForeignKey<FinancialTransactionRecord, BankStatementRecord> FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_BANK_STATEMENT_ID_FKEY = Internal.createForeignKey(generated.sky.regular.income.Keys.BANK_STATEMENT_PKEY, FinancialTransaction.FINANCIAL_TRANSACTION, "financial_transaction__financial_transaction_bank_statement_id_fkey", FinancialTransaction.FINANCIAL_TRANSACTION.BANK_STATEMENT_ID);
+        public static final ForeignKey<FinancialTransactionRecord, CategoryRecord> FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_CATEGORY_ID_FKEY = Internal.createForeignKey(generated.sky.regular.income.Keys.CATEGORY_PKEY, FinancialTransaction.FINANCIAL_TRANSACTION, "financial_transaction__financial_transaction_category_id_fkey", FinancialTransaction.FINANCIAL_TRANSACTION.CATEGORY_ID);
     }
 }
