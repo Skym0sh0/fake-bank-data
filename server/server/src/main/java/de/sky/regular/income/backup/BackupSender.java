@@ -8,8 +8,7 @@ import generated.sky.regular.income.RegularIncome;
 import generated.sky.regular.income.Tables;
 import generated.sky.regular.income.tables.records.BackupHistoryRecord;
 import org.apache.commons.lang3.time.StopWatch;
-import org.jooq.DSLContext;
-import org.jooq.Table;
+import org.jooq.*;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -88,23 +87,32 @@ public class BackupSender {
 
         var tsField = field(name("LAST_TS"), OffsetDateTime.class);
 
-        BackupHistoryRecord lastBackup = ctx.select()
-                .from(BACKUP_HISTORY)
-                .where(BACKUP_HISTORY.SUCCESS.isTrue())
-                .and(BACKUP_HISTORY.LAST_CHECK.lessThan(
-                        select(max(tsField))
-                                .from(
-                                        select(BANK_STATEMENT.CREATED_AT.as(tsField)).from(BANK_STATEMENT)
-                                                .unionAll(select(BANK_STATEMENT.UPDATED_AT.as(tsField)).from(BANK_STATEMENT))
-                                                .unionAll(select(FINANCIAL_TRANSACTION.CREATED_AT.as(tsField)).from(FINANCIAL_TRANSACTION))
-                                )
-                                .limit(1)
-                ))
-                .orderBy(BACKUP_HISTORY.LAST_CHECK.desc())
-                .limit(1)
-                .fetchOneInto(BACKUP_HISTORY);
+        CommonTableExpression<Record> last_backup = name("last_backup")
+                .as(select()
+                        .from(BACKUP_HISTORY)
+                        .orderBy(BACKUP_HISTORY.LAST_CHECK.desc())
+                        .limit(1));
 
-        return lastBackup != null;
+        CommonTableExpression<Record1<OffsetDateTime>> last_update = name("last_update")
+                .as(select(max(tsField))
+                        .from(
+                                select(BANK_STATEMENT.CREATED_AT.as(tsField)).from(BANK_STATEMENT)
+                                        .unionAll(select(BANK_STATEMENT.UPDATED_AT.as(tsField)).from(BANK_STATEMENT))
+                                        .unionAll(select(FINANCIAL_TRANSACTION.CREATED_AT.as(tsField)).from(FINANCIAL_TRANSACTION))
+                        )
+                        .limit(1)
+                );
+
+        return ctx.fetchExists(
+                with(last_backup, last_update)
+                        .select()
+                        .from(last_backup)
+                        .where(last_backup.field(BACKUP_HISTORY.LAST_CHECK)
+                                .lessThan(
+                                        select(last_update.field(tsField))
+                                                .from(last_update)
+                                ))
+        );
     }
 
     private Optional<String> doBackupIfNeeded(DSLContext ctx, ZonedDateTime timestamp, boolean backupNeeded) {
