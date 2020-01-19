@@ -310,29 +310,18 @@
                 }
             },
             loadStatements() {
-                api.getAllStatements()
+                return api.getAllStatements()
                     .then(res => {
-                        const isSameID = stmt => stmt.id === this.id
-                        const isSuccessorID = stmt => stmt.previousStatement && stmt.previousStatement.id === this.id
+                        this.previousStatementOptions = res
 
-                        this.previousStatementOptions = res.filter(stmt => {
-                            const isNew = this.isNew
-                            const isSame = isSameID(stmt)
-                            const isSuccessor = isSuccessorID(stmt)
-
-                            const isNotSameOrSuccessor = !isSame && !isSuccessor
-
-                            return isNew || isNotSameOrSuccessor
+                        this.previousStatementOptions.sort((a, b) => {
+                            return -moment.utc(a.date).diff(moment.utc(b.date))
                         })
-                            .map(s => {
-                                s.date = moment.utc(s.date)
-                                return s
-                            })
-
-                        this.previousStatementOptions.sort((a, b) => -a.date.diff(b.date))
 
                         if (this.previousStatementOptions.length > 0)
                             this.statement.previousStatement = this.previousStatementOptions[0]
+
+                        return this.previousStatementOptions
                     })
             },
             loadReasons() {
@@ -340,8 +329,8 @@
                     .then(res => this.reasonOptions = res.map(r => r.reason))
             },
             loadOtherEntities() {
-                this.loadStatements()
                 this.loadReasons()
+                return this.loadStatements()
             },
             saveModel() {
                 const normalizedStatement = normalizeStatement(this.statement)
@@ -357,7 +346,7 @@
                         })
 
                         this.loadStatements()
-                        this.loadEntity()
+                            .then(() => this.loadEntity())
                     })
                     .catch(e => {
                         // eslint-disable-next-line
@@ -393,16 +382,26 @@
                 return this.statement.transactions
             },
             prevStatementOptions() {
+                const isSameID = stmt => stmt.id === this.id
+                const isSuccessorID = stmt => stmt.previousStatement && stmt.previousStatement.id === this.id
+
                 return this.previousStatementOptions.map(stmt => {
                     const isBefore = (a, b) => a.diff(b) < 0
                     const indexIndicator = this.statement.date ? (isBefore(moment(this.statement.date), stmt.date) ? "\u2193" : "\u2191") : "#"
 
                     const text = `${indexIndicator} ${dateFormat.formatDate(stmt.date)} [${moneyFormat.formatCents(stmt.balance)}]`
 
+                    const isNew = this.isNew
+                    const isSame = isSameID(stmt)
+                    const isSuccessor = isSuccessorID(stmt)
+
+                    const isNotSameOrSuccessor = !isSame && !isSuccessor
+
                     return {
                         text: text,
                         value: stmt,
-                        order: stmt.date.utc()
+                        order: moment.utc(stmt.date).utc(),
+                        disabled: !(isNew || isNotSameOrSuccessor),
                     }
                 })
             },
@@ -426,9 +425,8 @@
             },
         },
         mounted() {
-            this.loadEntity()
-
             this.loadOtherEntities()
+                .then(() => this.loadEntity())
 
             this.$refs['statement-date-input'].focus()
         },
