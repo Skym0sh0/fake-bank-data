@@ -63,10 +63,20 @@ function denormalizeReason(rsn) {
     }
 }
 
+function normalizeCategory(cat) {
+    return cat
+}
+
+function denormalizeCategory(cat) {
+    return cat
+}
+
 export {
     normalizeTransaction,
     denormalizeTransaction,
     normalizeStatement,
     denormalizeStatement,
     denormalizeReason,
+    denormalizeCategory,
+    normalizeCategory,
 }

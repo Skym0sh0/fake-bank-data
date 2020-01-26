@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Home from './views/Home.vue'
 import StatementOverview from './components/overview/StatementOverview'
 import StatementEntering from "./components/enterings/StatementEntering";
+import CategoryOverview from "./components/categories/CategoryOverview";
 import ReportOverview from "./components/reports/ReportOverview";
 
 Vue.use(Router)
@@ -24,6 +25,11 @@ export default new Router({
             name: 'statement-edit',
             props: true,
             component: StatementEntering,
+        },
+        {
+            path: '/categories/',
+            name: 'category-overview',
+            component: CategoryOverview,
         },
         {
             path: '/reports/',
