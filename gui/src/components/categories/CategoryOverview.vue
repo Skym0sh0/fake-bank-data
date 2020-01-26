@@ -8,25 +8,25 @@
             <v-col>
                 <v-card>
                     <v-card-title>
-                        Category List:
+                        Category List
                     </v-card-title>
 
                     <v-card-text>
-                        <div v-if="categories.length">
+                        <div v-if="categories.length" class="overflow-y-auto" style="height: 70vh">
                             <v-treeview :items="categories"
-                                        :open-on-click="true"
                                         :activatable="true"
                                         :hoverable="true"
                                         :dense="true"
-                                        @update:active="onUpdateActive"
-                            />
+                                        :return-object="true"
+                                        @update:active="onUpdateActive">
+                            </v-treeview>
                         </div>
                     </v-card-text>
                 </v-card>
             </v-col>
 
             <v-col>
-                <v-card v-if="activeCategory">
+                <v-card v-if="activeCategory" class="position-sticky">
                     <v-card-title>
                         Category Details
                     </v-card-title>
@@ -41,6 +41,18 @@
                                     label="Description"
                                     placeholder="Description"
                                     outlined/>
+
+                        <v-text-field v-show="activeCategory.createdAt"
+                                      :value="formatDate(activeCategory.createdAt)"
+                                      label="Created At"
+                                      readonly
+                                      outlined/>
+
+                        <v-text-field v-show="activeCategory.updatedAt"
+                                      :value="formatDate(activeCategory.updatedAt)"
+                                      label="Updated At"
+                                      readonly
+                                      outlined/>
                     </v-card-text>
                 </v-card>
             </v-col>
@@ -50,6 +62,7 @@
 
 <script>
     import {api} from "../../api/RegularIncomeAPI"
+    import * as moment from "moment";
 
     export default {
         name: "CategoryOverview",
@@ -60,23 +73,18 @@
             }
         },
         methods: {
-            onUpdateActive(activeIds) {
-                if (activeIds && activeIds.length > 0) {
-                    const activeId = activeIds[0]
+            formatDate(date) {
+                if (!date)
+                    return null
 
-                    const actives = this.flatCategories.filter(c => c.id === activeId)
-                    if (actives && actives.length > 0)
-                        this.activeCategory = actives[0]
-                }
+                return moment(date).format("YYYY-MM-DD HH:mm:ss")
+            },
+            onUpdateActive(activeCategories) {
+                if (activeCategories && activeCategories.length > 0)
+                    this.activeCategory = activeCategories[0]
             },
         },
-        computed: {
-            flatCategories() {
-                const flatter = cat => [cat, ...cat.children.flatMap(flatter)]
-
-                return this.categories.flatMap(flatter)
-            },
-        },
+        computed: {},
         mounted() {
             api.fetchCategories()
                 .then(res => {
@@ -86,6 +94,11 @@
                         })
                         cat.children.forEach(sorter)
                     }
+
+                    res.sort((a, b) => {
+                        return a.name.localeCompare(b.name)
+                    })
+
                     res.forEach(sorter)
 
                     this.categories = res

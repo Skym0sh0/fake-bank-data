@@ -5,7 +5,9 @@ import generated.sky.regular.income.tables.records.CategoryRecord;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Component;
 
+import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 
@@ -25,7 +27,7 @@ public class CategoryDAO {
 
                     return -(size.applyAsInt(a) - size.applyAsInt(b));
                 })
-                .limit(5)
+//                .limit(5)
                 .collect(Collectors.toList());
     }
 
@@ -37,6 +39,10 @@ public class CategoryDAO {
         c.setDescription(rec.getDescription());
 
         c.setChildren(findChildren(rec.getId(), records));
+
+        c.setCreatedAt(ZonedDateTime.now());
+        if (ThreadLocalRandom.current().nextBoolean())
+            c.setUpdatedAt(ZonedDateTime.now());
 
         return c;
     }
