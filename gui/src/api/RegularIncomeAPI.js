@@ -1,6 +1,6 @@
 import axios from "axios";
 import uuid from "uuid";
-import {denormalizeReason, denormalizeStatement, denormalizeTransaction} from "../util/Normalizer";
+import {denormalizeCategory, denormalizeReason, denormalizeStatement, denormalizeTransaction} from "../util/Normalizer";
 
 class RegularIncomeAPI {
     constructor(baseUrl) {
@@ -79,6 +79,11 @@ class RegularIncomeAPI {
     fetchIncomeExpenseReport() {
         return this.getClient().get('reports/monthly-income-expenses')
             .then(res => res.data)
+    }
+
+    fetchCategories() {
+        return this.getClient().get('categories')
+            .then(res => res.data.map(c => denormalizeCategory(c)))
     }
 }
 

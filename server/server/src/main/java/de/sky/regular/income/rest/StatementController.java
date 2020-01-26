@@ -65,7 +65,7 @@ public class StatementController {
         });
     }
 
-    @GetMapping("")
+    @GetMapping
     public List<Statement> getAllStatements() {
         return db.transactionWithResult(dao::readAllStatements);
     }
