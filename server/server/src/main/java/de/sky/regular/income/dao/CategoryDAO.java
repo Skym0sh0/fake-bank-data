@@ -15,29 +15,36 @@ import static generated.sky.regular.income.Tables.CATEGORY;
 
 @Component
 public class CategoryDAO {
-    public List<Category> fetchAllCategories(DSLContext ctx) {
+    public List<Category> fetchAllCategoriesFlatted(DSLContext ctx) {
+        return ctx.selectFrom(CATEGORY)
+                .fetchInto(CATEGORY)
+                .map(this::mapFlat);
+    }
+
+    public List<Category> fetchAllCategoriesAsHierarchy(DSLContext ctx) {
         var categories = ctx.selectFrom(CATEGORY)
                 .fetchInto(CATEGORY);
 
         return categories.stream()
                 .filter(rec -> Objects.isNull(rec.getParentCategory()))
-                .map(rec -> mapRecursively(rec, categories))
+                .map(rec -> mapRecursively(rec, null, categories))
                 .sorted((a, b) -> {
                     ToIntFunction<Category> size = c -> Optional.ofNullable(c).map(Category::getChildren).map(List::size).orElse(0);
 
                     return -(size.applyAsInt(a) - size.applyAsInt(b));
                 })
-//                .limit(5)
+                .limit(10)
                 .collect(Collectors.toList());
     }
 
-    private Category mapRecursively(CategoryRecord rec, Collection<CategoryRecord> records) {
+    private Category mapRecursively(CategoryRecord rec, UUID parentId, Collection<CategoryRecord> records) {
         Category c = new Category();
 
         c.setId(rec.getId());
         c.setName(rec.getName());
         c.setDescription(rec.getDescription());
 
+        c.setParentId(parentId);
         c.setChildren(findChildren(rec.getId(), records));
 
         c.setCreatedAt(ZonedDateTime.now());
@@ -50,7 +57,20 @@ public class CategoryDAO {
     private List<Category> findChildren(UUID id, Collection<CategoryRecord> records) {
         return records.stream()
                 .filter(rec -> Objects.equals(id, rec.getParentCategory()))
-                .map(rec -> mapRecursively(rec, records))
+                .map(rec -> mapRecursively(rec, id, records))
                 .collect(Collectors.toList());
+    }
+
+    private Category mapFlat(CategoryRecord rec) {
+        Category c = new Category();
+
+        c.setId(rec.getId());
+
+        c.setParentId(rec.getParentCategory());
+
+        c.setName(rec.getName());
+        c.setDescription(rec.getDescription());
+
+        return c;
     }
 }
