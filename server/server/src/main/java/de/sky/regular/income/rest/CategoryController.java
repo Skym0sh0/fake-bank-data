@@ -28,8 +28,13 @@ public class CategoryController {
         this(supplier.getDatabase(), dao);
     }
 
-    @GetMapping
-    public List<Category> getAllCategories() {
-        return db.transactionWithResult(dao::fetchAllCategories);
+    @GetMapping("hierarchical")
+    public List<Category> getHierarchicalCategories() {
+        return db.transactionWithResult(dao::fetchAllCategoriesAsHierarchy);
+    }
+
+    @GetMapping("flat")
+    public List<Category> getFlatCategories() {
+        return db.transactionWithResult(dao::fetchAllCategoriesFlatted);
     }
 }
