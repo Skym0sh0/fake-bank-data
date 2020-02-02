@@ -45,7 +45,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class FinancialTransaction extends TableImpl<FinancialTransactionRecord> {
 
-    private static final long serialVersionUID = -422689294;
+    private static final long serialVersionUID = 792795025;
 
     /**
      * The reference instance of <code>REGULAR_INCOME.financial_transaction</code>
@@ -103,7 +103,7 @@ public class FinancialTransaction extends TableImpl<FinancialTransactionRecord> 
     /**
      * The column <code>REGULAR_INCOME.financial_transaction.category_id</code>.
      */
-    public final TableField<FinancialTransactionRecord, UUID> CATEGORY_ID = createField("category_id", org.jooq.impl.SQLDataType.UUID, this, "");
+    public final TableField<FinancialTransactionRecord, UUID> CATEGORY_ID = createField("category_id", org.jooq.impl.SQLDataType.UUID.nullable(false), this, "");
 
     /**
      * Create a <code>REGULAR_INCOME.financial_transaction</code> table reference
