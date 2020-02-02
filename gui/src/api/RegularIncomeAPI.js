@@ -81,9 +81,39 @@ class RegularIncomeAPI {
             .then(res => res.data)
     }
 
-    fetchCategories() {
-        return this.getClient().get('categories')
-            .then(res => res.data.map(c => denormalizeCategory(c)))
+    getCategories() {
+        const ref = this
+
+        return {
+            fetchCategories() {
+                return ref.getClient().get('categories')
+                    .then(res => res.data.map(c => denormalizeCategory(c)))
+            },
+
+            postCategory(category) {
+                return ref.getClient().post('categories', category)
+                    .then(res => denormalizeCategory(res.data))
+            },
+
+            postChildCategory(parentId, category) {
+                return ref.getClient().post(`categories/${parentId}/children`, category)
+                    .then(res => denormalizeCategory(res.data))
+            },
+
+            patchCategory(category) {
+                return ref.getClient().patch(`categories/${category.id}`, category)
+                    .then(res => denormalizeCategory(res.data))
+            },
+
+            deleteCategory(category) {
+                return ref.getClient().delete(`categories/${category.id}`)
+            },
+
+            reassignCategory(newParent, child) {
+                return ref.getClient().patch(`categories/${newParent.id}/children/${child.id}`)
+                    .then(res => denormalizeCategory(res.data))
+            }
+        }
     }
 }
 
