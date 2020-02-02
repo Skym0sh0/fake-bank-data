@@ -41,7 +41,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Category extends TableImpl<CategoryRecord> {
 
-    private static final long serialVersionUID = 1144128761;
+    private static final long serialVersionUID = 482197252;
 
     /**
      * The reference instance of <code>REGULAR_INCOME.category</code>
@@ -70,6 +70,11 @@ public class Category extends TableImpl<CategoryRecord> {
      * The column <code>REGULAR_INCOME.category.name</code>.
      */
     public final TableField<CategoryRecord, String> NAME = createField("name", org.jooq.impl.SQLDataType.CLOB.nullable(false), this, "");
+
+    /**
+     * The column <code>REGULAR_INCOME.category.is_income</code>.
+     */
+    public final TableField<CategoryRecord, Boolean> IS_INCOME = createField("is_income", org.jooq.impl.SQLDataType.BOOLEAN.nullable(false), this, "");
 
     /**
      * The column <code>REGULAR_INCOME.category.description</code>.
