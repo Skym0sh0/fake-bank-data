@@ -15,7 +15,7 @@
             </v-toolbar-title>
         </v-app-bar>
 
-        <v-navigation-drawer app v-model="drawer">
+        <v-navigation-drawer app v-model="drawer" dark>
             <sky-navigation/>
         </v-navigation-drawer>
 

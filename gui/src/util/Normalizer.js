@@ -64,11 +64,29 @@ function denormalizeReason(rsn) {
 }
 
 function normalizeCategory(cat) {
-    return cat
+    if (!cat)
+        return null
+
+    return {
+        id: cat.id || null,
+        parentId: cat.parentId || null,
+        name: cat.name,
+        description: cat.description,
+    }
 }
 
 function denormalizeCategory(cat) {
-    return cat
+    return {
+        id: cat.id,
+        parentId: cat.parentId,
+        name: cat.name,
+        description: cat.description,
+
+        subCategories: (cat.subCategories || []).map(denormalizeCategory),
+
+        createdAt: cat.createdAt,
+        updatedAt: cat.updatedAt,
+    }
 }
 
 export {
