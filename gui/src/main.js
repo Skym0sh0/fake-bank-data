@@ -4,6 +4,7 @@ import router from './router'
 import Vuelidate from 'vuelidate'
 import vuetify from './plugins/vuetify';
 
+import GlobalEvents from 'vue-global-events'
 import { Drag, Drop } from 'vue-drag-drop';
 
 import BootstrapVue from 'bootstrap-vue'
@@ -14,6 +15,7 @@ Vue.config.productionTip = false
 
 Vue.component('drag', Drag);
 Vue.component('drop', Drop);
+Vue.component('GlobalEvents', GlobalEvents)
 
 Vue.use(BootstrapVue)
 Vue.use(Vuelidate)

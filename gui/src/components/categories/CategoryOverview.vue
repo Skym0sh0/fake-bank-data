@@ -1,5 +1,8 @@
 <template>
     <v-card class="pa-2">
+        <global-events @keydown.17.prevent="reallocationEnabled = true"
+                       @keyup.17.prevent="reallocationEnabled = false"/>
+
         <v-card-title>
             Categories
         </v-card-title>
@@ -22,6 +25,7 @@
                                   v-model="reallocationEnabled"
                                   :loading="isLoading"
                                   hint="Categories can now be dragged & dropped persistently."
+                                  messages="Shortcut: Ctrl"
                                   label="Edit Category Hierarchy"/>
 
                         <v-btn fab dark small
