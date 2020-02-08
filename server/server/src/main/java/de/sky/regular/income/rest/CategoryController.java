@@ -58,10 +58,4 @@ public class CategoryController {
     public void deleteCategory(@PathVariable("id") UUID id) {
         db.transactionWithoutResult(ctx -> dao.deleteCategory(ctx, id));
     }
-
-    @Deprecated
-    @GetMapping("hierarchical")
-    public List<Category> getHierarchicalCategories() {
-        return db.transactionWithResult(dao::fetchAllCategoriesAsHierarchy);
-    }
 }

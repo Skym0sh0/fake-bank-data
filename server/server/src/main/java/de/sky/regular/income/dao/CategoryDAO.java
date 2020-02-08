@@ -4,15 +4,14 @@ import de.sky.regular.income.api.Category;
 import de.sky.regular.income.api.CategoryPatch;
 import generated.sky.regular.income.tables.records.CategoryRecord;
 import org.jooq.DSLContext;
+import org.jooq.impl.DSL;
 import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.ToIntFunction;
-import java.util.stream.Collectors;
 
 import static generated.sky.regular.income.Tables.CATEGORY;
+import static generated.sky.regular.income.Tables.FINANCIAL_TRANSACTION;
 import static org.jooq.impl.DSL.*;
 
 @Component
@@ -75,8 +74,19 @@ public class CategoryDAO {
     }
 
     public void deleteCategory(DSLContext ctx, UUID id) {
-        var child = CATEGORY.as("child");
+        var transaction = FINANCIAL_TRANSACTION.as("transaction");
         var parent = CATEGORY.as("parent");
+        var child = CATEGORY.as("child");
+
+        ctx.update(transaction)
+                .set(transaction.CATEGORY_ID, child.PARENT_CATEGORY)
+                .from(child)
+                .where(DSL.and(
+                        child.ID.eq(transaction.CATEGORY_ID),
+                        child.ID.eq(id),
+                        child.PARENT_CATEGORY.isNotNull()
+                ))
+                .execute();
 
         ctx.update(child)
                 .set(CATEGORY.PARENT_CATEGORY, parent.PARENT_CATEGORY)
@@ -120,48 +130,6 @@ public class CategoryDAO {
                 .fetchOneInto(CATEGORY.ID.getType());
 
         return fetchById(ctx, rootParentId);
-    }
-
-    @Deprecated
-    public List<Category> fetchAllCategoriesAsHierarchy(DSLContext ctx) {
-        var categories = ctx.selectFrom(CATEGORY)
-                .fetchInto(CATEGORY);
-
-        return categories.stream()
-                .filter(rec -> Objects.isNull(rec.getParentCategory()))
-                .map(rec -> mapRecursively(rec, null, categories))
-                .sorted((a, b) -> {
-                    ToIntFunction<Category> size = c -> Optional.ofNullable(c).map(Category::getSubCategories).map(List::size).orElse(0);
-
-                    return -(size.applyAsInt(a) - size.applyAsInt(b));
-                })
-                .collect(Collectors.toList());
-    }
-
-    @Deprecated
-    private Category mapRecursively(CategoryRecord rec, UUID parentId, Collection<CategoryRecord> records) {
-        Category c = new Category();
-
-        c.setId(rec.getId());
-        c.setName(rec.getName());
-        c.setDescription(rec.getDescription());
-
-        c.setParentId(parentId);
-        c.setSubCategories(findChildren(rec.getId(), records));
-
-        c.setCreatedAt(ZonedDateTime.now());
-        if (ThreadLocalRandom.current().nextBoolean())
-            c.setUpdatedAt(ZonedDateTime.now());
-
-        return c;
-    }
-
-    @Deprecated
-    private List<Category> findChildren(UUID id, Collection<CategoryRecord> records) {
-        return records.stream()
-                .filter(rec -> Objects.equals(id, rec.getParentCategory()))
-                .map(rec -> mapRecursively(rec, id, records))
-                .collect(Collectors.toList());
     }
 
     private Category mapFlat(CategoryRecord rec) {
