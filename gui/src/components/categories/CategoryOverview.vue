@@ -21,26 +21,44 @@
           </v-card-title>
 
           <v-card-subtitle>
-            <v-switch v-show="categories && categories.length"
-                      v-model="reallocationEnabled"
-                      :loading="isLoading"
-                      hint="Categories can now be dragged & dropped persistently."
-                      messages="Shortcut: Ctrl"
-                      label="Edit Category Hierarchy"/>
+            <v-container>
+              <v-row justify="space-between">
+                <v-col>
+                  <v-switch v-show="categories && categories.length"
+                            v-model="reallocationEnabled"
+                            :loading="isLoading"
+                            hint="Categories can now be dragged & dropped persistently."
+                            messages="Shortcut: Ctrl"
+                            label="Edit Category Hierarchy"/>
+                </v-col>
 
-            <v-btn fab dark small
-                   color="primary" class="mx-2"
-                   :loading="isLoading"
-                   @click="addNewParentCategory">
-              <v-icon dark>
-                mdi-plus
-              </v-icon>
-            </v-btn>
+                <v-col>
+                  <v-btn fab dark small
+                         color="primary" class="mx-2"
+                         :loading="isLoading"
+                         @click="addNewParentCategory">
+                    <v-icon dark>
+                      mdi-plus
+                    </v-icon>
+                  </v-btn>
+                </v-col>
+              </v-row>
+
+              <v-row>
+                <v-text-field id="quickfilter-text-input-field"
+                              v-model="quickfilter"
+                              type="text"
+                              :clearable="true"
+                              label="Quickfilter"
+                              hint="Type regex to match items"
+                              suffix="Regex"/>
+              </v-row>
+            </v-container>
           </v-card-subtitle>
 
           <v-card-text>
             <div v-if="categoriesForTreeView && categoriesForTreeView.length"
-                 class="overflow-y-auto" style="height: 60vh">
+                 class="overflow-y-auto" style="height: 55vh">
               <v-treeview :items="categoriesForTreeView"
                           :active.sync="selected"
                           :open.sync="opened"
@@ -146,6 +164,7 @@ export default {
         entity: null,
       },
       reallocationEnabled: false,
+      quickfilter: null,
 
       selected: [],
       opened: [],
@@ -292,14 +311,22 @@ export default {
       this.categories.forEach(cat => mapping[cat.id] = cat)
       return mapping
     },
+    getFilteredCategories() {
+      if (!this.quickfilter)
+        return this.categories
+
+      const regex = new RegExp(this.quickfilter, "i")
+
+      return this.categories.filter(cat => cat.name.search(regex) >= 0)
+    },
     getParentCategories() {
-      return [...this.categories.filter(cat => !cat.parentId)]
+      return [...this.getFilteredCategories.filter(cat => !cat.parentId)]
     },
     categoriesForTreeView() {
       const cmp = (a, b) => a.name.localeCompare(b.name)
 
       const resolver = cat => {
-        const children = this.categories.filter(c => c.parentId === cat.id).map(resolver)
+        const children = this.getFilteredCategories.filter(c => c.parentId === cat.id).map(resolver)
 
         children.sort(cmp)
 
