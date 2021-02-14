@@ -90,6 +90,11 @@ class RegularIncomeAPI {
                     .then(res => res.data.map(c => denormalizeCategory(c)))
             },
 
+            fetchCategoryTree(){
+                return ref.getClient().get('categories/tree')
+                    .then(res => res.data.map(c => denormalizeCategory(c)))
+            },
+
             postCategory(category) {
                 return ref.getClient().post('categories', category)
                     .then(res => denormalizeCategory(res.data))

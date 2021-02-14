@@ -123,17 +123,30 @@
                         </template>
 
                         <template v-slot:cell(reason)="row">
-                            <b-form-input :id="`transactions-table-input-reason-${row.index}`"
-                                          :ref="`transactions-table-input-reason-${row.index}`"
-                                          type="text"
-                                          size="sm"
-                                          :list="`transactions-table-input-reason-datalist-${row.index}`"
-                                          :state="!$v.statement.transactions.$each.$iter[row.index].reason.$invalid"
-                                          v-model="row.item.reason"
-                                          placeholder="Reason"/>
+                            <!-- <b-form-input :id="`transactions-table-input-reason-${row.index}`"
+                                           v-if="false"
+                                           :ref="`transactions-table-input-reason-${row.index}`"
+                                           type="text"
+                                           size="sm"
+                                           :list="`transactions-table-input-reason-datalist-${row.index}`"
+                                           :state="!$v.statement.transactions.$each.$iter[row.index].reason.$invalid"
+                                           v-model="row.item.reason"
+                                           placeholder="Reason"/>
 
-                            <b-datalist :id="`transactions-table-input-reason-datalist-${row.index}`"
-                                        :options="reasonOptions"/>
+                             <b-datalist :id="`transactions-table-input-reason-datalist-${row.index}`"
+                                         :options="categories.map(c => c.name)"/>
+                                         -->
+
+                            <treeselect :id="`transactions-table-input-category-select-${row.index}`"
+                                        v-model="row.item.category"
+                                        :multiple="false"
+                                        :options="categories"
+                                        :normalizer="treeNodeNormalizer"
+                                        :open-on-focus="true"
+                                        :show-count="true"
+                                        :append-to-body="true"
+                                        value-format="id"
+                            />
                         </template>
 
                         <template v-slot:cell(actions)="row">
@@ -236,11 +249,14 @@
     import {integer, required} from 'vuelidate/dist/validators.min'
     import {validationMixin} from 'vuelidate'
     import MonetaryInput from "./MonetaryInput";
+    import Treeselect from '@riophae/vue-treeselect'
+    import '@riophae/vue-treeselect/dist/vue-treeselect.css'
 
     export default {
         name: "StatementEntering",
         components: {
-            MonetaryInput
+            MonetaryInput,
+            Treeselect
         },
         props: {
             id: {
@@ -251,7 +267,7 @@
         data() {
             return {
                 previousStatementOptions: [],
-                reasonOptions: [],
+                categories: [],
                 isNew: false,
                 statement: {},
             }
@@ -289,6 +305,15 @@
             }
         },
         methods: {
+            treeNodeNormalizer(node) {
+                const hasChildren = node => !!(node && node.subCategories && node.subCategories.length)
+
+                return {
+                    id: node.id,
+                    label: node.name,
+                    children: hasChildren(node) ? node.subCategories : undefined,
+                }
+            },
             loadEntity() {
                 if (!this.isNew) {
                     api.readStatement(this.id)
@@ -325,8 +350,13 @@
                     })
             },
             loadReasons() {
-                api.getReasonsForTransactions()
-                    .then(res => this.reasonOptions = res.map(r => r.reason))
+                api.getCategories()
+                    .fetchCategoryTree()
+                    .then(res => {
+                        this.categories = res
+
+                        console.log(this.categories)
+                    })
             },
             loadOtherEntities() {
                 this.loadReasons()

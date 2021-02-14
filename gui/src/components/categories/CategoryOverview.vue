@@ -317,6 +317,9 @@
         mounted() {
             this.loadCategories()
                 .then(() => {
+                    this.getParentCategories.filter((c, idx) => idx < 10)
+                        .map(c => c.id)
+                        .forEach(id => this.opened.push(id))
                 })
         },
     }
