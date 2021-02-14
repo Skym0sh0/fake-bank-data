@@ -59,6 +59,7 @@ public class CategoryDAO {
     public List<Category> fetchChildrenOf(DSLContext ctx, UUID parent) {
         return ctx.selectFrom(CATEGORY)
                 .where(CATEGORY.PARENT_CATEGORY.eq(parent))
+                .orderBy(CATEGORY.NAME)
                 .fetch(rec -> mapRecursively(ctx, rec));
     }
 
@@ -71,6 +72,14 @@ public class CategoryDAO {
 
                     return mapRecursively(ctx, rec);
                 });
+    }
+
+    public List<Category> fetchCategoryTree(DSLContext ctx) {
+        return ctx.selectFrom(CATEGORY)
+                .where(CATEGORY.PARENT_CATEGORY.isNull())
+                .orderBy(CATEGORY.NAME)
+                .fetch()
+                .map(rec -> mapRecursively(ctx, rec));
     }
 
     public void deleteCategory(DSLContext ctx, UUID id) {

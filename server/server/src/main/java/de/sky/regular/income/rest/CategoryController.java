@@ -49,6 +49,11 @@ public class CategoryController {
         return db.transactionWithResult(ctx -> dao.fetchAllCategoriesFlatted(ctx, Optional.ofNullable(deep).orElse(false)));
     }
 
+    @GetMapping("tree")
+    public List<Category> getCategoriesAsTree() {
+        return db.transactionWithResult(dao::fetchCategoryTree);
+    }
+
     @PatchMapping("{parent-id}/children/{child-id}")
     public Category reallocateCategory(@PathVariable("parent-id") UUID newParentId, @PathVariable("child-id") UUID childId) {
         return db.transactionWithResult(ctx -> dao.reassignParent(ctx, childId, newParentId));
