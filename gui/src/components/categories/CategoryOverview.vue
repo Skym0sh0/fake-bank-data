@@ -147,9 +147,9 @@
 </template>
 
 <script>
-import {api} from "../../api/RegularIncomeAPI"
+import {api} from "@/api/RegularIncomeAPI"
 import * as moment from "moment";
-import {normalizeCategory} from "../../util/Normalizer";
+import {normalizeCategory} from "@/util/Normalizer";
 
 export default {
   name: "CategoryOverview",
