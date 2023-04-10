@@ -88,7 +88,7 @@
           </b-btn>
 
           <b-table bordered small striped sticky-header
-                   :fields="['index', 'date', 'amount', 'periodic', 'reason', 'actions']"
+                   :fields="['index', 'date', 'amount', 'periodic', 'category', 'actions']"
                    :items="sortedTransactions">
             <template v-slot:cell(index)="row">
                             <span :id="`transactions-table-index-${row.index}`">
@@ -122,7 +122,7 @@
                                v-model="row.item.isPeriodic"/>
             </template>
 
-            <template v-slot:cell(reason)="row">
+            <template v-slot:cell(category)="row">
               <!-- <b-form-input :id="`transactions-table-input-reason-${row.index}`"
                              v-if="false"
                              :ref="`transactions-table-input-reason-${row.index}`"
@@ -146,11 +146,13 @@
                           :show-count="true"
                           :append-to-body="true"
                           value-format="id"
-              />
+                          :required="true"
+                          placeholder="Reason"
+                          :state="!$v.statement.transactions.$each.$iter[row.index].category.$invalid"/>
             </template>
 
             <template v-slot:cell(actions)="row">
-              <b-button-group size="sm" class="mr-2">
+              <b-button-group size="sm">
                 <b-btn :id="`transactions-table-input-add-new-transaction-before-${row.index}`"
                        variant="primary"
                        @click="addNewTransaction(row.index)">
@@ -161,12 +163,11 @@
                        @click="addNewTransaction(row.index + 1)">
                   &#8595;+
                 </b-btn>
-              </b-button-group>
 
-              <b-button-group size="sm">
                 <b-btn :id="`transactions-table-input-delete-transaction-${row.index}`"
-                       variant="secondary"
-                       @click="deleteTransaction(row.index)">
+                       variant="danger"
+                       @click="deleteTransaction(row.index)"
+                       class="ml-1">
                   &#128465;
                 </b-btn>
               </b-button-group>
@@ -179,7 +180,6 @@
                             label-size="sm"
                             label-for="expected-transaction-sum"
                             label="Expected Sum"
-
                             horizontal>
                 <b-form-input id="expected-transaction-sum"
                               :value="formatBalance(calculateExpectedTransactionSum)"
@@ -213,9 +213,6 @@
                               :state="isExpectedTransactionSumMatching"
                               size="sm"
                               disabled/>
-                <b-tooltip target="transaction-sum-deviation" triggers="hover">
-                  asfhjsdfhj
-                </b-tooltip>
               </b-form-group>
             </b-col>
           </b-row>
@@ -298,7 +295,7 @@ export default {
           isPeriodic: {
             required,
           },
-          reason: {
+          category: {
             required,
           },
         },
@@ -350,17 +347,15 @@ export default {
             return this.previousStatementOptions
           })
     },
-    loadReasons() {
+    loadCategories() {
       api.getCategories()
           .fetchCategoryTree()
           .then(res => {
             this.categories = res
-
-            console.log(this.categories)
           })
     },
     loadOtherEntities() {
-      this.loadReasons()
+      this.loadCategories()
       return this.loadStatements()
     },
     saveModel() {
@@ -396,7 +391,7 @@ export default {
         date: null,
         amount: null,
         isPeriodic: false,
-        reason: null,
+        category: null,
       })
 
       this.$nextTick(() => this.$refs[`transactions-table-input-date-${index}`].focus())
@@ -438,7 +433,7 @@ export default {
     },
     calculateExpectedTransactionSum() {
       if (!this.statement.balance || !this.statement.previousStatement)
-        return null
+        return 0
 
       return this.statement.balance - this.statement.previousStatement.balance
     },

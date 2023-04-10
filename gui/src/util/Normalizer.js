@@ -7,7 +7,7 @@ function normalizeTransaction(t) {
         date: t.date,
         amountInCents: t.amount,
         isPeriodic: t.isPeriodic,
-        reasons: [t.reason],
+        categoryId: t.category,
     }
 }
 
@@ -20,7 +20,7 @@ function denormalizeTransaction(t) {
         date: t.date,
         amount: t.amountInCents,
         isPeriodic: t.isPeriodic,
-        reason: t.reasons[0],
+        category: t.categoryId,
     }
 }
 
@@ -36,7 +36,7 @@ function normalizeStatement(stmt) {
         finalBalanceInCents: parseInt(stmt.balance),
         transactions: transactions,
         previousStatementId: (stmt.previousStatement && stmt.previousStatement.id) || null,
-        previousBalanceInCents: (stmt.previousStatement && stmt.previousStatement.balance) || null,
+        previousBalanceInCents: (stmt.previousStatement && stmt.previousStatement.balance) || null, //hier das klappt nbcihtw enns 0 ist
     }
 }
 
