@@ -4,7 +4,7 @@ import de.sky.regular.income.api.detail.CreatedMetaInformation;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.UUID;
 
 @Data
 public class Transaction extends CreatedMetaInformation {
@@ -15,5 +15,5 @@ public class Transaction extends CreatedMetaInformation {
 
     public Boolean isPeriodic;
 
-    public List<String> reasons;
+    public UUID categoryId;
 }

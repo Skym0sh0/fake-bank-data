@@ -1,5 +1,6 @@
 package de.sky.regular.income.importing.excel;
 
+import de.sky.regular.income.api.CategoryPatch;
 import de.sky.regular.income.api.StatementPatch;
 import de.sky.regular.income.api.TransactionPatch;
 import de.sky.regular.income.importing.excel.model.ExcelBankStatementRecord;
@@ -24,7 +25,7 @@ public class ExcelImporter {
         this.validator = Objects.requireNonNull(validator);
     }
 
-    public List<StatementPatch> prepareExcelImport(MultipartFile file) {
+    public ImportResult prepareExcelImport(MultipartFile file) {
         try (InputStream is = file.getInputStream()) {
             return prepareExcelImport(is);
         } catch (Exception e) {
@@ -32,22 +33,22 @@ public class ExcelImporter {
         }
     }
 
-    public List<StatementPatch> prepareExcelImport(InputStream is) {
+    public ImportResult prepareExcelImport(InputStream is) {
         List<ExcelRecord> records = parser.parseWorkbookFromStream(is);
 
         return transform(records);
     }
 
-    private List<StatementPatch> transform(List<ExcelRecord> records) {
+    private ImportResult transform(List<ExcelRecord> records) {
         List<StatementPatch> statements = new ArrayList<>();
 
         List<TransactionPatch> currentTransactions = null;
 
-        for (int i = 0; i < records.size(); i++) {
-            ExcelRecord current = records.get(i);
+        Map<String, CategoryPatch> categoriesByName = new HashMap<>();
 
+        for (ExcelRecord current : records) {
             if (!current.getIsStatement()) {
-                TransactionPatch transform = transform(current.getTransaction());
+                TransactionPatch transform = transform(current.getTransaction(), categoriesByName);
                 currentTransactions.add(validator.validate(transform));
             } else {
                 StatementPatch transform = transform(current.getStatement(), currentTransactions, last(statements));
@@ -57,10 +58,13 @@ public class ExcelImporter {
             }
         }
 
-        return statements;
+        var result = new ImportResult();
+        result.categories = categoriesByName.values();
+        result.statements = statements;
+        return result;
     }
 
-    private static TransactionPatch transform(ExcelTransactionRecord rec) {
+    private static TransactionPatch transform(ExcelTransactionRecord rec, Map<String, CategoryPatch> categoriesByName) {
         TransactionPatch t = new TransactionPatch();
 
         t.setId(UUID.randomUUID());
@@ -75,7 +79,14 @@ public class ExcelImporter {
                         .orElseThrow()
         );
         t.setIsPeriodic(Optional.ofNullable(rec.getPeriodic()).orElse(false));
-        t.setReasons(Collections.singletonList(rec.getReason()));
+
+        t.setCategoryId(categoriesByName.computeIfAbsent(rec.getReason(), reason -> {
+            var patch = new CategoryPatch();
+            patch.setId(UUID.randomUUID());
+            patch.setName(reason);
+            patch.setDescription(reason);
+            return patch;
+        }).getId());
 
         return t;
     }

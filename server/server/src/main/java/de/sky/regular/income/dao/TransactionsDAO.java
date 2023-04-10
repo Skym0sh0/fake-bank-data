@@ -1,7 +1,5 @@
 package de.sky.regular.income.dao;
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.Iterables;
 import de.sky.regular.income.api.*;
 import de.sky.regular.income.utils.TransactionChecksumCalculator;
 import generated.sky.regular.income.tables.records.FinancialTransactionRecord;
@@ -14,7 +12,6 @@ import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -68,9 +65,9 @@ public class TransactionsDAO {
 
                     rec.setAmountValueCents(t.amountInCents);
                     rec.setDateRecord(t.date);
-                    //t.dateRank
                     rec.setIsPeriodic(t.isPeriodic);
-                    rec.setReason(String.join(";", t.reasons));
+                    rec.setReason(null);
+                    rec.setCategoryId(t.categoryId);
 
                     rec.setChecksum(checksumCalculator.calculateChecksum(t));
 
@@ -118,7 +115,8 @@ public class TransactionsDAO {
         // date rank
         t.setAmountInCents(rec.getAmountValueCents());
         t.setIsPeriodic(rec.getIsPeriodic());
-        t.setReasons(Arrays.asList(Iterables.toArray(Splitter.on(";").split(rec.getReason()), String.class)));
+
+        t.setCategoryId(rec.getCategoryId());
 
         return t;
     }

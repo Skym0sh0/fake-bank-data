@@ -26,7 +26,7 @@ public class ExcelRecordValidator {
                     .sum();
 
             if (stmt.previousBalanceInCents + sum != stmt.finalBalanceInCents)
-                System.err.printf("%s: Expected %d but was %d + %d = %d Difference=%d%n",stmt.getDate(), stmt.finalBalanceInCents, stmt.previousBalanceInCents, sum, stmt.previousBalanceInCents + sum, stmt.finalBalanceInCents - (stmt.previousBalanceInCents + sum));
+                System.err.printf("%s: Expected %d but was %d + %d = %d Difference=%d%n", stmt.getDate(), stmt.finalBalanceInCents, stmt.previousBalanceInCents, sum, stmt.previousBalanceInCents + sum, stmt.finalBalanceInCents - (stmt.previousBalanceInCents + sum));
         }
 
         return stmt;
@@ -35,7 +35,7 @@ public class ExcelRecordValidator {
     public TransactionPatch validate(TransactionPatch txn) {
         validateNonNull(txn.getDate(), "date");
         validateNonNull(txn.getAmountInCents(), "amountInCents");
-        validateNonEmpty(txn.getReasons(), "reasons");
+        validateNonNull(txn.getCategoryId(), "categoryId");
         validateNonNull(txn.getIsPeriodic(), "isPeriodic");
 
         return txn;

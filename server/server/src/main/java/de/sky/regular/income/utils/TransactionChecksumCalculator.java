@@ -16,7 +16,7 @@ public class TransactionChecksumCalculator {
         byte[] checksum = Digester.createMD5()
                 .append(transaction.getDate())
                 .append(transaction.getAmountInCents())
-                .append(transaction.getReasons())
+                .append(transaction.getCategoryId().toString())
                 .create();
 
         return bytesToHex(checksum);
