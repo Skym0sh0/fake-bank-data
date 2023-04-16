@@ -123,32 +123,13 @@
             </template>
 
             <template v-slot:cell(category)="row">
-              <!-- <b-form-input :id="`transactions-table-input-reason-${row.index}`"
-                             v-if="false"
-                             :ref="`transactions-table-input-reason-${row.index}`"
-                             type="text"
-                             size="sm"
-                             :list="`transactions-table-input-reason-datalist-${row.index}`"
-                             :state="!$v.statement.transactions.$each.$iter[row.index].reason.$invalid"
-                             v-model="row.item.reason"
-                             placeholder="Reason"/>
-
-               <b-datalist :id="`transactions-table-input-reason-datalist-${row.index}`"
-                           :options="categories.map(c => c.name)"/>
-                           -->
-
-              <treeselect :id="`transactions-table-input-category-select-${row.index}`"
-                          v-model="row.item.category"
-                          :multiple="false"
-                          :options="categories"
-                          :normalizer="treeNodeNormalizer"
-                          :open-on-focus="true"
-                          :show-count="true"
-                          :append-to-body="true"
-                          value-format="id"
-                          :required="true"
-                          placeholder="Reason"
-                          :state="!$v.statement.transactions.$each.$iter[row.index].category.$invalid"/>
+                <CategoryInput :id="`transactions-table-input-category-select-${row.index}`"
+                               v-model="row.item.category"
+                               @createCategory="onCreateCategory"
+                               :options="categories"
+                               :state="!$v.statement.transactions.$each.$iter[row.index].category.$invalid"
+                               @input="onRowChange(row.index)"
+                />
             </template>
 
             <template v-slot:cell(actions)="row">
@@ -242,19 +223,19 @@
 import {api} from "@/api/RegularIncomeAPI"
 import {dateFormat, moneyFormat} from '@/util/Formatters'
 import moment from "moment";
-import {normalizeStatement} from "@/util/Normalizer";
+import {normalizeCategory, normalizeStatement} from "@/util/Normalizer";
 import * as uuid from "uuid";
 import {integer, required} from 'vuelidate/dist/validators.min'
 import {validationMixin} from 'vuelidate'
 import MonetaryInput from "./MonetaryInput";
-import Treeselect from '@riophae/vue-treeselect'
 import '@riophae/vue-treeselect/dist/vue-treeselect.css'
+import CategoryInput from "@/components/enterings/CategoryInput.vue";
 
 export default {
   name: "StatementEntering",
   components: {
+      CategoryInput,
     MonetaryInput,
-    Treeselect
   },
   props: {
     id: {
@@ -303,14 +284,8 @@ export default {
     }
   },
   methods: {
-    treeNodeNormalizer(node) {
-      const hasChildren = node => !!(node && node.subCategories && node.subCategories.length)
-
-      return {
-        id: node.id,
-        label: node.name,
-        children: hasChildren(node) ? node.subCategories : undefined,
-      }
+    onRowChange(rowIdx) {
+      this.$v.statement.transactions.$each.$iter[rowIdx].$touch();
     },
     loadEntity() {
       if (!this.isNew) {
@@ -352,6 +327,17 @@ export default {
           .fetchCategoryTree()
           .then(res => {
             this.categories = res
+          })
+    },
+    onCreateCategory(categoryName) {
+      const normalized = normalizeCategory({
+          name: categoryName,
+      });
+
+      api.getCategories()
+          .postCategory(normalized)
+          .then(() => {
+              this.loadCategories()
           })
     },
     loadOtherEntities() {

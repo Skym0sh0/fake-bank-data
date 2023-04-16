@@ -1,27 +1,16 @@
 <template>
-    <div :id="id">
-        <b-form-input :id="`${id}-form-input`"
-                      v-model="rawInput"
-                      :disabled="disabled"
-                      :size="size"
-                      :placeholder="placeholder"
-                      :state="state"
-                      @focus="onFocus()"
-                      @blur="onFocusLost()"/>
-
-        <div v-if="false" class="debug">
-            <div>Id: {{id}}</div>
-            <div>RawInput: {{rawInput}}</div>
-            <div>Value: {{value}}</div>
-            <div>InCents: {{amountInCents()}}</div>
-            <div>Frmted: {{amountFormatted()}}</div>
-            <div>Decimal: {{amountInDecimal()}}</div>
-        </div>
-    </div>
+    <b-form-input :id="`${id}-form-input`"
+                  v-model="rawInput"
+                  :disabled="disabled"
+                  :size="size"
+                  :placeholder="placeholder"
+                  :state="state"
+                  @focus="onFocus()"
+                  @blur="onFocusLost()"/>
 </template>
 
 <script>
-    import {moneyFormat} from "../../util/Formatters";
+    import {moneyFormat} from "@/util/Formatters";
 
     export default {
         name: "MonetaryInput",
