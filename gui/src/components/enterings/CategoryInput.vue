@@ -1,51 +1,28 @@
 <template>
-  <!--       <div><treeselect v-if="false"-->
-  <!--                    :id="`${id}-category-treeselect`"-->
-  <!--                    v-model="value"-->
-  <!--                    :multiple="false"-->
-  <!--                    :options="options"-->
-  <!--                    :normalizer="treeNodeNormalizer"-->
-  <!--                    :open-on-focus="true"-->
-  <!--                    :show-count="true"-->
-  <!--                    :append-to-body="true"-->
-  <!--                    value-format="id"-->
-  <!--                    :required="true"-->
-  <!--                    placeholder="Reason"-->
-  <!--                    :state="state"/></div>-->
-  <!--        treeNodeNormalizer(node) {-->
-  <!--        const hasChildren = node => !!(node && node.subCategories && node.subCategories.length)-->
+    <b-input-group>
+        <b-form-input :id="`${id}-category-input`"
+                      :list="`${id}-category-input-list`"
+                      @input="onCategoryInput"
+                      :value="currentSearch"
+                      :state="isValidState"
+                      autocomplete="off"
+                      size="sm"
+                      type="text">
+        </b-form-input>
+        <b-input-group-append v-if="isUnknownCategory">
+            <b-button size="sm"
+                      @click="onAddCategory"
+                      :disabled="$v.currentSearch.$invalid">
+                +
+            </b-button>
+        </b-input-group-append>
 
-  <!--        return {-->
-  <!--        id: node.id,-->
-  <!--        label: node.name,-->
-  <!--        children: hasChildren(node) ? node.subCategories : undefined,-->
-  <!--        }-->
-  <!--        },-->
-
-        <b-input-group>
-            <b-form-input :id="`${id}-category-input`"
-                          :list="`${id}-category-input-list`"
-                          @input="onCategoryInput"
-                          :value="currentSearch"
-                          :state="isValidState"
-                          autocomplete="off"
-                          size="sm"
-                          type="text">
-            </b-form-input>
-            <b-input-group-append v-if="isUnknownCategory">
-                <b-button size="sm"
-                          @click="onAddCategory"
-                          :disabled="$v.currentSearch.$invalid">
-                    +
-                </b-button>
-            </b-input-group-append>
-
-            <datalist :id="`${id}-category-input-list`">
-                <option v-for="cat in categories" :key="cat.id">
-                    {{ cat.name }}
-                </option>
-            </datalist>
-        </b-input-group>
+        <datalist :id="`${id}-category-input-list`">
+            <option v-for="cat in categories" :key="cat.id">
+                {{ cat.name }}
+            </option>
+        </datalist>
+    </b-input-group>
 </template>
 
 <script>
