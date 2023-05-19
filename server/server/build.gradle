@@ -68,7 +68,7 @@ jib {
                 CMD_ARGS      : '',
         ]
 
-        creationTime = 'USE_CURRENT_TIMESTAMP'
+        creationTime = 'EPOCH'
     }
     from {
 //        image = 'gcr.io/distroless/java:11'

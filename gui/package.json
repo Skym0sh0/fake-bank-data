@@ -6,8 +6,8 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "postpack": "docker build -t 192.168.1.2:5000/regular-income-frontend:latest . && docker push 192.168.1.2:5000/regular-income-frontend:latest",
-    "prepack": "rm -f regular-income-gui-*.tgz"
+    "prebuild": "rimraf ./dist",
+    "postbuild": "docker build -t 192.168.1.2:5000/regular-income-frontend:latest . && docker push 192.168.1.2:5000/regular-income-frontend:latest"
   },
   "dependencies": {
     "@amcharts/amcharts4": "4.7.18",

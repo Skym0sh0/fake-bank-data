@@ -11,6 +11,6 @@ echo "Backend Image built"
 
 echo "Building Frontend Image..."
 cd ../gui \
-  && npm pack \
+  && npm run build \
   && cd ../release
 echo "Frontend Image built"
