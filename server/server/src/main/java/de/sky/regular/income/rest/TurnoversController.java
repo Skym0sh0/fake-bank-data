@@ -1,6 +1,6 @@
 package de.sky.regular.income.rest;
 
-import de.sky.regular.income.importing.excel.TurnoverCsvImporter;
+import de.sky.regular.income.importing.csv.TurnoverCsvImporter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
