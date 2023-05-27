@@ -52,19 +52,51 @@ class RegularIncomeAPI {
         return this.getClient().post(`statements/${stmt.id}`, stmt)
     }
 
-    putFileToImport(file) {
-        const formData = new FormData()
-        formData.append('file', file)
+    getFileImports() {
+        const ref = this
 
-        return this.getClient().put(
-            'statements/import',
-            formData,
-            {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            }
-        )
+        return {
+            putFileToImport(file) {
+                const formData = new FormData()
+                formData.append('file', file)
+
+                return ref.getClient().put(
+                    'statements/import',
+                    formData,
+                    {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    }
+                )
+            },
+
+            postCsvImportPreview(file) {
+                console.log("preview", file);
+
+                return new Promise(
+                    (resolve, reject) => {
+                        if (Math.random() < 0.1)
+                            reject("some-error");
+                        else
+                            setTimeout(() => resolve(["some-preview"]), 1500);
+                    }
+                );
+            },
+
+            postCsvImport(file) {
+                console.log("import", file);
+
+                return new Promise(
+                    (resolve, reject) => {
+                        if (Math.random() < 0.1)
+                            reject("some-error");
+                        else
+                            setTimeout(() => resolve(), 1500);
+                    }
+                );
+            },
+        }
     }
 
     fetchStatementsReport(begin, end) {
@@ -90,7 +122,7 @@ class RegularIncomeAPI {
                     .then(res => res.data.map(c => denormalizeCategory(c)))
             },
 
-            fetchCategoryTree(){
+            fetchCategoryTree() {
                 return ref.getClient().get('categories/tree')
                     .then(res => res.data.map(c => denormalizeCategory(c)))
             },
