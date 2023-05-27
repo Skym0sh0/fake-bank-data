@@ -1,6 +1,6 @@
 import axios from "axios";
 import uuid from "uuid";
-import {denormalizeCategory, denormalizeReason, denormalizeStatement, denormalizeTransaction} from "../util/Normalizer";
+import {denormalizeCategory, denormalizeReason, denormalizeStatement, denormalizeTransaction, denormalizeTurnoverPreview} from "../util/Normalizer";
 
 class RegularIncomeAPI {
     constructor(baseUrl) {
@@ -72,16 +72,18 @@ class RegularIncomeAPI {
             },
 
             postCsvImportPreview(file) {
-                console.log("preview", file);
+                const formData = new FormData()
+                formData.append('file', file)
 
-                return new Promise(
-                    (resolve, reject) => {
-                        if (Math.random() < 0.1)
-                            reject("some-error");
-                        else
-                            setTimeout(() => resolve(["some-preview"]), 1500);
-                    }
-                );
+                return ref.getClient().post(
+                    'turnovers/preview',
+                    formData,
+                    {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    },
+                ).then(res => denormalizeTurnoverPreview(res.data));
             },
 
             postCsvImport(file) {

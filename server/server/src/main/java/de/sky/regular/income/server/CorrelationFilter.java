@@ -1,7 +1,7 @@
 package de.sky.regular.income.server;
 
 import com.google.common.base.Stopwatch;
-import org.slf4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -13,24 +13,21 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
+@Slf4j
 @Component
 @Order(0)
 public class CorrelationFilter extends HttpFilter {
-    private static final Logger logger = getLogger(CorrelationFilter.class);
-
     @Override
     protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         String correlationid = Optional.ofNullable(request.getHeader("correlationid"))
                 .orElse("unknown");
 
-        logger.info(" >>> {} {} - cor-id: {}", request.getMethod(), request.getServletPath(), correlationid);
+        log.info(" >>> {} {} - cor-id: {}", request.getMethod(), request.getServletPath(), correlationid);
         Stopwatch sw = Stopwatch.createStarted();
 
         super.doFilter(request, response, chain);
 
         sw.stop();
-        logger.info(" <<< {} {} {} {} - cor-id: {}", request.getMethod(), request.getServletPath(), response.getStatus(), sw, correlationid);
+        log.info(" <<< {} {} {} {} - cor-id: {}", request.getMethod(), request.getServletPath(), response.getStatus(), sw, correlationid);
     }
 }

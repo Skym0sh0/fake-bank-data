@@ -1,6 +1,7 @@
 package de.sky.regular.income.database;
 
 import de.sky.common.database.DatabaseConnection;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -9,10 +10,9 @@ import org.springframework.stereotype.Service;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
+@Slf4j
 @Service
 public class DatabaseService implements DatabaseSupplier, InitializingBean, DisposableBean {
-    private static final Logger logger = getLogger(DatabaseService.class);
-
     private DatabaseConnection connect;
 
     @Value("${config.jdbc.url}")
@@ -31,24 +31,24 @@ public class DatabaseService implements DatabaseSupplier, InitializingBean, Disp
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        logger.info("Connecting to Database");
+        log.info("Connecting to Database");
 
         connect = ConnectDatabase.connect(url, user, password, schema);
 
-        logger.info("Database connected, now migrating Schema...");
+        log.info("Database connected, now migrating Schema...");
 
         ConnectDatabase.migrateSchema(connect);
 
-        logger.info("Database connected and schema migrated successfully");
+        log.info("Database connected and schema migrated successfully");
     }
 
     @Override
     public void destroy() throws Exception {
-        logger.info("Closing Database Connection...");
+        log.info("Closing Database Connection...");
 
         if (connect != null)
             connect.close();
 
-        logger.info("Database Connection successfully closed");
+        log.info("Database Connection successfully closed");
     }
 }

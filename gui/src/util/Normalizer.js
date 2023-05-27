@@ -89,6 +89,14 @@ function denormalizeCategory(cat) {
     }
 }
 
+function denormalizeTurnoverPreview(turnover) {
+    return turnover;
+}
+
+function normalizeTurnoverPreview(turnover) {
+    return turnover;
+}
+
 export {
     normalizeTransaction,
     denormalizeTransaction,
@@ -97,4 +105,6 @@ export {
     denormalizeReason,
     denormalizeCategory,
     normalizeCategory,
+    denormalizeTurnoverPreview,
+    normalizeTurnoverPreview,
 }
