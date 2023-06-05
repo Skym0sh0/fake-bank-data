@@ -18,8 +18,8 @@ group 'de.sky.regular.income.server'
 version '1.0-SNAPSHOT'
 
 dependencies {
-    compile project(':database')
-    compile project(':api')
+    implementation project(':database')
+    implementation project(':api')
 
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.28'
     implementation group: 'ch.qos.logback', name: 'logback-core', version: "$logback_version"
@@ -42,7 +42,8 @@ dependencies {
 
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: "$springboot_version"
 
-    compile group: 'org.apache.poi', name: 'poi', version: '4.1.0'
+    implementation group: 'org.apache.poi', name: 'poi', version: '4.1.0'
+    implementation group: 'com.univocity', name: 'univocity-parsers', version: '2.8.4'
 }
 
 sourceSets {

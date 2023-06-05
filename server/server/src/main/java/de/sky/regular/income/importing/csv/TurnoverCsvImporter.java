@@ -1,16 +1,22 @@
 package de.sky.regular.income.importing.csv;
 
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 
 @Component
+@AllArgsConstructor
+@Slf4j
 public class TurnoverCsvImporter {
-    public void parseForPreview(InputStream is) throws Exception {
-        System.out.println("parse for preview");
+    private final TurnoverCsvParser csvParser;
 
-        System.out.println(
-                new String(is.readAllBytes())
-        );
+    public void parseForPreview(InputStream is) {
+        log.info("Parsing CSV...");
+
+        var records = csvParser.parseCsv(is);
+
+        log.info("Parsed {} turnover records from CSV", records.size());
     }
 }
