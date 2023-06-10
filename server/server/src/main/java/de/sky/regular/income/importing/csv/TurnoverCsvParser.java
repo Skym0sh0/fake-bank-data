@@ -8,6 +8,7 @@ import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -17,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Slf4j
+@Component
 public class TurnoverCsvParser {
     public List<TurnoverRecord> parseCsv(String csv) throws Exception {
         try (var is = new ByteArrayInputStream(csv.getBytes())) {
@@ -60,7 +62,7 @@ public class TurnoverCsvParser {
 
         @Parsed(field = "Betrag")
         @Convert(conversionClass = MoneyAmountConverter.class)
-        private int amount;
+        private int amountInCents;
 
         @Parsed(field = "Saldo nach Buchung")
         @Convert(conversionClass = MoneyAmountConverter.class)
