@@ -9,8 +9,10 @@
                  ref="file-upload-modal"
                  title="File Upload"
                  :centered="true"
+                 :scrollable="true"
                  header-bg-variant="warning"
-                 footer-bg-variant="light">
+                 footer-bg-variant="light"
+                 @hidden="reset">
             <template v-slot:modal-footer>
                 <b-button variant="secondary"
                           @click="reset">
@@ -43,8 +45,7 @@
                     {{ fileSelection.name }}
                 </p>
                 <p v-if="parsedPreview">
-                    Preview:
-                    {{ parsedPreview }}
+                    <preview-data :rows="parsedPreview.rows"/>
                 </p>
             </template>
         </b-modal>
@@ -54,9 +55,13 @@
 <script>
 import {required} from 'vuelidate/dist/validators.min'
 import {api} from "../../api/RegularIncomeAPI";
+import PreviewData from "@/components/overview/PreviewData.vue";
 
 export default {
     name: "GeneralFileUpload",
+    components: {
+        PreviewData
+    },
     data() {
         return {
             isUploading: false,
@@ -122,6 +127,18 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
+@media (min-width: 800px) {
+    .modal-md {
+        max-width: 80% !important;
+        /*width: 90% !important;*/
+    }
+}
 
+@media (min-width: 576px) {
+    .modal-dialog {
+        max-width: 80% !important;
+        width: 80% !important;
+    }
+}
 </style>

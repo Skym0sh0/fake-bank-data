@@ -90,7 +90,23 @@ function denormalizeCategory(cat) {
 }
 
 function denormalizeTurnoverPreview(turnover) {
-    return turnover;
+    return {
+        filename: turnover.filename,
+        uploadTime: turnover.uploadTime,
+        rows: (turnover.rows || []).map(denormalizeTurnoverPreviewRow)
+    };
+}
+
+function denormalizeTurnoverPreviewRow(row) {
+    return {
+        date: row.date,
+        amountInCents: row.amountInCents,
+        categoryId: row.categoryId,
+        checksum: row.checksum,
+        description: row.description,
+        suggestedCategory: row.suggestedCategory,
+        recipient: row.recipient,
+    };
 }
 
 function normalizeTurnoverPreview(turnover) {
