@@ -102,10 +102,10 @@ function denormalizeTurnoverPreviewRow(row) {
         date: row.date,
         amountInCents: row.amountInCents,
         categoryId: row.categoryId,
-        checksum: row.checksum,
-        description: row.description,
         suggestedCategory: row.suggestedCategory,
+        description: row.description,
         recipient: row.recipient,
+        checksum: row.checksum,
     };
 }
 

@@ -123,7 +123,7 @@
                         </template>
 
                         <template v-slot:cell(category)="row">
-                            <CategoryInput :id="`transactions-table-input-category-select-${row.index}`"
+                            <category-input :id="`transactions-table-input-category-select-${row.index}`"
                                            v-model="row.item.category"
                                            @createCategory="onCreateCategory"
                                            :options="categories"
