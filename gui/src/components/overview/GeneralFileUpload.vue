@@ -20,7 +20,7 @@
                 </b-button>
                 <b-button variant="primary"
                           @click="doImportRequest"
-                          :disabled="!fileSelection || !parsedPreview || !previewedData || isUploading">
+                          :disabled="$v.$invalid || isUploading">
                     Import
                 </b-button>
             </template>
@@ -75,6 +75,13 @@ export default {
         fileSelection: {
             required,
         },
+        previewedData: {
+            $each: {
+                categoryId: {
+                    required,
+                }
+            }
+        }
     },
     methods: {
         doPreviewRequest() {
