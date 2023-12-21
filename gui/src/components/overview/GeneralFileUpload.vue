@@ -20,7 +20,7 @@
                 </b-button>
                 <b-button variant="primary"
                           @click="doImportRequest"
-                          :disabled="!fileSelection || !parsedPreview ||isUploading">
+                          :disabled="!fileSelection || !parsedPreview || !previewedData || isUploading">
                     Import
                 </b-button>
             </template>
@@ -44,8 +44,8 @@
                 <p v-if="fileSelection">
                     {{ fileSelection.name }}
                 </p>
-                <p v-if="parsedPreview">
-                    <preview-data :rows="parsedPreview.rows"/>
+                <p v-if="previewedData">
+                    <preview-data v-model="previewedData"/>
                 </p>
             </template>
         </b-modal>
@@ -67,6 +67,7 @@ export default {
             isUploading: false,
             fileSelection: null,
             parsedPreview: null,
+            previewedData: null,
             errorMessage: null
         };
     },
@@ -83,6 +84,7 @@ export default {
                 .postCsvImportPreview(this.fileSelection)
                 .then(preview => {
                     this.parsedPreview = preview;
+                    this.previewedData = this.parsedPreview.rows.filter((x, idx) => idx <= 5);
 
                     this.isUploading = false;
                 })
@@ -98,7 +100,7 @@ export default {
             this.isUploading = true;
 
             api.getFileImports()
-                .postCsvImport(this.fileSelection)
+                .postCsvImport(this.previewedData)
                 .then(() => {
                     this.$emit("uploadSucceeded")
                     this.$refs["file-upload-modal"].hide();
@@ -112,6 +114,7 @@ export default {
         reset() {
             this.fileSelection = null;
             this.parsedPreview = null;
+            this.previewedData = null;
             this.errorMessage = null;
             this.isUploading = false;
             this.$refs["file-upload-modal"].hide();

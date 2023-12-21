@@ -4,7 +4,7 @@
         <div>
             <b-table :striped="true"
                      :hover="true"
-                     :items="sortedRows"
+                     :items="value"
                      :fields="fields"
                      :responsive="true">
                 <template #cell(Date)="row">
@@ -15,9 +15,10 @@
                 </template>
                 <template v-slot:cell(Category)="row">
                     <category-input :id="`csv-category-input-${row.index}`"
-                                    :state="true"
+                                    v-model="row.item.categoryId"
+                                    @createCategory="onCreateCategory"
                                     :options="categories"
-                                    :value="row.item.categoryId"/>
+                                    :state="true"/>
                 </template>
                 <template v-slot:cell(SuggestedCategory)="row">
                     {{ row.item.suggestedCategory }}
@@ -42,12 +43,17 @@ import TableCellDescription from "@/components/overview/utils/TableCellDescripti
 import TableCellMonetary from "@/components/overview/utils/TableCellMonetary.vue";
 import CategoryInput from "@/components/enterings/CategoryInput.vue";
 import {api} from "@/api/RegularIncomeAPI";
+import {normalizeCategory} from "@/util/Normalizer";
 
 export default {
     name: "PreviewData",
-    components: {CategoryInput, TableCellMonetary, TableCellDescription},
+    components: {
+        CategoryInput,
+        TableCellMonetary,
+        TableCellDescription,
+    },
     props: {
-        rows: {
+        value: {
             required: true,
             type: Array,
         },
@@ -62,9 +68,7 @@ export default {
             return ["Date", "Recipient", "Amount", "Category", "SuggestedCategory", "Checksum", "Description"];
         },
         sortedRows() {
-            const data = this.rows.filter((tmp, idx) => idx < 10);
-
-            return _.reverse(_.sortBy(data, row => row.date));
+            return _.reverse(_.sortBy(this.value, row => row.date));
         }
     },
     methods: {
@@ -73,6 +77,17 @@ export default {
                 .fetchCategoryTree()
                 .then(res => {
                     this.categories = res
+                })
+        },
+        onCreateCategory(categoryName) {
+            const normalized = normalizeCategory({
+                name: categoryName,
+            });
+
+            api.getCategories()
+                .postCategory(normalized)
+                .then(() => {
+                    this.loadCategories()
                 })
         },
     },
