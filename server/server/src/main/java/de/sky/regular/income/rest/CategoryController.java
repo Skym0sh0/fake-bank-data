@@ -40,7 +40,7 @@ public class CategoryController {
     }
 
     @PatchMapping("{id}")
-    public Category createCategory(@PathVariable("id") UUID id, @RequestBody CategoryPatch cat) {
+    public Category updateCategory(@PathVariable("id") UUID id, @RequestBody CategoryPatch cat) {
         return db.transactionWithResult(ctx -> dao.updateCategory(ctx, id, cat));
     }
 
