@@ -14,6 +14,10 @@
                  footer-bg-variant="light"
                  @hidden="reset">
             <template v-slot:modal-footer>
+                <div v-show="uploadingTime">
+                    Time to parse for preview: {{ uploadingTime / 1000.0 }}s
+                </div>
+
                 <b-button variant="secondary"
                           @click="reset">
                     Abbrechen
@@ -65,6 +69,7 @@ export default {
     data() {
         return {
             isUploading: false,
+            uploadingTime: null,
             fileSelection: null,
             parsedPreview: null,
             previewedData: null,
@@ -86,18 +91,23 @@ export default {
     methods: {
         doPreviewRequest() {
             this.isUploading = true;
+            this.uploadingTime = null;
+            const startTime = new Date();
 
             api.getFileImports()
                 .postCsvImportPreview(this.fileSelection)
                 .then(preview => {
                     this.parsedPreview = preview;
-                    this.previewedData = this.parsedPreview.rows.filter((x, idx) => idx <= 5);
+                    this.previewedData = this.parsedPreview.rows;
 
                     this.isUploading = false;
                 })
                 .catch(e => {
                     this.errorMessage = e.response.data;
                     this.isUploading = false;
+                })
+                .finally(() => {
+                    this.uploadingTime = new Date().getTime() - startTime.getTime();
                 })
         },
         doImportRequest() {
@@ -124,6 +134,7 @@ export default {
             this.previewedData = null;
             this.errorMessage = null;
             this.isUploading = false;
+            this.uploadingTime = null;
             this.$refs["file-upload-modal"].hide();
         },
     },

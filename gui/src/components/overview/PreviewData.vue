@@ -1,7 +1,7 @@
 <template>
     <div>PREVIEW !
 
-        <div>
+        <div v-if="categories">
             <b-table :striped="true"
                      :hover="true"
                      :items="value"
@@ -21,6 +21,11 @@
                                     :state="true"/>
                 </template>
                 <template v-slot:cell(SuggestedCategory)="row">
+                    <b-button v-if="!isUnknownCategory[row.item.suggestedCategory]"
+                              size="sm"
+                              @click="onCreateSuggestedCategory(row.item.suggestedCategory)">
+                        +
+                    </b-button>
                     {{ row.item.suggestedCategory }}
                 </template>
                 <template v-slot:cell(Description)="row">
@@ -38,7 +43,6 @@
 </template>
 
 <script>
-import _ from 'lodash';
 import TableCellDescription from "@/components/overview/utils/TableCellDescription.vue";
 import TableCellMonetary from "@/components/overview/utils/TableCellMonetary.vue";
 import CategoryInput from "@/components/enterings/CategoryInput.vue";
@@ -60,20 +64,20 @@ export default {
     },
     data() {
         return {
-            categories: [],
+            categories: null,
         }
     },
     computed: {
         fields() {
-            return ["Date", "Recipient", "Amount", "Category", "SuggestedCategory", "Checksum", "Description"];
+            return ["Date", "Recipient", "Amount", "Category", "SuggestedCategory", /*"Checksum",*/ "Description"];
         },
-        sortedRows() {
-            return _.reverse(_.sortBy(this.value, row => row.date));
+        isUnknownCategory() {
+            return this.categories.reduce((a, v) => ({...a, [v.name]: v}))
         }
     },
     methods: {
         loadCategories() {
-            api.getCategories()
+            return api.getCategories()
                 .fetchCategoryTree()
                 .then(res => {
                     this.categories = res
@@ -84,12 +88,25 @@ export default {
                 name: categoryName,
             });
 
-            api.getCategories()
+            return api.getCategories()
                 .postCategory(normalized)
                 .then(() => {
-                    this.loadCategories()
+                    return this.loadCategories()
                 })
         },
+        onCreateSuggestedCategory(categoryName) {
+            this.onCreateCategory(categoryName)
+                .then(() => {
+                    const newlyCreatedCategory = this.categories.find(cat => cat.name === categoryName)
+                    if (!newlyCreatedCategory)
+                        return;
+
+                    this.value.forEach(row => {
+                        if (row.suggestedCategory === categoryName && !row.categoryId)
+                            row.categoryId = newlyCreatedCategory.id;
+                    })
+                });
+        }
     },
     mounted() {
         this.loadCategories()

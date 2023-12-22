@@ -86,6 +86,9 @@ export default {
         },
     },
     watch: {
+        value(/*newValue, oldValue*/) {
+            this.initWhenOnlyValueIsSet()
+        },
         options(/*newOptions, oldOptions*/) {
             this.findOption()
         },
@@ -109,11 +112,23 @@ export default {
         onAddCategory() {
             this.$emit('createCategory', this.currentSearch)
         },
+        initWhenOnlyValueIsSet() {
+            if (this.value) {
+                const foundCategory = this.categoriesById[this.value];
+                if (foundCategory) {
+                    this.currentSearch = foundCategory.name;
+                    this.isUnknownCategory = false;
+                    this.$emit('input', foundCategory.id);
+                } else {
+                    this.currentSearch = "";
+                    this.isUnknownCategory = true;
+                    this.$emit('input', null);
+                }
+            }
+        },
     },
     mounted() {
-        if (this.value) {
-            this.currentSearch = this.categoriesById[this.value].name;
-        }
+        this.initWhenOnlyValueIsSet()
     },
     mixins: [
         validationMixin,
