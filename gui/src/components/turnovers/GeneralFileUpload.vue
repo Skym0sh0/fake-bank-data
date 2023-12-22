@@ -59,7 +59,7 @@
 <script>
 import {required} from 'vuelidate/dist/validators.min'
 import {api} from "../../api/RegularIncomeAPI";
-import PreviewData from "@/components/overview/PreviewData.vue";
+import PreviewData from "@/components/turnovers/PreviewData.vue";
 
 export default {
     name: "GeneralFileUpload",

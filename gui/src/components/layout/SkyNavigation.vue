@@ -38,6 +38,7 @@
                 links: [
                     {link: "/", title: "Home", icon: 'mdi-apps',},
                     {link: "/statements", title: "Statement Overview", icon: 'mdi-file-document-box',},
+                    {link: "/turnovers", title: "Turnover Overview", icon: 'mdi-file-document-box',},
                     {link: "/categories", title: "Category Overview", icon: 'mdi-file-document-box',},
                     {link: "/reports", title: "Reports", icon: 'mdi-graphql',},
                     {link: "/about", title: "About", icon: 'mdi-help-circle',},

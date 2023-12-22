@@ -18,8 +18,6 @@
                             Refresh
                         </b-btn>
 
-                        <general-file-upload @uploadSucceeded="uploadSuccess"/>
-
                         <b-btn id="statement-overview-create-new-statement"
                                class="mb-2"
                                variant="primary"
@@ -109,14 +107,12 @@ import {api} from "../../api/RegularIncomeAPI"
 import StatementTableDetails from "./StatementTableDetails"
 import {dateFormat, moneyFormat} from '../../util/Formatters'
 import * as uuid from "uuid";
-import GeneralFileUpload from "@/components/overview/GeneralFileUpload.vue";
 import LegacyXlsUpload from "@/components/overview/LegacyXlsUpload.vue";
 
 export default {
     name: "StatementOverview",
     components: {
         LegacyXlsUpload,
-        GeneralFileUpload,
         StatementTableDetails
     },
     data() {
