@@ -33,7 +33,6 @@ public class TurnoverCsvImporter {
             return records.stream()
                     .map(rec -> enrichAndMap(suggester, rec))
                     .sorted(Comparator.comparing(TurnoverRow::getDate))
-                    .limit(5)
                     .collect(Collectors.toUnmodifiableList());
         }
     }
