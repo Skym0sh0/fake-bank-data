@@ -1,4 +1,4 @@
-function normalizeTransaction(t) {
+export function normalizeTransaction(t) {
     if (!t)
         return null
 
@@ -11,7 +11,7 @@ function normalizeTransaction(t) {
     }
 }
 
-function denormalizeTransaction(t) {
+export function denormalizeTransaction(t) {
     if (!t)
         return null
 
@@ -24,7 +24,7 @@ function denormalizeTransaction(t) {
     }
 }
 
-function normalizeStatement(stmt) {
+export function normalizeStatement(stmt) {
     if (!stmt)
         return null
 
@@ -40,7 +40,7 @@ function normalizeStatement(stmt) {
     }
 }
 
-function denormalizeStatement(stmt) {
+export function denormalizeStatement(stmt) {
     if (!stmt)
         return null
 
@@ -54,7 +54,7 @@ function denormalizeStatement(stmt) {
     }
 }
 
-function denormalizeReason(rsn) {
+export function denormalizeReason(rsn) {
     if (!rsn)
         return null
 
@@ -63,7 +63,7 @@ function denormalizeReason(rsn) {
     }
 }
 
-function normalizeCategory(cat) {
+export function normalizeCategory(cat) {
     if (!cat)
         return null
 
@@ -75,7 +75,7 @@ function normalizeCategory(cat) {
     }
 }
 
-function denormalizeCategory(cat) {
+export function denormalizeCategory(cat) {
     return {
         id: cat.id,
         parentId: cat.parentId,
@@ -89,7 +89,16 @@ function denormalizeCategory(cat) {
     }
 }
 
-function denormalizeTurnoverPreview(turnover) {
+export function denormalizeTurnoverImport(turnoverImport) {
+    return {
+        id: turnoverImport.id,
+        date: turnoverImport.date,
+
+        turnovers: [],
+    };
+}
+
+export function denormalizeTurnoverPreview(turnover) {
     return {
         filename: turnover.filename,
         uploadTime: turnover.uploadTime,
@@ -97,7 +106,7 @@ function denormalizeTurnoverPreview(turnover) {
     };
 }
 
-function denormalizeTurnoverPreviewRow(row) {
+export function denormalizeTurnoverPreviewRow(row) {
     return {
         date: row.date,
         amountInCents: row.amountInCents,
@@ -109,18 +118,6 @@ function denormalizeTurnoverPreviewRow(row) {
     };
 }
 
-function normalizeTurnoverPreview(turnover) {
+export function normalizeTurnoverPreview(turnover) {
     return turnover;
-}
-
-export {
-    normalizeTransaction,
-    denormalizeTransaction,
-    normalizeStatement,
-    denormalizeStatement,
-    denormalizeReason,
-    denormalizeCategory,
-    normalizeCategory,
-    denormalizeTurnoverPreview,
-    normalizeTurnoverPreview,
 }

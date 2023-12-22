@@ -94,8 +94,8 @@ export default {
             this.uploadingTime = null;
             const startTime = new Date();
 
-            api.getFileImports()
-                .postCsvImportPreview(this.fileSelection)
+            api.getTurnovers()
+                .previewTurnoverImport(this.fileSelection)
                 .then(preview => {
                     this.parsedPreview = preview;
                     this.previewedData = this.parsedPreview.rows;
@@ -116,8 +116,8 @@ export default {
 
             this.isUploading = true;
 
-            api.getFileImports()
-                .postCsvImport(this.previewedData)
+            api.getTurnovers()
+                .createTurnoverImport(this.fileSelection, this.previewedData)
                 .then(() => {
                     this.$emit("uploadSucceeded")
                     this.$refs["file-upload-modal"].hide();

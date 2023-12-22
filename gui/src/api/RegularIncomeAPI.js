@@ -1,6 +1,13 @@
 import axios from "axios";
 import uuid from "uuid";
-import {denormalizeCategory, denormalizeReason, denormalizeStatement, denormalizeTransaction, denormalizeTurnoverPreview} from "../util/Normalizer";
+import {
+    denormalizeCategory,
+    denormalizeReason,
+    denormalizeStatement,
+    denormalizeTransaction,
+    denormalizeTurnoverImport,
+    denormalizeTurnoverPreview
+} from "../util/Normalizer";
 
 class RegularIncomeAPI {
     constructor(baseUrl) {
@@ -70,34 +77,6 @@ class RegularIncomeAPI {
                     }
                 )
             },
-
-            postCsvImportPreview(file) {
-                const formData = new FormData()
-                formData.append('file', file)
-
-                return ref.getClient().post(
-                    'turnovers/preview',
-                    formData,
-                    {
-                        headers: {
-                            'Content-Type': 'multipart/form-data'
-                        }
-                    },
-                ).then(res => denormalizeTurnoverPreview(res.data));
-            },
-
-            postCsvImport(file) {
-                console.log("import", file);
-
-                return new Promise(
-                    (resolve, reject) => {
-                        if (Math.random() < 0.1)
-                            reject("some-error");
-                        else
-                            setTimeout(() => resolve(), 1500);
-                    }
-                );
-            },
         }
     }
 
@@ -113,6 +92,50 @@ class RegularIncomeAPI {
     fetchIncomeExpenseReport() {
         return this.getClient().get('reports/monthly-income-expenses')
             .then(res => res.data)
+    }
+
+    getTurnovers() {
+        const ref = this
+
+        return {
+            previewTurnoverImport(file) {
+                const formData = new FormData()
+                formData.append('file', file)
+
+                return ref.getClient().post(
+                    'turnover-import/preview',
+                    formData,
+                    {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    },
+                ).then(res => denormalizeTurnoverPreview(res.data));
+            },
+
+            createTurnoverImport(file, data) {
+                const formData = new FormData()
+                formData.append('file', file)
+                formData.append('data', data)
+
+                return ref.getClient().post(
+                    'turnover-import',
+                    formData,
+                    {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    },
+                ).then(res => denormalizeTurnoverImport(res.data));
+            },
+            fetchTurnoverImports() {
+                return ref.getClient().get('turnover-import')
+                    .then(res => res.data.map(c => denormalizeTurnoverImport(c)))
+            },
+            deleteTurnoverImport(turnoverImport) {
+                return ref.getClient().delete(`turnover-import/${turnoverImport.id}`)
+            }
+        };
     }
 
     getCategories() {

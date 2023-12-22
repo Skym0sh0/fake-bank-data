@@ -17,7 +17,7 @@ import java.util.Objects;
 
 @Slf4j
 @RestController
-@RequestMapping("/turnovers")
+@RequestMapping("/turnover-imports")
 public class TurnoversController {
     private final TurnoverCsvImporter importer;
 
