@@ -46,7 +46,7 @@
             <b-spinner v-if="isUploading"/>
             <template v-else>
                 <b-card v-show="fileSelection" :title="fileSelection.name">
-                    <preview-data v-model="previewedData"/>
+                    <turnover-preview-table v-model="previewedData"/>
                 </b-card>
             </template>
         </b-modal>
@@ -56,12 +56,12 @@
 <script>
 import {required} from 'vuelidate/dist/validators.min'
 import {api} from "../../api/RegularIncomeAPI";
-import PreviewData from "@/components/turnovers/PreviewData.vue";
+import TurnoverPreviewTable from "@/components/turnovers/TurnoverPreviewTable.vue";
 
 export default {
     name: "TurnoverImporting",
     components: {
-        PreviewData
+        TurnoverPreviewTable
     },
     data() {
         return {

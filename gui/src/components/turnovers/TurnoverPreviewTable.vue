@@ -46,7 +46,7 @@ import {api} from "@/api/RegularIncomeAPI";
 import {normalizeCategory} from "@/util/Normalizer";
 
 export default {
-    name: "PreviewData",
+    name: "TurnoverPreviewTable",
     components: {
         CategoryInput,
         TableCellMonetary,
