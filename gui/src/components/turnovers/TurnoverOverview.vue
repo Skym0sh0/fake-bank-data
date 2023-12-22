@@ -2,7 +2,7 @@
     <b-card title="Turnovers" sub-title="Overview">
         <b-card-body>
             <div class="action-buttons">
-                <general-file-upload @uploadSucceeded="uploadSuccess"/>
+                <turnover-importing @uploadSucceeded="uploadSuccess"/>
             </div>
 
             <turnovers-list :imports="turnoverImports"/>
@@ -12,7 +12,7 @@
 
 <script>
 import TurnoversList from './TurnoversList';
-import GeneralFileUpload from "@/components/turnovers/GeneralFileUpload.vue";
+import TurnoverImporting from "@/components/turnovers/TurnoverImporting.vue";
 import {api} from "@/api/RegularIncomeAPI";
 
 export default {
@@ -23,7 +23,7 @@ export default {
         };
     },
     components: {
-        GeneralFileUpload,
+        TurnoverImporting,
         TurnoversList,
     },
     methods: {

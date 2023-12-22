@@ -45,12 +45,9 @@
 
             <b-spinner v-if="isUploading"/>
             <template v-else>
-                <p v-if="fileSelection">
-                    {{ fileSelection.name }}
-                </p>
-                <p v-if="previewedData">
+                <b-card v-show="fileSelection" :title="fileSelection.name">
                     <preview-data v-model="previewedData"/>
-                </p>
+                </b-card>
             </template>
         </b-modal>
     </b-btn>
@@ -62,7 +59,7 @@ import {api} from "../../api/RegularIncomeAPI";
 import PreviewData from "@/components/turnovers/PreviewData.vue";
 
 export default {
-    name: "GeneralFileUpload",
+    name: "TurnoverImporting",
     components: {
         PreviewData
     },
@@ -99,14 +96,12 @@ export default {
                 .then(preview => {
                     this.parsedPreview = preview;
                     this.previewedData = this.parsedPreview.rows;
-
-                    this.isUploading = false;
                 })
                 .catch(e => {
                     this.errorMessage = e.response.data;
-                    this.isUploading = false;
                 })
                 .finally(() => {
+                    this.isUploading = false;
                     this.uploadingTime = new Date().getTime() - startTime.getTime();
                 })
         },
@@ -125,6 +120,8 @@ export default {
                 })
                 .catch(e => {
                     this.errorMessage = e.response.data;
+                })
+                .finally(() => {
                     this.isUploading = false;
                 })
         },

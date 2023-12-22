@@ -1,45 +1,41 @@
 <template>
-    <div>PREVIEW !
-
-        <div v-if="categories">
-            <b-table :striped="true"
-                     :hover="true"
-                     :items="value"
-                     :fields="fields"
-                     :responsive="true">
-                <template #cell(Date)="row">
-                    {{ row.item.date }}
-                </template>
-                <template v-slot:cell(Amount)="row">
-                    <table-cell-monetary :value="row.item.amountInCents"/>
-                </template>
-                <template v-slot:cell(Category)="row">
-                    <category-input :id="`csv-category-input-${row.index}`"
-                                    v-model="row.item.categoryId"
-                                    @createCategory="onCreateCategory"
-                                    :options="categories"
-                                    :state="true"/>
-                </template>
-                <template v-slot:cell(SuggestedCategory)="row">
-                    <b-button v-if="!isUnknownCategory[row.item.suggestedCategory]"
-                              size="sm"
-                              @click="onCreateSuggestedCategory(row.item.suggestedCategory)">
-                        +
-                    </b-button>
-                    {{ row.item.suggestedCategory }}
-                </template>
-                <template v-slot:cell(Description)="row">
-                    <table-cell-description :index="row.index" :value="row.item.description"/>
-                </template>
-                <template v-slot:cell(Recipient)="row">
-                    {{ row.item.recipient }}
-                </template>
-                <template v-slot:cell(Checksum)="row">
-                    {{ row.item.checksum }}
-                </template>
-            </b-table>
-        </div>
-    </div>
+    <b-table v-if="categories"
+             :striped="true"
+             :hover="true"
+             :items="value"
+             :fields="fields"
+             :responsive="true">
+        <template #cell(Date)="row">
+            {{ row.item.date }}
+        </template>
+        <template v-slot:cell(Amount)="row">
+            <table-cell-monetary :value="row.item.amountInCents"/>
+        </template>
+        <template v-slot:cell(Category)="row">
+            <category-input :id="`csv-category-input-${row.index}`"
+                            v-model="row.item.categoryId"
+                            @createCategory="onCreateCategory"
+                            :options="categories"
+                            :state="true"/>
+        </template>
+        <template v-slot:cell(SuggestedCategory)="row">
+            <b-button v-if="!isUnknownCategory[row.item.suggestedCategory]"
+                      size="sm"
+                      @click="onCreateSuggestedCategory(row.item.suggestedCategory)">
+                +
+            </b-button>
+            {{ row.item.suggestedCategory }}
+        </template>
+        <template v-slot:cell(Description)="row">
+            <table-cell-description :index="row.index" :value="row.item.description"/>
+        </template>
+        <template v-slot:cell(Recipient)="row">
+            {{ row.item.recipient }}
+        </template>
+        <template v-slot:cell(Checksum)="row">
+            {{ row.item.checksum }}
+        </template>
+    </b-table>
 </template>
 
 <script>
