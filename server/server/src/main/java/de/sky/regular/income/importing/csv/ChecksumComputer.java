@@ -28,6 +28,10 @@ public class ChecksumComputer implements Function<TurnoverCsvParser.TurnoverReco
                 rec.getDescription() +
                 rec.getRecipient();
 
-        return Hex.encodeHexString(digester.digest(sb.getBytes(StandardCharsets.UTF_8)));
+        return computeChecksum(sb.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public String computeChecksum(byte[] data) {
+        return Hex.encodeHexString(digester.digest(data));
     }
 }

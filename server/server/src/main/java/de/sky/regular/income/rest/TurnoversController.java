@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedInputStream;
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -48,26 +47,19 @@ public class TurnoversController {
     }
 
     @PostMapping(consumes = "multipart/form-data")
-    public TurnoverImport createTurnoverImport(@RequestPart("file") MultipartFile file, @RequestPart("data") TurnoverImportPatch patch) {
-        log.info(
-                "Importing file: {} {} {} {} with data:",
-                file.getOriginalFilename(),
-                file.getSize(),
-                file.getName(),
-                file.getContentType()
-        );
+    public TurnoverImport createTurnoverImport(@RequestPart("file") MultipartFile file, @RequestPart("data") TurnoverImportPatch patch) throws Exception {
+        log.info("Importing file {} with {} bytes and {} data rows...", file.getOriginalFilename(), file.getSize(), patch.getRows().size());
 
-        patch.getRows().forEach(r -> log.info("\t - {}", r));
-
-        return TurnoverImport.builder()
-                .id(UUID.randomUUID())
-                .turnovers(List.of())
-                .date(LocalDate.now())
-                .build();
+        return importer.createImport(ZonedDateTime.now(), file, patch);
     }
 
     @GetMapping
-    public List<TurnoverImport> createTurnoverImport() {
-        return List.of();
+    public List<TurnoverImport> fetchTurnoverImports() {
+        return importer.fetchTurnoverImports();
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteTurnoverImport(@PathVariable UUID id) {
+        importer.deleteImport(id);
     }
 }
