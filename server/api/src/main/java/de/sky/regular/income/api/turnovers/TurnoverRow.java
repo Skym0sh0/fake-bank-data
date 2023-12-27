@@ -2,13 +2,14 @@ package de.sky.regular.income.api.turnovers;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.experimental.SuperBuilder;
 import lombok.experimental.Tolerate;
 
 import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
-@Builder
+@SuperBuilder
 public class TurnoverRow {
     public LocalDate date;
     public Integer amountInCents;

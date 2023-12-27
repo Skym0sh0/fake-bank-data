@@ -5,6 +5,7 @@ import de.sky.regular.income.api.detail.CreatedMetaInformation;
 import de.sky.regular.income.api.turnovers.TurnoverImport;
 import de.sky.regular.income.api.turnovers.TurnoverImportPatch;
 import de.sky.regular.income.api.turnovers.TurnoverRow;
+import de.sky.regular.income.api.turnovers.TurnoverRowPreview;
 import de.sky.regular.income.database.DatabaseSupplier;
 import generated.sky.regular.income.tables.records.TurnoverFileImportRecord;
 import generated.sky.regular.income.tables.records.TurnoverRowRecord;
@@ -126,7 +127,7 @@ public class TurnoverCsvImporter {
         });
     }
 
-    public List<TurnoverRow> parseForPreview(InputStream is) {
+    public List<TurnoverRowPreview> parseForPreview(InputStream is) {
         log.info("Parsing file...");
 
         var records = csvParser.parseCsv(is);
@@ -143,8 +144,8 @@ public class TurnoverCsvImporter {
         }
     }
 
-    private TurnoverRow enrichAndMap(CategorySuggester.CategoryBatchSuggester categorySuggester, TurnoverCsvParser.TurnoverRecord rec) {
-        return TurnoverRow.builder()
+    private TurnoverRowPreview enrichAndMap(CategorySuggester.CategoryBatchSuggester categorySuggester, TurnoverCsvParser.TurnoverRecord rec) {
+        return TurnoverRowPreview.builder()
                 .date(rec.getDate())
                 .amountInCents(rec.getAmountInCents())
                 .description(rec.getDescription())
@@ -156,6 +157,7 @@ public class TurnoverCsvImporter {
                                 .map(CreatedMetaInformation::getId)
                                 .orElse(null)
                 )
+                .importable(true)
                 .build();
     }
 
