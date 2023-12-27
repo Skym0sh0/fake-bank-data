@@ -19,6 +19,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 
 import static generated.sky.regular.income.Tables.TURNOVER_FILE_IMPORT;
 import static generated.sky.regular.income.Tables.TURNOVER_ROW;
+import static org.jooq.impl.DSL.and;
 
 @Service
 @AllArgsConstructor
@@ -132,32 +134,58 @@ public class TurnoverCsvImporter {
 
         var records = csvParser.parseCsv(is);
 
+        var alreadyExistentRows = findExistentRows(records);
+
         log.info("Parsed {} turnover records from CSV", records.size());
 
         try (var suggester = categorySuggester.openForBatchSuggestion()) {
             log.info("Now enriching and mapping CSV rows ...");
 
             return records.stream()
-                    .map(rec -> enrichAndMap(suggester, rec))
+                    .map(rec -> enrichAndMap(suggester, alreadyExistentRows, rec))
                     .sorted(Comparator.comparing(TurnoverRow::getDate))
                     .collect(Collectors.toUnmodifiableList());
         }
     }
 
-    private TurnoverRowPreview enrichAndMap(CategorySuggester.CategoryBatchSuggester categorySuggester, TurnoverCsvParser.TurnoverRecord rec) {
+    private Set<String> findExistentRows(List<TurnoverCsvParser.TurnoverRecord> recs) {
+        var minDate = recs.stream()
+                .map(TurnoverCsvParser.TurnoverRecord::getDate)
+                .min(Comparator.naturalOrder())
+                .orElse(LocalDate.MIN);
+        var maxDate = recs.stream()
+                .map(TurnoverCsvParser.TurnoverRecord::getDate)
+                .max(Comparator.naturalOrder())
+                .orElse(LocalDate.MAX);
+
+        return db.transactionWithResult(ctx ->
+                ctx.selectDistinct(TURNOVER_ROW.CHECKSUM)
+                        .from(TURNOVER_ROW)
+                        .where(and(
+                                TURNOVER_ROW.DATE.greaterOrEqual(minDate),
+                                TURNOVER_ROW.DATE.lessOrEqual(maxDate)
+                        ))
+                        .fetch()
+                        .intoSet(TURNOVER_ROW.CHECKSUM)
+        );
+    }
+
+    private TurnoverRowPreview enrichAndMap(CategorySuggester.CategoryBatchSuggester categorySuggester, Set<String> alreadyExistentRowChecksums, TurnoverCsvParser.TurnoverRecord rec) {
+        String checksum = checksummer.computeChecksum(rec);
+
         return TurnoverRowPreview.builder()
                 .date(rec.getDate())
                 .amountInCents(rec.getAmountInCents())
                 .description(rec.getDescription())
                 .suggestedCategory(rec.getCategory())
                 .recipient(rec.getRecipient())
-                .checksum(checksummer.computeChecksum(rec))
+                .checksum(checksum)
                 .categoryId(
                         categorySuggester.findCategorySuggestion(rec.getDescription(), rec.getCategory())
                                 .map(CreatedMetaInformation::getId)
                                 .orElse(null)
                 )
-                .importable(true)
+                .importable(!alreadyExistentRowChecksums.contains(checksum))
                 .build();
     }
 

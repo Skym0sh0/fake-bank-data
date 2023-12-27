@@ -44,13 +44,13 @@
 
                     <div class="m-auto">
                         <b-button class="mr-1"
-                            variant="secondary"
+                                  variant="secondary"
                                   @click="reset">
                             Abbrechen
                         </b-button>
                         <b-button variant="primary"
                                   @click="doImportRequest"
-                                  :disabled="$v.$invalid || isUploading">
+                                  :disabled="isImportImpossible">
                             Import
                         </b-button>
                     </div>
@@ -118,6 +118,9 @@ export default {
         }
     },
     computed: {
+        isImportImpossible() {
+            return this.$v.$invalid || this.isUploading || this.importableRows.length <= 0;
+        },
         rawRows() {
             return (this.previewedData || []);
         },
