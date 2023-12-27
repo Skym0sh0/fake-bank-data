@@ -1,7 +1,6 @@
 package de.sky.common.database;
 
 import de.sky.common.database.converters.DateConverter;
-import de.sky.common.database.converters.TimestampConverter;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.Location;
 import org.jooq.codegen.DefaultGeneratorStrategy;
@@ -24,7 +23,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
@@ -52,7 +50,7 @@ public class JooqBindingGenerator {
     }
 
     public void run() throws Exception {
-        try (PostgreSQLContainer psql = new PostgreSQLContainer<>()
+        try (var psql = new PostgreSQLContainer<>()
                 .withDatabaseName("tmp-database")
                 .withUsername("scott")
                 .withPassword("tiger")) {
@@ -66,11 +64,13 @@ public class JooqBindingGenerator {
                 logger.error("Error during JooqBinding Generation", e);
 
                 throw e;
+            } finally {
+                psql.stop();
             }
         }
     }
 
-    private void migrateSchema(PostgreSQLContainer psql) {
+    private void migrateSchema(PostgreSQLContainer<?> psql) {
         logger.info("Migrating schema with Flyway...");
 
         String descriptor = Location.FILESYSTEM_PREFIX + changeset.toString();
@@ -105,36 +105,36 @@ public class JooqBindingGenerator {
                                         new Strategy()
                                                 .withName(DefaultGeneratorStrategy.class.getName())
                                 ).withDatabase(
-                                new Database()
-                                        .withName(PostgresDatabase.class.getName())
-                                        .withInputSchema("public")
-                                        .withOutputSchema(this.schemaName)
-                                        .withExcludes(getExcludes())
-                                        .withForcedTypes(
+                                        new Database()
+                                                .withName(PostgresDatabase.class.getName())
+                                                .withInputSchema("public")
+                                                .withOutputSchema(this.schemaName)
+                                                .withExcludes(getExcludes())
+                                                .withForcedTypes(
                                                 /*new ForcedType()
                                                         .withUserType(ZonedDateTime.class.getName())
                                                         .withTypes("TIMESTAMP.*")
                                                         .withExpression(".*")
                                                         .withConverter(TimestampConverter.class.getName()),*/
-                                                new ForcedType()
-                                                        .withUserType(LocalDate.class.getName())
-                                                        .withTypes("DATE.*")
-                                                        .withExpression(".*")
-                                                        .withConverter(DateConverter.class.getName())
-                                        )
-                        ).withGenerate(
-                                new Generate()
-                                        .withDeprecated(false)
-                                        .withFluentSetters(true)
-                                        .withRelations(true)
-                        ).withTarget(
-                                new Target()
-                                        .withEncoding(StandardCharsets.UTF_8.name())
-                                        .withPackageName(this.packageName)
-                                        .withDirectory(this.localBuildDir.toString())
-                                        .withClean(true)
-                                        .withEncoding(StandardCharsets.UTF_8.name())
-                        )
+                                                        new ForcedType()
+                                                                .withUserType(LocalDate.class.getName())
+                                                                .withTypes("DATE.*")
+                                                                .withExpression(".*")
+                                                                .withConverter(DateConverter.class.getName())
+                                                )
+                                ).withGenerate(
+                                        new Generate()
+                                                .withDeprecated(false)
+                                                .withFluentSetters(true)
+                                                .withRelations(true)
+                                ).withTarget(
+                                        new Target()
+                                                .withEncoding(StandardCharsets.UTF_8.name())
+                                                .withPackageName(this.packageName)
+                                                .withDirectory(this.localBuildDir.toString())
+                                                .withClean(true)
+                                                .withEncoding(StandardCharsets.UTF_8.name())
+                                )
                 );
     }
 
