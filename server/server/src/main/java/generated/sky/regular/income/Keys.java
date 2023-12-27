@@ -8,10 +8,14 @@ import generated.sky.regular.income.tables.BackupHistory;
 import generated.sky.regular.income.tables.BankStatement;
 import generated.sky.regular.income.tables.Category;
 import generated.sky.regular.income.tables.FinancialTransaction;
+import generated.sky.regular.income.tables.TurnoverFileImport;
+import generated.sky.regular.income.tables.TurnoverRow;
 import generated.sky.regular.income.tables.records.BackupHistoryRecord;
 import generated.sky.regular.income.tables.records.BankStatementRecord;
 import generated.sky.regular.income.tables.records.CategoryRecord;
 import generated.sky.regular.income.tables.records.FinancialTransactionRecord;
+import generated.sky.regular.income.tables.records.TurnoverFileImportRecord;
+import generated.sky.regular.income.tables.records.TurnoverRowRecord;
 
 import javax.annotation.Generated;
 
@@ -49,6 +53,9 @@ public class Keys {
     public static final UniqueKey<CategoryRecord> CATEGORY_PKEY = UniqueKeys0.CATEGORY_PKEY;
     public static final UniqueKey<CategoryRecord> CATEGORY_NAME_KEY = UniqueKeys0.CATEGORY_NAME_KEY;
     public static final UniqueKey<FinancialTransactionRecord> FINANCIAL_TRANSACTION_PKEY = UniqueKeys0.FINANCIAL_TRANSACTION_PKEY;
+    public static final UniqueKey<TurnoverFileImportRecord> TURNOVER_FILE_IMPORT_PKEY = UniqueKeys0.TURNOVER_FILE_IMPORT_PKEY;
+    public static final UniqueKey<TurnoverRowRecord> TURNOVER_ROW_PKEY = UniqueKeys0.TURNOVER_ROW_PKEY;
+    public static final UniqueKey<TurnoverRowRecord> TURNOVER_ROW_CHECKSUM_KEY = UniqueKeys0.TURNOVER_ROW_CHECKSUM_KEY;
 
     // -------------------------------------------------------------------------
     // FOREIGN KEY definitions
@@ -58,6 +65,8 @@ public class Keys {
     public static final ForeignKey<CategoryRecord, CategoryRecord> CATEGORY__CATEGORY_PARENT_CATEGORY_FKEY = ForeignKeys0.CATEGORY__CATEGORY_PARENT_CATEGORY_FKEY;
     public static final ForeignKey<FinancialTransactionRecord, BankStatementRecord> FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_BANK_STATEMENT_ID_FKEY = ForeignKeys0.FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_BANK_STATEMENT_ID_FKEY;
     public static final ForeignKey<FinancialTransactionRecord, CategoryRecord> FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_CATEGORY_ID_FKEY = ForeignKeys0.FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_CATEGORY_ID_FKEY;
+    public static final ForeignKey<TurnoverRowRecord, TurnoverFileImportRecord> TURNOVER_ROW__TURNOVER_ROW_TURNOVER_FILE_FKEY = ForeignKeys0.TURNOVER_ROW__TURNOVER_ROW_TURNOVER_FILE_FKEY;
+    public static final ForeignKey<TurnoverRowRecord, CategoryRecord> TURNOVER_ROW__TURNOVER_ROW_CATEGORY_ID_FKEY = ForeignKeys0.TURNOVER_ROW__TURNOVER_ROW_CATEGORY_ID_FKEY;
 
     // -------------------------------------------------------------------------
     // [#1459] distribute members to avoid static initialisers > 64kb
@@ -70,6 +79,9 @@ public class Keys {
         public static final UniqueKey<CategoryRecord> CATEGORY_PKEY = Internal.createUniqueKey(Category.CATEGORY, "category_pkey", Category.CATEGORY.ID);
         public static final UniqueKey<CategoryRecord> CATEGORY_NAME_KEY = Internal.createUniqueKey(Category.CATEGORY, "category_name_key", Category.CATEGORY.NAME);
         public static final UniqueKey<FinancialTransactionRecord> FINANCIAL_TRANSACTION_PKEY = Internal.createUniqueKey(FinancialTransaction.FINANCIAL_TRANSACTION, "financial_transaction_pkey", FinancialTransaction.FINANCIAL_TRANSACTION.ID);
+        public static final UniqueKey<TurnoverFileImportRecord> TURNOVER_FILE_IMPORT_PKEY = Internal.createUniqueKey(TurnoverFileImport.TURNOVER_FILE_IMPORT, "turnover_file_import_pkey", TurnoverFileImport.TURNOVER_FILE_IMPORT.ID);
+        public static final UniqueKey<TurnoverRowRecord> TURNOVER_ROW_PKEY = Internal.createUniqueKey(TurnoverRow.TURNOVER_ROW, "turnover_row_pkey", TurnoverRow.TURNOVER_ROW.ID);
+        public static final UniqueKey<TurnoverRowRecord> TURNOVER_ROW_CHECKSUM_KEY = Internal.createUniqueKey(TurnoverRow.TURNOVER_ROW, "turnover_row_checksum_key", TurnoverRow.TURNOVER_ROW.CHECKSUM);
     }
 
     private static class ForeignKeys0 {
@@ -77,5 +89,7 @@ public class Keys {
         public static final ForeignKey<CategoryRecord, CategoryRecord> CATEGORY__CATEGORY_PARENT_CATEGORY_FKEY = Internal.createForeignKey(generated.sky.regular.income.Keys.CATEGORY_PKEY, Category.CATEGORY, "category__category_parent_category_fkey", Category.CATEGORY.PARENT_CATEGORY);
         public static final ForeignKey<FinancialTransactionRecord, BankStatementRecord> FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_BANK_STATEMENT_ID_FKEY = Internal.createForeignKey(generated.sky.regular.income.Keys.BANK_STATEMENT_PKEY, FinancialTransaction.FINANCIAL_TRANSACTION, "financial_transaction__financial_transaction_bank_statement_id_fkey", FinancialTransaction.FINANCIAL_TRANSACTION.BANK_STATEMENT_ID);
         public static final ForeignKey<FinancialTransactionRecord, CategoryRecord> FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_CATEGORY_ID_FKEY = Internal.createForeignKey(generated.sky.regular.income.Keys.CATEGORY_PKEY, FinancialTransaction.FINANCIAL_TRANSACTION, "financial_transaction__financial_transaction_category_id_fkey", FinancialTransaction.FINANCIAL_TRANSACTION.CATEGORY_ID);
+        public static final ForeignKey<TurnoverRowRecord, TurnoverFileImportRecord> TURNOVER_ROW__TURNOVER_ROW_TURNOVER_FILE_FKEY = Internal.createForeignKey(generated.sky.regular.income.Keys.TURNOVER_FILE_IMPORT_PKEY, TurnoverRow.TURNOVER_ROW, "turnover_row__turnover_row_turnover_file_fkey", TurnoverRow.TURNOVER_ROW.TURNOVER_FILE);
+        public static final ForeignKey<TurnoverRowRecord, CategoryRecord> TURNOVER_ROW__TURNOVER_ROW_CATEGORY_ID_FKEY = Internal.createForeignKey(generated.sky.regular.income.Keys.CATEGORY_PKEY, TurnoverRow.TURNOVER_ROW, "turnover_row__turnover_row_category_id_fkey", TurnoverRow.TURNOVER_ROW.CATEGORY_ID);
     }
 }

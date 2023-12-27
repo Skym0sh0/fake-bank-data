@@ -8,6 +8,8 @@ import generated.sky.regular.income.tables.BackupHistory;
 import generated.sky.regular.income.tables.BankStatement;
 import generated.sky.regular.income.tables.Category;
 import generated.sky.regular.income.tables.FinancialTransaction;
+import generated.sky.regular.income.tables.TurnoverFileImport;
+import generated.sky.regular.income.tables.TurnoverRow;
 import generated.sky.regular.income.tables.VOrderedBankStatements;
 
 import java.util.ArrayList;
@@ -34,7 +36,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class RegularIncome extends SchemaImpl {
 
-    private static final long serialVersionUID = 775375863;
+    private static final long serialVersionUID = 3005001;
 
     /**
      * The reference instance of <code>REGULAR_INCOME</code>
@@ -60,6 +62,16 @@ public class RegularIncome extends SchemaImpl {
      * The table <code>REGULAR_INCOME.financial_transaction</code>.
      */
     public final FinancialTransaction FINANCIAL_TRANSACTION = generated.sky.regular.income.tables.FinancialTransaction.FINANCIAL_TRANSACTION;
+
+    /**
+     * The table <code>REGULAR_INCOME.turnover_file_import</code>.
+     */
+    public final TurnoverFileImport TURNOVER_FILE_IMPORT = generated.sky.regular.income.tables.TurnoverFileImport.TURNOVER_FILE_IMPORT;
+
+    /**
+     * The table <code>REGULAR_INCOME.turnover_row</code>.
+     */
+    public final TurnoverRow TURNOVER_ROW = generated.sky.regular.income.tables.TurnoverRow.TURNOVER_ROW;
 
     /**
      * The table <code>REGULAR_INCOME.v_ordered_bank_statements</code>.
@@ -95,6 +107,8 @@ public class RegularIncome extends SchemaImpl {
             BankStatement.BANK_STATEMENT,
             Category.CATEGORY,
             FinancialTransaction.FINANCIAL_TRANSACTION,
+            TurnoverFileImport.TURNOVER_FILE_IMPORT,
+            TurnoverRow.TURNOVER_ROW,
             VOrderedBankStatements.V_ORDERED_BANK_STATEMENTS);
     }
 }

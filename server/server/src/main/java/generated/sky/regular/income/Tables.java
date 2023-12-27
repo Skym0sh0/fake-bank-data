@@ -8,6 +8,8 @@ import generated.sky.regular.income.tables.BackupHistory;
 import generated.sky.regular.income.tables.BankStatement;
 import generated.sky.regular.income.tables.Category;
 import generated.sky.regular.income.tables.FinancialTransaction;
+import generated.sky.regular.income.tables.TurnoverFileImport;
+import generated.sky.regular.income.tables.TurnoverRow;
 import generated.sky.regular.income.tables.VOrderedBankStatements;
 
 import javax.annotation.Generated;
@@ -45,6 +47,16 @@ public class Tables {
      * The table <code>REGULAR_INCOME.financial_transaction</code>.
      */
     public static final FinancialTransaction FINANCIAL_TRANSACTION = generated.sky.regular.income.tables.FinancialTransaction.FINANCIAL_TRANSACTION;
+
+    /**
+     * The table <code>REGULAR_INCOME.turnover_file_import</code>.
+     */
+    public static final TurnoverFileImport TURNOVER_FILE_IMPORT = generated.sky.regular.income.tables.TurnoverFileImport.TURNOVER_FILE_IMPORT;
+
+    /**
+     * The table <code>REGULAR_INCOME.turnover_row</code>.
+     */
+    public static final TurnoverRow TURNOVER_ROW = generated.sky.regular.income.tables.TurnoverRow.TURNOVER_ROW;
 
     /**
      * The table <code>REGULAR_INCOME.v_ordered_bank_statements</code>.

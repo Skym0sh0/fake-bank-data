@@ -45,7 +45,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class FinancialTransaction extends TableImpl<FinancialTransactionRecord> {
 
-    private static final long serialVersionUID = 792795025;
+    private static final long serialVersionUID = -632185648;
 
     /**
      * The reference instance of <code>REGULAR_INCOME.financial_transaction</code>
@@ -88,7 +88,7 @@ public class FinancialTransaction extends TableImpl<FinancialTransactionRecord> 
     /**
      * The column <code>REGULAR_INCOME.financial_transaction.reason</code>.
      */
-    public final TableField<FinancialTransactionRecord, String> REASON = createField("reason", org.jooq.impl.SQLDataType.CLOB.nullable(false), this, "");
+    public final TableField<FinancialTransactionRecord, String> REASON = createField("reason", org.jooq.impl.SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>REGULAR_INCOME.financial_transaction.checksum</code>.

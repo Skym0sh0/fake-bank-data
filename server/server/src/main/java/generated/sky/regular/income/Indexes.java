@@ -8,6 +8,8 @@ import generated.sky.regular.income.tables.BackupHistory;
 import generated.sky.regular.income.tables.BankStatement;
 import generated.sky.regular.income.tables.Category;
 import generated.sky.regular.income.tables.FinancialTransaction;
+import generated.sky.regular.income.tables.TurnoverFileImport;
+import generated.sky.regular.income.tables.TurnoverRow;
 
 import javax.annotation.Generated;
 
@@ -42,6 +44,10 @@ public class Indexes {
     public static final Index CATEGORY_PKEY = Indexes0.CATEGORY_PKEY;
     public static final Index FINANCIAL_TRANSACTION_PKEY = Indexes0.FINANCIAL_TRANSACTION_PKEY;
     public static final Index IDX_FK_TRANSACTION_X_STATEMENT = Indexes0.IDX_FK_TRANSACTION_X_STATEMENT;
+    public static final Index TURNOVER_FILE_IMPORT_PKEY = Indexes0.TURNOVER_FILE_IMPORT_PKEY;
+    public static final Index TURNOVER_ROW_CHECKSUM_KEY = Indexes0.TURNOVER_ROW_CHECKSUM_KEY;
+    public static final Index TURNOVER_ROW_PKEY = Indexes0.TURNOVER_ROW_PKEY;
+    public static final Index UQ_TURNOVER_ROW_CHECKSUM = Indexes0.UQ_TURNOVER_ROW_CHECKSUM;
 
     // -------------------------------------------------------------------------
     // [#1459] distribute members to avoid static initialisers > 64kb
@@ -56,5 +62,9 @@ public class Indexes {
         public static Index CATEGORY_PKEY = Internal.createIndex("category_pkey", Category.CATEGORY, new OrderField[] { Category.CATEGORY.ID }, true);
         public static Index FINANCIAL_TRANSACTION_PKEY = Internal.createIndex("financial_transaction_pkey", FinancialTransaction.FINANCIAL_TRANSACTION, new OrderField[] { FinancialTransaction.FINANCIAL_TRANSACTION.ID }, true);
         public static Index IDX_FK_TRANSACTION_X_STATEMENT = Internal.createIndex("idx_fk_transaction_x_statement", FinancialTransaction.FINANCIAL_TRANSACTION, new OrderField[] { FinancialTransaction.FINANCIAL_TRANSACTION.BANK_STATEMENT_ID }, false);
+        public static Index TURNOVER_FILE_IMPORT_PKEY = Internal.createIndex("turnover_file_import_pkey", TurnoverFileImport.TURNOVER_FILE_IMPORT, new OrderField[] { TurnoverFileImport.TURNOVER_FILE_IMPORT.ID }, true);
+        public static Index TURNOVER_ROW_CHECKSUM_KEY = Internal.createIndex("turnover_row_checksum_key", TurnoverRow.TURNOVER_ROW, new OrderField[] { TurnoverRow.TURNOVER_ROW.CHECKSUM }, true);
+        public static Index TURNOVER_ROW_PKEY = Internal.createIndex("turnover_row_pkey", TurnoverRow.TURNOVER_ROW, new OrderField[] { TurnoverRow.TURNOVER_ROW.ID }, true);
+        public static Index UQ_TURNOVER_ROW_CHECKSUM = Internal.createIndex("uq_turnover_row_checksum", TurnoverRow.TURNOVER_ROW, new OrderField[] { TurnoverRow.TURNOVER_ROW.CHECKSUM }, true);
     }
 }
