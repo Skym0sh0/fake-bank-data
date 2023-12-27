@@ -1,23 +1,39 @@
 <template>
-    <b-table v-if="categories"
-             :striped="true"
+    <b-table :striped="true"
              :hover="true"
+             :bordered="true"
              :items="value"
              :fields="fields"
-             :responsive="true">
-        <template #cell(Date)="row">
+             :responsive="true"
+             primary-key="checksum"
+             :small="true"
+             :foot-clone="true">
+
+        <template v-slot:cell(importable)="row">
+            <b-checkbox v-model="row.item.importable"/>
+        </template>
+
+        <template #cell(date)="row">
             {{ row.item.date }}
         </template>
-        <template v-slot:cell(Amount)="row">
+
+        <template v-slot:cell(amount)="row">
             <table-cell-monetary :value="row.item.amountInCents"/>
         </template>
+
         <template v-slot:cell(Category)="row">
-            <category-input :id="`csv-category-input-${row.index}`"
+            <category-input v-if="categories"
+                            :id="`csv-category-input-${row.index}`"
                             v-model="row.item.categoryId"
                             @createCategory="onCreateCategory"
                             :options="categories"
                             :state="true"/>
+            <template v-else>
+                <b-spinner :type="row.index % 2 ? 'grow' : 'border'"
+                           variant="info"/>
+            </template>
         </template>
+
         <template v-slot:cell(SuggestedCategory)="row">
             <b-button v-if="!isUnknownCategory[row.item.suggestedCategory]"
                       size="sm"
@@ -26,12 +42,15 @@
             </b-button>
             {{ row.item.suggestedCategory }}
         </template>
+
         <template v-slot:cell(Description)="row">
             <table-cell-description :index="row.index" :value="row.item.description"/>
         </template>
+
         <template v-slot:cell(Recipient)="row">
             {{ row.item.recipient }}
         </template>
+
         <template v-slot:cell(Checksum)="row">
             {{ row.item.checksum }}
         </template>
@@ -65,10 +84,38 @@ export default {
     },
     computed: {
         fields() {
-            return ["Date", "Recipient", "Amount", "Category", "SuggestedCategory", /*"Checksum",*/ "Description"];
+            return [
+                {
+                    key: "importable",
+                    label: "?",
+                    sortable: true,
+                },
+                {
+                    key: "date",
+                    label: "Date",
+                    sortable: true
+                },
+                {
+                    key: "Recipient"
+                },
+                {
+                    key: "amount",
+                    label: "Money",
+                },
+                {
+                    key: "Category"
+                },
+                {
+                    key: "SuggestedCategory",
+                    label: "Suggested"
+                },
+                {
+                    key: "Description"
+                }
+            ];
         },
         isUnknownCategory() {
-            return this.categories.reduce((a, v) => ({...a, [v.name]: v}))
+            return (this.categories || []).reduce((a, v) => ({...a, [v.name]: v}), {})
         }
     },
     methods: {

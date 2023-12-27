@@ -14,19 +14,51 @@
                  footer-bg-variant="light"
                  @hidden="reset">
             <template v-slot:modal-footer>
-                <div v-show="uploadingTime">
-                    Time to parse for preview: {{ uploadingTime / 1000.0 }}s
+                <div class="w-100" style="display: flex;">
+                    <b-container class="p-0">
+                        <b-row>
+                            <b-col class="p-0 px-2">
+                                <h6>Importierbar</h6>
+                                <b-progress :max="rawRows.length" :show-value="true">
+                                    <b-progress-bar :value="importableRows.length" variant="success"/>
+                                    <b-progress-bar :value="rawRows.length - importableRows.length" variant="warning"/>
+                                </b-progress>
+                            </b-col>
+
+                            <b-col class="p-0 px-2">
+                                <h6>Todos</h6>
+                                <b-progress :max="rawRows.length" :show-value="true">
+                                    <b-progress-bar :value="rawRows.length - rowsTodo.length" variant="success"/>
+                                    <b-progress-bar :value="rowsTodo.length" variant="danger"/>
+                                </b-progress>
+                            </b-col>
+
+                            <b-col class="p-0 px-2">
+                                <h6>Time to parse for preview</h6>
+                                <b-progress :max="uploadingTime/1000 * 1.3" :show-value="true" :precision="3">
+                                    <b-progress-bar :value="uploadingTime/1000" variant="success"/>
+                                </b-progress>
+                            </b-col>
+                        </b-row>
+                    </b-container>
+
+                    <div class="m-auto">
+                        <b-button class="mr-1"
+                            variant="secondary"
+                                  @click="reset">
+                            Abbrechen
+                        </b-button>
+                        <b-button variant="primary"
+                                  @click="doImportRequest"
+                                  :disabled="$v.$invalid || isUploading">
+                            Import
+                        </b-button>
+                    </div>
                 </div>
 
-                <b-button variant="secondary"
-                          @click="reset">
-                    Abbrechen
-                </b-button>
-                <b-button variant="primary"
-                          @click="doImportRequest"
-                          :disabled="$v.$invalid || isUploading">
-                    Import
-                </b-button>
+                <b-alert :show="errorMessage" variant="danger" :dismissible.camel="true">
+                    {{ errorMessage }}
+                </b-alert>
             </template>
 
             <b-form-group label-cols="2"
@@ -85,6 +117,17 @@ export default {
             }
         }
     },
+    computed: {
+        rawRows() {
+            return (this.previewedData || []);
+        },
+        importableRows() {
+            return this.rawRows.filter(r => r.importable);
+        },
+        rowsTodo() {
+            return this.rawRows.filter(r => !r.categoryId);
+        },
+    },
     methods: {
         doPreviewRequest() {
             this.isUploading = true;
@@ -112,14 +155,14 @@ export default {
             this.isUploading = true;
 
             api.getTurnovers()
-                .createTurnoverImport(this.fileSelection, this.previewedData)
+                .createTurnoverImport(this.fileSelection, this.importableRows)
                 .then(() => {
                     this.$emit("uploadSucceeded")
                     this.$refs["file-upload-modal"].hide();
                     this.reset();
                 })
                 .catch(e => {
-                    this.errorMessage = e.response.data;
+                    this.errorMessage = e.response.data.message;
                 })
                 .finally(() => {
                     this.isUploading = false;

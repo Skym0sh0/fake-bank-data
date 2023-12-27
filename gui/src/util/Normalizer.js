@@ -119,6 +119,7 @@ export function denormalizeTurnoverPreviewRow(row) {
         description: row.description,
         recipient: row.recipient,
         checksum: row.checksum,
+        importable: row.importable,
     };
 }
 
