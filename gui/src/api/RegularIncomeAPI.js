@@ -116,7 +116,7 @@ class RegularIncomeAPI {
             createTurnoverImport(file, data) {
                 const formData = new FormData()
                 formData.append('file', file)
-                formData.append('data', data)
+                formData.append('data', new Blob([JSON.stringify({rows: data})], {type: "application/json"}))
 
                 return ref.getClient().post(
                     'turnover-import',

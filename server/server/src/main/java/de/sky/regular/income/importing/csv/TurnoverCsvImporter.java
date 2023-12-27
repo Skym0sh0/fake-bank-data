@@ -3,6 +3,8 @@ package de.sky.regular.income.importing.csv;
 import de.sky.regular.income.api.detail.CreatedMetaInformation;
 import de.sky.regular.income.api.turnovers.TurnoverRow;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -52,4 +54,5 @@ public class TurnoverCsvImporter {
                 )
                 .build();
     }
+
 }

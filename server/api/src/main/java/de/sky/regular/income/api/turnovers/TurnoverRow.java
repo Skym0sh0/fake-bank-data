@@ -2,6 +2,7 @@ package de.sky.regular.income.api.turnovers;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.experimental.Tolerate;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -16,4 +17,8 @@ public class TurnoverRow {
     public String description;
     public String suggestedCategory;
     public String recipient;
+
+    @Tolerate
+    public TurnoverRow() {
+    }
 }

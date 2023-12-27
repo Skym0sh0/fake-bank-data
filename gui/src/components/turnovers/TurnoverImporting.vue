@@ -45,7 +45,7 @@
 
             <b-spinner v-if="isUploading"/>
             <template v-else>
-                <b-card v-show="fileSelection" :title="fileSelection.name">
+                <b-card v-if="fileSelection" :title="fileSelection.name">
                     <turnover-preview-table v-model="previewedData"/>
                 </b-card>
             </template>
