@@ -4,6 +4,7 @@ import Home from './views/Home.vue'
 import StatementOverview from './components/overview/StatementOverview'
 import StatementEntering from "./components/enterings/StatementEntering";
 import TurnoverOverview from "./components/turnovers/TurnoverOverview";
+import TurnoversDetail from "./components/turnovers/TurnoversDetail";
 import CategoryOverview from "./components/categories/CategoryOverview";
 import ReportOverview from "./components/reports/ReportOverview";
 
@@ -31,6 +32,11 @@ export default new Router({
             path: '/turnovers/',
             name: 'turnover-overview',
             component: TurnoverOverview,
+        },
+        {
+            path: '/turnovers/:id',
+            name: "turnovers-detail",
+            component: TurnoversDetail,
         },
         {
             path: '/categories/',

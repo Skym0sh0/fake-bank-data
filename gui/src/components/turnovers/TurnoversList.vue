@@ -6,25 +6,46 @@
                  :fields="fields"
                  :responsive="true">
             <template v-slot:cell(Date)="row">
-                {{ row.item.date}}
+                {{ formatDate(row.item.importedAt) }}
             </template>
             <template v-slot:cell(Turnovers)="row">
-                {{ row.item.turnovers.length}}
+                {{ row.item.turnovers.length }}
             </template>
-            <template v-slot:cell(Actions)>
-                ...
+            <template v-slot:cell(Actions)="row">
+                <b-button variant="primary" @click="() => onOpen(row.item)">
+                    Öffnen
+                </b-button>
+
+                <b-button variant="danger" @click="() => onDelete(row.item)">
+                    Löschen
+                </b-button>
             </template>
         </b-table>
     </div>
 </template>
 
 <script>
+import moment from 'moment/moment';
+
 export default {
     name: "TurnoversList",
     props: {
         imports: {
             required: true,
             type: Array,
+        }
+    },
+    methods: {
+        formatDate(d) {
+            return moment(d).format("YYYY-MM-DD HH:mm");
+        },
+        onOpen(item) {
+            console.log("open button", item)
+
+            this.$router.push({name: "turnovers-detail", params: {id: item.id}});
+        },
+        onDelete(item) {
+            this.$emit("onDelete", item);
         }
     },
     computed: {

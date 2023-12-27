@@ -5,7 +5,9 @@
                 <turnover-importing @uploadSucceeded="uploadSuccess"/>
             </div>
 
-            <turnovers-list :imports="turnoverImports"/>
+            <turnovers-list :imports="turnoverImports"
+                            @onDelete="onDelete"
+            />
         </b-card-body>
     </b-card>
 </template>
@@ -34,8 +36,13 @@ export default {
                     this.turnoverImports = imports;
                 })
         },
+        onDelete(fileImport) {
+            api.getTurnovers()
+                .deleteTurnoverImport(fileImport)
+                .then(() => this.loadImports())
+        },
         uploadSuccess() {
-            console.log("Upload success")
+            this.loadImports()
         },
     },
     mounted() {

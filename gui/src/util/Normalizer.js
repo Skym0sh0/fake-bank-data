@@ -92,9 +92,9 @@ export function denormalizeCategory(cat) {
 export function denormalizeTurnoverImport(turnoverImport) {
     return {
         id: turnoverImport.id,
-        date: turnoverImport.date,
+        importedAt: turnoverImport.importedAt,
 
-        turnovers: [],
+        turnovers: (turnoverImport.turnovers || []).map(denormalizeTurnoverRow),
     };
 }
 
@@ -104,6 +104,10 @@ export function denormalizeTurnoverPreview(turnover) {
         uploadTime: turnover.uploadTime,
         rows: (turnover.rows || []).map(denormalizeTurnoverPreviewRow)
     };
+}
+
+export function denormalizeTurnoverRow(row) {
+    return denormalizeTurnoverPreview(row);
 }
 
 export function denormalizeTurnoverPreviewRow(row) {
