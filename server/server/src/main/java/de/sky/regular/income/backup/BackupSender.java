@@ -99,6 +99,8 @@ public class BackupSender {
                                 select(BANK_STATEMENT.CREATED_AT.as(tsField)).from(BANK_STATEMENT)
                                         .unionAll(select(BANK_STATEMENT.UPDATED_AT.as(tsField)).from(BANK_STATEMENT))
                                         .unionAll(select(FINANCIAL_TRANSACTION.CREATED_AT.as(tsField)).from(FINANCIAL_TRANSACTION))
+                                        .unionAll(select(TURNOVER_FILE_IMPORT.IMPORTED_AT.as(tsField)).from(TURNOVER_FILE_IMPORT))
+                                        .unionAll(select(TURNOVER_ROW.LAST_UPDATED_AT.as(tsField)).from(TURNOVER_ROW))
                         )
                         .limit(1)
                 );

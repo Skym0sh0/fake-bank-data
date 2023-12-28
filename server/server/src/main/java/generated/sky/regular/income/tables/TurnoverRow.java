@@ -12,6 +12,7 @@ import generated.sky.regular.income.RegularIncome;
 import generated.sky.regular.income.tables.records.TurnoverRowRecord;
 
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -44,7 +45,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class TurnoverRow extends TableImpl<TurnoverRowRecord> {
 
-    private static final long serialVersionUID = -815048566;
+    private static final long serialVersionUID = -1319009438;
 
     /**
      * The reference instance of <code>REGULAR_INCOME.turnover_row</code>
@@ -103,6 +104,11 @@ public class TurnoverRow extends TableImpl<TurnoverRowRecord> {
      * The column <code>REGULAR_INCOME.turnover_row.category_id</code>.
      */
     public final TableField<TurnoverRowRecord, UUID> CATEGORY_ID = createField("category_id", org.jooq.impl.SQLDataType.UUID.nullable(false), this, "");
+
+    /**
+     * The column <code>REGULAR_INCOME.turnover_row.last_updated_at</code>.
+     */
+    public final TableField<TurnoverRowRecord, OffsetDateTime> LAST_UPDATED_AT = createField("last_updated_at", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE.nullable(false), this, "");
 
     /**
      * Create a <code>REGULAR_INCOME.turnover_row</code> table reference

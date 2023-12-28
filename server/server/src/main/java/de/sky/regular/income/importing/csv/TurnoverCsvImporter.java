@@ -79,6 +79,8 @@ public class TurnoverCsvImporter {
 
                         rec.setId(row.getChecksum());
                         rec.setChecksum(row.getChecksum());
+                        rec.setLastUpdatedAt(ts.toOffsetDateTime());
+
                         return rec;
                     })
                     .collect(Collectors.toList());
