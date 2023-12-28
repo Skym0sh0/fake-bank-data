@@ -12,7 +12,8 @@
                  :scrollable="true"
                  header-bg-variant="warning"
                  footer-bg-variant="light"
-                 @hidden="reset">
+                 @hidden="reset"
+                 @hide="checkToHide">
             <template v-slot:modal-footer>
                 <div class="w-100" style="display: flex;">
                     <b-container class="p-0">
@@ -179,6 +180,15 @@ export default {
             this.isUploading = false;
             this.uploadingTime = null;
             this.$refs["file-upload-modal"].hide();
+        },
+        checkToHide(e) {
+            const mustNotBeClosed = this.isUploading || (this.parsedPreview && !(
+                e.trigger === null // abort button was pressed
+                || e.trigger === 'headerclose' // X Button in header was pressed
+            ));
+            if (mustNotBeClosed) {
+                e.preventDefault()
+            }
         },
     },
     watch: {
