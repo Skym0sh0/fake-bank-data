@@ -1,7 +1,5 @@
 <template>
     <v-card class="pa-2">
-        <global-events @keydown.17.prevent="reallocationEnabled = true"
-                       @keyup.17.prevent="reallocationEnabled = false"/>
 
         <v-card-title>
             Categories
@@ -15,59 +13,14 @@
         </v-card-subtitle>
         <v-row>
             <v-col>
-                <v-card style="height: 80vh">
-                    <v-card-title>
-                        Category List
-                    </v-card-title>
-
-                    <v-card-subtitle>
-                        <v-container>
-                            <v-row justify="space-between">
-                                <v-col>
-                                    <v-switch v-show="categories && categories.length"
-                                              v-model="reallocationEnabled"
-                                              :loading="isLoading"
-                                              hint="Categories can now be dragged & dropped persistently."
-                                              messages="Shortcut: Ctrl"
-                                              label="Edit Category Hierarchy"/>
-                                </v-col>
-
-                                <v-col>
-                                    <v-btn fab dark small
-                                           color="primary" class="mx-2"
-                                           :loading="isLoading"
-                                           @click="addNewParentCategory">
-                                        <v-icon dark>
-                                            mdi-plus
-                                        </v-icon>
-                                    </v-btn>
-                                </v-col>
-                            </v-row>
-
-                            <v-row>
-                                <v-text-field id="quickfilter-text-input-field"
-                                              v-model="quickfilter"
-                                              type="text"
-                                              :clearable="true"
-                                              label="Quickfilter"
-                                              hint="Type regex to match items"
-                                              suffix="Regex"/>
-                            </v-row>
-                        </v-container>
-                    </v-card-subtitle>
-
-                    <v-card-text>
-                        <category-tree-list :categories-by-id="categoriesById"
-                            :categories="categories"
-                                       :quickfilter="quickfilter"
-                                       :reallocation-enabled="reallocationEnabled"
-                                       :is-loading="isLoading"
-                                       @newCategory="addNewCategoryTo"
-                                       @deleteCategory="deleteCategory"
-                                       @onReassign="onDrop"
-                                       @open="selectForDetailedView"/>
-                    </v-card-text>
-                </v-card>
+                <category-list :categories-by-id="categoriesById"
+                               :categories="categories"
+                               :is-loading="isLoading"
+                               @click="addNewParentCategory"
+                               @newCategory="addNewCategoryTo"
+                               @deleteCategory="deleteCategory"
+                               @onReassign="onDrop"
+                               @open="selectForDetailedView"/>
             </v-col>
 
             <v-col>
@@ -88,27 +41,27 @@
 
 <script>
 import {api} from "@/api/RegularIncomeAPI"
-import CategoryTreeList from "@/components/categories/CategoryTreeList.vue";
 import CategoryDetails from "@/components/categories/CategoryDetails.vue";
+import CategoryList from "@/components/categories/CategoryList.vue";
+import _ from 'lodash';
 
 export default {
     name: "CategoryOverview",
     components: {
+        CategoryList,
         CategoryDetails,
-        CategoryTreeList
     },
     data() {
         return {
             isLoading: false,
             categories: [],
+
             selectedForDetails: {
                 isNew: null,
                 isSelected: false,
                 parentId: null,
                 entity: null,
             },
-            reallocationEnabled: false,
-            quickfilter: null,
         }
     },
     methods: {
@@ -168,9 +121,7 @@ export default {
                 return api.getCategories()
                     .patchCategory(cat)
                     .then(res => {
-                        const idx = this.categories.findIndex(cat => cat.id === res.id)
-                        if (idx >= 0)
-                            this.categories.splice(idx, 1)
+                        this.categories = _.filter(this.categories, cur => cur.id !== res.id)
 
                         return res;
                     })
@@ -199,7 +150,7 @@ export default {
             api.getCategories()
                 .deleteCategory(category)
                 .then(() => {
-                    this.loadCategories()
+                    this.categories = _.filter(this.categories, cur => cur.id !== category.id)
                 })
                 .finally(() => {
                     this.isLoading = false

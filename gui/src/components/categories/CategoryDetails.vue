@@ -6,6 +6,7 @@
 
         <v-card-subtitle>
             <v-breadcrumbs :items="allParentCategoryChain"/>
+
         </v-card-subtitle>
 
         <v-card-text>
@@ -130,7 +131,7 @@ export default {
                 chain.push(current.name);
                 cur = current.parentId;
             }
-            return chain.reverse();
+            return chain.reverse().map(c => ({text: c}));
         }
     },
 }

@@ -103,6 +103,7 @@ export default {
         },
         addNewCategoryTo(id) {
             this.$emit("newCategory", {parentId: id});
+            this.setOpenRecursively(id)
         },
         deleteCategory(id) {
             this.$emit("deleteCategory", this.categoriesById[id])
