@@ -57,7 +57,7 @@
                     </v-card-subtitle>
 
                     <v-card-text>
-                        <category-list :categories-by-id="categoriesById"
+                        <category-tree-list :categories-by-id="categoriesById"
                             :categories="categories"
                                        :quickfilter="quickfilter"
                                        :reallocation-enabled="reallocationEnabled"
@@ -88,14 +88,14 @@
 
 <script>
 import {api} from "@/api/RegularIncomeAPI"
-import CategoryList from "@/components/categories/CategoryList.vue";
+import CategoryTreeList from "@/components/categories/CategoryTreeList.vue";
 import CategoryDetails from "@/components/categories/CategoryDetails.vue";
 
 export default {
     name: "CategoryOverview",
     components: {
         CategoryDetails,
-        CategoryList
+        CategoryTreeList
     },
     data() {
         return {

@@ -44,7 +44,7 @@
 import _ from 'lodash';
 
 export default {
-    name: "CategoryList",
+    name: "CategoryTreeList",
     props: {
         categoriesById: {
             type: Object,
