@@ -7,8 +7,12 @@ import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static generated.sky.regular.income.Tables.CATEGORY;
 import static generated.sky.regular.income.Tables.FINANCIAL_TRANSACTION;
@@ -16,9 +20,6 @@ import static org.jooq.impl.DSL.*;
 
 @Component
 public class CategoryDAO {
-    private final Map<UUID, ZonedDateTime> creationTs = new HashMap<>();
-    private final Map<UUID, ZonedDateTime> updateTs = new HashMap<>();
-
     public Category createCategory(DSLContext ctx, UUID parentId, CategoryPatch patch) {
         CategoryRecord rec = ctx.newRecord(CATEGORY);
 
@@ -30,8 +31,6 @@ public class CategoryDAO {
         rec.setLastUpdatedAt(ZonedDateTime.now().toOffsetDateTime());
 
         rec.insert();
-
-        creationTs.put(rec.getId(), ZonedDateTime.now());
 
         return fetchById(ctx, rec.getId());
     }
@@ -46,8 +45,6 @@ public class CategoryDAO {
         rec.setLastUpdatedAt(ZonedDateTime.now().toOffsetDateTime());
 
         rec.update();
-
-        updateTs.put(id, ZonedDateTime.now());
 
         return fetchById(ctx, id);
     }
@@ -149,7 +146,7 @@ public class CategoryDAO {
     }
 
     private Category mapFlat(CategoryRecord rec) {
-        Category c = new Category();
+        var c = new Category();
 
         c.setId(rec.getId());
         c.setParentId(rec.getParentCategory());
@@ -159,25 +156,16 @@ public class CategoryDAO {
 
         c.setSubCategories(null);
 
-        c.setCreatedAt(creationTs.computeIfAbsent(rec.getId(), id -> ZonedDateTime.now()));
-        c.setUpdatedAt(updateTs.get(rec.getId()));
+        c.setCreatedAt(ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault()));
+        c.setUpdatedAt(rec.getLastUpdatedAt().toZonedDateTime());
 
         return c;
     }
 
     private Category mapRecursively(DSLContext ctx, CategoryRecord rec) {
-        Category c = new Category();
-
-        c.setId(rec.getId());
-        c.setParentId(rec.getParentCategory());
-
-        c.setName(rec.getName());
-        c.setDescription(rec.getDescription());
+        var c = mapFlat(rec);
 
         c.setSubCategories(fetchChildrenOf(ctx, rec.getId()));
-
-        c.setCreatedAt(creationTs.computeIfAbsent(rec.getId(), id -> ZonedDateTime.now()));
-        c.setUpdatedAt(updateTs.get(rec.getId()));
 
         return c;
     }
