@@ -56,46 +56,17 @@
             </v-container>
           </v-card-subtitle>
 
-          <v-card-text>
-            <div v-if="categoriesForTreeView && categoriesForTreeView.length"
-                 class="overflow-y-auto" style="height: 55vh">
-              <v-treeview :items="categoriesForTreeView"
-                          :active.sync="selected"
-                          :open.sync="opened"
-                          :activatable="true"
-                          :hoverable="true"
-                          :dense="true"
-                          :return-object="false"
-                          @update:active="selectForDetailedView">
-                <template v-slot:label="{ item }">
-                  <drop @drop="onDrop(item, ...arguments)">
-                    <drag :transfer-data="item">
-                      {{ item.name }}
-                    </drag>
-                  </drop>
-                </template>
-
-                <template v-slot:append="{ item }">
-                  <v-btn icon color="primary"
-                         @click.stop="addNewCategoryTo(item.id)"
-                         :loading="isLoading">
-                    <v-icon>
-                      mdi-plus
-                    </v-icon>
-                  </v-btn>
-
-                  <v-btn icon color="secondary"
-                         @click.stop="deleteCategory(item.id)"
-                         :disabled="item.children && item.children.length > 0"
-                         :loading="isLoading">
-                    <v-icon>
-                      mdi-delete
-                    </v-icon>
-                  </v-btn>
-                </template>
-              </v-treeview>
-            </div>
-          </v-card-text>
+            <v-card-text>
+                <category-list :categories="categories"
+                               :quickfilter="quickfilter"
+                               :reallocation-enabled="reallocationEnabled"
+                               :is-loading="isLoading"
+                               @newCategory="addNewCategoryTo"
+                               @deleteCategory="deleteCategory"
+                               @onReassign="onDrop"
+                               @open="selectForDetailedView"
+                               @close="onNoSelection"/>
+            </v-card-text>
         </v-card>
       </v-col>
 
@@ -150,9 +121,13 @@
 import {api} from "@/api/RegularIncomeAPI"
 import * as moment from "moment";
 import {normalizeCategory} from "@/util/Normalizer";
+import CategoryList from "@/components/categories/CategoryList.vue";
 
 export default {
   name: "CategoryOverview",
+  components: {
+      CategoryList
+  },
   data() {
     return {
       isLoading: false,
@@ -165,9 +140,6 @@ export default {
       },
       reallocationEnabled: false,
       quickfilter: null,
-
-      selected: [],
-      opened: [],
     }
   },
   methods: {
@@ -178,10 +150,10 @@ export default {
           .fetchCategories()
           .then(res => {
             this.categories = res
-
-            this.isLoading = false
-
             return this.categories
+          })
+          .finally(()=>{
+              this.isLoading = false
           })
     },
     formatDate(date) {
@@ -202,39 +174,36 @@ export default {
         description: "",
       }
     },
-    addNewCategoryTo(parentId) {
-      this.newCategory(parentId)
+    addNewCategoryTo(payload) {
+      this.newCategory(payload.parentId)
     },
-    deleteCategory(id) {
+    deleteCategory(category) {
       this.isLoading = true
 
       this.cancelActiveForm()
 
-      api.getCategories().deleteCategory(this.categoriesById[id])
+      api.getCategories()
+          .deleteCategory(category)
           .then(() => {
-            this.loadCategories()
-            this.isLoading = false
+              this.loadCategories()
+          })
+          .finally(() => {
+              this.isLoading = false
           })
     },
     addNewParentCategory() {
       this.newCategory(null)
     },
-    selectForDetailedView(selected) {
-      if (!selected)
-        return
-      if (Array.isArray(selected) && selected.length <= 0)
-        return
-
-      const id = Array.isArray(selected) ? selected[0] : selected
-
+    selectForDetailedView(id) {
       this.selectedForDetails.isNew = false
       this.selectedForDetails.isSelected = true
       this.selectedForDetails.entity = this.categoriesById[id]
       this.selectedForDetails.parentId = this.categoriesById[id].parentId
 
       this.selected = [id]
-
-      this.setOpenRecursively(id)
+    },
+    onNoSelection(){
+      console.log("nothing selected")
     },
     cancelActiveForm() {
       this.selectedForDetails.isNew = null
@@ -277,39 +246,20 @@ export default {
         }
       }
     },
-    setOpenRecursively(id) {
-      const newlyOpened = new Set(this.opened)
-
-      let current = this.categoriesById[id]
-      while (current) {
-        newlyOpened.add(current.id)
-        current = this.categoriesById[current.parentId]
-      }
-
-      this.opened = [...newlyOpened]
-    },
-    onDrop(trgtItem, srcItem) {
-      if (!this.reallocationEnabled || trgtItem === srcItem)
-        return
-
+    onDrop(payload) {
       this.isLoading = true
 
-      api.getCategories().reassignCategory(trgtItem, srcItem)
-          .then(() => {
-            this.loadCategories()
-                .then(() => {
-                  this.isLoading = false
-
-                  this.opened.push(trgtItem.id, srcItem.id)
-                })
+      api.getCategories()
+          .reassignCategory(payload.target, payload.source)
+          .then(() => this.loadCategories())
+          .finally(() => {
+              this.isLoading = false
           })
     },
   },
   computed: {
     categoriesById() {
-      const mapping = {}
-      this.categories.forEach(cat => mapping[cat.id] = cat)
-      return mapping
+        return this.categories.reduce((old, cur) => ({...old, [cur.id]: cur}), {})
     },
     getFilteredCategories() {
       if (!this.quickfilter)
@@ -322,32 +272,9 @@ export default {
     getParentCategories() {
       return [...this.getFilteredCategories.filter(cat => !cat.parentId)]
     },
-    categoriesForTreeView() {
-      const cmp = (a, b) => a.name.localeCompare(b.name)
-
-      const resolver = cat => {
-        const children = this.getFilteredCategories.filter(c => c.parentId === cat.id).map(resolver)
-
-        children.sort(cmp)
-
-        return {
-          ...cat,
-          children: children,
-        }
-      }
-
-      const tmp = [...this.getParentCategories.map(resolver)]
-      tmp.sort(cmp)
-      return tmp
-    },
   },
   mounted() {
     this.loadCategories()
-        .then(() => {
-          this.getParentCategories.filter((c, idx) => idx < 10)
-              .map(c => c.id)
-              .forEach(id => this.opened.push(id))
-        })
   },
 }
 </script>
