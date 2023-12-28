@@ -27,6 +27,7 @@ public class CategoryDAO {
         rec.setName(patch.name.trim());
         rec.setDescription(Optional.ofNullable(patch.description).map(String::trim).orElse(null));
         rec.setIsIncome(false);
+        rec.setLastUpdatedAt(ZonedDateTime.now().toOffsetDateTime());
 
         rec.insert();
 
@@ -42,6 +43,7 @@ public class CategoryDAO {
 
         rec.setName(patch.name.trim());
         rec.setDescription(Optional.ofNullable(patch.description).map(String::trim).orElse(null));
+        rec.setLastUpdatedAt(ZonedDateTime.now().toOffsetDateTime());
 
         rec.update();
 
@@ -115,6 +117,11 @@ public class CategoryDAO {
         ctx.update(CATEGORY)
                 .set(CATEGORY.PARENT_CATEGORY, newParentId)
                 .where(CATEGORY.ID.eq(childId))
+                .execute();
+        ctx.update(CATEGORY)
+                .set(CATEGORY.LAST_UPDATED_AT, ZonedDateTime.now().toOffsetDateTime())
+                .where(CATEGORY.ID.eq(childId))
+                .or(CATEGORY.ID.eq(newParentId))
                 .execute();
 
         var parent = CATEGORY.as("parent");

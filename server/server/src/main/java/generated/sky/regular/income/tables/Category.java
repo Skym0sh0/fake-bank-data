@@ -9,6 +9,7 @@ import generated.sky.regular.income.Keys;
 import generated.sky.regular.income.RegularIncome;
 import generated.sky.regular.income.tables.records.CategoryRecord;
 
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -41,7 +42,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class Category extends TableImpl<CategoryRecord> {
 
-    private static final long serialVersionUID = 482197252;
+    private static final long serialVersionUID = -798471989;
 
     /**
      * The reference instance of <code>REGULAR_INCOME.category</code>
@@ -80,6 +81,11 @@ public class Category extends TableImpl<CategoryRecord> {
      * The column <code>REGULAR_INCOME.category.description</code>.
      */
     public final TableField<CategoryRecord, String> DESCRIPTION = createField("description", org.jooq.impl.SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>REGULAR_INCOME.category.last_updated_at</code>.
+     */
+    public final TableField<CategoryRecord, OffsetDateTime> LAST_UPDATED_AT = createField("last_updated_at", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE.nullable(false), this, "");
 
     /**
      * Create a <code>REGULAR_INCOME.category</code> table reference
