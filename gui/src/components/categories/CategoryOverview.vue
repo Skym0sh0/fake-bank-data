@@ -1,41 +1,55 @@
 <template>
-    <v-card class="pa-2">
+    <v-card class="px-5">
+        <v-card-title class="p-2">
+            <div class="w-100 d-flex justify-content-between align-items-center">
+                <span>Categories</span>
 
-        <v-card-title>
-            Categories
+                <v-btn-toggle :dense="true">
+                    <v-btn @click="loadCategories"
+                           :loading="isLoading"
+                           color="accent"
+                           :small="true">
+                        Reload
+                    </v-btn>
+                    <v-btn @click="addNewRootCategory"
+                           :loading="isLoading"
+                           color="primary"
+                           :small="true">
+                        Neue Category
+                    </v-btn>
+                </v-btn-toggle>
+            </div>
         </v-card-title>
 
-        <v-card-subtitle>
-            <v-btn @click="loadCategories"
-                   :loading="isLoading">
-                Reload
-            </v-btn>
-        </v-card-subtitle>
-        <v-row>
-            <v-col>
-                <category-list :categories-by-id="categoriesById"
-                               :categories="categories"
-                               :is-loading="isLoading"
-                               @click="addNewParentCategory"
-                               @newCategory="addNewCategoryTo"
-                               @deleteCategory="deleteCategory"
-                               @onReassign="onDrop"
-                               @open="selectForDetailedView"/>
-            </v-col>
+        <v-container class="pt-0">
+            <v-row class="py-0">
+                <v-col class="py-0" :cols="selectedForDetails.isSelected ? 8 : 12">
+                    <category-list :categories-by-id="categoriesById"
+                                   :categories="categories"
+                                   :is-loading="isLoading"
+                                   @newRootCategory="addNewRootCategory"
+                                   @click="addNewParentCategory"
+                                   @newCategory="addNewCategoryTo"
+                                   @deleteCategory="deleteCategory"
+                                   @onReassign="onDrop"
+                                   @open="selectForDetailedView"/>
+                </v-col>
 
-            <v-col>
-                <category-details v-if="selectedForDetails.isSelected"
-                                  ref="detail-form"
-                                  :categories-by-id="categoriesById"
-                                  :entity="selectedForDetails.entity"
-                                  :is-new="selectedForDetails.isNew"
-                                  :is-loading="isLoading"
-                                  @createAsChild="createNewChildCategory"
-                                  @createAsRoot="createNewRootCategory"
-                                  @update="updateCategory"
-                                  @close="cancelActiveForm"/>
-            </v-col>
-        </v-row>
+                <v-col v-if="selectedForDetails.isSelected" :cols="4">
+                    <div class="fixed-position-editor">
+                        <category-details ref="detail-form"
+                                          :categories-by-id="categoriesById"
+                                          :entity="selectedForDetails.entity"
+                                          :is-new="selectedForDetails.isNew"
+                                          :is-loading="isLoading"
+                                          @createAsChild="createNewChildCategory"
+                                          @createAsRoot="createNewRootCategory"
+                                          @update="updateCategory"
+                                          @close="cancelActiveForm"/>
+                    </div>
+                </v-col>
+            </v-row>
+        </v-container>
     </v-card>
 </template>
 
@@ -90,6 +104,12 @@ export default {
                 description: "",
             }
         },
+        addNewCategoryTo(payload) {
+            this.newCategory(payload.parentId)
+        },
+        addNewRootCategory() {
+            this.newCategory(null)
+        },
         selectForDetailedView(id) {
             this.selectedForDetails.isNew = false
             this.selectedForDetails.isSelected = true
@@ -139,9 +159,6 @@ export default {
                     this.isLoading = false
                 })
         },
-        addNewCategoryTo(payload) {
-            this.newCategory(payload.parentId)
-        },
         deleteCategory(category) {
             this.isLoading = true
 
@@ -182,4 +199,9 @@ export default {
 </script>
 
 <style scoped>
+.fixed-position-editor {
+    position: sticky;
+    top: 5em;
+    bottom:5em;
+}
 </style>

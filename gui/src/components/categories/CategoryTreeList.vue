@@ -1,6 +1,6 @@
 <template>
-    <div v-if="categoriesForTreeView && categoriesForTreeView.length"
-         class="overflow-y-auto" style="background-color: lightcoral; height: 55vh">
+    <v-card v-if="categoriesForTreeView && categoriesForTreeView.length"
+            class="overflow-y-auto">
         <v-treeview :items="categoriesForTreeView"
                     :active.sync="selected"
                     :open.sync="opened"
@@ -37,7 +37,7 @@
                 </v-btn>
             </template>
         </v-treeview>
-    </div>
+    </v-card>
 </template>
 
 <script>

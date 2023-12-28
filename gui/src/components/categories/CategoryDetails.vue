@@ -125,7 +125,7 @@ export default {
         allParentCategoryChain() {
             let cur = this.entity.parentId;
 
-            const chain = [this.entity.name];
+            const chain = [];
             while (cur) {
                 const current = this.categoriesById[cur];
                 chain.push(current.name);
