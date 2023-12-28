@@ -46,6 +46,10 @@ import _ from 'lodash';
 export default {
     name: "CategoryList",
     props: {
+        categoriesById: {
+            type: Object,
+            required: true,
+        },
         categories: {
             type: Array,
             required: true,
@@ -98,22 +102,14 @@ export default {
             this.opened = [...newlyOpened]
         },
         addNewCategoryTo(id) {
-            console.log("add new category to parent with id", id)
             this.$emit("newCategory", {parentId: id});
         },
         deleteCategory(id) {
-            console.log("delete category with id", id);
             this.$emit("deleteCategory", this.categoriesById[id])
         },
         onDrop(trgtItem, srcItem) {
             if (!this.reallocationEnabled || trgtItem.id === srcItem.id)
                 return
-
-            console.log("Move item",
-                {id: srcItem.id, name: srcItem.name},
-                "to target",
-                {id: trgtItem.id, name: trgtItem.name}
-            );
 
             this.$emit("onReassign", {
                 source: srcItem,
@@ -124,9 +120,6 @@ export default {
         },
     },
     computed: {
-        categoriesById() {
-            return this.categories.reduce((old, cur) => ({...old, [cur.id]: cur}), {})
-        },
         getFilteredCategories() {
             if (!this.quickfilter)
                 return this.categories
@@ -149,7 +142,6 @@ export default {
             }
 
             return _.sortBy([...this.getParentCategories.map(resolver)], x => x.name)
-                .filter((x, idx) => idx <= 20)
         },
     },
     mounted() {
