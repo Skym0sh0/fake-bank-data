@@ -3,6 +3,7 @@ package de.sky.regular.income.api.turnovers;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -12,5 +13,9 @@ import java.util.UUID;
 public class TurnoverImport {
     public UUID id;
     public ZonedDateTime importedAt;
+
+    public LocalDate firstTurnover;
+    public LocalDate lastTurnover;
+
     public List<TurnoverRow> turnovers;
 }

@@ -94,6 +94,9 @@ export function denormalizeTurnoverImport(turnoverImport) {
         id: turnoverImport.id,
         importedAt: turnoverImport.importedAt,
 
+        firstTurnover: turnoverImport.firstTurnover,
+        lastTurnover: turnoverImport.lastTurnover,
+
         turnovers: (turnoverImport.turnovers || []).map(denormalizeTurnoverRow),
     };
 }

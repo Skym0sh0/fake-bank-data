@@ -4,21 +4,22 @@
                  :hover="true"
                  :items="sortedList"
                  :fields="fields"
-                 :responsive="true">
-            <template v-slot:cell(Date)="row">
-                {{ formatDate(row.item.importedAt) }}
-            </template>
-            <template v-slot:cell(Turnovers)="row">
-                {{ row.item.turnovers.length }}
-            </template>
+                 primary-key="id"
+                 :responsive="true"
+                 :fixed="true">
             <template v-slot:cell(Actions)="row">
-                <b-button variant="primary" @click="() => onOpen(row.item)">
-                    Öffnen
-                </b-button>
-
-                <b-button variant="danger" @click="() => onDelete(row.item)">
-                    Löschen
-                </b-button>
+                <div class="action-buttons">
+                    <b-button variant="primary"
+                              size="sm"
+                              @click="() => onOpen(row.item)">
+                        Öffnen
+                    </b-button>
+                    <b-button variant="danger"
+                              size="sm"
+                              @click="() => onDelete(row.item)">
+                        Löschen
+                    </b-button>
+                </div>
             </template>
         </b-table>
     </div>
@@ -36,8 +37,15 @@ export default {
         }
     },
     methods: {
-        formatDate(d) {
+        formatTimestamp(d) {
+            if (!d)
+                return null;
             return moment(d).format("YYYY-MM-DD HH:mm");
+        },
+        formatDate(d) {
+            if (!d)
+                return null;
+            return moment(d).format("YYYY-MM-DD");
         },
         onOpen(item) {
             console.log("open button", item)
@@ -50,15 +58,49 @@ export default {
     },
     computed: {
         fields() {
-            return ["Date", "Turnovers", "Actions"];
+            return [
+                {
+                    key: "importedAt",
+                    label: "Import",
+                    sortable: true,
+                    formatter: (value) => this.formatTimestamp(value),
+                },
+                {
+                    key: 'firstTurnover',
+                    label: "From",
+                    sortable: true,
+                    formatter: (value) => this.formatDate(value),
+                },
+                {
+                    key: 'lastTurnover',
+                    label: "To",
+                    sortable: true,
+                    formatter: (value) => this.formatDate(value),
+                },
+                {
+                    key: "turnovers",
+                    label: "#Turnovers",
+                    sortable: true,
+                    sortByFormatted: true,
+                    formatter: (value) => value.length,
+                },
+                {
+                    key: "Actions",
+                    label: "Actions"
+                }
+            ];
         },
         sortedList() {
-            return this.imports;
+            return this.imports || [];
         }
     }
 }
 </script>
 
 <style scoped>
-
+.action-buttons {
+    display: flex;
+    justify-content: flex-start;
+    gap: 0.5em;
+}
 </style>
