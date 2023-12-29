@@ -54,7 +54,7 @@
                     <v-btn :icon="true"
                            color="secondary"
                            @click.stop="deleteCategory(item.id)"
-                           :disabled="item.children && item.children.length > 0">
+                           :disabled="isDeletionForbidden(item)">
                         <v-icon>
                             mdi-delete
                         </v-icon>
@@ -131,6 +131,12 @@ export default {
 
             // this.$nextTick(() => this.opened.push(trgtItem.id, srcItem.id));
         },
+        isDeletionForbidden(category) {
+            const isRoot = !category.parentId;
+            const hasChildren = category.children && category.children.length > 0;
+            const isUsed = category.usageCount > 0;
+            return hasChildren || (isRoot && isUsed);
+        }
     },
     watch: {
         categories() {

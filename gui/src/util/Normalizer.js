@@ -86,6 +86,8 @@ export function denormalizeCategory(cat) {
 
         createdAt: cat.createdAt,
         updatedAt: cat.updatedAt,
+
+        usageCount: cat.usageCount,
     }
 }
 
