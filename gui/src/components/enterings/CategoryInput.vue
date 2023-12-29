@@ -28,6 +28,7 @@
 <script>
 import {validationMixin} from 'vuelidate'
 import {required} from 'vuelidate/dist/validators.min'
+import _ from 'lodash'
 
 export default {
     name: "CategoryInput",
@@ -63,23 +64,22 @@ export default {
     },
     computed: {
         categories() {
-            const tmp = [...this.options]
+            const extract = (cat) => {
+                return [
+                    cat,
+                    ...cat.subCategories.flatMap(extract)
+                ];
+            };
 
-            tmp.sort((a, b) => {
-                return a.name.localeCompare(b.name);
-            });
+            const flatted = this.options.flatMap(extract)
 
-            return tmp;
+            return _.sortBy(flatted, cat => cat.name)
         },
         categoriesByName() {
-            const map = {};
-            this.options.forEach(cat => map[cat.name] = cat);
-            return map;
+            return this.categories.reduce((old, cur) => ({...old, [cur.name]: cur}), {})
         },
         categoriesById() {
-            const map = {};
-            this.options.forEach(cat => map[cat.id] = cat);
-            return map;
+            return this.categories.reduce((old, cur) => ({...old, [cur.id]: cur}), {})
         },
         isValidState() {
             return this.state && !this.isUnknownCategory && !this.$v.currentSearch.$invalid;
