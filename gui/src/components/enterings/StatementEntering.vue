@@ -123,7 +123,8 @@
                         </template>
 
                         <template v-slot:cell(category)="row">
-                            <category-input :id="`transactions-table-input-category-select-${row.index}`"
+                            <category-input v-if="categories"
+                                            :id="`transactions-table-input-category-select-${row.index}`"
                                            v-model="row.item.category"
                                            @createCategory="onCreateCategory"
                                            :options="categories"
@@ -323,10 +324,11 @@ export default {
                 })
         },
         loadCategories() {
-            api.getCategories()
+            return api.getCategories()
                 .fetchCategoryTree()
                 .then(res => {
                     this.categories = res
+                    return this.categories;
                 })
         },
         onCreateCategory(categoryName) {
@@ -341,8 +343,7 @@ export default {
                 })
         },
         loadOtherEntities() {
-            this.loadCategories()
-            return this.loadStatements()
+            return Promise.all([this.loadCategories(), this.loadStatements()])
         },
         saveModel() {
             const normalizedStatement = normalizeStatement(this.statement)
