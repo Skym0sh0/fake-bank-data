@@ -69,24 +69,19 @@
             </template>
         </v-treeview>
 
-        <v-chip v-show="selected.length"
-                class="selection-info"
-                color="primary"
-                @click="clearSelection">
-            <v-icon :left="true"
-                    :dense="true">
-                mdi-delete
-            </v-icon>
-            Ausgewählt: {{ selected.length }}
-        </v-chip>
+        <selected-category-info :selectedIds="selected"
+                                :categories-by-id="categoriesById"
+                                @clear="clearSelection"/>
     </v-card>
 </template>
 
 <script>
 import _ from 'lodash';
+import SelectedCategoryInfo from "@/components/categories/SelectedCategoryInfo.vue";
 
 export default {
     name: "CategoryTreeList",
+    components: {SelectedCategoryInfo},
     props: {
         categoriesById: {
             type: Object,
