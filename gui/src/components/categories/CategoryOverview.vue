@@ -23,29 +23,43 @@
 
         <v-container class="pt-0">
             <v-row class="py-0">
-                <v-col class="py-0" :cols="selectedForDetails.isSelected ? 8 : 12">
+                <v-col class="py-0" :cols="showDetails ? 8 : 12">
                     <category-list :categories-by-id="categoriesById"
                                    :categories="categories"
                                    :is-loading="isLoading"
-                                   @newRootCategory="addNewRootCategory"
-                                   @click="addNewParentCategory"
                                    @newCategory="addNewCategoryTo"
                                    @deleteCategory="deleteCategory"
                                    @onReassign="onDrop"
-                                   @open="selectForDetailedView"/>
+                                   @edit="openEditView"
+                                   @select="onSelection"/>
                 </v-col>
 
-                <v-col v-if="selectedForDetails.isSelected" :cols="4">
+                <v-col v-if="showDetails" :cols="4">
                     <div class="fixed-position-editor">
-                        <category-details ref="detail-form"
-                                          :categories-by-id="categoriesById"
-                                          :entity="selectedForDetails.entity"
-                                          :is-new="selectedForDetails.isNew"
-                                          :is-loading="isLoading"
-                                          @createAsChild="createNewChildCategory"
-                                          @createAsRoot="createNewRootCategory"
-                                          @update="updateCategory"
-                                          @close="cancelActiveForm"/>
+                        <div class="details-view">
+                            <category-details v-if="selectedForDetails.isSelected"
+                                              ref="detail-form"
+                                              :categories-by-id="categoriesById"
+                                              :entity="selectedForDetails.entity"
+                                              :is-new="selectedForDetails.isNew"
+                                              :is-loading="isLoading"
+                                              @createAsChild="createNewChildCategory"
+                                              @createAsRoot="createNewRootCategory"
+                                              @update="updateCategory"
+                                              @close="cancelActiveForm"/>
+
+                            <v-sheet v-if="selectedCategories.length"
+                                     :elevation="10"
+                                     class="overflow-y-auto"
+                            height="10vh">
+                                <ul>
+                                    <li v-for="category in selectedCategories"
+                                        :key="category">
+                                        {{ category }}
+                                    </li>
+                                </ul>
+                            </v-sheet>
+                        </div>
                     </div>
                 </v-col>
             </v-row>
@@ -70,6 +84,7 @@ export default {
             isLoading: false,
             categories: [],
 
+            multiSelection: [],
             selectedForDetails: {
                 isNew: null,
                 isSelected: false,
@@ -110,18 +125,22 @@ export default {
         addNewRootCategory() {
             this.newCategory(null)
         },
-        selectForDetailedView(id) {
+        onSelection(ids) {
+            this.multiSelection = ids;
+            // this.cancelActiveForm()
+        },
+        openEditView(id) {
+            if (this.selectedForDetails.entity && this.selectedForDetails.entity.id === id)
+                return;
+
             this.selectedForDetails.isNew = false
             this.selectedForDetails.isSelected = true
             this.selectedForDetails.entity = {...this.categoriesById[id]}
-
-            this.selected = [id]
         },
         cancelActiveForm() {
             this.selectedForDetails.isNew = null
             this.selectedForDetails.isSelected = false
             this.selectedForDetails.entity = null
-            this.selected = []
         },
         createNewRootCategory(cat) {
             this.doRestCallForCategory(() => {
@@ -153,7 +172,7 @@ export default {
             call()
                 .then(res => {
                     this.categories.push(res)
-                    this.selectForDetailedView(res.id)
+                    this.openEditView(res.id)
                 })
                 .finally(() => {
                     this.isLoading = false
@@ -173,9 +192,6 @@ export default {
                     this.isLoading = false
                 })
         },
-        addNewParentCategory() {
-            this.newCategory(null)
-        },
         onDrop(payload) {
             this.isLoading = true
 
@@ -191,6 +207,14 @@ export default {
         categoriesById() {
             return this.categories.reduce((old, cur) => ({...old, [cur.id]: cur}), {})
         },
+        showDetails() {
+            return this.selectedForDetails.isSelected || this.multiSelection.length > 0;
+        },
+        selectedCategories() {
+            return this.multiSelection.map(id => this.categoriesById[id])
+                .map(cat => cat.name)
+                .sort();
+        },
     },
     mounted() {
         this.loadCategories()
@@ -202,6 +226,14 @@ export default {
 .fixed-position-editor {
     position: sticky;
     top: 5em;
-    bottom:5em;
+    bottom: 5em;
+    height: 88vh;
+}
+
+.details-view {
+    height: 90%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 </style>

@@ -1,17 +1,18 @@
 <template>
-    <v-card v-if="categoriesForTreeView && categoriesForTreeView.length"
+    <v-card v-if="categoriesAsTree && categoriesAsTree.length"
             class="overflow-y-auto">
-        <v-treeview :items="categoriesForTreeView"
+        <v-treeview :items="categoriesAsTree"
                     :active.sync="selected"
                     :open.sync="opened"
                     :activatable="true"
+                    :multiple-active="true"
                     :selectable="false"
                     :hoverable="true"
                     :dense="true"
                     :return-object="false"
                     :transition="true"
                     :rounded="true"
-                    @update:active="selectForDetailedView">
+                    @update:active="onSelectUpdate">
 
             <template v-slot:prepend="{ item }">
                 <drop @drop="onDrop(item, ...arguments)">
@@ -36,24 +37,48 @@
             </template>
 
             <template v-slot:append="{ item }">
-                <v-btn icon color="primary"
-                       @click.stop="addNewCategoryTo(item.id)"
-                       :loading="isLoading">
-                    <v-icon>
-                        mdi-plus
-                    </v-icon>
-                </v-btn>
+                <v-btn-toggle :dense="true">
+                    <v-btn :icon="true"
+                           color="primary"
+                           @click.stop="editCategory(item.id)"
+                           :loading="isLoading">
+                        <v-icon>
+                            mdi-pen
+                        </v-icon>
+                    </v-btn>
 
-                <v-btn icon color="secondary"
-                       @click.stop="deleteCategory(item.id)"
-                       :disabled="item.children && item.children.length > 0"
-                       :loading="isLoading">
-                    <v-icon>
-                        mdi-delete
-                    </v-icon>
-                </v-btn>
+                    <v-btn :icon="true"
+                           color="primary"
+                           @click.stop="addNewCategoryTo(item.id)"
+                           :loading="isLoading">
+                        <v-icon>
+                            mdi-plus
+                        </v-icon>
+                    </v-btn>
+
+                    <v-btn :icon="true"
+                           color="secondary"
+                           @click.stop="deleteCategory(item.id)"
+                           :disabled="item.children && item.children.length > 0"
+                           :loading="isLoading">
+                        <v-icon>
+                            mdi-delete
+                        </v-icon>
+                    </v-btn>
+                </v-btn-toggle>
             </template>
         </v-treeview>
+
+        <v-chip v-show="selected.length"
+                class="selection-info"
+                color="primary"
+                @click="clearSelection">
+            <v-icon :left="true"
+                    :dense="true">
+                mdi-delete
+            </v-icon>
+            Ausgewählt: {{ selected.length }}
+        </v-chip>
     </v-card>
 </template>
 
@@ -71,10 +96,6 @@ export default {
             type: Array,
             required: true,
         },
-        quickfilter: {
-            type: String,
-            required: false
-        },
         isLoading: {
             type: Boolean,
             required: true,
@@ -87,21 +108,11 @@ export default {
         };
     },
     methods: {
-        selectForDetailedView(selected) {
-            if (selected.length === 0) {
-                this.$emit("close");
-                return;
-            }
-
-            if (selected.length === 1) {
-                const id = selected[0];
-
-                this.$emit("open", id);
-                this.setOpenRecursively(id);
-                return;
-            }
-
-            console.error("Not expected to have multi openings", selected);
+        clearSelection() {
+            this.selected = [];
+        },
+        onSelectUpdate(selected) {
+            this.$emit("select", selected)
         },
         setOpenRecursively(id) {
             const newlyOpened = new Set(this.opened)
@@ -114,12 +125,18 @@ export default {
 
             this.opened = [...newlyOpened]
         },
+        editCategory(id) {
+            this.$emit("edit", id)
+        },
         addNewCategoryTo(id) {
             this.$emit("newCategory", {parentId: id});
             this.setOpenRecursively(id)
         },
         deleteCategory(id) {
             this.$emit("deleteCategory", this.categoriesById[id])
+        },
+        onDragstart(srcItem) {
+            this.selected.push(srcItem.id)
         },
         onDrop(trgtItem, srcItem) {
             if (trgtItem.id === srcItem.id)
@@ -133,21 +150,19 @@ export default {
             // this.$nextTick(() => this.opened.push(trgtItem.id, srcItem.id));
         },
     },
+    watch: {
+        categories() {
+            this.selected = [];
+        }
+    },
     computed: {
-        getFilteredCategories() {
-            if (!this.quickfilter)
-                return this.categories
-
-            const regex = new RegExp(this.quickfilter, "i")
-
-            return this.categories.filter(cat => cat.name.search(regex) >= 0)
+        parentCategories() {
+            return _.sortBy(this.categories.filter(cat => !cat.parentId), x => x.name)
+                .filter((x, idx) => idx < 15)
         },
-        getParentCategories() {
-            return [...this.getFilteredCategories.filter(cat => !cat.parentId)]
-        },
-        categoriesForTreeView() {
+        categoriesAsTree() {
             const resolver = cat => {
-                const children = this.getFilteredCategories.filter(c => c.parentId === cat.id).map(resolver)
+                const children = this.categories.filter(c => c.parentId === cat.id).map(resolver)
 
                 return {
                     ...cat,
@@ -155,7 +170,7 @@ export default {
                 }
             }
 
-            return _.sortBy([...this.getParentCategories.map(resolver)], x => x.name)
+            return this.parentCategories.map(resolver)
         },
     },
 }
@@ -164,5 +179,17 @@ export default {
 <style scoped>
 .drag-point {
     cursor: grabbing;
+}
+
+.selection-info {
+    position: fixed;
+    opacity: 50%;
+    right: 50%;
+    bottom: 1em;
+    z-index: 100;
+}
+
+.selection-info:hover {
+    opacity: 100%;
 }
 </style>

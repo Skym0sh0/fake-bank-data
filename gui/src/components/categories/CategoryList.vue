@@ -19,14 +19,13 @@
         <v-row class="py-0">
             <v-col class="py-0">
                 <category-tree-list :categories-by-id="categoriesById"
-                                    :categories="categories"
-                                    :quickfilter="quickfilter"
+                                    :categories="filteredCategories"
                                     :is-loading="isLoading"
-                                    @click="$emit('click', $event)"
                                     @newCategory="$emit('newCategory', $event)"
                                     @deleteCategory="$emit('deleteCategory', $event)"
                                     @onReassign="$emit('onReassign', $event)"
-                                    @open="$emit('open', $event)"/>
+                                    @edit="$emit('edit', $event)"
+                                    @select="$emit('select', $event)"/>
             </v-col>
         </v-row>
     </v-container>
@@ -58,6 +57,16 @@ export default {
         return {
             quickfilter: null,
         }
+    },
+    computed: {
+        filteredCategories() {
+            if (!this.quickfilter)
+                return this.categories
+
+            const regex = new RegExp(this.quickfilter, "i")
+
+            return this.categories.filter(cat => cat.name.search(regex) >= 0)
+        },
     },
 }
 </script>
