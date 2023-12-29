@@ -5,16 +5,27 @@
                     :active.sync="selected"
                     :open.sync="opened"
                     :activatable="true"
-                    :selectable="!true"
+                    :selectable="false"
                     :hoverable="true"
                     :dense="true"
                     :return-object="false"
+                    :transition="true"
+                    :rounded="true"
                     @update:active="selectForDetailedView">
-            <template v-slot:label="{ item }">
+
+            <template v-slot:prepend="{ item }">
                 <drop @drop="onDrop(item, ...arguments)">
                     <drag :transfer-data="item">
-                        {{ item.name }}
+                        <v-icon>
+                            mdi-drag
+                        </v-icon>
                     </drag>
+                </drop>
+            </template>
+
+            <template v-slot:label="{ item }">
+                <drop @drop="onDrop(item, ...arguments)">
+                    {{ item.name }}
                 </drop>
             </template>
 
@@ -57,10 +68,6 @@ export default {
         quickfilter: {
             type: String,
             required: false
-        },
-        reallocationEnabled: {
-            type: Boolean,
-            required: true,
         },
         isLoading: {
             type: Boolean,
@@ -109,8 +116,8 @@ export default {
             this.$emit("deleteCategory", this.categoriesById[id])
         },
         onDrop(trgtItem, srcItem) {
-            if (!this.reallocationEnabled || trgtItem.id === srcItem.id)
-                return
+            if (trgtItem.id === srcItem.id)
+                return;
 
             this.$emit("onReassign", {
                 source: srcItem,
@@ -144,11 +151,6 @@ export default {
 
             return _.sortBy([...this.getParentCategories.map(resolver)], x => x.name)
         },
-    },
-    mounted() {
-        this.getParentCategories.filter((c, idx) => idx < 10)
-            .map(c => c.id)
-            .forEach(id => this.opened.push(id))
     },
 }
 </script>

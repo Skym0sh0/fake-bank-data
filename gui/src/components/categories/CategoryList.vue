@@ -1,26 +1,18 @@
 <template>
     <v-container class="py-0">
-        <global-events @keydown.17.prevent="reallocationEnabled = true"
-                       @keyup.17.prevent="reallocationEnabled = false"/>
+        <!--        <global-events @keydown.17.prevent="reallocationEnabled = true"-->
+        <!--                       @keyup.17.prevent="reallocationEnabled = false"/>-->
 
         <v-row>
-            <v-col :cols="9" class="py-0">
+            <v-col class="py-0">
                 <v-text-field id="quickfilter-text-input-field"
                               v-model="quickfilter"
                               type="text"
+                              :dense="true"
                               :clearable="true"
                               label="Quickfilter"
                               hint="Type regex to match items"
                               suffix="Regex"/>
-            </v-col>
-
-            <v-col :cols="3" class="py-0">
-                <v-switch v-show="categories && categories.length"
-                          v-model="reallocationEnabled"
-                          :loading="isLoading"
-                          :dense="true"
-                          hint="Categories can now be dragged & dropped persistently."
-                          label="Drag & Drop (Ctrl)"/>
             </v-col>
         </v-row>
 
@@ -29,7 +21,6 @@
                 <category-tree-list :categories-by-id="categoriesById"
                                     :categories="categories"
                                     :quickfilter="quickfilter"
-                                    :reallocation-enabled="reallocationEnabled"
                                     :is-loading="isLoading"
                                     @click="$emit('click', $event)"
                                     @newCategory="$emit('newCategory', $event)"
@@ -65,14 +56,8 @@ export default {
     },
     data() {
         return {
-            reallocationEnabled: false,
             quickfilter: null,
         }
-    },
-    methods: {
-        onNewCategory() {
-            this.$emit('newRootCategory')
-        },
     },
 }
 </script>
