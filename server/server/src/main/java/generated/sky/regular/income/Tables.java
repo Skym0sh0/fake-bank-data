@@ -10,6 +10,7 @@ import generated.sky.regular.income.tables.Category;
 import generated.sky.regular.income.tables.FinancialTransaction;
 import generated.sky.regular.income.tables.TurnoverFileImport;
 import generated.sky.regular.income.tables.TurnoverRow;
+import generated.sky.regular.income.tables.VCategoriesWithUsageCount;
 import generated.sky.regular.income.tables.VOrderedBankStatements;
 
 import javax.annotation.Generated;
@@ -57,6 +58,11 @@ public class Tables {
      * The table <code>REGULAR_INCOME.turnover_row</code>.
      */
     public static final TurnoverRow TURNOVER_ROW = generated.sky.regular.income.tables.TurnoverRow.TURNOVER_ROW;
+
+    /**
+     * The table <code>REGULAR_INCOME.v_categories_with_usage_count</code>.
+     */
+    public static final VCategoriesWithUsageCount V_CATEGORIES_WITH_USAGE_COUNT = generated.sky.regular.income.tables.VCategoriesWithUsageCount.V_CATEGORIES_WITH_USAGE_COUNT;
 
     /**
      * The table <code>REGULAR_INCOME.v_ordered_bank_statements</code>.

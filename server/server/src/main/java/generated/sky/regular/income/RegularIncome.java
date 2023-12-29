@@ -10,6 +10,7 @@ import generated.sky.regular.income.tables.Category;
 import generated.sky.regular.income.tables.FinancialTransaction;
 import generated.sky.regular.income.tables.TurnoverFileImport;
 import generated.sky.regular.income.tables.TurnoverRow;
+import generated.sky.regular.income.tables.VCategoriesWithUsageCount;
 import generated.sky.regular.income.tables.VOrderedBankStatements;
 
 import java.util.ArrayList;
@@ -36,7 +37,7 @@ import org.jooq.impl.SchemaImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class RegularIncome extends SchemaImpl {
 
-    private static final long serialVersionUID = 3005001;
+    private static final long serialVersionUID = 1354495988;
 
     /**
      * The reference instance of <code>REGULAR_INCOME</code>
@@ -74,6 +75,11 @@ public class RegularIncome extends SchemaImpl {
     public final TurnoverRow TURNOVER_ROW = generated.sky.regular.income.tables.TurnoverRow.TURNOVER_ROW;
 
     /**
+     * The table <code>REGULAR_INCOME.v_categories_with_usage_count</code>.
+     */
+    public final VCategoriesWithUsageCount V_CATEGORIES_WITH_USAGE_COUNT = generated.sky.regular.income.tables.VCategoriesWithUsageCount.V_CATEGORIES_WITH_USAGE_COUNT;
+
+    /**
      * The table <code>REGULAR_INCOME.v_ordered_bank_statements</code>.
      */
     public final VOrderedBankStatements V_ORDERED_BANK_STATEMENTS = generated.sky.regular.income.tables.VOrderedBankStatements.V_ORDERED_BANK_STATEMENTS;
@@ -109,6 +115,7 @@ public class RegularIncome extends SchemaImpl {
             FinancialTransaction.FINANCIAL_TRANSACTION,
             TurnoverFileImport.TURNOVER_FILE_IMPORT,
             TurnoverRow.TURNOVER_ROW,
+            VCategoriesWithUsageCount.V_CATEGORIES_WITH_USAGE_COUNT,
             VOrderedBankStatements.V_ORDERED_BANK_STATEMENTS);
     }
 }
