@@ -149,7 +149,6 @@ export default {
     computed: {
         parentCategories() {
             return _.sortBy(this.categories.filter(cat => !cat.parentId), x => x.name)
-                .filter((x, idx) => idx < 15)
         },
         categoriesAsTree() {
             const resolver = cat => {
@@ -170,17 +169,5 @@ export default {
 <style scoped>
 .drag-point {
     cursor: grabbing;
-}
-
-.selection-info {
-    position: fixed;
-    opacity: 50%;
-    right: 50%;
-    bottom: 1em;
-    z-index: 100;
-}
-
-.selection-info:hover {
-    opacity: 100%;
 }
 </style>
