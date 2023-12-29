@@ -7,6 +7,7 @@ package generated.sky.regular.income.tables;
 import generated.sky.regular.income.RegularIncome;
 import generated.sky.regular.income.tables.records.VCategoriesWithUsageCountRecord;
 
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import javax.annotation.Generated;
@@ -35,7 +36,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VCategoriesWithUsageCount extends TableImpl<VCategoriesWithUsageCountRecord> {
 
-    private static final long serialVersionUID = -21001847;
+    private static final long serialVersionUID = 2000583892;
 
     /**
      * The reference instance of <code>REGULAR_INCOME.v_categories_with_usage_count</code>
@@ -51,14 +52,39 @@ public class VCategoriesWithUsageCount extends TableImpl<VCategoriesWithUsageCou
     }
 
     /**
-     * The column <code>REGULAR_INCOME.v_categories_with_usage_count.category_id</code>.
+     * The column <code>REGULAR_INCOME.v_categories_with_usage_count.id</code>.
      */
-    public final TableField<VCategoriesWithUsageCountRecord, UUID> CATEGORY_ID = createField("category_id", org.jooq.impl.SQLDataType.UUID, this, "");
+    public final TableField<VCategoriesWithUsageCountRecord, UUID> ID = createField("id", org.jooq.impl.SQLDataType.UUID, this, "");
 
     /**
-     * The column <code>REGULAR_INCOME.v_categories_with_usage_count.use_count</code>.
+     * The column <code>REGULAR_INCOME.v_categories_with_usage_count.parent_category</code>.
      */
-    public final TableField<VCategoriesWithUsageCountRecord, Long> USE_COUNT = createField("use_count", org.jooq.impl.SQLDataType.BIGINT, this, "");
+    public final TableField<VCategoriesWithUsageCountRecord, UUID> PARENT_CATEGORY = createField("parent_category", org.jooq.impl.SQLDataType.UUID, this, "");
+
+    /**
+     * The column <code>REGULAR_INCOME.v_categories_with_usage_count.name</code>.
+     */
+    public final TableField<VCategoriesWithUsageCountRecord, String> NAME = createField("name", org.jooq.impl.SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>REGULAR_INCOME.v_categories_with_usage_count.is_income</code>.
+     */
+    public final TableField<VCategoriesWithUsageCountRecord, Boolean> IS_INCOME = createField("is_income", org.jooq.impl.SQLDataType.BOOLEAN, this, "");
+
+    /**
+     * The column <code>REGULAR_INCOME.v_categories_with_usage_count.description</code>.
+     */
+    public final TableField<VCategoriesWithUsageCountRecord, String> DESCRIPTION = createField("description", org.jooq.impl.SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>REGULAR_INCOME.v_categories_with_usage_count.last_updated_at</code>.
+     */
+    public final TableField<VCategoriesWithUsageCountRecord, OffsetDateTime> LAST_UPDATED_AT = createField("last_updated_at", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+
+    /**
+     * The column <code>REGULAR_INCOME.v_categories_with_usage_count.coalesce</code>.
+     */
+    public final TableField<VCategoriesWithUsageCountRecord, Long> COALESCE = createField("coalesce", org.jooq.impl.SQLDataType.BIGINT, this, "");
 
     /**
      * Create a <code>REGULAR_INCOME.v_categories_with_usage_count</code> table reference
