@@ -1,5 +1,11 @@
 <template>
     <v-card class="px-5">
+        <v-overlay :value="isLoading">
+            <v-progress-circular
+                    :indeterminate="true"
+                    :size="64"/>
+        </v-overlay>
+
         <v-card-title class="p-2">
             <div class="w-100 d-flex justify-content-between align-items-center">
                 <span>Categories</span>
@@ -26,10 +32,9 @@
                 <v-col class="py-0" :cols="showDetails ? 8 : 12">
                     <category-list :categories-by-id="categoriesById"
                                    :categories="categories"
-                                   :is-loading="isLoading"
                                    @newCategory="addNewCategoryTo"
                                    @deleteCategory="deleteCategory"
-                                   @onReassign="onDrop"
+                                   @onReassign="reassignCategories"
                                    @edit="openEditView"/>
                 </v-col>
 
@@ -174,7 +179,7 @@ export default {
                     this.isLoading = false
                 })
         },
-        onDrop(payload) {
+        reassignCategories(payload) {
             this.isLoading = true
 
             Promise.all(

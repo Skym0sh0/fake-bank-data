@@ -20,7 +20,6 @@
             <v-col class="py-0">
                 <category-tree-list :categories-by-id="categoriesById"
                                     :categories="filteredCategories"
-                                    :is-loading="isLoading"
                                     @newCategory="$emit('newCategory', $event)"
                                     @deleteCategory="$emit('deleteCategory', $event)"
                                     @onReassign="$emit('onReassign', $event)"
@@ -45,10 +44,6 @@ export default {
         },
         categories: {
             type: Array,
-            required: true,
-        },
-        isLoading: {
-            type: Boolean,
             required: true,
         },
     },

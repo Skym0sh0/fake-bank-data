@@ -37,12 +37,13 @@
                               :outlined="true"/>
 
                 <v-btn @click="saveActiveForm"
-                       :disabled="isLoading || !hasChanged"
+                       :disabled="!hasChanged"
+                       :loading="isLoading"
                        color="success">
                     Save
                 </v-btn>
                 <v-btn @click="cancelActiveForm"
-                       :disabled="isLoading"
+                       :loading="isLoading"
                        color="warning">
                     Cancel
                 </v-btn>

@@ -1,6 +1,5 @@
 <template>
-    <v-card v-if="categoriesAsTree && categoriesAsTree.length"
-            class="overflow-y-auto">
+    <v-card>
         <v-treeview :items="categoriesAsTree"
                     :active.sync="selected"
                     :open.sync="opened"
@@ -16,8 +15,7 @@
             <template v-slot:prepend="{ item }">
                 <drop @drop="onDrop(item, ...arguments)">
                     <drag :transfer-data="item" @dragstart="onDragstart">
-                        <v-icon class="drag-point"
-                                :disabled="isLoading">
+                        <v-icon class="drag-point">
                             mdi-drag
                         </v-icon>
                     </drag>
@@ -39,8 +37,7 @@
                 <v-btn-toggle :dense="true">
                     <v-btn :icon="true"
                            color="primary"
-                           @click.stop="editCategory(item.id)"
-                           :loading="isLoading">
+                           @click.stop="editCategory(item.id)">
                         <v-icon>
                             mdi-pen
                         </v-icon>
@@ -48,8 +45,7 @@
 
                     <v-btn :icon="true"
                            color="primary"
-                           @click.stop="addNewCategoryTo(item.id)"
-                           :loading="isLoading">
+                           @click.stop="addNewCategoryTo(item.id)">
                         <v-icon>
                             mdi-plus
                         </v-icon>
@@ -58,8 +54,7 @@
                     <v-btn :icon="true"
                            color="secondary"
                            @click.stop="deleteCategory(item.id)"
-                           :disabled="item.children && item.children.length > 0"
-                           :loading="isLoading">
+                           :disabled="item.children && item.children.length > 0">
                         <v-icon>
                             mdi-delete
                         </v-icon>
@@ -88,10 +83,6 @@ export default {
         },
         categories: {
             type: Array,
-            required: true,
-        },
-        isLoading: {
-            type: Boolean,
             required: true,
         },
     },
