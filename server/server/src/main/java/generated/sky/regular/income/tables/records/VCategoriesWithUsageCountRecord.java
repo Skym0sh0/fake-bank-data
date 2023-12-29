@@ -30,7 +30,7 @@ import org.jooq.impl.TableRecordImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VCategoriesWithUsageCountRecord extends TableRecordImpl<VCategoriesWithUsageCountRecord> implements Record7<UUID, UUID, String, Boolean, String, OffsetDateTime, Long> {
 
-    private static final long serialVersionUID = -450449463;
+    private static final long serialVersionUID = -2027385386;
 
     /**
      * Setter for <code>REGULAR_INCOME.v_categories_with_usage_count.id</code>.
@@ -123,17 +123,17 @@ public class VCategoriesWithUsageCountRecord extends TableRecordImpl<VCategories
     }
 
     /**
-     * Setter for <code>REGULAR_INCOME.v_categories_with_usage_count.coalesce</code>.
+     * Setter for <code>REGULAR_INCOME.v_categories_with_usage_count.use_count</code>.
      */
-    public VCategoriesWithUsageCountRecord setCoalesce(Long value) {
+    public VCategoriesWithUsageCountRecord setUseCount(Long value) {
         set(6, value);
         return this;
     }
 
     /**
-     * Getter for <code>REGULAR_INCOME.v_categories_with_usage_count.coalesce</code>.
+     * Getter for <code>REGULAR_INCOME.v_categories_with_usage_count.use_count</code>.
      */
-    public Long getCoalesce() {
+    public Long getUseCount() {
         return (Long) get(6);
     }
 
@@ -210,7 +210,7 @@ public class VCategoriesWithUsageCountRecord extends TableRecordImpl<VCategories
      */
     @Override
     public Field<Long> field7() {
-        return VCategoriesWithUsageCount.V_CATEGORIES_WITH_USAGE_COUNT.COALESCE;
+        return VCategoriesWithUsageCount.V_CATEGORIES_WITH_USAGE_COUNT.USE_COUNT;
     }
 
     /**
@@ -266,7 +266,7 @@ public class VCategoriesWithUsageCountRecord extends TableRecordImpl<VCategories
      */
     @Override
     public Long component7() {
-        return getCoalesce();
+        return getUseCount();
     }
 
     /**
@@ -322,7 +322,7 @@ public class VCategoriesWithUsageCountRecord extends TableRecordImpl<VCategories
      */
     @Override
     public Long value7() {
-        return getCoalesce();
+        return getUseCount();
     }
 
     /**
@@ -384,7 +384,7 @@ public class VCategoriesWithUsageCountRecord extends TableRecordImpl<VCategories
      */
     @Override
     public VCategoriesWithUsageCountRecord value7(Long value) {
-        setCoalesce(value);
+        setUseCount(value);
         return this;
     }
 
@@ -417,7 +417,7 @@ public class VCategoriesWithUsageCountRecord extends TableRecordImpl<VCategories
     /**
      * Create a detached, initialised VCategoriesWithUsageCountRecord
      */
-    public VCategoriesWithUsageCountRecord(UUID id, UUID parentCategory, String name, Boolean isIncome, String description, OffsetDateTime lastUpdatedAt, Long coalesce) {
+    public VCategoriesWithUsageCountRecord(UUID id, UUID parentCategory, String name, Boolean isIncome, String description, OffsetDateTime lastUpdatedAt, Long useCount) {
         super(VCategoriesWithUsageCount.V_CATEGORIES_WITH_USAGE_COUNT);
 
         set(0, id);
@@ -426,6 +426,6 @@ public class VCategoriesWithUsageCountRecord extends TableRecordImpl<VCategories
         set(3, isIncome);
         set(4, description);
         set(5, lastUpdatedAt);
-        set(6, coalesce);
+        set(6, useCount);
     }
 }

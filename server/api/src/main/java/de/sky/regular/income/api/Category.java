@@ -13,4 +13,6 @@ public class Category extends UpdatedMetaInformation {
 
     public UUID parentId;
     public List<Category> subCategories;
+
+    public Long usageCount;
 }

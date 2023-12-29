@@ -13,7 +13,7 @@ AS (
                                  COALESCE(t.TURNOVER_COUNT, 0)          AS USE_COUNT
                           FROM FIN_TRANSACTION_COUNT c
                                    FULL JOIN TURNOVERS_COUNT t ON c.CATEGORY_ID = t.CATEGORY_ID),
-        COMPLETED_CATEGORIES AS (SELECT c.*, coalesce(o.USE_COUNT, 0)
+        COMPLETED_CATEGORIES AS (SELECT c.*, coalesce(o.USE_COUNT, 0) as USE_COUNT
                                  FROM CATEGORY c
                                           LEFT JOIN OVERALL_COUNT o ON c.ID = o.CATEGORY_ID)
    SELECT *

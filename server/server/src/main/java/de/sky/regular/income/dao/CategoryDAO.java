@@ -3,6 +3,7 @@ package de.sky.regular.income.dao;
 import de.sky.regular.income.api.Category;
 import de.sky.regular.income.api.CategoryPatch;
 import generated.sky.regular.income.tables.records.CategoryRecord;
+import generated.sky.regular.income.tables.records.VCategoriesWithUsageCountRecord;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 import org.springframework.stereotype.Component;
@@ -14,8 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static generated.sky.regular.income.Tables.CATEGORY;
-import static generated.sky.regular.income.Tables.FINANCIAL_TRANSACTION;
+import static generated.sky.regular.income.Tables.*;
 import static org.jooq.impl.DSL.*;
 
 @Component
@@ -50,21 +50,21 @@ public class CategoryDAO {
     }
 
     public Category fetchById(DSLContext ctx, UUID id) {
-        return ctx.selectFrom(CATEGORY)
-                .where(CATEGORY.ID.eq(id))
+        return ctx.selectFrom(V_CATEGORIES_WITH_USAGE_COUNT)
+                .where(V_CATEGORIES_WITH_USAGE_COUNT.ID.eq(id))
                 .fetchOne(rec -> mapRecursively(ctx, rec));
     }
 
     public List<Category> fetchChildrenOf(DSLContext ctx, UUID parent) {
-        return ctx.selectFrom(CATEGORY)
-                .where(CATEGORY.PARENT_CATEGORY.eq(parent))
-                .orderBy(CATEGORY.NAME)
+        return ctx.selectFrom(V_CATEGORIES_WITH_USAGE_COUNT)
+                .where(V_CATEGORIES_WITH_USAGE_COUNT.PARENT_CATEGORY.eq(parent))
+                .orderBy(V_CATEGORIES_WITH_USAGE_COUNT.NAME)
                 .fetch(rec -> mapRecursively(ctx, rec));
     }
 
     public List<Category> fetchAllCategoriesFlatted(DSLContext ctx, boolean deep) {
-        return ctx.selectFrom(CATEGORY)
-                .fetchInto(CATEGORY)
+        return ctx.selectFrom(V_CATEGORIES_WITH_USAGE_COUNT)
+                .fetchInto(V_CATEGORIES_WITH_USAGE_COUNT)
                 .map(rec -> {
                     if (!deep)
                         return mapFlat(rec);
@@ -74,9 +74,9 @@ public class CategoryDAO {
     }
 
     public List<Category> fetchCategoryTree(DSLContext ctx) {
-        return ctx.selectFrom(CATEGORY)
-                .where(CATEGORY.PARENT_CATEGORY.isNull())
-                .orderBy(CATEGORY.NAME)
+        return ctx.selectFrom(V_CATEGORIES_WITH_USAGE_COUNT)
+                .where(V_CATEGORIES_WITH_USAGE_COUNT.PARENT_CATEGORY.isNull())
+                .orderBy(V_CATEGORIES_WITH_USAGE_COUNT.NAME)
                 .fetch()
                 .map(rec -> mapRecursively(ctx, rec));
     }
@@ -145,7 +145,7 @@ public class CategoryDAO {
         return fetchById(ctx, rootParentId);
     }
 
-    private Category mapFlat(CategoryRecord rec) {
+    private Category mapFlat(VCategoriesWithUsageCountRecord rec) {
         var c = new Category();
 
         c.setId(rec.getId());
@@ -156,13 +156,15 @@ public class CategoryDAO {
 
         c.setSubCategories(null);
 
+        c.setUsageCount(rec.getUseCount());
+
         c.setCreatedAt(ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault()));
         c.setUpdatedAt(rec.getLastUpdatedAt().toZonedDateTime());
 
         return c;
     }
 
-    private Category mapRecursively(DSLContext ctx, CategoryRecord rec) {
+    private Category mapRecursively(DSLContext ctx, VCategoriesWithUsageCountRecord rec) {
         var c = mapFlat(rec);
 
         c.setSubCategories(fetchChildrenOf(ctx, rec.getId()));
