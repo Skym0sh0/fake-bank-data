@@ -15,8 +15,9 @@
 
             <template v-slot:prepend="{ item }">
                 <drop @drop="onDrop(item, ...arguments)">
-                    <drag :transfer-data="item">
-                        <v-icon>
+                    <drag :transfer-data="item" @dragstart="onDragstart">
+                        <v-icon class="drag-point"
+                                :disabled="isLoading">
                             mdi-drag
                         </v-icon>
                     </drag>
@@ -161,5 +162,7 @@ export default {
 </script>
 
 <style scoped>
-
+.drag-point {
+    cursor: grabbing;
+}
 </style>
