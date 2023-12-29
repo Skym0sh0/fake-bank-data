@@ -129,12 +129,12 @@ export default {
         onDragstart(srcItem) {
             this.selected.push(srcItem.id)
         },
-        onDrop(trgtItem, srcItem) {
-            if (trgtItem.id === srcItem.id)
+        onDrop(trgtItem/*, srcItem*/) {
+            if (this.selected.includes(trgtItem.id))
                 return;
 
             this.$emit("onReassign", {
-                source: srcItem,
+                sources: this.selected,
                 target: trgtItem,
             });
 

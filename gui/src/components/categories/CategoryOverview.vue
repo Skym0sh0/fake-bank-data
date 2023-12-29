@@ -177,8 +177,11 @@ export default {
         onDrop(payload) {
             this.isLoading = true
 
-            api.getCategories()
-                .reassignCategory(payload.target, payload.source)
+            Promise.all(
+                payload.sources.map(id => this.categoriesById[id])
+                    .map(source => api.getCategories()
+                        .reassignCategory(payload.target, source))
+            )
                 .then(() => this.loadCategories())
                 .finally(() => {
                     this.isLoading = false
