@@ -58,6 +58,12 @@ export default {
             this.$emit("clear");
         },
     },
+    watch: {
+        categoryCount(newValue) {
+            if (newValue <= 0)
+                this.opened = false
+        }
+    },
     computed: {
         isOpen() {
             return this.categoryCount > 0;

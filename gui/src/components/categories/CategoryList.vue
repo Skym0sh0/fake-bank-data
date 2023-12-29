@@ -24,8 +24,7 @@
                                     @newCategory="$emit('newCategory', $event)"
                                     @deleteCategory="$emit('deleteCategory', $event)"
                                     @onReassign="$emit('onReassign', $event)"
-                                    @edit="$emit('edit', $event)"
-                                    @select="$emit('select', $event)"/>
+                                    @edit="$emit('edit', $event)"/>
             </v-col>
         </v-row>
     </v-container>

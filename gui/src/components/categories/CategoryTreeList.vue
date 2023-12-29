@@ -11,8 +11,7 @@
                     :dense="true"
                     :return-object="false"
                     :transition="true"
-                    :rounded="true"
-                    @update:active="onSelectUpdate">
+                    :rounded="true">
 
             <template v-slot:prepend="{ item }">
                 <drop @drop="onDrop(item, ...arguments)">
@@ -105,9 +104,6 @@ export default {
     methods: {
         clearSelection() {
             this.selected = [];
-        },
-        onSelectUpdate(selected) {
-            this.$emit("select", selected)
         },
         setOpenRecursively(id) {
             const newlyOpened = new Set(this.opened)

@@ -30,8 +30,7 @@
                                    @newCategory="addNewCategoryTo"
                                    @deleteCategory="deleteCategory"
                                    @onReassign="onDrop"
-                                   @edit="openEditView"
-                                   @select="onSelection"/>
+                                   @edit="openEditView"/>
                 </v-col>
 
                 <v-col v-if="showDetails" :cols="4">
@@ -47,18 +46,6 @@
                                               @createAsRoot="createNewRootCategory"
                                               @update="updateCategory"
                                               @close="cancelActiveForm"/>
-
-                            <v-sheet v-if="selectedCategories.length"
-                                     :elevation="10"
-                                     class="overflow-y-auto"
-                            height="10vh">
-                                <ul>
-                                    <li v-for="category in selectedCategories"
-                                        :key="category">
-                                        {{ category }}
-                                    </li>
-                                </ul>
-                            </v-sheet>
                         </div>
                     </div>
                 </v-col>
@@ -84,7 +71,6 @@ export default {
             isLoading: false,
             categories: [],
 
-            multiSelection: [],
             selectedForDetails: {
                 isNew: null,
                 isSelected: false,
@@ -124,10 +110,6 @@ export default {
         },
         addNewRootCategory() {
             this.newCategory(null)
-        },
-        onSelection(ids) {
-            this.multiSelection = ids;
-            // this.cancelActiveForm()
         },
         openEditView(id) {
             if (this.selectedForDetails.entity && this.selectedForDetails.entity.id === id)
@@ -208,12 +190,7 @@ export default {
             return this.categories.reduce((old, cur) => ({...old, [cur.id]: cur}), {})
         },
         showDetails() {
-            return this.selectedForDetails.isSelected || this.multiSelection.length > 0;
-        },
-        selectedCategories() {
-            return this.multiSelection.map(id => this.categoriesById[id])
-                .map(cat => cat.name)
-                .sort();
+            return this.selectedForDetails.isSelected;
         },
     },
     mounted() {
@@ -228,12 +205,5 @@ export default {
     top: 5em;
     bottom: 5em;
     height: 88vh;
-}
-
-.details-view {
-    height: 90%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
 }
 </style>
