@@ -25,7 +25,12 @@
 
             <template v-slot:label="{ item }">
                 <drop @drop="onDrop(item, ...arguments)">
-                    {{ item.name }}
+                    <v-badge :content="item.children.length"
+                             :value="item.children.length"
+                             color="accent"
+                             :inline="true">
+                        {{ item.name }}
+                    </v-badge>
                 </drop>
             </template>
 
