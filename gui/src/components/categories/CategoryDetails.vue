@@ -30,16 +30,16 @@
 
                 <div class="d-flex justify-content-end">
                     <b-btn-group>
+                        <v-btn @click="cancelActiveForm"
+                               :loading="isLoading"
+                               color="warning">
+                            Cancel
+                        </v-btn>
                         <v-btn @click="saveActiveForm"
                                :disabled="!hasChanged"
                                :loading="isLoading"
                                color="success">
                             Save
-                        </v-btn>
-                        <v-btn @click="cancelActiveForm"
-                               :loading="isLoading"
-                               color="warning">
-                            Cancel
                         </v-btn>
                     </b-btn-group>
                 </div>
