@@ -66,7 +66,15 @@
 
         <selected-category-info :selectedIds="selected"
                                 :categories-by-id="categoriesById"
-                                @clear="clearSelection"/>
+                                @clear="clearSelection">
+            <template v-slot:prepend>
+                <drag @dragstart="onDragstart">
+                    <v-icon class="drag-point">
+                        mdi-drag
+                    </v-icon>
+                </drag>
+            </template>
+        </selected-category-info>
     </v-card>
 </template>
 
@@ -119,7 +127,8 @@ export default {
             this.$emit("deleteCategory", this.categoriesById[id])
         },
         onDragstart(srcItem) {
-            this.selected.push(srcItem.id)
+            if (srcItem)
+                this.selected.push(srcItem.id)
         },
         onDrop(trgtItem/*, srcItem*/) {
             if (this.selected.includes(trgtItem.id))

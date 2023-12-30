@@ -13,11 +13,15 @@
         </div>
 
         <div class="d-flex justify-content-between align-items-center">
-            <div class="btn v-card--hover subtitle-2" @click="clearSelection">
-                <v-icon :left="true" :dense="true" :small="true">
-                    mdi-delete
-                </v-icon>
-                {{ categoryCount }} ausgewählte Kategorien
+            <div class="d-flex justify-content-start align-items-center">
+                <slot name="prepend"/>
+
+                <div class="btn v-card--hover subtitle-2 px-0" @click="clearSelection">
+                    <v-icon :left="true" :small="true">
+                        mdi-delete
+                    </v-icon>
+                    {{ categoryCount }} ausgewählte Kategorien
+                </div>
             </div>
 
             <v-btn :icon="true"
