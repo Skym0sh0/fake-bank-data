@@ -23,29 +23,26 @@
                             :outlined="true"
                             @input="changeAnything"/>
 
-                <v-text-field v-show="entity.createdAt"
-                              :value="formatDate(entity.createdAt)"
-                              label="Created At"
-                              :readonly="true"
-                              :outlined="true"/>
+                <div class="category-info px-1">
+                    <p v-show="entity.updatedAt">Updated at: {{ formatDate(entity.updatedAt) }}</p>
+                    <p v-show="entity.createdAt">Created at: {{ formatDate(entity.createdAt) }}</p>
+                </div>
 
-                <v-text-field v-show="entity.updatedAt"
-                              :value="formatDate(entity.updatedAt)"
-                              label="Updated At"
-                              :readonly="true"
-                              :outlined="true"/>
-
-                <v-btn @click="saveActiveForm"
-                       :disabled="!hasChanged"
-                       :loading="isLoading"
-                       color="success">
-                    Save
-                </v-btn>
-                <v-btn @click="cancelActiveForm"
-                       :loading="isLoading"
-                       color="warning">
-                    Cancel
-                </v-btn>
+                <div class="d-flex justify-content-end">
+                    <b-btn-group>
+                        <v-btn @click="saveActiveForm"
+                               :disabled="!hasChanged"
+                               :loading="isLoading"
+                               color="success">
+                            Save
+                        </v-btn>
+                        <v-btn @click="cancelActiveForm"
+                               :loading="isLoading"
+                               color="warning">
+                            Cancel
+                        </v-btn>
+                    </b-btn-group>
+                </div>
             </v-form>
         </v-card-text>
     </v-card>
@@ -140,5 +137,13 @@ export default {
 </script>
 
 <style scoped>
+.category-info {
+    font-size: 10px;
+    display: flex;
+    flex-direction: column;
+}
 
+.category-info > * {
+    margin: 0;
+}
 </style>
