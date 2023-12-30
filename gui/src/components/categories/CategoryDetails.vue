@@ -4,9 +4,8 @@
             Category Details
         </v-card-title>
 
-        <v-card-subtitle>
-            <v-breadcrumbs :items="allParentCategoryChain"/>
-
+        <v-card-subtitle class="py-0">
+            <breadcrumps :items="allParentCategoryChain"/>
         </v-card-subtitle>
 
         <v-card-text>
@@ -55,9 +54,11 @@
 <script>
 import * as moment from "moment";
 import {normalizeCategory} from "@/util/Normalizer";
+import Breadcrumps from "@/components/categories/Breadcrumps.vue";
 
 export default {
     name: "CategoryDetails",
+    components: {Breadcrumps},
     props: {
         categoriesById: {
             type: Object,
@@ -126,13 +127,13 @@ export default {
         allParentCategoryChain() {
             let cur = this.entity.parentId;
 
-            const chain = [];
+            const chain = [this.entity.name];
             while (cur) {
                 const current = this.categoriesById[cur];
                 chain.push(current.name);
                 cur = current.parentId;
             }
-            return chain.reverse().map(c => ({text: c}));
+            return chain.reverse();
         }
     },
 }
