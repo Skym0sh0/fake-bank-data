@@ -34,32 +34,33 @@
             </template>
 
             <template v-slot:append="{ item }">
-                <v-btn-toggle :dense="true">
-                    <v-btn :icon="true"
-                           color="primary"
+                <b-btn-group>
+                    <v-btn :icon="true" :small="true"
+                           color="success"
                            @click.stop="editCategory(item.id)">
-                        <v-icon>
-                            mdi-pen
+                        <v-icon :small="true">
+                            mdi-playlist-edit
                         </v-icon>
                     </v-btn>
 
                     <v-btn :icon="true"
-                           color="primary"
+                           :small="true"
+                           color="purple"
                            @click.stop="addNewCategoryTo(item.id)">
-                        <v-icon>
-                            mdi-plus
+                        <v-icon :small="true">
+                            mdi-playlist-plus
                         </v-icon>
                     </v-btn>
 
-                    <v-btn :icon="true"
-                           color="secondary"
+                    <v-btn :icon="true" :small="true"
+                           color="error"
                            @click.stop="deleteCategory(item.id)"
                            :disabled="isDeletionForbidden(item)">
-                        <v-icon>
-                            mdi-delete
+                        <v-icon :small="true">
+                            mdi-trash-can-outline
                         </v-icon>
                     </v-btn>
-                </v-btn-toggle>
+                </b-btn-group>
             </template>
         </v-treeview>
 
