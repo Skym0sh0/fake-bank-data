@@ -106,10 +106,10 @@
 
 <script>
 import {api} from "../../api/RegularIncomeAPI"
-import StatementTableDetails from "./StatementTableDetails"
+import StatementTableDetails from "./StatementTableDetails.vue"
 import {dateFormat, moneyFormat} from '../../util/Formatters'
 import * as uuid from "uuid";
-import LegacyXlsUpload from "@/components/overview/LegacyXlsUpload.vue";
+import LegacyXlsUpload from "@/components/enterings/LegacyXlsUpload.vue";
 
 export default {
     name: "StatementOverview",
