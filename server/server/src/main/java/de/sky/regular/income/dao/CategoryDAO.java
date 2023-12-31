@@ -9,8 +9,6 @@ import org.jooq.Result;
 import org.jooq.impl.DSL;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -183,7 +181,7 @@ public class CategoryDAO {
 
         c.setUsageCount(rec.getUseCount());
 
-        c.setCreatedAt(ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault()));
+        c.setCreatedAt(rec.getCreatedAt().toZonedDateTime());
         c.setUpdatedAt(rec.getLastUpdatedAt().toZonedDateTime());
 
         return c;

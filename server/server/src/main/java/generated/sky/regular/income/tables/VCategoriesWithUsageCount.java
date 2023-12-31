@@ -36,7 +36,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class VCategoriesWithUsageCount extends TableImpl<VCategoriesWithUsageCountRecord> {
 
-    private static final long serialVersionUID = 1452201384;
+    private static final long serialVersionUID = -1193182195;
 
     /**
      * The reference instance of <code>REGULAR_INCOME.v_categories_with_usage_count</code>
@@ -80,6 +80,11 @@ public class VCategoriesWithUsageCount extends TableImpl<VCategoriesWithUsageCou
      * The column <code>REGULAR_INCOME.v_categories_with_usage_count.last_updated_at</code>.
      */
     public final TableField<VCategoriesWithUsageCountRecord, OffsetDateTime> LAST_UPDATED_AT = createField("last_updated_at", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
+
+    /**
+     * The column <code>REGULAR_INCOME.v_categories_with_usage_count.created_at</code>.
+     */
+    public final TableField<VCategoriesWithUsageCountRecord, OffsetDateTime> CREATED_AT = createField("created_at", org.jooq.impl.SQLDataType.TIMESTAMPWITHTIMEZONE, this, "");
 
     /**
      * The column <code>REGULAR_INCOME.v_categories_with_usage_count.use_count</code>.

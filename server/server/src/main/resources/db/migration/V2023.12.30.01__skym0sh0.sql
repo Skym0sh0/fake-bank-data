@@ -6,12 +6,12 @@
 INSERT INTO TURNOVER_FILE_IMPORT
 WITH STMTS AS (SELECT ID
                FROM BANK_STATEMENT),
-     DATA AS (SELECT S.ID                                                                AS STMT,
+     DATA AS (SELECT S.ID                                                                        AS STMT,
                      DATE_RECORD,
                      AMOUNT_VALUE_CENTS,
-                     CASE WHEN IS_PERIODIC THEN 'is-periodic' ELSE 'is-not-periodic' END AS IS_PERIODIC,
+                     (CASE WHEN IS_PERIODIC THEN 'is-periodic' ELSE 'is-not-periodic' END)::TEXT AS IS_PERIODIC,
                      REASON,
-                     ';'                                                                 AS DIVIDER
+                     ';'::TEXT                                                                   AS DIVIDER
               FROM FINANCIAL_TRANSACTION T
                        JOIN STMTS S ON S.ID = T.BANK_STATEMENT_ID),
      CSV_DATA AS (SELECT STMT,
@@ -27,14 +27,14 @@ WITH STMTS AS (SELECT ID
                                    GROUP BY STMT),
      DATA_FOR_FIRST_STATEMENTS AS (SELECT S.ID AS STMT,
                                           S.DATE_RECORD
-                                              || ';' || S.AMOUNT_BALANCE_CENTS
-                                              || ';' || 'is-not-periodic'
-                                              || ';' || 'Start Guthaben'
+                                              || ';'::TEXT || S.AMOUNT_BALANCE_CENTS
+                                              || ';'::TEXT || 'is-not-periodic'::TEXT
+                                              || ';'::TEXT || 'Start Guthaben'::TEXT
                                                AS CSV
                                    FROM BANK_STATEMENT S
                                    WHERE S.PREVIOUS_STATEMENT_ID IS NULL),
-     DATA_FOR_EMPTY_STATEMENTS AS (SELECT S.ID AS STMT,
-                                          ''   AS CSV
+     DATA_FOR_EMPTY_STATEMENTS AS (SELECT S.ID     AS STMT,
+                                          ''::TEXT AS CSV
                                    FROM BANK_STATEMENT S
                                    WHERE S.PREVIOUS_STATEMENT_ID IS NOT NULL
                                      AND NOT EXISTS(SELECT *
@@ -52,7 +52,7 @@ SELECT ID                               AS ID,
        GREATEST(CREATED_AT, UPDATED_AT) AS IMPORTED_AT,
        DATE_RECORD                      AS FILENAME,
        LENGTH(CSV)                      AS FILE_SIZE,
-       'text/csv'                       AS FILE_CONTENT_TYPE,
+       'text/csv'::TEXT                 AS FILE_CONTENT_TYPE,
        convert_to(CSV, 'UTF-8')         AS FILE_CONTENT,
        MD5(CSV)                         AS CHECKSUM
 FROM BANK_STATEMENT S
