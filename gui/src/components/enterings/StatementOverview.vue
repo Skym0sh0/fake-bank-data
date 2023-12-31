@@ -1,11 +1,13 @@
 <template>
     <div>
+        <waiting-indicator :is-loading="isLoading"/>
+
         <b-card>
             <h1>Statement Overview</h1>
 
             <b-row align-h="between">
                 <b-col cols="1">
-                    <legacy-xls-upload v-if="statements.length === 0"
+                    <legacy-xls-upload v-if="statements.length === 0 && !isLoading"
                                        @uploadSucceeded="uploadSuccess"
                                        :disabled="disabled"/>
                 </b-col>
@@ -110,10 +112,12 @@ import StatementTableDetails from "./StatementTableDetails.vue"
 import {dateFormat, moneyFormat} from '../../util/Formatters'
 import * as uuid from "uuid";
 import LegacyXlsUpload from "@/components/enterings/LegacyXlsUpload.vue";
+import WaitingIndicator from "@/components/misc/WaitingIndicator.vue";
 
 export default {
     name: "StatementOverview",
     components: {
+        WaitingIndicator,
         LegacyXlsUpload,
         StatementTableDetails
     },
@@ -126,6 +130,7 @@ export default {
     data() {
         return {
             errorMessage: '',
+            isLoading: false,
             statements: [],
         }
     },
@@ -147,11 +152,14 @@ export default {
     },
     methods: {
         initiallyLoadData() {
-            api.getAllStatements()
+            this.isLoading = true;
+
+            return api.getAllStatements()
                 .then(res => {
                     this.statements = res
                 })
                 .catch(e => this.errorMessage += e)
+                .finally(() => this.isLoading = false)
         },
         formatBalance(amount) {
             return moneyFormat.formatCents(amount)
@@ -166,11 +174,14 @@ export default {
             this.$router.push({name: "statement-edit", params: {id: realId}, query: {isNew: isNew,}})
         },
         deleteStatement(id) {
-            api.deleteStatement(id)
+            this.isLoading = true;
+
+            return api.deleteStatement(id)
                 .then(() => this.initiallyLoadData())
+                .finally(() => this.isLoading = false)
         },
         uploadSuccess() {
-            this.initiallyLoadData()
+            return this.initiallyLoadData()
         },
         calculateStatementDeviation(stmt) {
             const prev = (stmt.previousStatement && stmt.previousStatement.balance) || 0

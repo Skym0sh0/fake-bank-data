@@ -1,10 +1,6 @@
 <template>
     <v-card class="px-5">
-        <v-overlay :value="isLoading">
-            <v-progress-circular
-                    :indeterminate="true"
-                    :size="64"/>
-        </v-overlay>
+        <waiting-indicator :is-loading="isLoading"/>
 
         <v-card-title class="p-2">
             <div class="w-100 d-flex justify-content-between align-items-center">
@@ -64,10 +60,12 @@ import {api} from "@/api/RegularIncomeAPI"
 import CategoryDetails from "@/components/categories/CategoryDetails.vue";
 import CategoryList from "@/components/categories/CategoryList.vue";
 import _ from 'lodash';
+import WaitingIndicator from "@/components/misc/WaitingIndicator.vue";
 
 export default {
     name: "CategoryOverview",
     components: {
+        WaitingIndicator,
         CategoryList,
         CategoryDetails,
     },

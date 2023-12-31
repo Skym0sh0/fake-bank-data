@@ -1,5 +1,7 @@
 <template>
     <b-container fluid>
+        <waiting-indicator :is-loading="isLoading"/>
+
         <b-form>
             <b-card>
                 <h3>{{ isNew ? 'Create' : 'Edit' }} Statement</h3>
@@ -130,14 +132,14 @@
                         </template>
 
                         <template v-slot:cell(category)="row">
-                            <category-input v-if="categories"
+                            <category-input v-if="categories && categories.length"
                                             :id="`transactions-table-input-category-select-${row.index}`"
-                                           v-model="row.item.category"
-                                           @createCategory="onCreateCategory"
-                                           :options="categories"
-                                           :state="!$v.statement.transactions.$each.$iter[row.index].category.$invalid"
-                                           @input="onRowChange(row.index)"
-                                           :disabled="disabled"
+                                            v-model="row.item.category"
+                                            @createCategory="onCreateCategory"
+                                            :options="categories"
+                                            :state="!$v.statement.transactions.$each.$iter[row.index].category.$invalid"
+                                            @input="onRowChange(row.index)"
+                                            :disabled="disabled"
                             />
                         </template>
 
@@ -242,10 +244,12 @@ import {validationMixin} from 'vuelidate'
 import MonetaryInput from "./MonetaryInput";
 import '@riophae/vue-treeselect/dist/vue-treeselect.css'
 import CategoryInput from "@/components/enterings/CategoryInput.vue";
+import WaitingIndicator from "@/components/misc/WaitingIndicator.vue";
 
 export default {
     name: "StatementEntering",
     components: {
+        WaitingIndicator,
         CategoryInput,
         MonetaryInput,
     },
@@ -261,6 +265,7 @@ export default {
     },
     data() {
         return {
+            isLoading: false,
             previousStatementOptions: [],
             categories: [],
             isNew: false,
@@ -304,24 +309,25 @@ export default {
             this.$v.statement.transactions.$each.$iter[rowIdx].$touch();
         },
         loadEntity() {
-            if (!this.isNew) {
-                api.readStatement(this.id)
-                    .then(svrStmt => {
-                        this.statement.date = svrStmt.date
-                        this.statement.balance = svrStmt.balance
+            if (this.isNew)
+                return Promise.resolve();
 
-                        if (svrStmt.previousStatement) {
-                            const selected = this.previousStatementOptions.filter(stmt => stmt.id === svrStmt.previousStatement.id)
+            return api.readStatement(this.id)
+                .then(svrStmt => {
+                    this.statement.date = svrStmt.date
+                    this.statement.balance = svrStmt.balance
 
-                            if (selected.length > 0)
-                                this.statement.previousStatement = selected[0]
-                        }
+                    if (svrStmt.previousStatement) {
+                        const selected = this.previousStatementOptions.filter(stmt => stmt.id === svrStmt.previousStatement.id)
 
-                        this.statement.transactions = svrStmt.transactions.sort((a, b) => {
-                            return -moment.utc(a.date).diff(moment.utc(b.date))
-                        })
+                        if (selected.length > 0)
+                            this.statement.previousStatement = selected[0]
+                    }
+
+                    this.statement.transactions = svrStmt.transactions.sort((a, b) => {
+                        return -moment.utc(a.date).diff(moment.utc(b.date))
                     })
-            }
+                })
         },
         loadStatements() {
             return api.getAllStatements()
@@ -351,19 +357,19 @@ export default {
                 name: categoryName,
             });
 
-            api.getCategories()
+            this.isLoading = true;
+
+            return api.getCategories()
                 .postCategory(normalized)
-                .then(() => {
-                    this.loadCategories()
-                })
-        },
-        loadOtherEntities() {
-            return Promise.all([this.loadCategories(), this.loadStatements()])
+                .then(() => this.loadCategories())
+                .finally(() => this.isLoading = false)
         },
         saveModel() {
             const normalizedStatement = normalizeStatement(this.statement)
 
-            api.postStatement(normalizedStatement)
+            this.isLoading = true;
+
+            return api.postStatement(normalizedStatement)
                 .then(res => {
                     this.isNew = false
 
@@ -373,13 +379,14 @@ export default {
                     }).catch(() => {
                     })
 
-                    this.loadStatements()
+                    return this.loadStatements()
                         .then(() => this.loadEntity())
                 })
                 .catch(e => {
                     // eslint-disable-next-line
                     console.log('Post failed', e)
                 })
+                .finally(() => this.isLoading = false)
         },
         abort() {
             this.$router.back()
@@ -453,8 +460,10 @@ export default {
         },
     },
     mounted() {
-        this.loadOtherEntities()
+        this.isLoading = true;
+        Promise.all([this.loadCategories(), this.loadStatements()])
             .then(() => this.loadEntity())
+            .finally(() => this.isLoading = false)
 
         this.$refs['statement-date-input'].focus()
     },
