@@ -8,7 +8,10 @@ import generated.sky.regular.income.RegularIncome;
 import generated.sky.regular.income.Tables;
 import generated.sky.regular.income.tables.records.BackupHistoryRecord;
 import org.apache.commons.lang3.time.StopWatch;
-import org.jooq.*;
+import org.jooq.CommonTableExpression;
+import org.jooq.DSLContext;
+import org.jooq.Record1;
+import org.jooq.Table;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -82,19 +85,10 @@ public class BackupSender {
     }
 
     private boolean isBackupNeeded(DSLContext ctx) {
-        if (ctx.fetchCount(BACKUP_HISTORY) == 0)
-            return true;
-
         var tsField = field(name("LAST_TS"), OffsetDateTime.class);
 
-        CommonTableExpression<Record> last_backup = name("last_backup")
-                .as(select()
-                        .from(BACKUP_HISTORY)
-                        .orderBy(BACKUP_HISTORY.LAST_CHECK.desc())
-                        .limit(1));
-
         CommonTableExpression<Record1<OffsetDateTime>> last_update = name("last_update")
-                .as(select(max(tsField))
+                .as(select(max(tsField).as(tsField))
                         .from(
                                 select(BANK_STATEMENT.CREATED_AT.as(tsField)).from(BANK_STATEMENT)
                                         .unionAll(select(BANK_STATEMENT.UPDATED_AT.as(tsField)).from(BANK_STATEMENT))
@@ -105,16 +99,45 @@ public class BackupSender {
                         .limit(1)
                 );
 
-        return ctx.fetchExists(
-                with(last_backup, last_update)
-                        .select()
-                        .from(last_backup)
-                        .where(last_backup.field(BACKUP_HISTORY.LAST_CHECK)
-                                .lessThan(
-                                        select(last_update.field(tsField))
-                                                .from(last_update)
-                                ))
+        var lastBackupTimestamp = ctx.select()
+                .from(BACKUP_HISTORY)
+                .where(BACKUP_HISTORY.SUCCESS.isTrue())
+                .orderBy(BACKUP_HISTORY.LAST_CHECK.desc())
+                .limit(1)
+                .fetchOptional(BACKUP_HISTORY.LAST_CHECK);
+
+        var lastUpdateTimestamp = ctx.with(last_update)
+                .select()
+                .from(last_update)
+                .fetchOptional(tsField);
+
+        logger.info("Last successful backup was {}. Last update was {}.",
+                lastBackupTimestamp.map(OffsetDateTime::toString).orElse("never"),
+                lastUpdateTimestamp.map(OffsetDateTime::toString).orElse("never")
         );
+
+        if (lastBackupTimestamp.isEmpty()) {
+            if (lastUpdateTimestamp.isEmpty()) {
+                logger.info("Empty database, no backup necessary");
+                return false;
+            }
+
+            logger.info("Database filled but never had a backup");
+            return true;
+        } else {
+            if (lastUpdateTimestamp.isEmpty()) {
+                logger.info("Database is empty again, no backup necessary");
+                return false;
+            }
+
+            if (lastBackupTimestamp.get().isBefore(lastBackupTimestamp.get())) {
+                logger.info("Database was updated after last backup");
+                return true;
+            }
+
+            logger.info("Last backup is still up to date");
+            return false;
+        }
     }
 
     private Optional<String> doBackupIfNeeded(DSLContext ctx, ZonedDateTime timestamp, boolean backupNeeded) {
