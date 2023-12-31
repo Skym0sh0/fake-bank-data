@@ -61,7 +61,10 @@
                 </b-alert>
             </template>
 
-            <b-form-group label-cols="2"
+            <waiting-indicator :is-loading="isUploading"/>
+
+            <b-form-group v-if="!fileSelection"
+                          label-cols="2"
                           label-for="general-file-import-file"
                           label="Selected file:"
                           :horizontal="true">
@@ -75,9 +78,8 @@
                              accept=".csv"/>
             </b-form-group>
 
-            <b-spinner v-if="isUploading"/>
             <template v-else>
-                <b-card v-if="fileSelection" :title="fileSelection.name">
+                <b-card v-if="fileSelection && previewedData" :title="fileSelection.name">
                     <turnover-preview-table v-model="previewedData"/>
                 </b-card>
             </template>
@@ -89,10 +91,12 @@
 import {required} from 'vuelidate/dist/validators.min'
 import {api} from "../../api/RegularIncomeAPI";
 import TurnoverPreviewTable from "@/components/turnovers/TurnoverPreviewTable.vue";
+import WaitingIndicator from "@/components/misc/WaitingIndicator.vue";
 
 export default {
     name: "TurnoverImporting",
     components: {
+        WaitingIndicator,
         TurnoverPreviewTable
     },
     data() {
