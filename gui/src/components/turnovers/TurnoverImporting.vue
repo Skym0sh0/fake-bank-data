@@ -1,6 +1,5 @@
 <template>
     <b-btn id="statement-overview-import-new-statement"
-           class="mb-2"
            variant="info"
            v-b-modal="'file-upload-modal'">
         Import CSV
