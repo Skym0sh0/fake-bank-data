@@ -3,6 +3,7 @@ package de.sky.regular.income.server;
 import com.google.common.base.Stopwatch;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.FilterChain;
@@ -19,6 +20,11 @@ import java.util.Optional;
 public class CorrelationFilter extends HttpFilter {
     @Override
     protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
+        if (HttpMethod.OPTIONS.matches(request.getMethod())) {
+            super.doFilter(request, response, chain);
+            return;
+        }
+
         String correlationid = Optional.ofNullable(request.getHeader("correlationid"))
                 .orElse("unknown");
 
