@@ -90,11 +90,11 @@ public class BackupSender {
         CommonTableExpression<Record1<OffsetDateTime>> last_update = name("last_update")
                 .as(select(max(tsField).as(tsField))
                         .from(
-                                select(BANK_STATEMENT.CREATED_AT.as(tsField)).from(BANK_STATEMENT)
-                                        .unionAll(select(BANK_STATEMENT.UPDATED_AT.as(tsField)).from(BANK_STATEMENT))
+                                select(greatest(BANK_STATEMENT.CREATED_AT, BANK_STATEMENT.UPDATED_AT).as(tsField)).from(BANK_STATEMENT)
                                         .unionAll(select(FINANCIAL_TRANSACTION.CREATED_AT.as(tsField)).from(FINANCIAL_TRANSACTION))
                                         .unionAll(select(TURNOVER_FILE_IMPORT.IMPORTED_AT.as(tsField)).from(TURNOVER_FILE_IMPORT))
                                         .unionAll(select(TURNOVER_ROW.LAST_UPDATED_AT.as(tsField)).from(TURNOVER_ROW))
+                                        .unionAll(select(greatest(CATEGORY.CREATED_AT, CATEGORY.LAST_UPDATED_AT).as(tsField)).from(CATEGORY))
                         )
                         .limit(1)
                 );

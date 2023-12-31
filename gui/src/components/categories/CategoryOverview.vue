@@ -163,6 +163,7 @@ export default {
 
             call()
                 .then(res => {
+                    this.selectedForDetails.entity = {...res}
                     this.categories.push(res)
                     this.openEditView(res.id)
                 })
