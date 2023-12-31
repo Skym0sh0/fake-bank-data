@@ -130,7 +130,7 @@ public class BackupSender {
                 return false;
             }
 
-            if (lastBackupTimestamp.get().isBefore(lastBackupTimestamp.get())) {
+            if (lastBackupTimestamp.get().isBefore(lastUpdateTimestamp.get())) {
                 logger.info("Database was updated after last backup");
                 return true;
             }
