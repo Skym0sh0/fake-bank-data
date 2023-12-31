@@ -19,6 +19,8 @@ import static org.jooq.impl.DSL.*;
 @Component
 public class CategoryDAO {
     public Category createCategory(DSLContext ctx, UUID parentId, CategoryPatch patch) {
+        var now = ZonedDateTime.now().toOffsetDateTime();
+
         CategoryRecord rec = ctx.newRecord(CATEGORY);
 
         rec.setId(UUID.randomUUID());
@@ -26,7 +28,8 @@ public class CategoryDAO {
         rec.setName(patch.name.trim());
         rec.setDescription(Optional.ofNullable(patch.description).map(String::trim).orElse(null));
         rec.setIsIncome(false);
-        rec.setLastUpdatedAt(ZonedDateTime.now().toOffsetDateTime());
+        rec.setCreatedAt(now);
+        rec.setLastUpdatedAt(now);
 
         rec.insert();
 
