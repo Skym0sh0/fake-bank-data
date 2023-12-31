@@ -1,7 +1,14 @@
 <template>
     <v-card class="position-sticky">
-        <v-card-title>
-            Category Details
+        <v-card-title class="justify-content-between">
+            <span>Category Details</span>
+
+            <b-badge id="usage-count"
+                     variant="success"
+                     v-b-tooltip.hover
+                     :title="`Diese Kategorie wird in ${entity.usageCount} Transaktionen benutzt.`">
+                {{ entity.usageCount }}
+            </b-badge>
         </v-card-title>
 
         <v-card-subtitle class="py-0">
@@ -26,6 +33,7 @@
                 <div class="category-info px-1">
                     <p v-show="entity.updatedAt">Updated at: {{ formatDate(entity.updatedAt) }}</p>
                     <p v-show="entity.createdAt">Created at: {{ formatDate(entity.createdAt) }}</p>
+                    <p v-show="entity.usageCount">Used in entities: {{ entity.usageCount }}</p>
                 </div>
 
                 <div class="d-flex justify-content-end">
