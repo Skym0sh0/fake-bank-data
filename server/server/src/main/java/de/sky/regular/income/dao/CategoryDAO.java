@@ -59,6 +59,7 @@ public class CategoryDAO {
 
     public void deleteCategory(DSLContext ctx, UUID id) {
         var transaction = FINANCIAL_TRANSACTION.as("transaction");
+        var turnovers = TURNOVER_ROW.as("turnovers");
         var parent = CATEGORY.as("parent");
         var child = CATEGORY.as("child");
 
@@ -67,6 +68,16 @@ public class CategoryDAO {
                 .from(child)
                 .where(DSL.and(
                         child.ID.eq(transaction.CATEGORY_ID),
+                        child.ID.eq(id),
+                        child.PARENT_CATEGORY.isNotNull()
+                ))
+                .execute();
+
+        ctx.update(turnovers)
+                .set(turnovers.CATEGORY_ID, child.PARENT_CATEGORY)
+                .from(child)
+                .where(DSL.and(
+                        child.ID.eq(turnovers.CATEGORY_ID),
                         child.ID.eq(id),
                         child.PARENT_CATEGORY.isNotNull()
                 ))
@@ -87,12 +98,15 @@ public class CategoryDAO {
     }
 
     public Category reassignParent(DSLContext ctx, UUID childId, UUID newParentId) {
+        var now = ZonedDateTime.now().toOffsetDateTime();
+
         ctx.update(CATEGORY)
                 .set(CATEGORY.PARENT_CATEGORY, newParentId)
+                .set(CATEGORY.LAST_UPDATED_AT, now)
                 .where(CATEGORY.ID.eq(childId))
                 .execute();
         ctx.update(CATEGORY)
-                .set(CATEGORY.LAST_UPDATED_AT, ZonedDateTime.now().toOffsetDateTime())
+                .set(CATEGORY.LAST_UPDATED_AT, now)
                 .where(CATEGORY.ID.eq(childId))
                 .or(CATEGORY.ID.eq(newParentId))
                 .execute();
