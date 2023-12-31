@@ -28,7 +28,7 @@ public class CategorySuggester {
     }
 
     public CategoryBatchSuggester openForBatchSuggestion() {
-        var allCategories = db.transactionWithResult(ctx -> dao.fetchAllCategoriesFlatted(ctx, true));
+        var allCategories = db.transactionWithResult(ctx -> dao.fetchAllCategoriesFlatted(ctx, false));
 
         log.info("Fetched {} categories for batch suggestion...", allCategories.size());
 

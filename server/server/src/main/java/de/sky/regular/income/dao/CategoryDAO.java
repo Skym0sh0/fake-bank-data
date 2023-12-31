@@ -5,15 +5,15 @@ import de.sky.regular.income.api.CategoryPatch;
 import generated.sky.regular.income.tables.records.CategoryRecord;
 import generated.sky.regular.income.tables.records.VCategoriesWithUsageCountRecord;
 import org.jooq.DSLContext;
+import org.jooq.Result;
 import org.jooq.impl.DSL;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static generated.sky.regular.income.Tables.*;
 import static org.jooq.impl.DSL.*;
@@ -50,35 +50,11 @@ public class CategoryDAO {
     }
 
     public Category fetchById(DSLContext ctx, UUID id) {
-        return ctx.selectFrom(V_CATEGORIES_WITH_USAGE_COUNT)
-                .where(V_CATEGORIES_WITH_USAGE_COUNT.ID.eq(id))
-                .fetchOne(rec -> mapRecursively(ctx, rec));
-    }
-
-    public List<Category> fetchChildrenOf(DSLContext ctx, UUID parent) {
-        return ctx.selectFrom(V_CATEGORIES_WITH_USAGE_COUNT)
-                .where(V_CATEGORIES_WITH_USAGE_COUNT.PARENT_CATEGORY.eq(parent))
-                .orderBy(V_CATEGORIES_WITH_USAGE_COUNT.NAME)
-                .fetch(rec -> mapRecursively(ctx, rec));
-    }
-
-    public List<Category> fetchAllCategoriesFlatted(DSLContext ctx, boolean deep) {
-        return ctx.selectFrom(V_CATEGORIES_WITH_USAGE_COUNT)
-                .fetchInto(V_CATEGORIES_WITH_USAGE_COUNT)
-                .map(rec -> {
-                    if (!deep)
-                        return mapFlat(rec);
-
-                    return mapRecursively(ctx, rec);
-                });
-    }
-
-    public List<Category> fetchCategoryTree(DSLContext ctx) {
-        return ctx.selectFrom(V_CATEGORIES_WITH_USAGE_COUNT)
-                .where(V_CATEGORIES_WITH_USAGE_COUNT.PARENT_CATEGORY.isNull())
-                .orderBy(V_CATEGORIES_WITH_USAGE_COUNT.NAME)
-                .fetch()
-                .map(rec -> mapRecursively(ctx, rec));
+        return fetchAllCategoriesFlatted(ctx, true)
+                .stream()
+                .filter(cat -> Objects.equals(id, cat.getId()))
+                .findAny()
+                .orElseThrow();
     }
 
     public void deleteCategory(DSLContext ctx, UUID id) {
@@ -145,6 +121,41 @@ public class CategoryDAO {
         return fetchById(ctx, rootParentId);
     }
 
+    public List<Category> fetchAllCategoriesFlatted(DSLContext ctx, boolean deep) {
+        var allCategories = ctx.selectFrom(V_CATEGORIES_WITH_USAGE_COUNT)
+                .orderBy(V_CATEGORIES_WITH_USAGE_COUNT.NAME)
+                .limit(10_000)
+                .fetchInto(V_CATEGORIES_WITH_USAGE_COUNT);
+
+        var categoriesByParentId = allCategories.intoGroups(V_CATEGORIES_WITH_USAGE_COUNT.PARENT_CATEGORY);
+
+        return allCategories.map(rec -> {
+            if (!deep)
+                return mapFlat(rec);
+
+            return mapRecursively(categoriesByParentId, rec);
+        });
+    }
+
+    public List<Category> fetchCategoryTree(DSLContext ctx) {
+        return fetchAllCategoriesFlatted(ctx, true)
+                .stream()
+                .filter(cat -> cat.getParentId() == null)
+                .collect(Collectors.toList());
+    }
+
+    private Category mapRecursively(Map<UUID, Result<VCategoriesWithUsageCountRecord>> categoriesByParentId, VCategoriesWithUsageCountRecord rec) {
+        var c = mapFlat(rec);
+
+        c.setSubCategories(
+                Optional.ofNullable(categoriesByParentId.get(rec.getId()))
+                        .map(children -> children.map(child -> mapRecursively(categoriesByParentId, child)))
+                        .orElse(List.of())
+        );
+
+        return c;
+    }
+
     private Category mapFlat(VCategoriesWithUsageCountRecord rec) {
         var c = new Category();
 
@@ -160,14 +171,6 @@ public class CategoryDAO {
 
         c.setCreatedAt(ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault()));
         c.setUpdatedAt(rec.getLastUpdatedAt().toZonedDateTime());
-
-        return c;
-    }
-
-    private Category mapRecursively(DSLContext ctx, VCategoriesWithUsageCountRecord rec) {
-        var c = mapFlat(rec);
-
-        c.setSubCategories(fetchChildrenOf(ctx, rec.getId()));
 
         return c;
     }
