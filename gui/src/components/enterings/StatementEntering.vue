@@ -18,7 +18,8 @@
                                                :options="prevStatementOptions"
                                                v-model="statement.previousStatement"
                                                :state="!$v.statement.previousStatement.$invalid"
-                                               class="statement-selection"/>
+                                               class="statement-selection"
+                                               :disabled="disabled"/>
                             </b-form-group>
                         </b-col>
 
@@ -47,7 +48,8 @@
                                            class="mr-2"
                                            size="sm"
                                            :variant="!$v.statement.date.$invalid ? 'success' : 'danger'"
-                                           @click="setDateToToday">
+                                           @click="setDateToToday"
+                                           :disabled="disabled">
                                         &#128198;
                                     </b-btn>
                                     <b-tooltip target="statement-date-input-btn-today">
@@ -58,7 +60,8 @@
                                                   ref="statement-date-input"
                                                   type="date"
                                                   v-model="statement.date"
-                                                  :state="!$v.statement.date.$invalid"/>
+                                                  :state="!$v.statement.date.$invalid"
+                                                  :disabled="disabled"/>
                                 </b-input-group>
                             </b-form-group>
                         </b-col>
@@ -71,7 +74,8 @@
                                           horizontal>
                                 <monetary-input id="statement-balance-input"
                                                 v-model="statement.balance"
-                                                :state="!$v.statement.balance.$invalid"/>
+                                                :state="!$v.statement.balance.$invalid"
+                                                :disabled="disabled"/>
                             </b-form-group>
                         </b-col>
                     </b-row>
@@ -83,7 +87,7 @@
                     <b-btn variant="primary"
                            class="mb-2"
                            @click="addNewTransaction(0)"
-                           :disabled="!statement.previousStatement.id">
+                           :disabled="!statement.previousStatement.id || disabled">
                         +
                     </b-btn>
 
@@ -102,7 +106,8 @@
                                           type="date"
                                           size="sm"
                                           :state="!$v.statement.transactions.$each.$iter[row.index].date.$invalid"
-                                          v-model="row.item.date"/>
+                                          v-model="row.item.date"
+                                          :disabled="disabled"/>
                         </template>
 
                         <template v-slot:cell(amount)="row">
@@ -111,7 +116,8 @@
                                             size="sm"
                                             :state="!$v.statement.transactions.$each.$iter[row.index].amount.$invalid"
                                             v-model="row.item.amount"
-                                            placeholder="Amount"/>
+                                            placeholder="Amount"
+                                            :disabled="disabled"/>
                         </template>
 
                         <template v-slot:cell(periodic)="row">
@@ -119,7 +125,8 @@
                                              :ref="`transactions-table-input-periodic-${row.index}`"
                                              size="sm"
                                              :state="!$v.statement.transactions.$each.$iter[row.index].isPeriodic.$invalid"
-                                             v-model="row.item.isPeriodic"/>
+                                             v-model="row.item.isPeriodic"
+                                             :disabled="disabled"/>
                         </template>
 
                         <template v-slot:cell(category)="row">
@@ -130,6 +137,7 @@
                                            :options="categories"
                                            :state="!$v.statement.transactions.$each.$iter[row.index].category.$invalid"
                                            @input="onRowChange(row.index)"
+                                           :disabled="disabled"
                             />
                         </template>
 
@@ -137,19 +145,22 @@
                             <b-button-group size="sm">
                                 <b-btn :id="`transactions-table-input-add-new-transaction-before-${row.index}`"
                                        variant="primary"
-                                       @click="addNewTransaction(row.index)">
+                                       @click="addNewTransaction(row.index)"
+                                       :disabled="disabled">
                                     &#8593;+
                                 </b-btn>
                                 <b-btn :id="`transactions-table-input-add-new-transaction-after-${row.index}`"
                                        variant="primary"
-                                       @click="addNewTransaction(row.index + 1)">
+                                       @click="addNewTransaction(row.index + 1)"
+                                       :disabled="disabled">
                                     &#8595;+
                                 </b-btn>
 
                                 <b-btn :id="`transactions-table-input-delete-transaction-${row.index}`"
                                        variant="danger"
                                        @click="deleteTransaction(row.index)"
-                                       class="ml-1">
+                                       class="ml-1"
+                                       :disabled="disabled">
                                     &#128465;
                                 </b-btn>
                             </b-button-group>
@@ -205,7 +216,7 @@
                         <b-btn-group>
                             <b-btn :variant="isExpectedTransactionSumMatching ? 'primary' : 'danger'"
                                    @click="saveModel"
-                                   :disabled="$v.statement.$invalid">
+                                   :disabled="$v.statement.$invalid || disabled">
                                 Save
                             </b-btn>
                             <b-btn variant="secondary"
@@ -242,6 +253,10 @@ export default {
         id: {
             required: true,
             type: String,
+        },
+        disabled: {
+            type: Boolean,
+            default: true,
         },
     },
     data() {

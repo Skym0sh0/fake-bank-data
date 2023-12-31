@@ -6,7 +6,8 @@
             <b-row align-h="between">
                 <b-col cols="1">
                     <legacy-xls-upload v-if="statements.length === 0"
-                                       @uploadSucceeded="uploadSuccess"/>
+                                       @uploadSucceeded="uploadSuccess"
+                                       :disabled="disabled"/>
                 </b-col>
 
                 <b-col class="col-auto">
@@ -21,7 +22,8 @@
                         <b-btn id="statement-overview-create-new-statement"
                                class="mb-2"
                                variant="primary"
-                               @click="toStatementDialog(null)">
+                               @click="toStatementDialog(null)"
+                               :disabled="disabled">
                             Create
                         </b-btn>
                     </b-button-group>
@@ -75,7 +77,7 @@
 
                             <b-button :id="`bank-statement-delete-btn-${row.item.id}`"
                                       variant="danger"
-                                      :disabled="row.index !== 0"
+                                      :disabled="row.index !== 0 || disabled"
                                       @click="$bvModal.show(`bank-statement-delete-modal-${row.item.id}`)">
                                 Delete
                             </b-button>
@@ -114,6 +116,12 @@ export default {
     components: {
         LegacyXlsUpload,
         StatementTableDetails
+    },
+    props: {
+        disabled: {
+            type: Boolean,
+            default: true,
+        },
     },
     data() {
         return {

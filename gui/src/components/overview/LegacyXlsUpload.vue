@@ -2,7 +2,8 @@
     <div>
         <b-button class="mb-2"
                   v-b-modal="'statement-file-upload-modal'"
-                  variant="primary">
+                  variant="primary"
+                  :disabled="true">
             {{ true ? 'Legacy Upload' : 'Abort Upload' }}
         </b-button>
 

@@ -5,6 +5,7 @@
                       @input="onCategoryInput"
                       :value="currentSearch"
                       :state="isValidState"
+                      :disabled="disabled"
                       autocomplete="off"
                       size="sm"
                       type="text">
@@ -41,6 +42,10 @@ export default {
         value: {
             // required: true,
             type: String,
+        },
+        disabled: {
+            type: Boolean,
+            default: false,
         },
         options: {
             required: true,
