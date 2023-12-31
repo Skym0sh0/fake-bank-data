@@ -87,9 +87,16 @@ export default {
             this.isLoading = true
 
             return api.getCategories()
-                .fetchCategories()
+                .fetchCategoryTree()
                 .then(res => {
-                    this.categories = res
+                    const flatter = cat => {
+                        return [
+                            cat,
+                            ...(cat.subCategories || []).flatMap(flatter)
+                        ];
+                    };
+
+                    this.categories = res.flatMap(flatter)
                     return this.categories
                 })
                 .finally(() => {

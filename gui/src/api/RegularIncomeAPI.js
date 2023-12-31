@@ -142,10 +142,10 @@ class RegularIncomeAPI {
         const ref = this
 
         return {
-            fetchCategories() {
-                return ref.getClient().get('categories')
-                    .then(res => res.data.map(c => denormalizeCategory(c)))
-            },
+            // fetchCategories() {
+            //     return ref.getClient().get('categories')
+            //         .then(res => res.data.map(c => denormalizeCategory(c)))
+            // },
 
             fetchCategoryTree() {
                 return ref.getClient().get('categories/tree')
