@@ -28,8 +28,8 @@
 
                             <b-col class="p-0 px-2">
                                 <h6>Todos</h6>
-                                <b-progress :max="rawRows.length" :show-value="true">
-                                    <b-progress-bar :value="rawRows.length - rowsTodo.length" variant="success"/>
+                                <b-progress :max="importableRows.length" :show-value="true">
+                                    <b-progress-bar :value="importableRows.length - rowsTodo.length" variant="success"/>
                                     <b-progress-bar :value="rowsTodo.length" variant="danger"/>
                                 </b-progress>
                             </b-col>
@@ -149,7 +149,7 @@ export default {
             return this.rawRows.filter(r => r.importable);
         },
         rowsTodo() {
-            return this.rawRows.filter(r => !r.categoryId);
+            return this.importableRows.filter(r => !r.categoryId);
         },
     },
     methods: {

@@ -9,7 +9,7 @@
              :filter="filters"
              :filter-function="doFilter"
              :small="true"
-             :foot-clone="true"
+             :foot-clone="value.length > 25"
              :tbody-tr-class="rowClass">
 
         <template v-slot:head(importable)>
@@ -27,6 +27,10 @@
                     </v-icon>
                 </v-btn>
             </div>
+        </template>
+
+        <template v-slot:cell(checksum)="row">
+            {{ row.index + 1 }}
         </template>
 
         <template v-slot:cell(importable)="row">
@@ -98,6 +102,10 @@ export default {
     computed: {
         fields() {
             return [
+                {
+                    key: 'checksum',
+                    label: '#',
+                },
                 {
                     key: "importable",
                     label: "?",
