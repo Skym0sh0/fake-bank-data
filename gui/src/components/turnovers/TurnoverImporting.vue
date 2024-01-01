@@ -22,7 +22,7 @@
                                 <h6>Importierbar</h6>
                                 <b-progress :max="rawRows.length" :show-value="true">
                                     <b-progress-bar :value="importableRows.length" variant="success"/>
-                                    <b-progress-bar :value="rawRows.length - importableRows.length" variant="warning"/>
+                                    <b-progress-bar :value="rawRows.length - importableRows.length" variant="secondary"/>
                                 </b-progress>
                             </b-col>
 
@@ -127,20 +127,20 @@ export default {
         fileSelection: {
             required,
         },
-        previewedData: {
-            $each: {
-                categoryId: {
-                    required,
-                }
-            }
-        }
     },
     computed: {
         importFileTypes() {
             return FILE_IMPORT_TYPES;
         },
         isImportImpossible() {
-            return this.$v.$invalid || this.isUploading || this.importableRows.length <= 0;
+            const isDataValid = (this.previewedData || []).every(row => {
+                if (!row.importable)
+                    return true;
+
+                return !!row.categoryId;
+            });
+
+            return this.$v.$invalid || !isDataValid || this.isUploading || this.importableRows.length <= 0;
         },
         rawRows() {
             return (this.previewedData || []);

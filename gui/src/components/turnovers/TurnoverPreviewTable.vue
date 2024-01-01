@@ -7,7 +7,8 @@
              :responsive="true"
              primary-key="checksum"
              :small="true"
-             :foot-clone="true">
+             :foot-clone="true"
+             :tbody-tr-class="rowClass">
 
         <template v-slot:cell(importable)="row">
             <b-checkbox v-model="row.item.importable"
@@ -27,13 +28,15 @@
                             v-model="row.item.categoryId"
                             @createCategory="onCreateCategory"
                             :options="categories"
-                            :state="true"/>
+                            :required="row.item.importable"
+                            :disabled="!row.item.importable"/>
         </template>
 
         <template v-slot:cell(SuggestedCategory)="row">
             <b-button v-if="!isUnknownCategory[row.item.suggestedCategory]"
                       size="sm"
-                      @click="onCreateSuggestedCategory(row.item.suggestedCategory)">
+                      @click="onCreateSuggestedCategory(row.item.suggestedCategory)"
+                      :disabled="!row.item.importable">
                 +
             </b-button>
             {{ row.item.suggestedCategory }}
@@ -115,6 +118,18 @@ export default {
         }
     },
     methods: {
+        rowClass(item, type) {
+            if (!item || type !== 'row')
+                return;
+
+            if (!item.importable)
+                return 'table-secondary'
+
+            if (!item.categoryId)
+                return 'table-danger';
+
+            return undefined;
+        },
         onCreateCategory(categoryName) {
             this.$emit("onCreateCategory", {
                 categoryName: categoryName,

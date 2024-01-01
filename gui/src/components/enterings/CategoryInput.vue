@@ -4,7 +4,7 @@
                       :list="`${id}-category-input-list`"
                       @input="onCategoryInput"
                       :value="currentSearch"
-                      :state="isValidState"
+                      :state="showValidationState"
                       :disabled="disabled"
                       autocomplete="off"
                       size="sm"
@@ -52,9 +52,13 @@ export default {
             type: Array,
         },
         state: {
-            required: true,
             type: Boolean,
-        }
+            default: true,
+        },
+        required: {
+            type: Boolean,
+            default: true,
+        },
     },
     data() {
         return {
@@ -88,6 +92,16 @@ export default {
         },
         isValidState() {
             return this.state && !this.isUnknownCategory && !this.$v.currentSearch.$invalid;
+        },
+        showValidationState() {
+            if (!this.required) {
+                if (this.isUnknownCategory && this.currentSearch !== '')
+                    return false;
+
+                return null;
+            }
+
+            return this.isValidState
         },
     },
     watch: {
