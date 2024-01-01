@@ -7,7 +7,7 @@ import vuetify from './plugins/vuetify';
 import GlobalEvents from 'vue-global-events'
 import { Drag, Drop } from 'vue-drag-drop';
 
-import BootstrapVue from 'bootstrap-vue'
+import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
@@ -18,6 +18,7 @@ Vue.component('drop', Drop);
 Vue.component('GlobalEvents', GlobalEvents)
 
 Vue.use(BootstrapVue)
+Vue.use(BootstrapVueIcons)
 Vue.use(Vuelidate)
 
 new Vue({

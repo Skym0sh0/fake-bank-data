@@ -6,24 +6,39 @@
              :fields="fields"
              :responsive="true"
              primary-key="checksum"
+             :filter="filters"
+             :filter-function="doFilter"
              :small="true"
              :foot-clone="true"
              :tbody-tr-class="rowClass">
+
+        <template v-slot:head(importable)>
+            <b-checkbox @input="onSelectImportable"/>
+        </template>
+        <template v-slot:head(categoryId)="item">
+            <div class="d-flex justify-content-between align-items-end">
+                {{ item.label }}
+
+                <v-btn :icon="true"
+                       :x-small="true"
+                       @click="filters.onlyMissingCategories = !filters.onlyMissingCategories">
+                    <v-icon>
+                        {{ filters.onlyMissingCategories ? 'mdi-filter-check' : 'mdi-filter' }}
+                    </v-icon>
+                </v-btn>
+            </div>
+        </template>
 
         <template v-slot:cell(importable)="row">
             <b-checkbox v-model="row.item.importable"
                         :disabled="!row.item.originalImportable"/>
         </template>
 
-        <template #cell(date)="row">
-            {{ row.item.date }}
-        </template>
-
         <template v-slot:cell(amount)="row">
             <table-cell-monetary :value="row.item.amountInCents"/>
         </template>
 
-        <template v-slot:cell(Category)="row">
+        <template v-slot:cell(categoryId)="row">
             <category-input :id="`csv-category-input-${row.index}`"
                             v-model="row.item.categoryId"
                             @createCategory="onCreateCategory"
@@ -32,26 +47,21 @@
                             :disabled="!row.item.importable"/>
         </template>
 
-        <template v-slot:cell(SuggestedCategory)="row">
-            <b-button v-if="!isUnknownCategory[row.item.suggestedCategory]"
+        <template v-slot:cell(suggestedCategory)="row">
+            <b-button v-if="!categoriesByName[row.item.suggestedCategory]"
                       size="sm"
                       @click="onCreateSuggestedCategory(row.item.suggestedCategory)"
-                      :disabled="!row.item.importable">
-                +
+                      :disabled="!row.item.importable"
+                      class="p-0"
+                      variant="info">
+                <b-icon icon="plus" font-scale="1"/>
             </b-button>
+
             {{ row.item.suggestedCategory }}
         </template>
 
         <template v-slot:cell(Description)="row">
             <table-cell-description :index="row.index" :value="row.item.description"/>
-        </template>
-
-        <template v-slot:cell(Recipient)="row">
-            {{ row.item.recipient }}
-        </template>
-
-        <template v-slot:cell(Checksum)="row">
-            {{ row.item.checksum }}
         </template>
     </b-table>
 </template>
@@ -79,7 +89,11 @@ export default {
         },
     },
     data() {
-        return {}
+        return {
+            filters: {
+                onlyMissingCategories: false,
+            },
+        }
     },
     computed: {
         fields() {
@@ -92,30 +106,46 @@ export default {
                 {
                     key: "date",
                     label: "Date",
-                    sortable: true
+                    sortable: true,
                 },
                 {
-                    key: "Recipient"
+                    key: "recipient",
+                    label: "Empfänger",
+                    sortable: true,
                 },
                 {
                     key: "amount",
                     label: "Money",
+                    sortable: true,
                 },
                 {
-                    key: "Category"
+                    key: "categoryId",
+                    label: "Kategorie",
+                    sortable: true,
+                    sortByFormatted: true,
+                    formatter: (id) => {
+                        const cat = this.categoriesById[id]
+                        if (!cat)
+                            return id;
+                        return cat.name;
+                    },
                 },
                 {
-                    key: "SuggestedCategory",
-                    label: "Suggested"
+                    key: "suggestedCategory",
+                    label: "Bank Vorschlag",
+                    sortable: true,
                 },
                 {
                     key: "Description"
                 }
             ];
         },
-        isUnknownCategory() {
+        categoriesByName() {
             return (this.categories || []).reduce((a, v) => ({...a, [v.name]: v}), {})
-        }
+        },
+        categoriesById() {
+            return (this.categories || []).reduce((a, v) => ({...a, [v.id]: v}), {})
+        },
     },
     methods: {
         rowClass(item, type) {
@@ -129,6 +159,9 @@ export default {
                 return 'table-danger';
 
             return undefined;
+        },
+        doFilter(row, filterProp) {
+            return filterProp.onlyMissingCategories ? !row.categoryId : true;
         },
         onCreateCategory(categoryName) {
             this.$emit("onCreateCategory", {
@@ -150,7 +183,13 @@ export default {
                     })
                 }
             })
-        }
+        },
+        onSelectImportable(newValue) {
+            this.value.forEach(row => {
+                if (row.originalImportable)
+                    row.importable = newValue;
+            })
+        },
     },
 }
 </script>
