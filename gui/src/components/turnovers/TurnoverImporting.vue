@@ -87,7 +87,9 @@
                     </b-card-header>
 
                     <b-card-body id="preview-card-body" class="p-2">
-                        <turnover-preview-table v-model="previewedData"/>
+                        <turnover-preview-table v-model="previewedData"
+                                                :categories="categories"
+                                                @onCreateCategory="onCreateCategory"/>
                     </b-card-body>
                 </b-card>
             </template>
@@ -100,6 +102,7 @@ import {required} from 'vuelidate/dist/validators.min'
 import {api} from "../../api/RegularIncomeAPI";
 import TurnoverPreviewTable from "@/components/turnovers/TurnoverPreviewTable.vue";
 import WaitingIndicator from "@/components/misc/WaitingIndicator.vue";
+import {normalizeCategory} from "@/util/Normalizer";
 
 const FILE_IMPORT_TYPES = ["VR-Bank CSV"];
 
@@ -112,6 +115,7 @@ export default {
     data() {
         return {
             isUploading: false,
+            categories: null,
             fileType: FILE_IMPORT_TYPES[0],
             fileSelection: null,
             parsedPreview: null,
@@ -149,10 +153,15 @@ export default {
         },
     },
     methods: {
+        loadCategories() {
+            return api.getCategories()
+                .fetchCategoryTree()
+                .then(res => {
+                    this.categories = res
+                })
+        },
         doPreviewRequest() {
-            this.isUploading = true;
-
-            api.getTurnovers()
+            return api.getTurnovers()
                 .previewTurnoverImport(this.fileSelection)
                 .then(preview => {
                     this.parsedPreview = preview;
@@ -161,12 +170,6 @@ export default {
                             ...row,
                             originalImportable: row.importable
                         }));
-                })
-                .catch(e => {
-                    this.errorMessage = e.response.data;
-                })
-                .finally(() => {
-                    this.isUploading = false;
                 })
         },
         doImportRequest() {
@@ -189,7 +192,25 @@ export default {
                     this.isUploading = false;
                 })
         },
+        onCreateCategory({categoryName, callback}) {
+            const normalized = normalizeCategory({
+                name: categoryName,
+            });
+
+            this.isUploading = true;
+
+            return api.getCategories()
+                .postCategory(normalized)
+                .then(() => this.loadCategories())
+                .then(() => {
+                    if (callback) {
+                        callback()
+                    }
+                })
+                .finally(() => this.isUploading = false)
+        },
         reset() {
+            this.categories = null;
             this.fileSelection = null;
             this.parsedPreview = null;
             this.previewedData = null;
@@ -210,7 +231,13 @@ export default {
     watch: {
         fileSelection(newFile/*, oldFile*/) {
             if (newFile) {
-                this.doPreviewRequest();
+                this.isUploading = true;
+
+                Promise.all([this.loadCategories(), this.doPreviewRequest()])
+                    .catch(e => {
+                        this.errorMessage = e.response.data;
+                    })
+                    .finally(() => this.isUploading = false)
             }
         },
     }

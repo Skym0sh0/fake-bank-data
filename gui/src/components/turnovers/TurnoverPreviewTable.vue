@@ -23,16 +23,11 @@
         </template>
 
         <template v-slot:cell(Category)="row">
-            <category-input v-if="categories"
-                            :id="`csv-category-input-${row.index}`"
+            <category-input :id="`csv-category-input-${row.index}`"
                             v-model="row.item.categoryId"
                             @createCategory="onCreateCategory"
                             :options="categories"
                             :state="true"/>
-            <template v-else>
-                <b-spinner :type="row.index % 2 ? 'grow' : 'border'"
-                           variant="info"/>
-            </template>
         </template>
 
         <template v-slot:cell(SuggestedCategory)="row">
@@ -62,8 +57,6 @@
 import TableCellDescription from "@/components/overview/utils/TableCellDescription.vue";
 import TableCellMonetary from "@/components/overview/utils/TableCellMonetary.vue";
 import CategoryInput from "@/components/enterings/CategoryInput.vue";
-import {api} from "@/api/RegularIncomeAPI";
-import {normalizeCategory} from "@/util/Normalizer";
 
 export default {
     name: "TurnoverPreviewTable",
@@ -77,11 +70,13 @@ export default {
             required: true,
             type: Array,
         },
+        categories: {
+            type: Array,
+            required: true,
+        },
     },
     data() {
-        return {
-            categories: null,
-        }
+        return {}
     },
     computed: {
         fields() {
@@ -120,27 +115,16 @@ export default {
         }
     },
     methods: {
-        loadCategories() {
-            return api.getCategories()
-                .fetchCategoryTree()
-                .then(res => {
-                    this.categories = res
-                })
-        },
         onCreateCategory(categoryName) {
-            const normalized = normalizeCategory({
-                name: categoryName,
-            });
-
-            return api.getCategories()
-                .postCategory(normalized)
-                .then(() => {
-                    return this.loadCategories()
-                })
+            this.$emit("onCreateCategory", {
+                categoryName: categoryName,
+                callback: undefined
+            })
         },
         onCreateSuggestedCategory(categoryName) {
-            this.onCreateCategory(categoryName)
-                .then(() => {
+            this.$emit("onCreateCategory", {
+                categoryName: categoryName,
+                callback: () => {
                     const newlyCreatedCategory = this.categories.find(cat => cat.name === categoryName)
                     if (!newlyCreatedCategory)
                         return;
@@ -149,11 +133,9 @@ export default {
                         if (row.suggestedCategory === categoryName && !row.categoryId)
                             row.categoryId = newlyCreatedCategory.id;
                     })
-                });
+                }
+            })
         }
-    },
-    mounted() {
-        this.loadCategories()
     },
 }
 </script>
