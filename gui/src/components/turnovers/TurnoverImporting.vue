@@ -12,7 +12,8 @@
                  header-bg-variant="warning"
                  footer-bg-variant="light"
                  @hidden="reset"
-                 @hide="checkToHide">
+                 @hide="checkToHide"
+                 body-class="p-0">
             <template v-slot:modal-footer>
                 <div class="w-100" style="display: flex;">
                     <b-container class="p-0">
@@ -30,13 +31,6 @@
                                 <b-progress :max="rawRows.length" :show-value="true">
                                     <b-progress-bar :value="rawRows.length - rowsTodo.length" variant="success"/>
                                     <b-progress-bar :value="rowsTodo.length" variant="danger"/>
-                                </b-progress>
-                            </b-col>
-
-                            <b-col class="p-0 px-2">
-                                <h6>Time to parse for preview</h6>
-                                <b-progress :max="uploadingTime/1000 * 1.3" :show-value="true" :precision="3">
-                                    <b-progress-bar :value="uploadingTime/1000" variant="success"/>
                                 </b-progress>
                             </b-col>
                         </b-row>
@@ -63,24 +57,38 @@
 
             <waiting-indicator :is-loading="isUploading"/>
 
-            <b-form-group v-if="!fileSelection"
-                          label-cols="2"
-                          label-for="general-file-import-file"
-                          label="Selected file:"
-                          :horizontal="true">
-                <b-form-file id="general-file-import-file"
-                             v-model="fileSelection"
-                             :disabled="isUploading"
-                             :multiple="false"
-                             :state="!$v.fileSelection.$invalid"
-                             placeholder="Select file to import"
-                             drop-placeholder="Drop file here to import"
-                             accept=".csv"/>
-            </b-form-group>
+            <div v-if="!fileSelection">
+                <b-container>
+                    <v-row>
+                        <v-col :cols="4">
+                            <b-form-select v-model="fileType"
+                                           :options="importFileTypes"/>
+                        </v-col>
+                        <v-col>
+                            <b-form-file id="general-file-import-file"
+                                         v-model="fileSelection"
+                                         :disabled="isUploading"
+                                         :multiple="false"
+                                         :state="!$v.fileSelection.$invalid"
+                                         placeholder="Select file to import"
+                                         drop-placeholder="Drop file here to import"
+                                         accept=".csv"/>
+                        </v-col>
+                    </v-row>
+                </b-container>
+            </div>
 
             <template v-else>
-                <b-card v-if="fileSelection && previewedData" :title="fileSelection.name">
-                    <turnover-preview-table v-model="previewedData"/>
+                <b-card v-if="fileSelection && previewedData" id="preview-card"
+                        body-class="p-2">
+                    <b-card-header class="d-flex justify-content-between py-2" id="preview-card-header">
+                        <h6>{{ fileSelection.name }}</h6>
+                        <h6>{{ fileType }}</h6>
+                    </b-card-header>
+
+                    <b-card-body id="preview-card-body" class="p-2">
+                        <turnover-preview-table v-model="previewedData"/>
+                    </b-card-body>
                 </b-card>
             </template>
         </b-modal>
@@ -93,6 +101,8 @@ import {api} from "../../api/RegularIncomeAPI";
 import TurnoverPreviewTable from "@/components/turnovers/TurnoverPreviewTable.vue";
 import WaitingIndicator from "@/components/misc/WaitingIndicator.vue";
 
+const FILE_IMPORT_TYPES = ["VR-Bank CSV"];
+
 export default {
     name: "TurnoverImporting",
     components: {
@@ -102,7 +112,7 @@ export default {
     data() {
         return {
             isUploading: false,
-            uploadingTime: null,
+            fileType: FILE_IMPORT_TYPES[0],
             fileSelection: null,
             parsedPreview: null,
             previewedData: null,
@@ -122,6 +132,9 @@ export default {
         }
     },
     computed: {
+        importFileTypes() {
+            return FILE_IMPORT_TYPES;
+        },
         isImportImpossible() {
             return this.$v.$invalid || this.isUploading || this.importableRows.length <= 0;
         },
@@ -138,21 +151,22 @@ export default {
     methods: {
         doPreviewRequest() {
             this.isUploading = true;
-            this.uploadingTime = null;
-            const startTime = new Date();
 
             api.getTurnovers()
                 .previewTurnoverImport(this.fileSelection)
                 .then(preview => {
                     this.parsedPreview = preview;
-                    this.previewedData = this.parsedPreview.rows;
+                    this.previewedData = (this.parsedPreview.rows || [])
+                        .map(row => ({
+                            ...row,
+                            originalImportable: row.importable
+                        }));
                 })
                 .catch(e => {
                     this.errorMessage = e.response.data;
                 })
                 .finally(() => {
                     this.isUploading = false;
-                    this.uploadingTime = new Date().getTime() - startTime.getTime();
                 })
         },
         doImportRequest() {
@@ -181,7 +195,6 @@ export default {
             this.previewedData = null;
             this.errorMessage = null;
             this.isUploading = false;
-            this.uploadingTime = null;
             this.$refs["file-upload-modal"].hide();
         },
         checkToHide(e) {

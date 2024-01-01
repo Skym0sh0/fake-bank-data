@@ -10,7 +10,8 @@
              :foot-clone="true">
 
         <template v-slot:cell(importable)="row">
-            <b-checkbox v-model="row.item.importable"/>
+            <b-checkbox v-model="row.item.importable"
+                        :disabled="!row.item.originalImportable"/>
         </template>
 
         <template #cell(date)="row">
