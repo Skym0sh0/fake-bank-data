@@ -77,11 +77,11 @@ public class DatabaseConnection implements AutoCloseable {
     public <T> T transactionWithResult(Function<DSLContext, T> func) {
         Instant t0 = Instant.now();
 
-        try (DSLContext outerCtx = getContext()) {
+        try {
+            var outerCtx = getContext();
             return outerCtx.transactionResult(configuration -> {
-                try (DSLContext ctx = DSL.using(configuration)) {
-                    return func.apply(ctx);
-                }
+                var ctx = DSL.using(configuration);
+                return func.apply(ctx);
             });
         } finally {
             Instant t1 = Instant.now();
@@ -93,11 +93,12 @@ public class DatabaseConnection implements AutoCloseable {
     public void transactionWithoutResult(Consumer<DSLContext> func) {
         Instant t0 = Instant.now();
 
-        try (DSLContext outerCtx = getContext()) {
+        try {
+            var outerCtx = getContext();
+
             outerCtx.transaction(configuration -> {
-                try (DSLContext ctx = DSL.using(configuration)) {
-                    func.accept(ctx);
-                }
+                var ctx = DSL.using(configuration);
+                func.accept(ctx);
             });
         } finally {
             Instant t1 = Instant.now();

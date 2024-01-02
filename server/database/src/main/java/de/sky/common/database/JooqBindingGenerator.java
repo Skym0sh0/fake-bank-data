@@ -145,11 +145,11 @@ public class JooqBindingGenerator {
     }
 
     private Connection createConnection(PostgreSQLContainer psql) throws SQLException {
-        try {
-            Class.forName("org.h2.Driver");
-        } catch (ClassNotFoundException e) {
-            throw new IllegalStateException("for " + getClass() + " to work properly, you have to manually include the H2 dependency, e.g. group: 'com.h2database', name: 'h2', version: '1.4.197'", e);
-        }
+//        try {
+//            Class.forName("org.h2.Driver");
+//        } catch (ClassNotFoundException e) {
+//            throw new IllegalStateException("for " + getClass() + " to work properly, you have to manually include the H2 dependency, e.g. group: 'com.h2database', name: 'h2', version: '1.4.197'", e);
+//        }
 
         try {
             Class.forName(psql.getDriverClassName());
