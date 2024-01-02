@@ -17,11 +17,13 @@ plugins {
 group 'de.sky.regular.income.server'
 version '1.0-SNAPSHOT'
 
+ext['jooq.version'] = '3.16.23'
+
 dependencies {
     implementation project(':database')
     implementation project(':api')
 
-    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.28'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.10'
     implementation group: 'ch.qos.logback', name: 'logback-core', version: "$logback_version"
     implementation group: 'ch.qos.logback', name: 'logback-classic', version: "$logback_version"
 
@@ -32,18 +34,18 @@ dependencies {
     compileOnly group: 'org.springframework.boot', name: 'spring-boot-configuration-processor', version: "$springboot_version"
     annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor', version: "$springboot_version"
 
-    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.9'
-    implementation group: 'com.google.guava', name: 'guava', version: '28.1-jre'
+    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: "$springboot_version"
+
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.14.0'
+    implementation group: 'com.google.guava', name: 'guava', version: '33.0.0-jre'
 
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: "$junit_version"
 //    testRuntime group: 'org.junit.vintage', name: 'junit-vintage-engine', version: "$junit_version"
     testImplementation group: 'org.mockito', name: 'mockito-core', version: "$mockito_version"
     testImplementation group: 'org.assertj', name: 'assertj-core', version: "$assertj_version"
 
-    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: "$springboot_version"
-
-    implementation group: 'org.apache.poi', name: 'poi', version: '4.1.0'
-    implementation group: 'com.univocity', name: 'univocity-parsers', version: '2.8.4'
+    implementation group: 'org.apache.poi', name: 'poi', version: '5.2.5'
+    implementation group: 'com.univocity', name: 'univocity-parsers', version: '2.9.1'
 }
 
 sourceSets {

@@ -4,8 +4,6 @@
 package generated.sky.regular.income.tables;
 
 
-import de.sky.common.database.converters.DateConverter;
-
 import generated.sky.regular.income.RegularIncome;
 import generated.sky.regular.income.tables.records.VOrderedBankStatementsRecord;
 
@@ -58,7 +56,7 @@ public class VOrderedBankStatements extends TableImpl<VOrderedBankStatementsReco
      * The column
      * <code>REGULAR_INCOME.v_ordered_bank_statements.date_record</code>.
      */
-    public final TableField<VOrderedBankStatementsRecord, LocalDate> DATE_RECORD = createField(DSL.name("date_record"), SQLDataType.LOCALDATE, this, "", new DateConverter());
+    public final TableField<VOrderedBankStatementsRecord, LocalDate> DATE_RECORD = createField(DSL.name("date_record"), SQLDataType.LOCALDATE, this, "");
 
     /**
      * The column

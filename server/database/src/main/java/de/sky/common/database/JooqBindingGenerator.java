@@ -116,11 +116,11 @@ public class JooqBindingGenerator {
                                                         .withTypes("TIMESTAMP.*")
                                                         .withExpression(".*")
                                                         .withConverter(TimestampConverter.class.getName()),*/
-                                                        new ForcedType()
-                                                                .withUserType(LocalDate.class.getName())
-                                                                .withTypes("DATE.*")
-                                                                .withExpression(".*")
-                                                                .withConverter(DateConverter.class.getName())
+//                                                        new ForcedType()
+//                                                                .withUserType(LocalDate.class.getName())
+//                                                                .withTypes("DATE.*")
+//                                                                .withExpression(".*")
+//                                                                .withConverter(DateConverter.class.getName())
                                                 )
                                 ).withGenerate(
                                         new Generate()

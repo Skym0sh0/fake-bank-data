@@ -4,8 +4,6 @@
 package generated.sky.regular.income.tables;
 
 
-import de.sky.common.database.converters.DateConverter;
-
 import generated.sky.regular.income.Indexes;
 import generated.sky.regular.income.Keys;
 import generated.sky.regular.income.RegularIncome;
@@ -71,7 +69,7 @@ public class FinancialTransaction extends TableImpl<FinancialTransactionRecord> 
     /**
      * The column <code>REGULAR_INCOME.financial_transaction.date_record</code>.
      */
-    public final TableField<FinancialTransactionRecord, LocalDate> DATE_RECORD = createField(DSL.name("date_record"), SQLDataType.LOCALDATE.nullable(false), this, "", new DateConverter());
+    public final TableField<FinancialTransactionRecord, LocalDate> DATE_RECORD = createField(DSL.name("date_record"), SQLDataType.LOCALDATE.nullable(false), this, "");
 
     /**
      * The column

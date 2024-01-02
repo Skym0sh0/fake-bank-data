@@ -4,8 +4,6 @@
 package generated.sky.regular.income.tables;
 
 
-import de.sky.common.database.converters.DateConverter;
-
 import generated.sky.regular.income.Indexes;
 import generated.sky.regular.income.Keys;
 import generated.sky.regular.income.RegularIncome;
@@ -69,7 +67,7 @@ public class TurnoverRow extends TableImpl<TurnoverRowRecord> {
     /**
      * The column <code>REGULAR_INCOME.turnover_row.date</code>.
      */
-    public final TableField<TurnoverRowRecord, LocalDate> DATE = createField(DSL.name("date"), SQLDataType.LOCALDATE.nullable(false), this, "", new DateConverter());
+    public final TableField<TurnoverRowRecord, LocalDate> DATE = createField(DSL.name("date"), SQLDataType.LOCALDATE.nullable(false), this, "");
 
     /**
      * The column <code>REGULAR_INCOME.turnover_row.amount_value_cents</code>.
