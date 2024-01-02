@@ -6,6 +6,7 @@ import com.univocity.parsers.common.processor.BeanListProcessor;
 import com.univocity.parsers.conversions.ObjectConversion;
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
+import de.sky.regular.income.api.turnovers.TurnoverImportFormat;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,12 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class TurnoverCsvParser {
+public class TurnoverCsvParser implements TurnoverParser {
+    @Override
+    public TurnoverImportFormat getSupportedFormat() {
+        return TurnoverImportFormat.VR_BANK_CSV;
+    }
+
     public List<TurnoverRecord> parseCsv(String csv) throws Exception {
         try (var is = new ByteArrayInputStream(csv.getBytes())) {
             return parseCsv(is);

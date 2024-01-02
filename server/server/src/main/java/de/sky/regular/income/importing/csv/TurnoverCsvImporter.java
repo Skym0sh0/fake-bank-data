@@ -1,5 +1,6 @@
 package de.sky.regular.income.importing.csv;
 
+import com.google.common.base.Stopwatch;
 import de.sky.common.database.DatabaseConnection;
 import de.sky.regular.income.api.detail.CreatedMetaInformation;
 import de.sky.regular.income.api.turnovers.*;
@@ -33,12 +34,12 @@ public class TurnoverCsvImporter {
     private final ChecksumComputer checksummer;
 
     private final DatabaseConnection db;
-    private final TurnoverCsvParser csvParser;
+    private final TurnoverFileParser parser;
     private final CategorySuggester categorySuggester;
 
     @Autowired
-    public TurnoverCsvImporter(ChecksumComputer checksummer, DatabaseSupplier db, TurnoverCsvParser csvParser, CategorySuggester categorySuggester) {
-        this(checksummer, db.getDatabase(), csvParser, categorySuggester);
+    public TurnoverCsvImporter(ChecksumComputer checksummer, DatabaseSupplier db, TurnoverFileParser parser, CategorySuggester categorySuggester) {
+        this(checksummer, db.getDatabase(), parser, categorySuggester);
     }
 
     public TurnoverImport createImport(ZonedDateTime ts, MultipartFile file, TurnoverImportPatch patch) throws Exception {
@@ -129,9 +130,11 @@ public class TurnoverCsvImporter {
     }
 
     public List<TurnoverRowPreview> parseForPreview(TurnoverImportFormat format, InputStream is) {
-        log.info("Parsing file...");
+        var sw = Stopwatch.createStarted();
 
-        var records = csvParser.parseCsv(is);
+        log.info("Previewing file ...");
+
+        var records = parser.parseCsv(format, is);
 
         var alreadyExistentRows = findExistentRows(records);
 
@@ -144,6 +147,8 @@ public class TurnoverCsvImporter {
                     .map(rec -> enrichAndMap(suggester, alreadyExistentRows, rec))
                     .sorted(Comparator.comparing(TurnoverRow::getDate))
                     .collect(Collectors.toUnmodifiableList());
+        } finally {
+            log.info("Previewing file was done in {}", sw.stop());
         }
     }
 
