@@ -3,6 +3,7 @@ package de.sky.regular.income.rest;
 import com.google.common.base.Stopwatch;
 import de.sky.regular.income.api.turnovers.TurnOverPreview;
 import de.sky.regular.income.api.turnovers.TurnoverImport;
+import de.sky.regular.income.api.turnovers.TurnoverImportFormat;
 import de.sky.regular.income.api.turnovers.TurnoverImportPatch;
 import de.sky.regular.income.importing.csv.TurnoverCsvImporter;
 import lombok.extern.slf4j.Slf4j;
@@ -27,17 +28,23 @@ public class TurnoversController {
         this.importer = Objects.requireNonNull(importer);
     }
 
+    @GetMapping("/formats")
+    public List<TurnoverImportFormat> getSupportedFormats() {
+        return List.of(TurnoverImportFormat.values());
+    }
+
     @PostMapping("preview")
-    public TurnOverPreview processPreview(@RequestParam("file") MultipartFile file) throws Exception {
-        log.info("Preview-processing file {} with {} bytes...", file.getOriginalFilename(), file.getSize());
+    public TurnOverPreview processPreview(@RequestParam("file") MultipartFile file, @RequestParam("format") TurnoverImportFormat format) throws Exception {
+        log.info("Preview-processing {} file {} with {} bytes...", format, file.getOriginalFilename(), file.getSize());
 
         var sw = Stopwatch.createStarted();
 
         try (var is = new BufferedInputStream(file.getInputStream())) {
-            var rows = importer.parseForPreview(is);
+            var rows = importer.parseForPreview(format, is);
 
             return TurnOverPreview.builder()
                     .filename(file.getOriginalFilename())
+                    .format(format)
                     .uploadTime(ZonedDateTime.now())
                     .rows(rows)
                     .build();

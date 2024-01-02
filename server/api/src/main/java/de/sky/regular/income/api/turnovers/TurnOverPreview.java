@@ -10,6 +10,7 @@ import java.util.List;
 @Builder
 public class TurnOverPreview {
     public String filename;
+    public TurnoverImportFormat format;
     public ZonedDateTime uploadTime;
     public List<TurnoverRowPreview> rows;
 }

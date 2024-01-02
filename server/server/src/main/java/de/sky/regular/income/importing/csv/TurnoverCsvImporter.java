@@ -2,10 +2,7 @@ package de.sky.regular.income.importing.csv;
 
 import de.sky.common.database.DatabaseConnection;
 import de.sky.regular.income.api.detail.CreatedMetaInformation;
-import de.sky.regular.income.api.turnovers.TurnoverImport;
-import de.sky.regular.income.api.turnovers.TurnoverImportPatch;
-import de.sky.regular.income.api.turnovers.TurnoverRow;
-import de.sky.regular.income.api.turnovers.TurnoverRowPreview;
+import de.sky.regular.income.api.turnovers.*;
 import de.sky.regular.income.database.DatabaseSupplier;
 import generated.sky.regular.income.tables.records.TurnoverFileImportRecord;
 import generated.sky.regular.income.tables.records.TurnoverRowRecord;
@@ -131,7 +128,7 @@ public class TurnoverCsvImporter {
         });
     }
 
-    public List<TurnoverRowPreview> parseForPreview(InputStream is) {
+    public List<TurnoverRowPreview> parseForPreview(TurnoverImportFormat format, InputStream is) {
         log.info("Parsing file...");
 
         var records = csvParser.parseCsv(is);
