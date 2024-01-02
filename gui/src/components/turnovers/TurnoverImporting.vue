@@ -80,7 +80,7 @@
             </div>
 
             <template v-else>
-                <b-card v-if="fileSelection && previewedData" id="preview-card"
+                <b-card v-if="isReadilyLoaded" id="preview-card"
                         body-class="p-2">
                     <b-card-header class="d-flex justify-content-between py-2" id="preview-card-header">
                         <h6>{{ fileSelection.name }}</h6>
@@ -148,6 +148,9 @@ export default {
         },
         rowsTodo() {
             return this.importableRows.filter(r => !r.categoryId);
+        },
+        isReadilyLoaded() {
+            return this.fileSelection && this.previewedData && this.categories
         },
     },
     methods: {
