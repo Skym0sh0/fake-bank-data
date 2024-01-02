@@ -13,9 +13,10 @@ dependencies {
 
     implementation("com.zaxxer", "HikariCP", "3.4.5")
 
-    implementation("org.slf4j", "slf4j-simple", "2.0.10")
+    implementation("org.slf4j", "slf4j-api", "2.0.10")
+    runtimeOnly("org.slf4j", "slf4j-simple", "2.0.10")
 
-    compile("org.flywaydb", "flyway-core", "6.0.8")
+    api("org.flywaydb", "flyway-core", "6.0.8")
 
     implementation("org.postgresql", "postgresql", "42.2.27")
 

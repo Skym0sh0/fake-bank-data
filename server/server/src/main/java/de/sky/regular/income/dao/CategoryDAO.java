@@ -5,7 +5,6 @@ import de.sky.regular.income.api.CategoryPatch;
 import generated.sky.regular.income.tables.records.CategoryRecord;
 import generated.sky.regular.income.tables.records.VCategoriesWithUsageCountRecord;
 import org.jooq.DSLContext;
-import org.jooq.Result;
 import org.jooq.impl.DSL;
 import org.springframework.stereotype.Component;
 
@@ -142,7 +141,10 @@ public class CategoryDAO {
                 .limit(10_000)
                 .fetchInto(V_CATEGORIES_WITH_USAGE_COUNT);
 
-        var categoriesByParentId = allCategories.intoGroups(V_CATEGORIES_WITH_USAGE_COUNT.PARENT_CATEGORY);
+        var categoriesByParentId = allCategories
+                .stream()
+                .filter(cat -> cat.getParentCategory() != null)
+                .collect(Collectors.groupingBy(VCategoriesWithUsageCountRecord::getParentCategory));
 
         return allCategories.map(rec -> {
             if (!deep)
@@ -159,13 +161,15 @@ public class CategoryDAO {
                 .collect(Collectors.toList());
     }
 
-    private Category mapRecursively(Map<UUID, Result<VCategoriesWithUsageCountRecord>> categoriesByParentId, VCategoriesWithUsageCountRecord rec) {
+    private Category mapRecursively(Map<UUID, List<VCategoriesWithUsageCountRecord>> categoriesByParentId, VCategoriesWithUsageCountRecord rec) {
         var c = mapFlat(rec);
 
         c.setSubCategories(
                 Optional.ofNullable(categoriesByParentId.get(rec.getId()))
-                        .map(children -> children.map(child -> mapRecursively(categoriesByParentId, child)))
-                        .orElse(List.of())
+                        .stream()
+                        .flatMap(Collection::stream)
+                        .map(child -> mapRecursively(categoriesByParentId, child))
+                        .collect(Collectors.toList())
         );
 
         return c;
