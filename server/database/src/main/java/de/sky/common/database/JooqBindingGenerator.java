@@ -1,6 +1,5 @@
 package de.sky.common.database;
 
-import de.sky.common.database.converters.DateConverter;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.Location;
 import org.jooq.codegen.DefaultGeneratorStrategy;
@@ -11,6 +10,7 @@ import org.jooq.meta.postgres.PostgresDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -22,7 +22,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
@@ -50,7 +49,10 @@ public class JooqBindingGenerator {
     }
 
     public void run() throws Exception {
-        try (var psql = new PostgreSQLContainer<>()
+        try (var psql = new PostgreSQLContainer<>(
+                DockerImageName.parse("postgres")
+                        .withTag("16.1@sha256:ee5dc0b649c9322656a1ee2c5dce7ce17fa9b15d838e992ca43a8e0b108b098e")
+        )
                 .withDatabaseName("tmp-database")
                 .withUsername("scott")
                 .withPassword("tiger")) {
