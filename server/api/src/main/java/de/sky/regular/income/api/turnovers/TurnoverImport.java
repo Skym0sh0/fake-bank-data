@@ -13,6 +13,7 @@ import java.util.UUID;
 public class TurnoverImport {
     public UUID id;
     public ZonedDateTime importedAt;
+    public TurnoverImportFormat format;
 
     public LocalDate firstTurnover;
     public LocalDate lastTurnover;

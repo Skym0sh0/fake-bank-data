@@ -42,7 +42,7 @@ import org.jooq.impl.TableImpl;
 @SuppressWarnings({ "all", "unchecked", "rawtypes" })
 public class TurnoverFileImport extends TableImpl<TurnoverFileImportRecord> {
 
-    private static final long serialVersionUID = 236244683;
+    private static final long serialVersionUID = 648064071;
 
     /**
      * The reference instance of <code>REGULAR_INCOME.turnover_file_import</code>
@@ -91,6 +91,11 @@ public class TurnoverFileImport extends TableImpl<TurnoverFileImportRecord> {
      * The column <code>REGULAR_INCOME.turnover_file_import.checksum</code>.
      */
     public final TableField<TurnoverFileImportRecord, String> CHECKSUM = createField("checksum", org.jooq.impl.SQLDataType.CLOB.nullable(false), this, "");
+
+    /**
+     * The column <code>REGULAR_INCOME.turnover_file_import.turnover_file_format</code>.
+     */
+    public final TableField<TurnoverFileImportRecord, String> TURNOVER_FILE_FORMAT = createField("turnover_file_format", org.jooq.impl.SQLDataType.CLOB.nullable(false), this, "");
 
     /**
      * Create a <code>REGULAR_INCOME.turnover_file_import</code> table reference

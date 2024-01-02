@@ -57,6 +57,7 @@ public class TurnoverCsvImporter {
             imp.setFileContent(content);
 
             imp.setChecksum(checksum);
+            imp.setTurnoverFileFormat(String.valueOf(patch.format));
 
             imp.insert();
 
@@ -200,6 +201,7 @@ public class TurnoverCsvImporter {
 
         return TurnoverImport.builder()
                 .id(rec.getId())
+                .format(TurnoverImportFormat.valueOf(rec.getTurnoverFileFormat()))
                 .importedAt(rec.getImportedAt().atZoneSameInstant(ZoneId.systemDefault()))
                 .firstTurnover(mappedRows.stream().map(TurnoverRow::getDate).min(Comparator.naturalOrder()).orElse(null))
                 .lastTurnover(mappedRows.stream().map(TurnoverRow::getDate).max(Comparator.naturalOrder()).orElse(null))
