@@ -17,6 +17,7 @@ dependencies {
     runtimeOnly("org.slf4j", "slf4j-simple", "2.0.10")
 
     api("org.flywaydb", "flyway-core", "9.22.3")
+    // api("org.flywaydb", "flyway-core", "10.4.1") when upgraded to Java 17+
 
     implementation("org.postgresql", "postgresql", "42.7.1")
 
