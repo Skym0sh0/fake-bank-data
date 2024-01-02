@@ -13,7 +13,7 @@
              :tbody-tr-class="rowClass">
 
         <template v-slot:head(importable)>
-            <b-checkbox @input="onSelectImportable"/>
+            <b-checkbox @input="onSelectImportable" :checked="true"/>
         </template>
         <template v-slot:head(categoryId)="item">
             <div class="d-flex justify-content-between align-items-end">
