@@ -22,7 +22,8 @@
                                 <h6>Importierbar</h6>
                                 <b-progress :max="rawRows.length" :show-value="true">
                                     <b-progress-bar :value="importableRows.length" variant="success"/>
-                                    <b-progress-bar :value="rawRows.length - importableRows.length" variant="secondary"/>
+                                    <b-progress-bar :value="rawRows.length - importableRows.length"
+                                                    variant="secondary"/>
                                 </b-progress>
                             </b-col>
 
@@ -50,7 +51,7 @@
                     </div>
                 </div>
 
-                <b-alert :show="errorMessage" variant="danger" :dismissible.camel="true">
+                <b-alert :show="!!errorMessage" variant="danger" :dismissible.camel="true">
                     {{ errorMessage }}
                 </b-alert>
             </template>
@@ -61,8 +62,8 @@
                 <b-container>
                     <v-row>
                         <v-col :cols="4">
-                            <b-form-select v-model="fileType"
-                                           :options="importFileTypes"/>
+                            <b-form-select v-model="selectedFileType"
+                                           :options="supportedFileTypes"/>
                         </v-col>
                         <v-col>
                             <b-form-file id="general-file-import-file"
@@ -83,7 +84,7 @@
                         body-class="p-2">
                     <b-card-header class="d-flex justify-content-between py-2" id="preview-card-header">
                         <h6>{{ fileSelection.name }}</h6>
-                        <h6>{{ fileType }}</h6>
+                        <h6>{{ selectedFileType }}</h6>
                     </b-card-header>
 
                     <b-card-body id="preview-card-body" class="p-2">
@@ -104,7 +105,6 @@ import TurnoverPreviewTable from "@/components/turnovers/TurnoverPreviewTable.vu
 import WaitingIndicator from "@/components/misc/WaitingIndicator.vue";
 import {normalizeCategory} from "@/util/Normalizer";
 
-const FILE_IMPORT_TYPES = ["VR-Bank CSV"];
 
 export default {
     name: "TurnoverImporting",
@@ -116,7 +116,8 @@ export default {
         return {
             isUploading: false,
             categories: null,
-            fileType: FILE_IMPORT_TYPES[0],
+            supportedFileTypes: [],
+            selectedFileType: null,
             fileSelection: null,
             parsedPreview: null,
             previewedData: null,
@@ -129,9 +130,6 @@ export default {
         },
     },
     computed: {
-        importFileTypes() {
-            return FILE_IMPORT_TYPES;
-        },
         isImportImpossible() {
             const isDataValid = (this.previewedData || []).every(row => {
                 if (!row.importable)
@@ -162,7 +160,7 @@ export default {
         },
         doPreviewRequest() {
             return api.getTurnovers()
-                .previewTurnoverImport(this.fileSelection)
+                .previewTurnoverImport(this.selectedFileType, this.fileSelection)
                 .then(preview => {
                     this.parsedPreview = preview;
                     this.previewedData = (this.parsedPreview.rows || [])
@@ -240,6 +238,17 @@ export default {
                     .finally(() => this.isUploading = false)
             }
         },
+    },
+    mounted() {
+        this.isUploading = true;
+
+        api.getTurnovers()
+            .getSupportedPreviewFormats()
+            .then(res => {
+                this.supportedFileTypes = res
+                this.selectedFileType = this.supportedFileTypes[0] || null
+            })
+            .finally(() => this.isUploading = false)
     }
 }
 </script>

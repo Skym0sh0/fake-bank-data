@@ -98,17 +98,26 @@ class RegularIncomeAPI {
         const ref = this
 
         return {
-            previewTurnoverImport(file) {
+            getSupportedPreviewFormats() {
+                return ref.getClient()
+                    .get("turnover-import/formats")
+                    .then(res => res.data)
+            },
+
+            previewTurnoverImport(type, file) {
                 const formData = new FormData()
                 formData.append('file', file)
 
                 return ref.getClient().post(
-                    'turnover-import/preview',
+                    `turnover-import/preview`,
                     formData,
                     {
                         headers: {
                             'Content-Type': 'multipart/form-data'
-                        }
+                        },
+                        params: {
+                            format: type,
+                        },
                     },
                 ).then(res => denormalizeTurnoverPreview(res.data));
             },
