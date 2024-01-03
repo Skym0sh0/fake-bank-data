@@ -1,34 +1,42 @@
 version: "3.7"
 
+# https://hub.docker.com/_/eclipse-temurin/tags?page=1&name=17
+# https://hub.docker.com/r/arm32v7/adoptopenjdk/tags?page=1&name=12-hot
+
+# https://github.com/tianon/docker-postgres-upgrade
+# https://hub.docker.com/layers/library/postgres/16.1/images/sha256-ee5dc0b649c9322656a1ee2c5dce7ce17fa9b15d838e992ca43a8e0b108b098e?context=explore
+
 services:
   database:
     container_name: "postgres-database"
-    image: "postgres:11"
+    image: "postgres:16.1@sha256:ee5dc0b649c9322656a1ee2c5dce7ce17fa9b15d838e992ca43a8e0b108b098e"
     ports:
       - "5432:5432"
     networks:
       - regular-income
     volumes:
       - db-data:/var/lib/postgresql/data
+      - db-data-backup:/var/lib/postgresql/backup
     environment:
       POSTGRES_USER: "scott"
       POSTGRES_PASSWORD: "tiger"
+      PGDATA: '/var/lib/postgresql/data'
 #      LANG: "de_DE.utf8"
 
-  admin:
-    container_name: "pgadmin-panel"
-    image: "dpage/pgadmin4"
-    ports:
-      - "80:80"
-    networks:
-      - regular-income
-    volumes:
-      - db-admin-data:/var/lib/pgadmin
-#      - "./db-data/pgadmin/:/var/lib/pgadmin"
-#    user: "${UID}:${GID}"
-    environment:
-      PGADMIN_DEFAULT_EMAIL: "bruce@scott.de"
-      PGADMIN_DEFAULT_PASSWORD: "tiger"
+#  admin:
+#    container_name: "pgadmin-panel"
+#    image: "dpage/pgadmin4"
+#    ports:
+#      - "80:80"
+#    networks:
+#      - regular-income
+#    volumes:
+#      - db-admin-data:/var/lib/pgadmin
+##      - "./db-data/pgadmin/:/var/lib/pgadmin"
+##    user: "${UID}:${GID}"
+#    environment:
+#      PGADMIN_DEFAULT_EMAIL: "bruce@scott.de"
+#      PGADMIN_DEFAULT_PASSWORD: "tiger"
 
 networks:
   regular-income:
@@ -36,4 +44,15 @@ networks:
 
 volumes:
   db-data:
+  db-data-backup:
+    # to migrate do the following:
+    # - bash terminal into the old postgres database container (with old postgres version)
+    #   - cd to this folder (e.g. /var/lib/postgresql/backup)
+    #   - su postgres
+    #   - pg_dump -U scott dev > dev.dump
+    # - bash terminal into the new postgres database container (with new postgres version)
+    #   - cd to this folder (e.g. /var/lib/postgresql/backup)
+    #   - su postgres
+    #   - createdb -U scott dev
+    #   - psql -U scott dev < dev.dump
   db-admin-data:
