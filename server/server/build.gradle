@@ -24,7 +24,7 @@ dependencies {
     implementation project(':database')
     implementation project(':api')
 
-//    implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.10'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: "$slf4j_version"
 //    implementation group: 'ch.qos.logback', name: 'logback-core', version: "$logback_version"
 //    implementation group: 'ch.qos.logback', name: 'logback-classic', version: "$logback_version"
 
