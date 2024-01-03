@@ -77,7 +77,8 @@ jib {
         creationTime = 'USE_CURRENT_TIMESTAMP'
     }
     from {
-        image = 'registry://eclipse-temurin:17.0.9_9-jre-jammy@sha256:c090149475ccead91f75c032d296f06a40a19682bb97a6873524aac51f444867'
+        // linux/arm/v7
+        image = 'registry://eclipse-temurin:19-jre-jammy@sha256:167557501026d70f7486b631d26ae00f7551cc1daba1da67f86948ea5bd2aa41'
     }
     to {
         image = "${docker_registry}/regular-income-backend"
