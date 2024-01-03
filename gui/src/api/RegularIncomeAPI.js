@@ -122,10 +122,13 @@ class RegularIncomeAPI {
                 ).then(res => denormalizeTurnoverPreview(res.data));
             },
 
-            createTurnoverImport(file, data) {
+            createTurnoverImport(file, format, data) {
                 const formData = new FormData()
                 formData.append('file', file)
-                formData.append('data', new Blob([JSON.stringify({rows: data})], {type: "application/json"}))
+                formData.append('data', new Blob([JSON.stringify({
+                    format: format,
+                    rows: data,
+                })], {type: "application/json"}))
 
                 return ref.getClient().post(
                     'turnover-import',

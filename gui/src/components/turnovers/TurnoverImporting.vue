@@ -125,6 +125,9 @@ export default {
         };
     },
     validations: {
+        selectedFileType: {
+            required,
+        },
         fileSelection: {
             required,
         },
@@ -180,7 +183,7 @@ export default {
             this.isUploading = true;
 
             api.getTurnovers()
-                .createTurnoverImport(this.fileSelection, this.importableRows)
+                .createTurnoverImport(this.fileSelection, this.selectedFileType, this.importableRows)
                 .then(() => {
                     this.$emit("uploadSucceeded")
                     this.$refs["file-upload-modal"].hide();

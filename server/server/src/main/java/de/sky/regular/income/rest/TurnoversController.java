@@ -55,7 +55,7 @@ public class TurnoversController {
 
     @PostMapping(consumes = "multipart/form-data")
     public TurnoverImport createTurnoverImport(@RequestPart("file") MultipartFile file, @RequestPart("data") TurnoverImportPatch patch) throws Exception {
-        log.info("Importing file {} with {} bytes and {} data rows...", file.getOriginalFilename(), file.getSize(), patch.getRows().size());
+        log.info("Importing {} file {} with {} bytes and {} data rows...", patch.format, file.getOriginalFilename(), file.getSize(), patch.getRows().size());
 
         return importer.createImport(ZonedDateTime.now(), file, patch);
     }
