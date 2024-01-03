@@ -10,7 +10,7 @@ plugins {
     id 'application'
     id 'org.springframework.boot' version '2.7.18'
     id 'io.spring.dependency-management' version '1.1.4'
-    id 'com.google.cloud.tools.jib' version '1.6.1'
+    id 'com.google.cloud.tools.jib' version '3.4.0'
     id "com.gorylenko.gradle-git-properties" version "2.4.1"
 }
 
@@ -72,7 +72,7 @@ jib {
                 CMD_ARGS      : '',
         ]
 
-        creationTime = 'EPOCH'
+        creationTime = 'USE_CURRENT_TIMESTAMP'
     }
     from {
 //        image = 'gcr.io/distroless/java:11'
