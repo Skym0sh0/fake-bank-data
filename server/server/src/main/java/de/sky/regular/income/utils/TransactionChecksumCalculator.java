@@ -1,8 +1,8 @@
 package de.sky.regular.income.utils;
 
 import de.sky.regular.income.api.TransactionPatch;
+import org.apache.commons.codec.binary.Hex;
 
-import javax.xml.bind.DatatypeConverter;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -71,6 +71,6 @@ public class TransactionChecksumCalculator {
     }
 
     private static String bytesToHex(byte[] hash) {
-        return DatatypeConverter.printHexBinary(hash).toLowerCase();
+        return Hex.encodeHexString(hash).toLowerCase();
     }
 }
