@@ -76,8 +76,7 @@ jib {
         creationTime = 'USE_CURRENT_TIMESTAMP'
     }
     from {
-//        image = 'gcr.io/distroless/java:11'
-        image = 'registry://arm32v7/adoptopenjdk:12-hotspot-bionic'
+        image = 'registry://eclipse-temurin:17.0.9_9-jre-jammy@sha256:c090149475ccead91f75c032d296f06a40a19682bb97a6873524aac51f444867'
     }
     to {
         image = "${docker_registry}/regular-income-backend"
