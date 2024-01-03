@@ -6,20 +6,29 @@ package generated.sky.regular.income.tables;
 
 import generated.sky.regular.income.Keys;
 import generated.sky.regular.income.RegularIncome;
+import generated.sky.regular.income.tables.TurnoverRow.TurnoverRowPath;
 import generated.sky.regular.income.tables.records.TurnoverFileImportRecord;
 
 import java.time.OffsetDateTime;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
 import org.jooq.Check;
+import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
+import org.jooq.InverseForeignKey;
 import org.jooq.Name;
+import org.jooq.Path;
+import org.jooq.PlainSQL;
+import org.jooq.QueryPart;
 import org.jooq.Record;
-import org.jooq.Row8;
+import org.jooq.SQL;
 import org.jooq.Schema;
+import org.jooq.Select;
+import org.jooq.Stringly;
 import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.TableOptions;
@@ -95,11 +104,11 @@ public class TurnoverFileImport extends TableImpl<TurnoverFileImportRecord> {
     public final TableField<TurnoverFileImportRecord, String> TURNOVER_FILE_FORMAT = createField(DSL.name("turnover_file_format"), SQLDataType.CLOB.nullable(false), this, "");
 
     private TurnoverFileImport(Name alias, Table<TurnoverFileImportRecord> aliased) {
-        this(alias, aliased, null);
+        this(alias, aliased, (Field<?>[]) null, null);
     }
 
-    private TurnoverFileImport(Name alias, Table<TurnoverFileImportRecord> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
+    private TurnoverFileImport(Name alias, Table<TurnoverFileImportRecord> aliased, Field<?>[] parameters, Condition where) {
+        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table(), where);
     }
 
     /**
@@ -125,8 +134,35 @@ public class TurnoverFileImport extends TableImpl<TurnoverFileImportRecord> {
         this(DSL.name("turnover_file_import"), null);
     }
 
-    public <O extends Record> TurnoverFileImport(Table<O> child, ForeignKey<O, TurnoverFileImportRecord> key) {
-        super(child, key, TURNOVER_FILE_IMPORT);
+    public <O extends Record> TurnoverFileImport(Table<O> path, ForeignKey<O, TurnoverFileImportRecord> childPath, InverseForeignKey<O, TurnoverFileImportRecord> parentPath) {
+        super(path, childPath, parentPath, TURNOVER_FILE_IMPORT);
+    }
+
+    /**
+     * A subtype implementing {@link Path} for simplified path-based joins.
+     */
+    public static class TurnoverFileImportPath extends TurnoverFileImport implements Path<TurnoverFileImportRecord> {
+        public <O extends Record> TurnoverFileImportPath(Table<O> path, ForeignKey<O, TurnoverFileImportRecord> childPath, InverseForeignKey<O, TurnoverFileImportRecord> parentPath) {
+            super(path, childPath, parentPath);
+        }
+        private TurnoverFileImportPath(Name alias, Table<TurnoverFileImportRecord> aliased) {
+            super(alias, aliased);
+        }
+
+        @Override
+        public TurnoverFileImportPath as(String alias) {
+            return new TurnoverFileImportPath(DSL.name(alias), this);
+        }
+
+        @Override
+        public TurnoverFileImportPath as(Name alias) {
+            return new TurnoverFileImportPath(alias, this);
+        }
+
+        @Override
+        public TurnoverFileImportPath as(Table<?> alias) {
+            return new TurnoverFileImportPath(alias.getQualifiedName(), this);
+        }
     }
 
     @Override
@@ -137,6 +173,19 @@ public class TurnoverFileImport extends TableImpl<TurnoverFileImportRecord> {
     @Override
     public UniqueKey<TurnoverFileImportRecord> getPrimaryKey() {
         return Keys.TURNOVER_FILE_IMPORT_PKEY;
+    }
+
+    private transient TurnoverRowPath _turnoverRow;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.turnover_row</code> table
+     */
+    public TurnoverRowPath turnoverRow() {
+        if (_turnoverRow == null)
+            _turnoverRow = new TurnoverRowPath(this, null, Keys.TURNOVER_ROW__TURNOVER_ROW_TURNOVER_FILE_FKEY.getInverseKey());
+
+        return _turnoverRow;
     }
 
     @Override
@@ -156,6 +205,11 @@ public class TurnoverFileImport extends TableImpl<TurnoverFileImportRecord> {
         return new TurnoverFileImport(alias, this);
     }
 
+    @Override
+    public TurnoverFileImport as(Table<?> alias) {
+        return new TurnoverFileImport(alias.getQualifiedName(), this);
+    }
+
     /**
      * Rename this table
      */
@@ -172,12 +226,95 @@ public class TurnoverFileImport extends TableImpl<TurnoverFileImportRecord> {
         return new TurnoverFileImport(name, null);
     }
 
-    // -------------------------------------------------------------------------
-    // Row8 type methods
-    // -------------------------------------------------------------------------
-
+    /**
+     * Rename this table
+     */
     @Override
-    public Row8<UUID, OffsetDateTime, String, Long, String, byte[], String, String> fieldsRow() {
-        return (Row8) super.fieldsRow();
+    public TurnoverFileImport rename(Table<?> name) {
+        return new TurnoverFileImport(name.getQualifiedName(), null);
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public TurnoverFileImport where(Condition condition) {
+        return new TurnoverFileImport(getQualifiedName(), aliased() ? this : null, null, condition);
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public TurnoverFileImport where(Collection<? extends Condition> conditions) {
+        return where(DSL.and(conditions));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public TurnoverFileImport where(Condition... conditions) {
+        return where(DSL.and(conditions));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public TurnoverFileImport where(Field<Boolean> condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public TurnoverFileImport where(SQL condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public TurnoverFileImport where(@Stringly.SQL String condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public TurnoverFileImport where(@Stringly.SQL String condition, Object... binds) {
+        return where(DSL.condition(condition, binds));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public TurnoverFileImport where(@Stringly.SQL String condition, QueryPart... parts) {
+        return where(DSL.condition(condition, parts));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public TurnoverFileImport whereExists(Select<?> select) {
+        return where(DSL.exists(select));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public TurnoverFileImport whereNotExists(Select<?> select) {
+        return where(DSL.notExists(select));
     }
 }

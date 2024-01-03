@@ -7,22 +7,32 @@ package generated.sky.regular.income.tables;
 import generated.sky.regular.income.Indexes;
 import generated.sky.regular.income.Keys;
 import generated.sky.regular.income.RegularIncome;
+import generated.sky.regular.income.tables.BankStatement.BankStatementPath;
+import generated.sky.regular.income.tables.Category.CategoryPath;
 import generated.sky.regular.income.tables.records.FinancialTransactionRecord;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
 import org.jooq.Check;
+import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Index;
+import org.jooq.InverseForeignKey;
 import org.jooq.Name;
+import org.jooq.Path;
+import org.jooq.PlainSQL;
+import org.jooq.QueryPart;
 import org.jooq.Record;
-import org.jooq.Row9;
+import org.jooq.SQL;
 import org.jooq.Schema;
+import org.jooq.Select;
+import org.jooq.Stringly;
 import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.TableOptions;
@@ -95,7 +105,7 @@ public class FinancialTransaction extends TableImpl<FinancialTransactionRecord> 
     /**
      * The column <code>REGULAR_INCOME.financial_transaction.created_at</code>.
      */
-    public final TableField<FinancialTransactionRecord, OffsetDateTime> CREATED_AT = createField(DSL.name("created_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field("now()", SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+    public final TableField<FinancialTransactionRecord, OffsetDateTime> CREATED_AT = createField(DSL.name("created_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
     /**
      * The column <code>REGULAR_INCOME.financial_transaction.category_id</code>.
@@ -103,11 +113,11 @@ public class FinancialTransaction extends TableImpl<FinancialTransactionRecord> 
     public final TableField<FinancialTransactionRecord, UUID> CATEGORY_ID = createField(DSL.name("category_id"), SQLDataType.UUID.nullable(false), this, "");
 
     private FinancialTransaction(Name alias, Table<FinancialTransactionRecord> aliased) {
-        this(alias, aliased, null);
+        this(alias, aliased, (Field<?>[]) null, null);
     }
 
-    private FinancialTransaction(Name alias, Table<FinancialTransactionRecord> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
+    private FinancialTransaction(Name alias, Table<FinancialTransactionRecord> aliased, Field<?>[] parameters, Condition where) {
+        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table(), where);
     }
 
     /**
@@ -134,8 +144,35 @@ public class FinancialTransaction extends TableImpl<FinancialTransactionRecord> 
         this(DSL.name("financial_transaction"), null);
     }
 
-    public <O extends Record> FinancialTransaction(Table<O> child, ForeignKey<O, FinancialTransactionRecord> key) {
-        super(child, key, FINANCIAL_TRANSACTION);
+    public <O extends Record> FinancialTransaction(Table<O> path, ForeignKey<O, FinancialTransactionRecord> childPath, InverseForeignKey<O, FinancialTransactionRecord> parentPath) {
+        super(path, childPath, parentPath, FINANCIAL_TRANSACTION);
+    }
+
+    /**
+     * A subtype implementing {@link Path} for simplified path-based joins.
+     */
+    public static class FinancialTransactionPath extends FinancialTransaction implements Path<FinancialTransactionRecord> {
+        public <O extends Record> FinancialTransactionPath(Table<O> path, ForeignKey<O, FinancialTransactionRecord> childPath, InverseForeignKey<O, FinancialTransactionRecord> parentPath) {
+            super(path, childPath, parentPath);
+        }
+        private FinancialTransactionPath(Name alias, Table<FinancialTransactionRecord> aliased) {
+            super(alias, aliased);
+        }
+
+        @Override
+        public FinancialTransactionPath as(String alias) {
+            return new FinancialTransactionPath(DSL.name(alias), this);
+        }
+
+        @Override
+        public FinancialTransactionPath as(Name alias) {
+            return new FinancialTransactionPath(alias, this);
+        }
+
+        @Override
+        public FinancialTransactionPath as(Table<?> alias) {
+            return new FinancialTransactionPath(alias.getQualifiedName(), this);
+        }
     }
 
     @Override
@@ -158,26 +195,27 @@ public class FinancialTransaction extends TableImpl<FinancialTransactionRecord> 
         return Arrays.asList(Keys.FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_BANK_STATEMENT_ID_FKEY, Keys.FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_CATEGORY_ID_FKEY);
     }
 
-    private transient BankStatement _bankStatement;
-    private transient Category _category;
+    private transient BankStatementPath _bankStatement;
 
     /**
      * Get the implicit join path to the <code>public.bank_statement</code>
      * table.
      */
-    public BankStatement bankStatement() {
+    public BankStatementPath bankStatement() {
         if (_bankStatement == null)
-            _bankStatement = new BankStatement(this, Keys.FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_BANK_STATEMENT_ID_FKEY);
+            _bankStatement = new BankStatementPath(this, Keys.FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_BANK_STATEMENT_ID_FKEY, null);
 
         return _bankStatement;
     }
 
+    private transient CategoryPath _category;
+
     /**
      * Get the implicit join path to the <code>public.category</code> table.
      */
-    public Category category() {
+    public CategoryPath category() {
         if (_category == null)
-            _category = new Category(this, Keys.FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_CATEGORY_ID_FKEY);
+            _category = new CategoryPath(this, Keys.FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_CATEGORY_ID_FKEY, null);
 
         return _category;
     }
@@ -199,6 +237,11 @@ public class FinancialTransaction extends TableImpl<FinancialTransactionRecord> 
         return new FinancialTransaction(alias, this);
     }
 
+    @Override
+    public FinancialTransaction as(Table<?> alias) {
+        return new FinancialTransaction(alias.getQualifiedName(), this);
+    }
+
     /**
      * Rename this table
      */
@@ -215,12 +258,95 @@ public class FinancialTransaction extends TableImpl<FinancialTransactionRecord> 
         return new FinancialTransaction(name, null);
     }
 
-    // -------------------------------------------------------------------------
-    // Row9 type methods
-    // -------------------------------------------------------------------------
-
+    /**
+     * Rename this table
+     */
     @Override
-    public Row9<UUID, UUID, LocalDate, Integer, Boolean, String, String, OffsetDateTime, UUID> fieldsRow() {
-        return (Row9) super.fieldsRow();
+    public FinancialTransaction rename(Table<?> name) {
+        return new FinancialTransaction(name.getQualifiedName(), null);
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public FinancialTransaction where(Condition condition) {
+        return new FinancialTransaction(getQualifiedName(), aliased() ? this : null, null, condition);
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public FinancialTransaction where(Collection<? extends Condition> conditions) {
+        return where(DSL.and(conditions));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public FinancialTransaction where(Condition... conditions) {
+        return where(DSL.and(conditions));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public FinancialTransaction where(Field<Boolean> condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public FinancialTransaction where(SQL condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public FinancialTransaction where(@Stringly.SQL String condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public FinancialTransaction where(@Stringly.SQL String condition, Object... binds) {
+        return where(DSL.condition(condition, binds));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public FinancialTransaction where(@Stringly.SQL String condition, QueryPart... parts) {
+        return where(DSL.condition(condition, parts));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public FinancialTransaction whereExists(Select<?> select) {
+        return where(DSL.exists(select));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public FinancialTransaction whereNotExists(Select<?> select) {
+        return where(DSL.notExists(select));
     }
 }

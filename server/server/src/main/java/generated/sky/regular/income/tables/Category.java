@@ -6,19 +6,30 @@ package generated.sky.regular.income.tables;
 
 import generated.sky.regular.income.Keys;
 import generated.sky.regular.income.RegularIncome;
+import generated.sky.regular.income.tables.Category.CategoryPath;
+import generated.sky.regular.income.tables.FinancialTransaction.FinancialTransactionPath;
+import generated.sky.regular.income.tables.TurnoverRow.TurnoverRowPath;
 import generated.sky.regular.income.tables.records.CategoryRecord;
 
 import java.time.OffsetDateTime;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
+import org.jooq.InverseForeignKey;
 import org.jooq.Name;
+import org.jooq.Path;
+import org.jooq.PlainSQL;
+import org.jooq.QueryPart;
 import org.jooq.Record;
-import org.jooq.Row7;
+import org.jooq.SQL;
 import org.jooq.Schema;
+import org.jooq.Select;
+import org.jooq.Stringly;
 import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.TableOptions;
@@ -85,11 +96,11 @@ public class Category extends TableImpl<CategoryRecord> {
     public final TableField<CategoryRecord, OffsetDateTime> CREATED_AT = createField(DSL.name("created_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false), this, "");
 
     private Category(Name alias, Table<CategoryRecord> aliased) {
-        this(alias, aliased, null);
+        this(alias, aliased, (Field<?>[]) null, null);
     }
 
-    private Category(Name alias, Table<CategoryRecord> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
+    private Category(Name alias, Table<CategoryRecord> aliased, Field<?>[] parameters, Condition where) {
+        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table(), where);
     }
 
     /**
@@ -113,8 +124,35 @@ public class Category extends TableImpl<CategoryRecord> {
         this(DSL.name("category"), null);
     }
 
-    public <O extends Record> Category(Table<O> child, ForeignKey<O, CategoryRecord> key) {
-        super(child, key, CATEGORY);
+    public <O extends Record> Category(Table<O> path, ForeignKey<O, CategoryRecord> childPath, InverseForeignKey<O, CategoryRecord> parentPath) {
+        super(path, childPath, parentPath, CATEGORY);
+    }
+
+    /**
+     * A subtype implementing {@link Path} for simplified path-based joins.
+     */
+    public static class CategoryPath extends Category implements Path<CategoryRecord> {
+        public <O extends Record> CategoryPath(Table<O> path, ForeignKey<O, CategoryRecord> childPath, InverseForeignKey<O, CategoryRecord> parentPath) {
+            super(path, childPath, parentPath);
+        }
+        private CategoryPath(Name alias, Table<CategoryRecord> aliased) {
+            super(alias, aliased);
+        }
+
+        @Override
+        public CategoryPath as(String alias) {
+            return new CategoryPath(DSL.name(alias), this);
+        }
+
+        @Override
+        public CategoryPath as(Name alias) {
+            return new CategoryPath(alias, this);
+        }
+
+        @Override
+        public CategoryPath as(Table<?> alias) {
+            return new CategoryPath(alias.getQualifiedName(), this);
+        }
     }
 
     @Override
@@ -137,16 +175,42 @@ public class Category extends TableImpl<CategoryRecord> {
         return Arrays.asList(Keys.CATEGORY__CATEGORY_PARENT_CATEGORY_FKEY);
     }
 
-    private transient Category _category;
+    private transient CategoryPath _category;
 
     /**
      * Get the implicit join path to the <code>public.category</code> table.
      */
-    public Category category() {
+    public CategoryPath category() {
         if (_category == null)
-            _category = new Category(this, Keys.CATEGORY__CATEGORY_PARENT_CATEGORY_FKEY);
+            _category = new CategoryPath(this, Keys.CATEGORY__CATEGORY_PARENT_CATEGORY_FKEY, null);
 
         return _category;
+    }
+
+    private transient FinancialTransactionPath _financialTransaction;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.financial_transaction</code> table
+     */
+    public FinancialTransactionPath financialTransaction() {
+        if (_financialTransaction == null)
+            _financialTransaction = new FinancialTransactionPath(this, null, Keys.FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_CATEGORY_ID_FKEY.getInverseKey());
+
+        return _financialTransaction;
+    }
+
+    private transient TurnoverRowPath _turnoverRow;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.turnover_row</code> table
+     */
+    public TurnoverRowPath turnoverRow() {
+        if (_turnoverRow == null)
+            _turnoverRow = new TurnoverRowPath(this, null, Keys.TURNOVER_ROW__TURNOVER_ROW_CATEGORY_ID_FKEY.getInverseKey());
+
+        return _turnoverRow;
     }
 
     @Override
@@ -157,6 +221,11 @@ public class Category extends TableImpl<CategoryRecord> {
     @Override
     public Category as(Name alias) {
         return new Category(alias, this);
+    }
+
+    @Override
+    public Category as(Table<?> alias) {
+        return new Category(alias.getQualifiedName(), this);
     }
 
     /**
@@ -175,12 +244,95 @@ public class Category extends TableImpl<CategoryRecord> {
         return new Category(name, null);
     }
 
-    // -------------------------------------------------------------------------
-    // Row7 type methods
-    // -------------------------------------------------------------------------
-
+    /**
+     * Rename this table
+     */
     @Override
-    public Row7<UUID, UUID, String, Boolean, String, OffsetDateTime, OffsetDateTime> fieldsRow() {
-        return (Row7) super.fieldsRow();
+    public Category rename(Table<?> name) {
+        return new Category(name.getQualifiedName(), null);
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public Category where(Condition condition) {
+        return new Category(getQualifiedName(), aliased() ? this : null, null, condition);
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public Category where(Collection<? extends Condition> conditions) {
+        return where(DSL.and(conditions));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public Category where(Condition... conditions) {
+        return where(DSL.and(conditions));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public Category where(Field<Boolean> condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public Category where(SQL condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public Category where(@Stringly.SQL String condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public Category where(@Stringly.SQL String condition, Object... binds) {
+        return where(DSL.condition(condition, binds));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public Category where(@Stringly.SQL String condition, QueryPart... parts) {
+        return where(DSL.condition(condition, parts));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public Category whereExists(Select<?> select) {
+        return where(DSL.exists(select));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public Category whereNotExists(Select<?> select) {
+        return where(DSL.notExists(select));
     }
 }

@@ -11,17 +11,21 @@ import generated.sky.regular.income.tables.records.BackupHistoryRecord;
 
 import java.time.OffsetDateTime;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
 import org.jooq.Check;
+import org.jooq.Condition;
 import org.jooq.Field;
-import org.jooq.ForeignKey;
 import org.jooq.Index;
 import org.jooq.Name;
-import org.jooq.Record;
-import org.jooq.Row5;
+import org.jooq.PlainSQL;
+import org.jooq.QueryPart;
+import org.jooq.SQL;
 import org.jooq.Schema;
+import org.jooq.Select;
+import org.jooq.Stringly;
 import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.TableOptions;
@@ -79,11 +83,11 @@ public class BackupHistory extends TableImpl<BackupHistoryRecord> {
     public final TableField<BackupHistoryRecord, String> ERROR_DETAILS = createField(DSL.name("error_details"), SQLDataType.CLOB, this, "");
 
     private BackupHistory(Name alias, Table<BackupHistoryRecord> aliased) {
-        this(alias, aliased, null);
+        this(alias, aliased, (Field<?>[]) null, null);
     }
 
-    private BackupHistory(Name alias, Table<BackupHistoryRecord> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
+    private BackupHistory(Name alias, Table<BackupHistoryRecord> aliased, Field<?>[] parameters, Condition where) {
+        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table(), where);
     }
 
     /**
@@ -107,10 +111,6 @@ public class BackupHistory extends TableImpl<BackupHistoryRecord> {
      */
     public BackupHistory() {
         this(DSL.name("backup_history"), null);
-    }
-
-    public <O extends Record> BackupHistory(Table<O> child, ForeignKey<O, BackupHistoryRecord> key) {
-        super(child, key, BACKUP_HISTORY);
     }
 
     @Override
@@ -145,6 +145,11 @@ public class BackupHistory extends TableImpl<BackupHistoryRecord> {
         return new BackupHistory(alias, this);
     }
 
+    @Override
+    public BackupHistory as(Table<?> alias) {
+        return new BackupHistory(alias.getQualifiedName(), this);
+    }
+
     /**
      * Rename this table
      */
@@ -161,12 +166,95 @@ public class BackupHistory extends TableImpl<BackupHistoryRecord> {
         return new BackupHistory(name, null);
     }
 
-    // -------------------------------------------------------------------------
-    // Row5 type methods
-    // -------------------------------------------------------------------------
-
+    /**
+     * Rename this table
+     */
     @Override
-    public Row5<UUID, OffsetDateTime, Boolean, Boolean, String> fieldsRow() {
-        return (Row5) super.fieldsRow();
+    public BackupHistory rename(Table<?> name) {
+        return new BackupHistory(name.getQualifiedName(), null);
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public BackupHistory where(Condition condition) {
+        return new BackupHistory(getQualifiedName(), aliased() ? this : null, null, condition);
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public BackupHistory where(Collection<? extends Condition> conditions) {
+        return where(DSL.and(conditions));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public BackupHistory where(Condition... conditions) {
+        return where(DSL.and(conditions));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public BackupHistory where(Field<Boolean> condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public BackupHistory where(SQL condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public BackupHistory where(@Stringly.SQL String condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public BackupHistory where(@Stringly.SQL String condition, Object... binds) {
+        return where(DSL.condition(condition, binds));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public BackupHistory where(@Stringly.SQL String condition, QueryPart... parts) {
+        return where(DSL.condition(condition, parts));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public BackupHistory whereExists(Select<?> select) {
+        return where(DSL.exists(select));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public BackupHistory whereNotExists(Select<?> select) {
+        return where(DSL.notExists(select));
     }
 }

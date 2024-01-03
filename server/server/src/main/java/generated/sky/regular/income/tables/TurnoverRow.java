@@ -7,22 +7,32 @@ package generated.sky.regular.income.tables;
 import generated.sky.regular.income.Indexes;
 import generated.sky.regular.income.Keys;
 import generated.sky.regular.income.RegularIncome;
+import generated.sky.regular.income.tables.Category.CategoryPath;
+import generated.sky.regular.income.tables.TurnoverFileImport.TurnoverFileImportPath;
 import generated.sky.regular.income.tables.records.TurnoverRowRecord;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
 import org.jooq.Check;
+import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
 import org.jooq.Index;
+import org.jooq.InverseForeignKey;
 import org.jooq.Name;
+import org.jooq.Path;
+import org.jooq.PlainSQL;
+import org.jooq.QueryPart;
 import org.jooq.Record;
-import org.jooq.Row10;
+import org.jooq.SQL;
 import org.jooq.Schema;
+import org.jooq.Select;
+import org.jooq.Stringly;
 import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.TableOptions;
@@ -105,11 +115,11 @@ public class TurnoverRow extends TableImpl<TurnoverRowRecord> {
     public final TableField<TurnoverRowRecord, OffsetDateTime> LAST_UPDATED_AT = createField(DSL.name("last_updated_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false), this, "");
 
     private TurnoverRow(Name alias, Table<TurnoverRowRecord> aliased) {
-        this(alias, aliased, null);
+        this(alias, aliased, (Field<?>[]) null, null);
     }
 
-    private TurnoverRow(Name alias, Table<TurnoverRowRecord> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
+    private TurnoverRow(Name alias, Table<TurnoverRowRecord> aliased, Field<?>[] parameters, Condition where) {
+        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table(), where);
     }
 
     /**
@@ -135,8 +145,35 @@ public class TurnoverRow extends TableImpl<TurnoverRowRecord> {
         this(DSL.name("turnover_row"), null);
     }
 
-    public <O extends Record> TurnoverRow(Table<O> child, ForeignKey<O, TurnoverRowRecord> key) {
-        super(child, key, TURNOVER_ROW);
+    public <O extends Record> TurnoverRow(Table<O> path, ForeignKey<O, TurnoverRowRecord> childPath, InverseForeignKey<O, TurnoverRowRecord> parentPath) {
+        super(path, childPath, parentPath, TURNOVER_ROW);
+    }
+
+    /**
+     * A subtype implementing {@link Path} for simplified path-based joins.
+     */
+    public static class TurnoverRowPath extends TurnoverRow implements Path<TurnoverRowRecord> {
+        public <O extends Record> TurnoverRowPath(Table<O> path, ForeignKey<O, TurnoverRowRecord> childPath, InverseForeignKey<O, TurnoverRowRecord> parentPath) {
+            super(path, childPath, parentPath);
+        }
+        private TurnoverRowPath(Name alias, Table<TurnoverRowRecord> aliased) {
+            super(alias, aliased);
+        }
+
+        @Override
+        public TurnoverRowPath as(String alias) {
+            return new TurnoverRowPath(DSL.name(alias), this);
+        }
+
+        @Override
+        public TurnoverRowPath as(Name alias) {
+            return new TurnoverRowPath(alias, this);
+        }
+
+        @Override
+        public TurnoverRowPath as(Table<?> alias) {
+            return new TurnoverRowPath(alias.getQualifiedName(), this);
+        }
     }
 
     @Override
@@ -164,26 +201,27 @@ public class TurnoverRow extends TableImpl<TurnoverRowRecord> {
         return Arrays.asList(Keys.TURNOVER_ROW__TURNOVER_ROW_TURNOVER_FILE_FKEY, Keys.TURNOVER_ROW__TURNOVER_ROW_CATEGORY_ID_FKEY);
     }
 
-    private transient TurnoverFileImport _turnoverFileImport;
-    private transient Category _category;
+    private transient TurnoverFileImportPath _turnoverFileImport;
 
     /**
      * Get the implicit join path to the
      * <code>public.turnover_file_import</code> table.
      */
-    public TurnoverFileImport turnoverFileImport() {
+    public TurnoverFileImportPath turnoverFileImport() {
         if (_turnoverFileImport == null)
-            _turnoverFileImport = new TurnoverFileImport(this, Keys.TURNOVER_ROW__TURNOVER_ROW_TURNOVER_FILE_FKEY);
+            _turnoverFileImport = new TurnoverFileImportPath(this, Keys.TURNOVER_ROW__TURNOVER_ROW_TURNOVER_FILE_FKEY, null);
 
         return _turnoverFileImport;
     }
 
+    private transient CategoryPath _category;
+
     /**
      * Get the implicit join path to the <code>public.category</code> table.
      */
-    public Category category() {
+    public CategoryPath category() {
         if (_category == null)
-            _category = new Category(this, Keys.TURNOVER_ROW__TURNOVER_ROW_CATEGORY_ID_FKEY);
+            _category = new CategoryPath(this, Keys.TURNOVER_ROW__TURNOVER_ROW_CATEGORY_ID_FKEY, null);
 
         return _category;
     }
@@ -205,6 +243,11 @@ public class TurnoverRow extends TableImpl<TurnoverRowRecord> {
         return new TurnoverRow(alias, this);
     }
 
+    @Override
+    public TurnoverRow as(Table<?> alias) {
+        return new TurnoverRow(alias.getQualifiedName(), this);
+    }
+
     /**
      * Rename this table
      */
@@ -221,12 +264,95 @@ public class TurnoverRow extends TableImpl<TurnoverRowRecord> {
         return new TurnoverRow(name, null);
     }
 
-    // -------------------------------------------------------------------------
-    // Row10 type methods
-    // -------------------------------------------------------------------------
-
+    /**
+     * Rename this table
+     */
     @Override
-    public Row10<String, UUID, LocalDate, Integer, String, String, String, String, UUID, OffsetDateTime> fieldsRow() {
-        return (Row10) super.fieldsRow();
+    public TurnoverRow rename(Table<?> name) {
+        return new TurnoverRow(name.getQualifiedName(), null);
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public TurnoverRow where(Condition condition) {
+        return new TurnoverRow(getQualifiedName(), aliased() ? this : null, null, condition);
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public TurnoverRow where(Collection<? extends Condition> conditions) {
+        return where(DSL.and(conditions));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public TurnoverRow where(Condition... conditions) {
+        return where(DSL.and(conditions));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public TurnoverRow where(Field<Boolean> condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public TurnoverRow where(SQL condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public TurnoverRow where(@Stringly.SQL String condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public TurnoverRow where(@Stringly.SQL String condition, Object... binds) {
+        return where(DSL.condition(condition, binds));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public TurnoverRow where(@Stringly.SQL String condition, QueryPart... parts) {
+        return where(DSL.condition(condition, parts));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public TurnoverRow whereExists(Select<?> select) {
+        return where(DSL.exists(select));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public TurnoverRow whereNotExists(Select<?> select) {
+        return where(DSL.notExists(select));
     }
 }

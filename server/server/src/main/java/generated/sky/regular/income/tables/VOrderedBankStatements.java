@@ -9,14 +9,18 @@ import generated.sky.regular.income.tables.records.VOrderedBankStatementsRecord;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.Collection;
 import java.util.UUID;
 
+import org.jooq.Condition;
 import org.jooq.Field;
-import org.jooq.ForeignKey;
 import org.jooq.Name;
-import org.jooq.Record;
-import org.jooq.Row7;
+import org.jooq.PlainSQL;
+import org.jooq.QueryPart;
+import org.jooq.SQL;
 import org.jooq.Schema;
+import org.jooq.Select;
+import org.jooq.Stringly;
 import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.TableOptions;
@@ -88,11 +92,41 @@ public class VOrderedBankStatements extends TableImpl<VOrderedBankStatementsReco
     public final TableField<VOrderedBankStatementsRecord, Integer> RANK = createField(DSL.name("rank"), SQLDataType.INTEGER, this, "");
 
     private VOrderedBankStatements(Name alias, Table<VOrderedBankStatementsRecord> aliased) {
-        this(alias, aliased, null);
+        this(alias, aliased, (Field<?>[]) null, null);
     }
 
-    private VOrderedBankStatements(Name alias, Table<VOrderedBankStatementsRecord> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.view("create view \"v_ordered_bank_statements\" as  WITH RECURSIVE cte AS (\n         SELECT bank_statement.id,\n            bank_statement.date_record,\n            bank_statement.amount_balance_cents,\n            bank_statement.previous_statement_id,\n            bank_statement.created_at,\n            bank_statement.updated_at,\n            0 AS rank\n           FROM bank_statement\n          WHERE (bank_statement.previous_statement_id IS NULL)\n        UNION ALL\n         SELECT e.id,\n            e.date_record,\n            e.amount_balance_cents,\n            e.previous_statement_id,\n            e.created_at,\n            e.updated_at,\n            (c.rank + 1)\n           FROM (cte c\n             JOIN bank_statement e ON ((e.previous_statement_id = c.id)))\n        )\n SELECT id,\n    date_record,\n    amount_balance_cents,\n    previous_statement_id,\n    created_at,\n    updated_at,\n    rank\n   FROM cte;"));
+    private VOrderedBankStatements(Name alias, Table<VOrderedBankStatementsRecord> aliased, Field<?>[] parameters, Condition where) {
+        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.view("""
+        create view "v_ordered_bank_statements" as  WITH RECURSIVE cte AS (
+                SELECT bank_statement.id,
+                   bank_statement.date_record,
+                   bank_statement.amount_balance_cents,
+                   bank_statement.previous_statement_id,
+                   bank_statement.created_at,
+                   bank_statement.updated_at,
+                   0 AS rank
+                  FROM bank_statement
+                 WHERE (bank_statement.previous_statement_id IS NULL)
+               UNION ALL
+                SELECT e.id,
+                   e.date_record,
+                   e.amount_balance_cents,
+                   e.previous_statement_id,
+                   e.created_at,
+                   e.updated_at,
+                   (c.rank + 1)
+                  FROM (cte c
+                    JOIN bank_statement e ON ((e.previous_statement_id = c.id)))
+               )
+        SELECT id,
+           date_record,
+           amount_balance_cents,
+           previous_statement_id,
+           created_at,
+           updated_at,
+           rank
+          FROM cte;
+        """), where);
     }
 
     /**
@@ -119,10 +153,6 @@ public class VOrderedBankStatements extends TableImpl<VOrderedBankStatementsReco
         this(DSL.name("v_ordered_bank_statements"), null);
     }
 
-    public <O extends Record> VOrderedBankStatements(Table<O> child, ForeignKey<O, VOrderedBankStatementsRecord> key) {
-        super(child, key, V_ORDERED_BANK_STATEMENTS);
-    }
-
     @Override
     public Schema getSchema() {
         return aliased() ? null : RegularIncome.REGULAR_INCOME;
@@ -136,6 +166,11 @@ public class VOrderedBankStatements extends TableImpl<VOrderedBankStatementsReco
     @Override
     public VOrderedBankStatements as(Name alias) {
         return new VOrderedBankStatements(alias, this);
+    }
+
+    @Override
+    public VOrderedBankStatements as(Table<?> alias) {
+        return new VOrderedBankStatements(alias.getQualifiedName(), this);
     }
 
     /**
@@ -154,12 +189,95 @@ public class VOrderedBankStatements extends TableImpl<VOrderedBankStatementsReco
         return new VOrderedBankStatements(name, null);
     }
 
-    // -------------------------------------------------------------------------
-    // Row7 type methods
-    // -------------------------------------------------------------------------
-
+    /**
+     * Rename this table
+     */
     @Override
-    public Row7<UUID, LocalDate, Integer, UUID, OffsetDateTime, OffsetDateTime, Integer> fieldsRow() {
-        return (Row7) super.fieldsRow();
+    public VOrderedBankStatements rename(Table<?> name) {
+        return new VOrderedBankStatements(name.getQualifiedName(), null);
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public VOrderedBankStatements where(Condition condition) {
+        return new VOrderedBankStatements(getQualifiedName(), aliased() ? this : null, null, condition);
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public VOrderedBankStatements where(Collection<? extends Condition> conditions) {
+        return where(DSL.and(conditions));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public VOrderedBankStatements where(Condition... conditions) {
+        return where(DSL.and(conditions));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public VOrderedBankStatements where(Field<Boolean> condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public VOrderedBankStatements where(SQL condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public VOrderedBankStatements where(@Stringly.SQL String condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public VOrderedBankStatements where(@Stringly.SQL String condition, Object... binds) {
+        return where(DSL.condition(condition, binds));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public VOrderedBankStatements where(@Stringly.SQL String condition, QueryPart... parts) {
+        return where(DSL.condition(condition, parts));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public VOrderedBankStatements whereExists(Select<?> select) {
+        return where(DSL.exists(select));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public VOrderedBankStatements whereNotExists(Select<?> select) {
+        return where(DSL.notExists(select));
     }
 }

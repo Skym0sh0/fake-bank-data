@@ -6,20 +6,30 @@ package generated.sky.regular.income.tables;
 
 import generated.sky.regular.income.Keys;
 import generated.sky.regular.income.RegularIncome;
+import generated.sky.regular.income.tables.BankStatement.BankStatementPath;
+import generated.sky.regular.income.tables.FinancialTransaction.FinancialTransactionPath;
 import generated.sky.regular.income.tables.records.BankStatementRecord;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
+import org.jooq.InverseForeignKey;
 import org.jooq.Name;
+import org.jooq.Path;
+import org.jooq.PlainSQL;
+import org.jooq.QueryPart;
 import org.jooq.Record;
-import org.jooq.Row6;
+import org.jooq.SQL;
 import org.jooq.Schema;
+import org.jooq.Select;
+import org.jooq.Stringly;
 import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.TableOptions;
@@ -75,19 +85,19 @@ public class BankStatement extends TableImpl<BankStatementRecord> {
     /**
      * The column <code>REGULAR_INCOME.bank_statement.created_at</code>.
      */
-    public final TableField<BankStatementRecord, OffsetDateTime> CREATED_AT = createField(DSL.name("created_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field("now()", SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+    public final TableField<BankStatementRecord, OffsetDateTime> CREATED_AT = createField(DSL.name("created_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
     /**
      * The column <code>REGULAR_INCOME.bank_statement.updated_at</code>.
      */
-    public final TableField<BankStatementRecord, OffsetDateTime> UPDATED_AT = createField(DSL.name("updated_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field("now()", SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+    public final TableField<BankStatementRecord, OffsetDateTime> UPDATED_AT = createField(DSL.name("updated_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
     private BankStatement(Name alias, Table<BankStatementRecord> aliased) {
-        this(alias, aliased, null);
+        this(alias, aliased, (Field<?>[]) null, null);
     }
 
-    private BankStatement(Name alias, Table<BankStatementRecord> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table());
+    private BankStatement(Name alias, Table<BankStatementRecord> aliased, Field<?>[] parameters, Condition where) {
+        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.table(), where);
     }
 
     /**
@@ -113,8 +123,35 @@ public class BankStatement extends TableImpl<BankStatementRecord> {
         this(DSL.name("bank_statement"), null);
     }
 
-    public <O extends Record> BankStatement(Table<O> child, ForeignKey<O, BankStatementRecord> key) {
-        super(child, key, BANK_STATEMENT);
+    public <O extends Record> BankStatement(Table<O> path, ForeignKey<O, BankStatementRecord> childPath, InverseForeignKey<O, BankStatementRecord> parentPath) {
+        super(path, childPath, parentPath, BANK_STATEMENT);
+    }
+
+    /**
+     * A subtype implementing {@link Path} for simplified path-based joins.
+     */
+    public static class BankStatementPath extends BankStatement implements Path<BankStatementRecord> {
+        public <O extends Record> BankStatementPath(Table<O> path, ForeignKey<O, BankStatementRecord> childPath, InverseForeignKey<O, BankStatementRecord> parentPath) {
+            super(path, childPath, parentPath);
+        }
+        private BankStatementPath(Name alias, Table<BankStatementRecord> aliased) {
+            super(alias, aliased);
+        }
+
+        @Override
+        public BankStatementPath as(String alias) {
+            return new BankStatementPath(DSL.name(alias), this);
+        }
+
+        @Override
+        public BankStatementPath as(Name alias) {
+            return new BankStatementPath(alias, this);
+        }
+
+        @Override
+        public BankStatementPath as(Table<?> alias) {
+            return new BankStatementPath(alias.getQualifiedName(), this);
+        }
     }
 
     @Override
@@ -137,17 +174,30 @@ public class BankStatement extends TableImpl<BankStatementRecord> {
         return Arrays.asList(Keys.BANK_STATEMENT__BANK_STATEMENT_PREVIOUS_STATEMENT_ID_FKEY);
     }
 
-    private transient BankStatement _bankStatement;
+    private transient BankStatementPath _bankStatement;
 
     /**
      * Get the implicit join path to the <code>public.bank_statement</code>
      * table.
      */
-    public BankStatement bankStatement() {
+    public BankStatementPath bankStatement() {
         if (_bankStatement == null)
-            _bankStatement = new BankStatement(this, Keys.BANK_STATEMENT__BANK_STATEMENT_PREVIOUS_STATEMENT_ID_FKEY);
+            _bankStatement = new BankStatementPath(this, Keys.BANK_STATEMENT__BANK_STATEMENT_PREVIOUS_STATEMENT_ID_FKEY, null);
 
         return _bankStatement;
+    }
+
+    private transient FinancialTransactionPath _financialTransaction;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.financial_transaction</code> table
+     */
+    public FinancialTransactionPath financialTransaction() {
+        if (_financialTransaction == null)
+            _financialTransaction = new FinancialTransactionPath(this, null, Keys.FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_BANK_STATEMENT_ID_FKEY.getInverseKey());
+
+        return _financialTransaction;
     }
 
     @Override
@@ -158,6 +208,11 @@ public class BankStatement extends TableImpl<BankStatementRecord> {
     @Override
     public BankStatement as(Name alias) {
         return new BankStatement(alias, this);
+    }
+
+    @Override
+    public BankStatement as(Table<?> alias) {
+        return new BankStatement(alias.getQualifiedName(), this);
     }
 
     /**
@@ -176,12 +231,95 @@ public class BankStatement extends TableImpl<BankStatementRecord> {
         return new BankStatement(name, null);
     }
 
-    // -------------------------------------------------------------------------
-    // Row6 type methods
-    // -------------------------------------------------------------------------
-
+    /**
+     * Rename this table
+     */
     @Override
-    public Row6<UUID, LocalDate, Integer, UUID, OffsetDateTime, OffsetDateTime> fieldsRow() {
-        return (Row6) super.fieldsRow();
+    public BankStatement rename(Table<?> name) {
+        return new BankStatement(name.getQualifiedName(), null);
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public BankStatement where(Condition condition) {
+        return new BankStatement(getQualifiedName(), aliased() ? this : null, null, condition);
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public BankStatement where(Collection<? extends Condition> conditions) {
+        return where(DSL.and(conditions));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public BankStatement where(Condition... conditions) {
+        return where(DSL.and(conditions));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public BankStatement where(Field<Boolean> condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public BankStatement where(SQL condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public BankStatement where(@Stringly.SQL String condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public BankStatement where(@Stringly.SQL String condition, Object... binds) {
+        return where(DSL.condition(condition, binds));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public BankStatement where(@Stringly.SQL String condition, QueryPart... parts) {
+        return where(DSL.condition(condition, parts));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public BankStatement whereExists(Select<?> select) {
+        return where(DSL.exists(select));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public BankStatement whereNotExists(Select<?> select) {
+        return where(DSL.notExists(select));
     }
 }

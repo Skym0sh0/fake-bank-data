@@ -8,14 +8,18 @@ import generated.sky.regular.income.RegularIncome;
 import generated.sky.regular.income.tables.records.VCategoriesWithUsageCountRecord;
 
 import java.time.OffsetDateTime;
+import java.util.Collection;
 import java.util.UUID;
 
+import org.jooq.Condition;
 import org.jooq.Field;
-import org.jooq.ForeignKey;
 import org.jooq.Name;
-import org.jooq.Record;
-import org.jooq.Row8;
+import org.jooq.PlainSQL;
+import org.jooq.QueryPart;
+import org.jooq.SQL;
 import org.jooq.Schema;
+import org.jooq.Select;
+import org.jooq.Stringly;
 import org.jooq.Table;
 import org.jooq.TableField;
 import org.jooq.TableOptions;
@@ -94,11 +98,48 @@ public class VCategoriesWithUsageCount extends TableImpl<VCategoriesWithUsageCou
     public final TableField<VCategoriesWithUsageCountRecord, Long> USE_COUNT = createField(DSL.name("use_count"), SQLDataType.BIGINT, this, "");
 
     private VCategoriesWithUsageCount(Name alias, Table<VCategoriesWithUsageCountRecord> aliased) {
-        this(alias, aliased, null);
+        this(alias, aliased, (Field<?>[]) null, null);
     }
 
-    private VCategoriesWithUsageCount(Name alias, Table<VCategoriesWithUsageCountRecord> aliased, Field<?>[] parameters) {
-        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.view("create view \"v_categories_with_usage_count\" as  WITH fin_transaction_count AS (\n         SELECT financial_transaction.category_id,\n            count(*) AS financial_transaction_count\n           FROM financial_transaction\n          GROUP BY financial_transaction.category_id\n        ), turnovers_count AS (\n         SELECT turnover_row.category_id,\n            count(*) AS turnover_count\n           FROM turnover_row\n          GROUP BY turnover_row.category_id\n        ), overall_count AS (\n         SELECT COALESCE(c.category_id, t.category_id) AS category_id,\n            (COALESCE(c.financial_transaction_count, (0)::bigint) + COALESCE(t.turnover_count, (0)::bigint)) AS use_count\n           FROM (fin_transaction_count c\n             FULL JOIN turnovers_count t ON ((c.category_id = t.category_id)))\n        ), completed_categories AS (\n         SELECT c.id,\n            c.parent_category,\n            c.name,\n            c.is_income,\n            c.description,\n            c.last_updated_at,\n            c.created_at,\n            COALESCE(o.use_count, (0)::bigint) AS use_count\n           FROM (category c\n             LEFT JOIN overall_count o ON ((c.id = o.category_id)))\n        )\n SELECT id,\n    parent_category,\n    name,\n    is_income,\n    description,\n    last_updated_at,\n    created_at,\n    use_count\n   FROM completed_categories;"));
+    private VCategoriesWithUsageCount(Name alias, Table<VCategoriesWithUsageCountRecord> aliased, Field<?>[] parameters, Condition where) {
+        super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.view("""
+        create view "v_categories_with_usage_count" as  WITH fin_transaction_count AS (
+                SELECT financial_transaction.category_id,
+                   count(*) AS financial_transaction_count
+                  FROM financial_transaction
+                 GROUP BY financial_transaction.category_id
+               ), turnovers_count AS (
+                SELECT turnover_row.category_id,
+                   count(*) AS turnover_count
+                  FROM turnover_row
+                 GROUP BY turnover_row.category_id
+               ), overall_count AS (
+                SELECT COALESCE(c.category_id, t.category_id) AS category_id,
+                   (COALESCE(c.financial_transaction_count, (0)::bigint) + COALESCE(t.turnover_count, (0)::bigint)) AS use_count
+                  FROM (fin_transaction_count c
+                    FULL JOIN turnovers_count t ON ((c.category_id = t.category_id)))
+               ), completed_categories AS (
+                SELECT c.id,
+                   c.parent_category,
+                   c.name,
+                   c.is_income,
+                   c.description,
+                   c.last_updated_at,
+                   c.created_at,
+                   COALESCE(o.use_count, (0)::bigint) AS use_count
+                  FROM (category c
+                    LEFT JOIN overall_count o ON ((c.id = o.category_id)))
+               )
+        SELECT id,
+           parent_category,
+           name,
+           is_income,
+           description,
+           last_updated_at,
+           created_at,
+           use_count
+          FROM completed_categories;
+        """), where);
     }
 
     /**
@@ -125,10 +166,6 @@ public class VCategoriesWithUsageCount extends TableImpl<VCategoriesWithUsageCou
         this(DSL.name("v_categories_with_usage_count"), null);
     }
 
-    public <O extends Record> VCategoriesWithUsageCount(Table<O> child, ForeignKey<O, VCategoriesWithUsageCountRecord> key) {
-        super(child, key, V_CATEGORIES_WITH_USAGE_COUNT);
-    }
-
     @Override
     public Schema getSchema() {
         return aliased() ? null : RegularIncome.REGULAR_INCOME;
@@ -142,6 +179,11 @@ public class VCategoriesWithUsageCount extends TableImpl<VCategoriesWithUsageCou
     @Override
     public VCategoriesWithUsageCount as(Name alias) {
         return new VCategoriesWithUsageCount(alias, this);
+    }
+
+    @Override
+    public VCategoriesWithUsageCount as(Table<?> alias) {
+        return new VCategoriesWithUsageCount(alias.getQualifiedName(), this);
     }
 
     /**
@@ -160,12 +202,95 @@ public class VCategoriesWithUsageCount extends TableImpl<VCategoriesWithUsageCou
         return new VCategoriesWithUsageCount(name, null);
     }
 
-    // -------------------------------------------------------------------------
-    // Row8 type methods
-    // -------------------------------------------------------------------------
-
+    /**
+     * Rename this table
+     */
     @Override
-    public Row8<UUID, UUID, String, Boolean, String, OffsetDateTime, OffsetDateTime, Long> fieldsRow() {
-        return (Row8) super.fieldsRow();
+    public VCategoriesWithUsageCount rename(Table<?> name) {
+        return new VCategoriesWithUsageCount(name.getQualifiedName(), null);
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public VCategoriesWithUsageCount where(Condition condition) {
+        return new VCategoriesWithUsageCount(getQualifiedName(), aliased() ? this : null, null, condition);
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public VCategoriesWithUsageCount where(Collection<? extends Condition> conditions) {
+        return where(DSL.and(conditions));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public VCategoriesWithUsageCount where(Condition... conditions) {
+        return where(DSL.and(conditions));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public VCategoriesWithUsageCount where(Field<Boolean> condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public VCategoriesWithUsageCount where(SQL condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public VCategoriesWithUsageCount where(@Stringly.SQL String condition) {
+        return where(DSL.condition(condition));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public VCategoriesWithUsageCount where(@Stringly.SQL String condition, Object... binds) {
+        return where(DSL.condition(condition, binds));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    @PlainSQL
+    public VCategoriesWithUsageCount where(@Stringly.SQL String condition, QueryPart... parts) {
+        return where(DSL.condition(condition, parts));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public VCategoriesWithUsageCount whereExists(Select<?> select) {
+        return where(DSL.exists(select));
+    }
+
+    /**
+     * Create an inline derived table from this table
+     */
+    @Override
+    public VCategoriesWithUsageCount whereNotExists(Select<?> select) {
+        return where(DSL.notExists(select));
     }
 }
