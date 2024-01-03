@@ -19,6 +19,7 @@ group 'de.sky.regular.income.server'
 version '1.0-SNAPSHOT'
 
 ext['jooq.version'] = "$jooq_version"
+ext['flyway.version'] = "$flyway_version"
 
 dependencies {
     implementation project(':database')

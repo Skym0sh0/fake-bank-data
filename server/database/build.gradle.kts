@@ -7,6 +7,7 @@ plugins {
 //name = "database-commons"
 val jooq_version: String by rootProject.extra
 val slf4j_version: String by rootProject.extra
+val flyway_version: String by rootProject.extra
 
 dependencies {
     api("org.jooq", "jooq", jooq_version)
@@ -17,8 +18,8 @@ dependencies {
 
     implementation("org.slf4j", "slf4j-api", slf4j_version)
 
-    api("org.flywaydb", "flyway-core", "10.4.1")
-    runtimeOnly("org.flywaydb", "flyway-database-postgresql", "10.4.1")
+    api("org.flywaydb", "flyway-core", flyway_version)
+    runtimeOnly("org.flywaydb", "flyway-database-postgresql", flyway_version)
 
     implementation("org.postgresql", "postgresql", "42.7.1")
 
