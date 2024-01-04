@@ -10,7 +10,7 @@
     "postbuild": "docker build -t 192.168.1.2:5000/regular-income-frontend:latest . && docker push 192.168.1.2:5000/regular-income-frontend:latest"
   },
   "dependencies": {
-    "@amcharts/amcharts4": "4.7.21",
+    "@amcharts/amcharts4": "4.10.38",
     "@amcharts/amcharts4-geodata": "4.1.28",
     "@riophae/vue-treeselect": "0.4.0",
     "axios": "1.6.0",
@@ -19,7 +19,7 @@
     "lodash": "^4.17.21",
     "moment": "2.30.1",
     "uuid": "9.0.1",
-    "vue": "2.6.11",
+    "vue": "2.7.16",
     "vue-drag-drop": "1.1.4",
     "vue-global-events": "1.2.1",
     "vue-router": "3.1.3",
@@ -27,16 +27,16 @@
     "vuetify": "2.7.1"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "4.1.2",
-    "@vue/cli-plugin-eslint": "4.1.2",
-    "@vue/cli-service": "4.1.2",
+    "@vue/cli-plugin-babel": "4.5.19",
+    "@vue/cli-plugin-eslint": "4.5.19",
+    "@vue/cli-service": "4.5.19",
     "babel-eslint": "10.0.3",
     "eslint": "6.8.0",
-    "eslint-plugin-vue": "6.1.2",
+    "eslint-plugin-vue": "9.19.2",
     "sass": "1.24.2",
     "sass-loader": "8.0.0",
     "vue-cli-plugin-vuetify": "2.0.3",
-    "vue-template-compiler": "2.6.11",
+    "vue-template-compiler": "2.7.16",
     "vuetify-loader": "1.4.3"
   },
   "eslintConfig": {
