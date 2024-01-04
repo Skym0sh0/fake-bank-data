@@ -19,11 +19,11 @@
             <sky-navigation/>
         </v-navigation-drawer>
 
-        <v-content app>
+        <v-main app>
             <v-container fluid>
                 <router-view/>
             </v-container>
-        </v-content>
+        </v-main>
 
         <!--<v-footer app/>-->
         <!--<v-bottom-navigation app/>-->

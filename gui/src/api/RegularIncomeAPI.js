@@ -1,5 +1,5 @@
 import axios from "axios";
-import uuid from "uuid";
+import { v4 as uuidv4 } from 'uuid';
 import {
     denormalizeCategory,
     denormalizeReason,
@@ -22,7 +22,7 @@ class RegularIncomeAPI {
             baseURL: this.baseUrl,
             // timeout: 1500,
             headers: {
-                correlationid: uuid.v4()
+                correlationid: uuidv4()
             },
         })
     }

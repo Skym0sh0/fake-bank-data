@@ -4,7 +4,7 @@
         <!--                       @keyup.17.prevent="reallocationEnabled = false"/>-->
 
         <v-row>
-            <v-col class="py-0">
+          <v-col>
                 <v-text-field id="quickfilter-text-input-field"
                               v-model="quickfilter"
                               type="text"

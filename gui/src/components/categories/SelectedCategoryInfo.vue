@@ -1,6 +1,6 @@
 <template>
     <v-snackbar :value="isOpen"
-                :timeout="0"
+                :timeout="-1"
                 :vertical="true"
                 color="info"
                 :right="true">
