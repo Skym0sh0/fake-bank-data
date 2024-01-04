@@ -71,9 +71,9 @@
 </template>
 
 <script>
-import TableCellDescription from "@/components/overview/utils/TableCellDescription.vue";
-import TableCellMonetary from "@/components/overview/utils/TableCellMonetary.vue";
-import CategoryInput from "@/components/enterings/CategoryInput.vue";
+import TableCellDescription from "@/components/turnovers/TableCellDescription.vue";
+import TableCellMonetary from "@/components/turnovers/TableCellMonetary.vue";
+import CategoryInput from "@/components/misc/CategoryInput.vue";
 
 export default {
     name: "TurnoverPreviewTable",

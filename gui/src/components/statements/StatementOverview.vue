@@ -111,7 +111,7 @@ import {api} from "../../api/RegularIncomeAPI"
 import StatementTableDetails from "./StatementTableDetails.vue"
 import {dateFormat, moneyFormat} from '../../util/Formatters'
 import * as uuid from "uuid";
-import LegacyXlsUpload from "@/components/enterings/LegacyXlsUpload.vue";
+import LegacyXlsUpload from "@/components/statements/LegacyXlsUpload.vue";
 import WaitingIndicator from "@/components/misc/WaitingIndicator.vue";
 
 export default {

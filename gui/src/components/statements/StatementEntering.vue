@@ -241,9 +241,9 @@ import {normalizeCategory, normalizeStatement} from "@/util/Normalizer";
 import * as uuid from "uuid";
 import {integer, required} from 'vuelidate/dist/validators.min'
 import {validationMixin} from 'vuelidate'
-import MonetaryInput from "./MonetaryInput";
+import MonetaryInput from "./MonetaryInput.vue";
 import '@riophae/vue-treeselect/dist/vue-treeselect.css'
-import CategoryInput from "@/components/enterings/CategoryInput.vue";
+import CategoryInput from "@/components/misc/CategoryInput.vue";
 import WaitingIndicator from "@/components/misc/WaitingIndicator.vue";
 
 export default {

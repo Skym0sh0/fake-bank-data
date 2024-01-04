@@ -59,7 +59,7 @@
 <script>
 import * as moment from "moment";
 import {normalizeCategory} from "@/util/Normalizer";
-import Breadcrumps from "@/components/categories/Breadcrumps.vue";
+import Breadcrumps from "@/components/misc/Breadcrumps.vue";
 
 export default {
     name: "CategoryDetails",
