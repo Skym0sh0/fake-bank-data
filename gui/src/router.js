@@ -5,8 +5,6 @@ import StatementOverview from './components/statements/StatementOverview.vue'
 import StatementEntering from "./components/statements/StatementEntering.vue";
 import TurnoverOverview from "./components/turnovers/TurnoverOverview";
 import TurnoversDetail from "./components/turnovers/TurnoversDetail";
-import CategoryOverview from "./components/categories/CategoryOverview";
-import ReportOverview from "./components/reports/ReportOverview";
 
 Vue.use(Router)
 
@@ -41,12 +39,12 @@ export default new Router({
         {
             path: '/categories/',
             name: 'category-overview',
-            component: CategoryOverview,
+            component: () => import("./components/categories/CategoryOverview"),
         },
         {
             path: '/reports/',
             name: 'reports-overview',
-            component: ReportOverview,
+            component: () => import("./components/reports/ReportOverview"),
         },
         {
             path: '/about',

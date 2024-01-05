@@ -4,8 +4,8 @@
         <v-app-bar app color="primary" dark>
             <v-app-bar-nav-icon @click.stop="drawer = !drawer"/>
 
-            <v-icon class="mx-4">
-                regular-income
+            <v-icon class="mx-4" color="warning">
+                mdi-currency-eur
             </v-icon>
 
             <v-toolbar-title class="mr-12 align-center">
