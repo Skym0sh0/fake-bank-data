@@ -13,10 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @RequestMapping("/user-auth")
@@ -67,10 +64,7 @@ public class UserAuthController {
         Thread.sleep(2500);
         log.info("Logging user in {}...", login);
 
-        return users.stream()
-                .filter(u -> u.getUsername().equals(login.getUsername()))
-                .filter(u -> u.getPassword().equals(login.getPassword()))
-                .findAny()
+        return findUser(login.getUsername(), login.getPassword())
                 .map(usr -> new AuthenticationToken(usr.getId(), usr.getUsername()))
                 .orElseThrow(() -> new RuntimeException("Username/Password does not exist"));
     }
@@ -80,6 +74,17 @@ public class UserAuthController {
     public void logout() {
         Thread.sleep(2500);
         log.info("Logging user out ...");
+    }
+
+    public boolean isValidUser(String username, String password) {
+        return findUser(username, password).isPresent();
+    }
+
+    private Optional<MyUser> findUser(String username, String password) {
+        return users.stream()
+                .filter(u -> u.getUsername().equals(username))
+                .filter(u -> u.getPassword().equals(password))
+                .findAny();
     }
 
     @Builder
