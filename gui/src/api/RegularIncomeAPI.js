@@ -1,5 +1,5 @@
 import axios from "axios";
-import { v4 as uuidv4 } from 'uuid';
+import {v4 as uuidv4} from 'uuid';
 import {
     denormalizeCategory,
     denormalizeReason,
@@ -7,7 +7,7 @@ import {
     denormalizeTransaction,
     denormalizeTurnoverImport,
     denormalizeTurnoverPreview
-} from "../util/Normalizer";
+} from "@/util/Normalizer";
 
 class RegularIncomeAPI {
     constructor(baseUrl) {
@@ -25,6 +25,46 @@ class RegularIncomeAPI {
                 correlationid: uuidv4()
             },
         })
+    }
+
+    getAuth() {
+        const ref = this
+
+        return {
+            registerUser(user) {
+                console.log(ref, user)
+
+                return new Promise((resolve, reject) => {
+                    if (new Date().getTime() % 13 === 0) {
+                        reject()
+                        return;
+                    }
+
+                    setTimeout(() => resolve({
+                        id: uuidv4(),
+                        login: user.username,
+                        password: user.password,
+                    }), 2500);
+                });
+            },
+
+            login(username, password) {
+                console.log(ref, username, password)
+
+                return new Promise((resolve, reject) => {
+                    if (new Date().getTime() % 13 === 0) {
+                        reject()
+                        return;
+                    }
+
+                    setTimeout(() => resolve({
+                        id: uuidv4(),
+                        username: username,
+                    }), 500);
+                });
+
+            },
+        }
     }
 
     getTransactionsForStatement(stmtId) {

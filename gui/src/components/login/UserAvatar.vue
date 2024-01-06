@@ -15,10 +15,6 @@ export default {
             return this.$root.userRef.user.username;
         },
         avatar() {
-            console.log(this.username.split(/\s+/)
-                .filter(word => word.length > 0)
-                .map(word => word.substring(0, 1)))
-
             return this.username.split(/\s+/)
                 .filter(word => word.length > 0)
                 .map(word => word.substring(0, 1))

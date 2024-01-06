@@ -39,17 +39,23 @@
                     </v-card-actions>
                 </v-card-text>
             </v-card>
+
+            <waiting-indicator :is-loading="isLoading"/>
         </div>
     </v-form>
 </template>
 
 <script>
 import {userService} from "@/auth/auth-header";
+import {api} from "@/api/RegularIncomeAPI";
+import WaitingIndicator from "@/components/misc/WaitingIndicator.vue";
 
 export default {
     name: "LoginPage",
+    components: {WaitingIndicator},
     data() {
         return {
+            isLoading: false,
             valid: false,
             username: '',
             password: '',
@@ -75,12 +81,21 @@ export default {
             if (!this.username || !this.password)
                 return;
 
-            userService.login(this.username, this.password)
+            this.isLoading = true;
 
-            this.$router.replace({
-                path: this.$route.query.returnUrl || '/'
-            })
-            // location.reload();
+            api.getAuth().login(this.username, this.password)
+                .then(user => {
+                    console.log(user);
+
+                    userService.login(this.username, this.password);
+
+                    this.$router.replace({
+                        path: this.$route.query.returnUrl || '/'
+                    })
+
+                    // location.reload();
+                })
+                .finally(() => this.isLoading = false)
         },
         onRegisterClick() {
             this.$router.push({name: 'register'})

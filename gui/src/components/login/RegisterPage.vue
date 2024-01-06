@@ -7,22 +7,17 @@
                 </v-card-title>
 
                 <v-card-text>
-                    <v-text-field v-model="firstName" label="Vorname"/>
-                    <v-text-field v-model="lastName" label="Nachname"/>
-
-                    <v-spacer class="my-5"/>
-
-                    <v-text-field v-model="loginName"
+                    <v-text-field v-model="username"
                                   type="text"
-                                  label="Loginname*"
+                                  label="Username"
                                   prepend-inner-icon="mdi-account-outline"
-                                  :rules="loginNameRules"
+                                  :rules="usernameRules"
                                   required/>
 
                     <v-spacer class="my-5"/>
 
                     <v-text-field v-model="password"
-                                  label="Passwort*"
+                                  label="Passwort"
                                   :rules="passwordRules"
                                   prepend-inner-icon="mdi-lock-outline"
                                   :type="passwordVisible ? 'text' : 'password'"
@@ -36,7 +31,7 @@
                         </template>
                     </v-text-field>
                     <v-text-field v-model="passwordRepeat"
-                                  label="Passwort wiederholen*"
+                                  label="Passwort wiederholen"
                                   :rules="passwordRepeatRules"
                                   prepend-inner-icon="mdi-lock-outline"
                                   :type="passwordVisible ? 'text' : 'password'"
@@ -62,22 +57,28 @@
                 </v-card-actions>
             </v-card>
         </div>
+
+        <waiting-indicator :is-loading="isLoading"/>
     </v-form>
 </template>
 
 <script>
+import {api} from "@/api/RegularIncomeAPI";
+import WaitingIndicator from "@/components/misc/WaitingIndicator.vue";
+
 export default {
     name: "RegisterPage",
+    components: {WaitingIndicator},
     data() {
         return {
-            firstName: '',
-            lastName: '',
-            loginName: '',
+            username: '',
             password: '',
             passwordRepeat: '',
+
+            isLoading: false,
             valid: false,
             passwordVisible: false,
-            loginNameRules: [
+            usernameRules: [
                 value => !value ? "Required" : true,
                 value => value.length < 5 ? "Minimal length is 5" : true,
                 value => value.search(/\s+/) >= 0 ? "Must not contain spaces" : true,
@@ -100,8 +101,15 @@ export default {
             if (!this.valid)
                 return;
 
-            console.log(this.loginName, this.password, this.passwordRepeat)
-            // this.$router.push({name: 'login'})
+            this.isLoading = true;
+
+            api.getAuth()
+                .registerUser({
+                    username: this.username,
+                    password: this.password
+                })
+                .then(() => this.$router.push({name: 'login'}))
+                .finally(() => this.isLoading = false)
         },
         validate() {
             this.$refs['registration-form'].validate()
