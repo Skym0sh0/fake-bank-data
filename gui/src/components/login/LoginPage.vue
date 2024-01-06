@@ -30,7 +30,7 @@
                     </v-text-field>
 
                     <div class="w-100 d-flex justify-content-between">
-                        <v-btn disabled color="warning">
+                        <v-btn @click="onRegisterClick" color="warning">
                             Register
                         </v-btn>
                         <v-btn :disabled="!valid" color="success" type="submit">
@@ -81,6 +81,9 @@ export default {
                 path: this.$route.query.returnUrl || '/'
             })
             // location.reload();
+        },
+        onRegisterClick() {
+            this.$router.push({name: 'register'})
         }
     },
 }

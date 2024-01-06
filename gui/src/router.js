@@ -7,6 +7,7 @@ import TurnoverOverview from "./components/turnovers/TurnoverOverview";
 import TurnoversDetail from "./components/turnovers/TurnoversDetail";
 import {userService} from "@/auth/auth-header";
 import LoginPage from "@/components/login/LoginPage.vue";
+import RegisterPage from "@/components/login/RegisterPage.vue";
 
 Vue.use(Router)
 
@@ -21,6 +22,11 @@ let router = new Router({
             path: '/login',
             name: 'login',
             component: LoginPage,
+        },
+        {
+            path: '/register',
+            name: 'register',
+            component: RegisterPage,
         },
         {
             path: '/statements/',
@@ -65,7 +71,7 @@ let router = new Router({
 });
 
 router.beforeEach((to, from, next) => {
-    const publicPages = ['/login'];
+    const publicPages = ['/login', '/register'];
     const authRequired = !publicPages.includes(to.path);
     const loggedIn = userService.getUser();
 
