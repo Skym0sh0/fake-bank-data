@@ -33,7 +33,7 @@
                         <v-btn disabled color="warning">
                             Register
                         </v-btn>
-                        <v-btn @click="doLogin" :disabled="!valid" color="success" type="submit">
+                        <v-btn :disabled="!valid" color="success" type="submit">
                             Login
                         </v-btn>
                     </div>
@@ -72,7 +72,7 @@ export default {
     },
     methods: {
         doLogin() {
-            if ( !this.username || !this.password)
+            if (!this.username || !this.password)
                 return;
 
             console.log("do login now!")
