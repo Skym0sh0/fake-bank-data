@@ -1,12 +1,12 @@
 <template>
-    <div style="height: 90vh" class="w-100 d-flex justify-content-center align-items-center">
-        <v-card min-width="25%" max-width="80%" elevation="10">
-            <v-card-title>
-                Login
-            </v-card-title>
+    <v-form v-model="valid" @submit.prevent="doLogin">
+        <div style="height: 90vh" class="w-100 d-flex justify-content-center align-items-center">
+            <v-card min-width="25%" max-width="80%" elevation="10">
+                <v-card-title>
+                    Login
+                </v-card-title>
 
-            <v-card-text>
-                <v-form v-model="valid" @submit.prevent="doLogin">
+                <v-card-text>
                     <v-text-field v-model="username"
                                   type="text"
                                   label="Username"
@@ -29,18 +29,18 @@
                         </template>
                     </v-text-field>
 
-                    <div class="w-100 d-flex justify-content-between">
+                    <v-card-actions class="w-100 d-flex justify-content-between">
                         <v-btn @click="onRegisterClick" color="warning">
                             Register
                         </v-btn>
                         <v-btn :disabled="!valid" color="success" type="submit">
                             Login
                         </v-btn>
-                    </div>
-                </v-form>
-            </v-card-text>
-        </v-card>
-    </div>
+                    </v-card-actions>
+                </v-card-text>
+            </v-card>
+        </div>
+    </v-form>
 </template>
 
 <script>
