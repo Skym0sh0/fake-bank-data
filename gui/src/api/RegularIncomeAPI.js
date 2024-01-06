@@ -34,35 +34,17 @@ class RegularIncomeAPI {
             registerUser(user) {
                 console.log(ref, user)
 
-                return new Promise((resolve, reject) => {
-                    if (new Date().getTime() % 13 === 0) {
-                        reject()
-                        return;
-                    }
-
-                    setTimeout(() => resolve({
-                        id: uuidv4(),
-                        login: user.username,
-                        password: user.password,
-                    }), 2500);
-                });
+                return ref.getClient()
+                    .post("user-auth/register", {username: user.username, password: user.password})
+                    .then();
             },
 
             login(username, password) {
                 console.log(ref, username, password)
 
-                return new Promise((resolve, reject) => {
-                    if (new Date().getTime() % 13 === 0) {
-                        reject()
-                        return;
-                    }
-
-                    setTimeout(() => resolve({
-                        id: uuidv4(),
-                        username: username,
-                    }), 500);
-                });
-
+                return ref.getClient()
+                    .post("user-auth/login", {username: username, password: password})
+                    .then();
             },
         }
     }
