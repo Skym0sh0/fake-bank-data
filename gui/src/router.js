@@ -5,15 +5,22 @@ import StatementOverview from './components/statements/StatementOverview.vue'
 import StatementEntering from "./components/statements/StatementEntering.vue";
 import TurnoverOverview from "./components/turnovers/TurnoverOverview";
 import TurnoversDetail from "./components/turnovers/TurnoversDetail";
+import {getUser} from "@/auth/auth-header";
+import LoginPage from "@/components/login/LoginPage.vue";
 
 Vue.use(Router)
 
-export default new Router({
+let router = new Router({
     routes: [
         {
             path: '/',
             name: 'home',
             component: Home,
+        },
+        {
+            path: '/login',
+            name: 'login',
+            component: LoginPage,
         },
         {
             path: '/statements/',
@@ -55,4 +62,25 @@ export default new Router({
             component: () => import(/* webpackChunkName: "about" */ './components/about/About.vue'),
         }
     ]
-})
+});
+
+router.beforeEach((to, from, next) => {
+    const publicPages = ['/login'];
+    const authRequired = !publicPages.includes(to.path);
+    const loggedIn = getUser();
+
+    console.log("before", authRequired, loggedIn)
+
+    if (authRequired && !loggedIn) {
+        return next({
+            path: '/login',
+            query: {
+                returnUrl: to.path
+            }
+        });
+    }
+
+    next();
+});
+
+export default router
