@@ -10,6 +10,7 @@ import { Drag, Drop } from 'vue-drag-drop';
 import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+import {userService} from "@/auth/auth-header";
 
 Vue.config.productionTip = false
 
@@ -24,5 +25,8 @@ Vue.use(Vuelidate)
 new Vue({
     router,
     vuetify,
-    render: h => h(App)
+    render: h => h(App),
+    data: {
+        userRef: userService.userReference,
+    }
 }).$mount('#app')

@@ -5,7 +5,7 @@ import StatementOverview from './components/statements/StatementOverview.vue'
 import StatementEntering from "./components/statements/StatementEntering.vue";
 import TurnoverOverview from "./components/turnovers/TurnoverOverview";
 import TurnoversDetail from "./components/turnovers/TurnoversDetail";
-import {getUser} from "@/auth/auth-header";
+import {userService} from "@/auth/auth-header";
 import LoginPage from "@/components/login/LoginPage.vue";
 
 Vue.use(Router)
@@ -67,13 +67,11 @@ let router = new Router({
 router.beforeEach((to, from, next) => {
     const publicPages = ['/login'];
     const authRequired = !publicPages.includes(to.path);
-    const loggedIn = getUser();
-
-    console.log("before", authRequired, loggedIn)
+    const loggedIn = userService.getUser();
 
     if (authRequired && !loggedIn) {
         return next({
-            path: '/login',
+            name: 'login',
             query: {
                 returnUrl: to.path
             }

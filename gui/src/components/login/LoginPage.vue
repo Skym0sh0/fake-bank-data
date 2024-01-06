@@ -75,14 +75,12 @@ export default {
             if (!this.username || !this.password)
                 return;
 
-            console.log("do login now!")
-
             userService.login(this.username, this.password)
 
-            console.log("query param", this.$route.query)
             this.$router.replace({
                 path: this.$route.query.returnUrl || '/'
             })
+            // location.reload();
         }
     },
 }

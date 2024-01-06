@@ -31,11 +31,7 @@ import getPages from "@/util/pages";
 export default {
     name: 'home',
     components: {},
-    methods: {
-        onClick(link) {
-            console.log(link)
-        },
-    },
+    methods: {},
     computed: {
         links() {
             return getPages().filter(p => !p.isStartPage);

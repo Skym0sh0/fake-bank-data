@@ -1,15 +1,26 @@
 const STORAGE_USER_KEY = "user";
 
-function setUser(user) {
-    sessionStorage.setItem(STORAGE_USER_KEY, JSON.stringify(user))
+const userReference = {
+    user: null,
 }
 
-export function getUser() {
-    return sessionStorage.getItem(STORAGE_USER_KEY)
+function setUser(user) {
+    sessionStorage.setItem(STORAGE_USER_KEY, JSON.stringify(user))
+    userReference.user = user;
+}
+
+function getUser() {
+    const userJson = sessionStorage.getItem(STORAGE_USER_KEY);
+    return JSON.parse(userJson)
+}
+
+function initUser() {
+    const userJson = sessionStorage.getItem(STORAGE_USER_KEY);
+    userReference.user = JSON.parse(userJson)
 }
 
 export function authHeader() {
-    const user = JSON.parse(getUser());
+    const user = getUser();
 
     if (user && user.authdata) {
         return {'Authorization': 'Basic ' + user.authdata};
@@ -26,16 +37,22 @@ function login(username, password) {
         authData: window.btoa(username + ":" + password)
     }
 
-    setUser(user)
+    setUser(user);
 }
 
 function logout() {
     sessionStorage.removeItem(STORAGE_USER_KEY);
+    userReference.user = null;
+
+    // location.reload();
 }
 
 export const userService = {
+    userReference,
     login,
-    logout
+    initUser,
+    logout,
+    getUser,
 };
 
 /*
