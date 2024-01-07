@@ -35,9 +35,9 @@ public class UserService implements UserDetailsService {
     public UserService(DatabaseSupplier supplier, PasswordEncoder passwordEncoder) {
         this(supplier.get(), passwordEncoder);
 
-        register(new UserRegistration("peter", "12345678"));
-        register(new UserRegistration("hans", "12345678"));
-        register(new UserRegistration("admin", "12345678"));
+        register(new UserRegistration("peter", "12345678"), true);
+        register(new UserRegistration("hans", "12345678"), true);
+        register(new UserRegistration("admin", "12345678"), true);
     }
 
     @Override
@@ -53,6 +53,10 @@ public class UserService implements UserDetailsService {
     }
 
     public User register(UserRegistration reg) {
+        return register(reg, false);
+    }
+
+    public User register(UserRegistration reg, boolean dontEncrypt) {
         if (userExists(reg.getUsername()))
             throw new RuntimeException("User already exists: " + reg.getUsername());
 
@@ -60,7 +64,7 @@ public class UserService implements UserDetailsService {
                 MyUser.builder()
                         .id(UUID.randomUUID())
                         .username(reg.getUsername())
-                        .password(passwordEncoder.encode(reg.getPassword()))
+                        .password(dontEncrypt ? "{noop}" + reg.getPassword() : passwordEncoder.encode(reg.getPassword()))
                         .build()
         );
 
