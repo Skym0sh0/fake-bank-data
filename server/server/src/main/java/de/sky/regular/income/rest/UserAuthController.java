@@ -1,6 +1,5 @@
 package de.sky.regular.income.rest;
 
-import de.sky.regular.income.api.auth.AuthenticationToken;
 import de.sky.regular.income.api.auth.User;
 import de.sky.regular.income.api.auth.UserLogin;
 import de.sky.regular.income.api.auth.UserRegistration;
@@ -28,7 +27,7 @@ public class UserAuthController {
     }
 
     @GetMapping("/auth/login")
-    public AuthenticationToken login() {
+    public User login() {
         var ctx = SecurityContextHolder.getContext();
         var auth = ctx.getAuthentication();
 
@@ -36,7 +35,7 @@ public class UserAuthController {
     }
 
     @PostMapping("/auth/login")
-    public AuthenticationToken login(@RequestBody UserLogin login) {
+    public User login(@RequestBody UserLogin login) {
         throw new UnsupportedOperationException("Not implemented");
     }
 

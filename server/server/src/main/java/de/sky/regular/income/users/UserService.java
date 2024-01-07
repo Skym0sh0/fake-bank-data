@@ -1,14 +1,17 @@
 package de.sky.regular.income.users;
 
 import de.sky.common.database.DatabaseConnection;
-import de.sky.regular.income.api.auth.AuthenticationToken;
 import de.sky.regular.income.api.auth.User;
 import de.sky.regular.income.api.auth.UserRegistration;
 import de.sky.regular.income.database.DatabaseSupplier;
+import generated.sky.regular.income.tables.records.UsersRecord;
 import lombok.Builder;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.Singular;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -19,7 +22,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.*;
+
+import static generated.sky.regular.income.Tables.USERS;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -34,43 +41,47 @@ public class UserService implements UserDetailsService {
     @Autowired
     public UserService(DatabaseSupplier supplier, PasswordEncoder passwordEncoder) {
         this(supplier.get(), passwordEncoder);
-
-        register(new UserRegistration("peter", "12345678"), true);
-        register(new UserRegistration("hans", "12345678"), true);
-        register(new UserRegistration("admin", "12345678"), true);
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return findUser(username)
-                .orElseThrow(() -> new UsernameNotFoundException(username));
+        return db.transactionWithResult(ctx ->
+                findUser(ctx, username)
+                        .map(UserService::mapToUserDetails)
+                        .orElseThrow(() -> new UsernameNotFoundException(username))
+        );
     }
 
-    public AuthenticationToken checkLogin(String username) {
-        return findUser(username)
-                .map(u -> new AuthenticationToken(u.getId(), u.getUsername()))
-                .orElseThrow();
+    public User checkLogin(String username) {
+        return db.transactionWithResult(ctx ->
+                findUser(ctx, username)
+                        .map(UserService::mapToUser)
+                        .orElseThrow(() -> new UsernameNotFoundException(username))
+        );
     }
 
     public User register(UserRegistration reg) {
-        return register(reg, false);
-    }
+        var ts = ZonedDateTime.now().toOffsetDateTime();
 
-    public User register(UserRegistration reg, boolean dontEncrypt) {
-        if (userExists(reg.getUsername()))
-            throw new RuntimeException("User already exists: " + reg.getUsername());
+        return db.transactionWithResult(ctx -> {
+            var u = ctx.newRecord(USERS);
 
-        users.add(
-                MyUser.builder()
-                        .id(UUID.randomUUID())
-                        .username(reg.getUsername())
-                        .password(dontEncrypt ? "{noop}" + reg.getPassword() : passwordEncoder.encode(reg.getPassword()))
-                        .build()
-        );
+            u.setId(UUID.randomUUID());
 
-        return findUser(reg.getUsername())
-                .map(u -> new User(u.getId(), u.getUsername()))
-                .orElseThrow();
+            u.setUsername(reg.getUsername());
+            u.setUsername(passwordEncoder.encode(reg.getPassword()));
+
+            u.setRoles("ROLE_USER");
+
+            u.setCreatedAt(ts);
+            u.setUpdatedAt(ts);
+
+            u.insert();
+
+            return findUser(ctx, reg.getUsername())
+                    .map(UserService::mapToUser)
+                    .orElseThrow();
+        });
     }
 
     public void createUser(UserDetails user) {
@@ -81,40 +92,61 @@ public class UserService implements UserDetailsService {
     }
 
     public void deleteUser(String username) {
-        users.removeIf(u -> u.getUsername().equals(username));
+        db.transactionWithoutResult(ctx -> {
+            ctx.deleteFrom(USERS)
+                    .where(USERS.USERNAME.eq(username))
+                    .execute();
+        });
     }
 
     public void changePassword(String oldPassword, String newPassword) {
         var username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        findUser(username)
-                .filter(u -> u.getPassword().equals(oldPassword))
-                .orElseThrow(() -> new RuntimeException("Old password does not match"))
-                .setPassword(newPassword);
+        db.transactionWithoutResult(ctx -> {
+            ctx.update(USERS)
+                    .set(USERS.UPDATED_AT, OffsetDateTime.now())
+                    .set(USERS.PASSWORD, newPassword)
+                    .where(USERS.USERNAME.eq(username))
+                    .and(USERS.PASSWORD.eq(oldPassword))
+                    .execute();
+        });
     }
 
     public boolean userExists(String username) {
-        return findUser(username).isPresent();
+        return db.transactionWithResult(ctx -> ctx.fetchExists(USERS, USERS.USERNAME.eq(username)));
     }
 
-    private Optional<MyUser> findUser(String username) {
-        return users.stream()
-                .filter(u -> u.getUsername().equals(username))
-                .findAny();
+    private Optional<UsersRecord> findUser(DSLContext ctx, String username) {
+        return ctx.fetchOptional(USERS, USERS.USERNAME.eq(username));
+    }
+
+    private static User mapToUser(UsersRecord rec) {
+        return new User(rec.getId(), rec.getUsername());
+    }
+
+    private static UserDetails mapToUserDetails(UsersRecord rec) {
+        return MyUser.builder()
+                .id(rec.getId())
+                .username(rec.getUsername())
+                .password(rec.getPassword())
+                .roles(Arrays.asList(StringUtils.split(rec.getRoles(), ",")))
+                .build();
     }
 
     @Builder
-    @Data
+    @Value
     private static class MyUser implements UserDetails {
-        final UUID id;
-        final String username;
+        UUID id;
+        String username;
         String password;
+        @Singular
+        List<String> roles;
 
         @Override
         public Collection<? extends GrantedAuthority> getAuthorities() {
-            return List.of(
-                    new SimpleGrantedAuthority("ROLE_USER")
-            );
+            return roles.stream()
+                    .map(SimpleGrantedAuthority::new)
+                    .toList();
         }
 
         @Override

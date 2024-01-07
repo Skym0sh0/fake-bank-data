@@ -10,6 +10,7 @@ import generated.sky.regular.income.tables.Category;
 import generated.sky.regular.income.tables.FinancialTransaction;
 import generated.sky.regular.income.tables.TurnoverFileImport;
 import generated.sky.regular.income.tables.TurnoverRow;
+import generated.sky.regular.income.tables.Users;
 import generated.sky.regular.income.tables.VCategoriesWithUsageCount;
 import generated.sky.regular.income.tables.VOrderedBankStatements;
 
@@ -65,6 +66,11 @@ public class RegularIncome extends SchemaImpl {
     public final TurnoverRow TURNOVER_ROW = TurnoverRow.TURNOVER_ROW;
 
     /**
+     * The table <code>REGULAR_INCOME.users</code>.
+     */
+    public final Users USERS = Users.USERS;
+
+    /**
      * The table <code>REGULAR_INCOME.v_categories_with_usage_count</code>.
      */
     public final VCategoriesWithUsageCount V_CATEGORIES_WITH_USAGE_COUNT = VCategoriesWithUsageCount.V_CATEGORIES_WITH_USAGE_COUNT;
@@ -96,6 +102,7 @@ public class RegularIncome extends SchemaImpl {
             FinancialTransaction.FINANCIAL_TRANSACTION,
             TurnoverFileImport.TURNOVER_FILE_IMPORT,
             TurnoverRow.TURNOVER_ROW,
+            Users.USERS,
             VCategoriesWithUsageCount.V_CATEGORIES_WITH_USAGE_COUNT,
             VOrderedBankStatements.V_ORDERED_BANK_STATEMENTS
         );

@@ -10,12 +10,14 @@ import generated.sky.regular.income.tables.Category;
 import generated.sky.regular.income.tables.FinancialTransaction;
 import generated.sky.regular.income.tables.TurnoverFileImport;
 import generated.sky.regular.income.tables.TurnoverRow;
+import generated.sky.regular.income.tables.Users;
 import generated.sky.regular.income.tables.records.BackupHistoryRecord;
 import generated.sky.regular.income.tables.records.BankStatementRecord;
 import generated.sky.regular.income.tables.records.CategoryRecord;
 import generated.sky.regular.income.tables.records.FinancialTransactionRecord;
 import generated.sky.regular.income.tables.records.TurnoverFileImportRecord;
 import generated.sky.regular.income.tables.records.TurnoverRowRecord;
+import generated.sky.regular.income.tables.records.UsersRecord;
 
 import org.jooq.ForeignKey;
 import org.jooq.TableField;
@@ -44,6 +46,8 @@ public class Keys {
     public static final UniqueKey<TurnoverFileImportRecord> TURNOVER_FILE_IMPORT_PKEY = Internal.createUniqueKey(TurnoverFileImport.TURNOVER_FILE_IMPORT, DSL.name("turnover_file_import_pkey"), new TableField[] { TurnoverFileImport.TURNOVER_FILE_IMPORT.ID }, true);
     public static final UniqueKey<TurnoverRowRecord> TURNOVER_ROW_CHECKSUM_KEY = Internal.createUniqueKey(TurnoverRow.TURNOVER_ROW, DSL.name("turnover_row_checksum_key"), new TableField[] { TurnoverRow.TURNOVER_ROW.CHECKSUM }, true);
     public static final UniqueKey<TurnoverRowRecord> TURNOVER_ROW_PKEY = Internal.createUniqueKey(TurnoverRow.TURNOVER_ROW, DSL.name("turnover_row_pkey"), new TableField[] { TurnoverRow.TURNOVER_ROW.ID }, true);
+    public static final UniqueKey<UsersRecord> USERS_PKEY = Internal.createUniqueKey(Users.USERS, DSL.name("users_pkey"), new TableField[] { Users.USERS.ID }, true);
+    public static final UniqueKey<UsersRecord> USERS_USERNAME_KEY = Internal.createUniqueKey(Users.USERS, DSL.name("users_username_key"), new TableField[] { Users.USERS.USERNAME }, true);
 
     // -------------------------------------------------------------------------
     // FOREIGN KEY definitions
