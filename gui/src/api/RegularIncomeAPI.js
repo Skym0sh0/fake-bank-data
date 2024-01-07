@@ -28,7 +28,7 @@ class RegularIncomeAPI {
     }
 
     getClient(auth = authHeader(userService.getUser())) {
-        return axios.create({
+        const client = axios.create({
             baseURL: this.baseUrl,
             // timeout: 1500,
             headers: {
@@ -36,6 +36,24 @@ class RegularIncomeAPI {
                 ...auth
             },
         })
+
+        client.interceptors.response.use(
+            response => {
+                // console.log("success", response)
+                return response;
+            },
+            error => {
+                if (error.response.status === 401) {
+                    userService.logout()
+                    location.reload();
+                }
+
+                // console.log("failed", error.response)
+                return error;
+            }
+        )
+
+        return client;
     }
 
     getAuth() {
