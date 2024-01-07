@@ -1,97 +1,47 @@
 package de.sky.regular.income.rest;
 
-import de.sky.common.database.DatabaseConnection;
 import de.sky.regular.income.api.auth.AuthenticationToken;
 import de.sky.regular.income.api.auth.User;
 import de.sky.regular.income.api.auth.UserLogin;
 import de.sky.regular.income.api.auth.UserRegistration;
-import de.sky.regular.income.database.DatabaseSupplier;
-import lombok.Builder;
+import de.sky.regular.income.users.UserService;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
-
 @RestController
-@RequestMapping("/user-auth")
+@RequestMapping
 @Slf4j
+@RequiredArgsConstructor
 public class UserAuthController {
-    private final DatabaseConnection db;
-
-    public UserAuthController(DatabaseConnection db) {
-        this.db = Objects.requireNonNull(db);
-    }
-
-    @Autowired
-    public UserAuthController(DatabaseSupplier supplier) {
-        this(supplier.getDatabase());
-    }
-
-    private static final List<MyUser> DEFAULT_USERS = List.of(
-            MyUser.builder().id(UUID.randomUUID()).username("peter").password("12345678").build(),
-            MyUser.builder().id(UUID.randomUUID()).username("hansi").password("12345678").build(),
-            MyUser.builder().id(UUID.randomUUID()).username("admin").password("12345678").build()
-    );
-
-    private final List<MyUser> users = new ArrayList<>(DEFAULT_USERS);
+    private final UserService userService;
 
     @SneakyThrows
-    @PostMapping("register")
+    @PostMapping("/user/register")
     public User registerUser(@RequestBody UserRegistration registration) {
         Thread.sleep(2500);
         log.info("Registering user {}...", registration);
 
-        if (users.stream().anyMatch(u -> u.getUsername().equals(registration.getUsername())))
-            throw new RuntimeException("username already in use");
-
-        var usr = MyUser.builder()
-                .id(UUID.randomUUID())
-                .username(registration.getUsername())
-                .password(registration.getPassword())
-                .build();
-
-        users.add(usr);
-
-        return new User(usr.getId(), usr.getUsername());
+        return userService.register(registration);
     }
 
-    @SneakyThrows
-    @PostMapping("login")
+    @GetMapping("/auth/login")
+    public AuthenticationToken login() {
+        var ctx = SecurityContextHolder.getContext();
+        var auth = ctx.getAuthentication();
+
+        return userService.checkLogin(auth.getPrincipal().toString());
+    }
+
+    @PostMapping("/auth/login")
     public AuthenticationToken login(@RequestBody UserLogin login) {
-        Thread.sleep(2500);
-        log.info("Logging user in {}...", login);
-
-        return findUser(login.getUsername(), login.getPassword())
-                .map(usr -> new AuthenticationToken(usr.getId(), usr.getUsername()))
-                .orElseThrow(() -> new RuntimeException("Username/Password does not exist"));
+        throw new UnsupportedOperationException("Not implemented");
     }
 
-    @SneakyThrows
-    @DeleteMapping("logout")
+    @DeleteMapping("/auth/logout")
     public void logout() {
-        Thread.sleep(2500);
-        log.info("Logging user out ...");
-    }
-
-    public boolean isValidUser(String username, String password) {
-        return findUser(username, password).isPresent();
-    }
-
-    private Optional<MyUser> findUser(String username, String password) {
-        return users.stream()
-                .filter(u -> u.getUsername().equals(username))
-                .filter(u -> u.getPassword().equals(password))
-                .findAny();
-    }
-
-    @Builder
-    @Value
-    private static class MyUser {
-        UUID id;
-        String username;
-        String password;
+        throw new UnsupportedOperationException("Not implemented");
     }
 }
