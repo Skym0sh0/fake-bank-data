@@ -65,8 +65,8 @@ public class UserService implements UserDetailsService {
 
             u.setId(UUID.randomUUID());
 
-            u.setUsername(reg.getUsername());
-            u.setUsername(passwordEncoder.encode(reg.getPassword()));
+            u.setUsername(reg.getUsername().toLowerCase());
+            u.setPassword(passwordEncoder.encode(reg.getPassword()));
 
             u.setRoles("ROLE_USER");
 
@@ -92,7 +92,7 @@ public class UserService implements UserDetailsService {
     public void deleteUser(String username) {
         db.transactionWithoutResult(ctx -> {
             ctx.deleteFrom(USERS)
-                    .where(USERS.USERNAME.eq(username))
+                    .where(USERS.USERNAME.equalIgnoreCase(username))
                     .execute();
         });
     }
@@ -104,18 +104,18 @@ public class UserService implements UserDetailsService {
             ctx.update(USERS)
                     .set(USERS.UPDATED_AT, OffsetDateTime.now())
                     .set(USERS.PASSWORD, newPassword)
-                    .where(USERS.USERNAME.eq(username))
+                    .where(USERS.USERNAME.equalIgnoreCase(username))
                     .and(USERS.PASSWORD.eq(oldPassword))
                     .execute();
         });
     }
 
     public boolean userExists(String username) {
-        return db.transactionWithResult(ctx -> ctx.fetchExists(USERS, USERS.USERNAME.eq(username)));
+        return db.transactionWithResult(ctx -> ctx.fetchExists(USERS, USERS.USERNAME.equalIgnoreCase(username)));
     }
 
     private Optional<UsersRecord> findUser(DSLContext ctx, String username) {
-        return ctx.fetchOptional(USERS, USERS.USERNAME.eq(username));
+        return ctx.fetchOptional(USERS, USERS.USERNAME.equalIgnoreCase(username));
     }
 
     private static User mapToUser(UsersRecord rec) {
