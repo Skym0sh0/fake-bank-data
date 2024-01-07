@@ -6,6 +6,15 @@
                     Login
                 </v-card-title>
 
+                <v-card-subtitle v-if="errorMessage"
+                                 @click="errorMessage = null"
+                                 style="font-size: small"
+                                 class="bg-warning transition-ease-in-out d-flex justify-content-center align-items-center">
+                    <span>
+                        {{ errorMessage }}
+                    </span>
+                </v-card-subtitle>
+
                 <v-card-text>
                     <v-text-field v-model="username"
                                   type="text"
@@ -74,6 +83,7 @@ export default {
                     return true;
                 }
             ],
+            errorMessage: null,
         };
     },
     methods: {
@@ -84,9 +94,7 @@ export default {
             this.isLoading = true;
 
             api.getAuth().login(this.username, this.password)
-                .then(user => {
-                    console.log(user);
-
+                .then(() => {
                     userService.login(this.username, this.password);
 
                     this.$router.replace({
@@ -95,6 +103,7 @@ export default {
 
                     // location.reload();
                 })
+                .catch(e => this.errorMessage = e)
                 .finally(() => this.isLoading = false)
         },
         onRegisterClick() {

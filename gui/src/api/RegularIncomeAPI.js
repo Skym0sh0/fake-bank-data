@@ -8,6 +8,16 @@ import {
     denormalizeTurnoverImport,
     denormalizeTurnoverPreview
 } from "@/util/Normalizer";
+import {userService} from '@/auth/auth-header';
+
+function authHeader(user) {
+    if (user && user.username && user.password) {
+        const authdata = window.btoa(user.username + ":" + user.password)
+        return {'Authorization': 'Basic ' + authdata};
+    } else {
+        return {};
+    }
+}
 
 class RegularIncomeAPI {
     constructor(baseUrl) {
@@ -17,12 +27,13 @@ class RegularIncomeAPI {
         this.baseUrl = baseUrl
     }
 
-    getClient() {
+    getClient(auth = authHeader(userService.getUser())) {
         return axios.create({
             baseURL: this.baseUrl,
             // timeout: 1500,
             headers: {
-                correlationid: uuidv4()
+                correlationid: uuidv4(),
+                ...auth
             },
         })
     }
@@ -32,18 +43,14 @@ class RegularIncomeAPI {
 
         return {
             registerUser(user) {
-                console.log(ref, user)
-
-                return ref.getClient()
-                    .post("user-auth/register", {username: user.username, password: user.password})
+                return ref.getClient({})
+                    .post("user/register", {username: user.username, password: user.password})
                     .then();
             },
 
             login(username, password) {
-                console.log(ref, username, password)
-
-                return ref.getClient()
-                    .post("user-auth/login", {username: username, password: password})
+                return ref.getClient(authHeader({username: username, password: password}))
+                    .get("auth/login")
                     .then();
             },
         }

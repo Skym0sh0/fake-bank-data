@@ -19,22 +19,10 @@ function initUser() {
     userReference.user = JSON.parse(userJson)
 }
 
-export function authHeader() {
-    const user = getUser();
-
-    if (user && user.authdata) {
-        return {'Authorization': 'Basic ' + user.authdata};
-    } else {
-        return {};
-    }
-}
-
 function login(username, password) {
     const user = {
         username: username,
         password: password,
-
-        authData: window.btoa(username + ":" + password)
     }
 
     setUser(user);
