@@ -31,15 +31,14 @@ public class CustomWebSecurityConfigurerAdapter {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, UserService userService) throws Exception {
         return http
-                .authorizeHttpRequests(
-                        configurer ->
-                                configurer
-                                        .requestMatchers("/user").permitAll()
-                                        .anyRequest().authenticated()
+                .authorizeHttpRequests(authz ->
+                        authz.requestMatchers("/user/register").permitAll()
+                                .anyRequest().authenticated()
                 )
                 .httpBasic(configurer -> {
                 })
                 .userDetailsService(userService)
+                .csrf().disable()
                 .build();
     }
 }

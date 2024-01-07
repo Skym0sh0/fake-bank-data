@@ -26,20 +26,18 @@ import java.util.*;
 @Service
 public class UserService implements UserDetailsService {
 
-    private static final List<MyUser> DEFAULT_USERS = List.of(
-            MyUser.builder().id(UUID.randomUUID()).username("peter").password("12345678").build(),
-            MyUser.builder().id(UUID.randomUUID()).username("hansi").password("12345678").build(),
-            MyUser.builder().id(UUID.randomUUID()).username("admin").password("12345678").build()
-    );
-
     private final DatabaseConnection db;
     private final PasswordEncoder passwordEncoder;
 
-    private final List<MyUser> users = new ArrayList<>(DEFAULT_USERS);
+    private final List<MyUser> users = new ArrayList<>();
 
     @Autowired
     public UserService(DatabaseSupplier supplier, PasswordEncoder passwordEncoder) {
         this(supplier.get(), passwordEncoder);
+
+        register(new UserRegistration("peter", "12345678"));
+        register(new UserRegistration("hans", "12345678"));
+        register(new UserRegistration("admin", "12345678"));
     }
 
     @Override
@@ -62,7 +60,7 @@ public class UserService implements UserDetailsService {
                 MyUser.builder()
                         .id(UUID.randomUUID())
                         .username(reg.getUsername())
-                        .password(reg.getPassword())
+                        .password(passwordEncoder.encode(reg.getPassword()))
                         .build()
         );
 
