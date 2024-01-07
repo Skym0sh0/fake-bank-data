@@ -8,7 +8,6 @@ import generated.sky.regular.income.tables.records.UsersRecord;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.Singular;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jooq.DSLContext;
@@ -35,8 +34,6 @@ public class UserService implements UserDetailsService {
 
     private final DatabaseConnection db;
     private final PasswordEncoder passwordEncoder;
-
-    private final List<MyUser> users = new ArrayList<>();
 
     @Autowired
     public UserService(DatabaseSupplier supplier, PasswordEncoder passwordEncoder) {
@@ -85,10 +82,11 @@ public class UserService implements UserDetailsService {
     }
 
     public void createUser(UserDetails user) {
-        register(new UserRegistration(user.getUsername(), user.getUsername()));
+        register(new UserRegistration(user.getUsername(), user.getPassword()));
     }
 
     public void updateUser(UserDetails user) {
+        throw new UnsupportedOperationException("not yet implemented");
     }
 
     public void deleteUser(String username) {
@@ -125,7 +123,7 @@ public class UserService implements UserDetailsService {
     }
 
     private static UserDetails mapToUserDetails(UsersRecord rec) {
-        return MyUser.builder()
+        return DBPersistedUser.builder()
                 .id(rec.getId())
                 .username(rec.getUsername())
                 .password(rec.getPassword())
@@ -134,19 +132,24 @@ public class UserService implements UserDetailsService {
     }
 
     @Builder
-    @Value
-    private static class MyUser implements UserDetails {
-        UUID id;
-        String username;
-        String password;
-        @Singular
-        List<String> roles;
+    private record DBPersistedUser(UUID id, String username, String password,
+                                   @Singular List<String> roles) implements UserDetails {
 
         @Override
         public Collection<? extends GrantedAuthority> getAuthorities() {
             return roles.stream()
                     .map(SimpleGrantedAuthority::new)
                     .toList();
+        }
+
+        @Override
+        public String getUsername() {
+            return username();
+        }
+
+        @Override
+        public String getPassword() {
+            return password();
         }
 
         @Override
@@ -171,7 +174,7 @@ public class UserService implements UserDetailsService {
 
         @Override
         public String toString() {
-            return getUsername();
+            return username();
         }
     }
 }
