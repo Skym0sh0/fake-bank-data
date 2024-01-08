@@ -95,6 +95,7 @@ public class BackupSender {
                                         .unionAll(select(TURNOVER_FILE_IMPORT.IMPORTED_AT.as(tsField)).from(TURNOVER_FILE_IMPORT))
                                         .unionAll(select(TURNOVER_ROW.LAST_UPDATED_AT.as(tsField)).from(TURNOVER_ROW))
                                         .unionAll(select(greatest(CATEGORY.CREATED_AT, CATEGORY.LAST_UPDATED_AT).as(tsField)).from(CATEGORY))
+                                        .unionAll(select(greatest(USERS.CREATED_AT, USERS.UPDATED_AT).as(tsField)).from(USERS))
                         )
                         .limit(1)
                 );
