@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-import org.jooq.Record1;
+import org.jooq.Record2;
 import org.jooq.impl.UpdatableRecordImpl;
 
 
@@ -116,13 +116,28 @@ public class BankStatementRecord extends UpdatableRecordImpl<BankStatementRecord
         return (OffsetDateTime) get(5);
     }
 
+    /**
+     * Setter for <code>REGULAR_INCOME.bank_statement.owner_id</code>.
+     */
+    public BankStatementRecord setOwnerId(UUID value) {
+        set(6, value);
+        return this;
+    }
+
+    /**
+     * Getter for <code>REGULAR_INCOME.bank_statement.owner_id</code>.
+     */
+    public UUID getOwnerId() {
+        return (UUID) get(6);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
 
     @Override
-    public Record1<UUID> key() {
-        return (Record1) super.key();
+    public Record2<UUID, UUID> key() {
+        return (Record2) super.key();
     }
 
     // -------------------------------------------------------------------------
@@ -139,7 +154,7 @@ public class BankStatementRecord extends UpdatableRecordImpl<BankStatementRecord
     /**
      * Create a detached, initialised BankStatementRecord
      */
-    public BankStatementRecord(UUID id, LocalDate dateRecord, Integer amountBalanceCents, UUID previousStatementId, OffsetDateTime createdAt, OffsetDateTime updatedAt) {
+    public BankStatementRecord(UUID id, LocalDate dateRecord, Integer amountBalanceCents, UUID previousStatementId, OffsetDateTime createdAt, OffsetDateTime updatedAt, UUID ownerId) {
         super(BankStatement.BANK_STATEMENT);
 
         setId(id);
@@ -148,6 +163,7 @@ public class BankStatementRecord extends UpdatableRecordImpl<BankStatementRecord
         setPreviousStatementId(previousStatementId);
         setCreatedAt(createdAt);
         setUpdatedAt(updatedAt);
+        setOwnerId(ownerId);
         resetChangedOnNotNull();
     }
 }

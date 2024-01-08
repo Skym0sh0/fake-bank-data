@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+import org.jooq.Check;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
@@ -38,6 +39,7 @@ import org.jooq.TableField;
 import org.jooq.TableOptions;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
+import org.jooq.impl.Internal;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
@@ -197,7 +199,7 @@ public class TurnoverRow extends TableImpl<TurnoverRowRecord> {
 
     @Override
     public List<UniqueKey<TurnoverRowRecord>> getUniqueKeys() {
-        return Arrays.asList(Keys.TURNOVER_ROW_ID_KEY);
+        return Arrays.asList(Keys.UQ_TURNOVER_ROW_ID);
     }
 
     @Override
@@ -240,6 +242,13 @@ public class TurnoverRow extends TableImpl<TurnoverRowRecord> {
             _users = new UsersPath(this, Keys.TURNOVER_ROW__FK_TURNOVER_ROW_OWNER, null);
 
         return _users;
+    }
+
+    @Override
+    public List<Check<TurnoverRowRecord>> getChecks() {
+        return Arrays.asList(
+            Internal.createCheck(this, DSL.name("c_amount_not_zero"), "((amount_value_cents <> 0))", true)
+        );
     }
 
     @Override

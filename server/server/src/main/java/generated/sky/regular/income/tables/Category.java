@@ -169,7 +169,7 @@ public class Category extends TableImpl<CategoryRecord> {
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.asList(Indexes.IDX_CATEGORY_NAME_KEY);
+        return Arrays.asList(Indexes.IDX_CATEGORY_NAME_KEY, Indexes.UQ_CATEGORY_ID);
     }
 
     @Override

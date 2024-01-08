@@ -4,6 +4,7 @@
 package generated.sky.regular.income.tables;
 
 
+import generated.sky.regular.income.Indexes;
 import generated.sky.regular.income.Keys;
 import generated.sky.regular.income.RegularIncome;
 import generated.sky.regular.income.tables.BankStatement.BankStatementPath;
@@ -20,6 +21,7 @@ import java.util.UUID;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
+import org.jooq.Index;
 import org.jooq.InverseForeignKey;
 import org.jooq.Name;
 import org.jooq.Path;
@@ -92,6 +94,11 @@ public class BankStatement extends TableImpl<BankStatementRecord> {
      */
     public final TableField<BankStatementRecord, OffsetDateTime> UPDATED_AT = createField(DSL.name("updated_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
+    /**
+     * The column <code>REGULAR_INCOME.bank_statement.owner_id</code>.
+     */
+    public final TableField<BankStatementRecord, UUID> OWNER_ID = createField(DSL.name("owner_id"), SQLDataType.UUID.nullable(false), this, "");
+
     private BankStatement(Name alias, Table<BankStatementRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }
@@ -160,18 +167,18 @@ public class BankStatement extends TableImpl<BankStatementRecord> {
     }
 
     @Override
+    public List<Index> getIndexes() {
+        return Arrays.asList(Indexes.UQ_BANK_STATEMENT_ID);
+    }
+
+    @Override
     public UniqueKey<BankStatementRecord> getPrimaryKey() {
         return Keys.BANK_STATEMENT_PKEY;
     }
 
     @Override
-    public List<UniqueKey<BankStatementRecord>> getUniqueKeys() {
-        return Arrays.asList(Keys.BANK_STATEMENT_PREVIOUS_STATEMENT_ID_KEY);
-    }
-
-    @Override
     public List<ForeignKey<BankStatementRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.BANK_STATEMENT__BANK_STATEMENT_PREVIOUS_STATEMENT_ID_FKEY);
+        return Arrays.asList(Keys.BANK_STATEMENT__FK_BAK_STATEMENT_PREVIOUS_STATEMENT);
     }
 
     private transient BankStatementPath _bankStatement;
@@ -182,7 +189,7 @@ public class BankStatement extends TableImpl<BankStatementRecord> {
      */
     public BankStatementPath bankStatement() {
         if (_bankStatement == null)
-            _bankStatement = new BankStatementPath(this, Keys.BANK_STATEMENT__BANK_STATEMENT_PREVIOUS_STATEMENT_ID_FKEY, null);
+            _bankStatement = new BankStatementPath(this, Keys.BANK_STATEMENT__FK_BAK_STATEMENT_PREVIOUS_STATEMENT, null);
 
         return _bankStatement;
     }
@@ -195,7 +202,7 @@ public class BankStatement extends TableImpl<BankStatementRecord> {
      */
     public FinancialTransactionPath financialTransaction() {
         if (_financialTransaction == null)
-            _financialTransaction = new FinancialTransactionPath(this, null, Keys.FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_BANK_STATEMENT_ID_FKEY.getInverseKey());
+            _financialTransaction = new FinancialTransactionPath(this, null, Keys.FINANCIAL_TRANSACTION__FK_FINANCIAL_TRANSACTION_TO_BANK_STATEMENT.getInverseKey());
 
         return _financialTransaction;
     }

@@ -180,7 +180,7 @@ public class TurnoverFileImport extends TableImpl<TurnoverFileImportRecord> {
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.asList(Indexes.IDX_TURNOVER_FILE_IMPORT_OWNER);
+        return Arrays.asList(Indexes.IDX_TURNOVER_FILE_IMPORT_OWNER, Indexes.UQ_TURNOVER_FILE_ID);
     }
 
     @Override

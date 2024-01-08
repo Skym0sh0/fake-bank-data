@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-import org.jooq.Record1;
+import org.jooq.Record3;
 import org.jooq.impl.UpdatableRecordImpl;
 
 
@@ -161,13 +161,28 @@ public class FinancialTransactionRecord extends UpdatableRecordImpl<FinancialTra
         return (UUID) get(8);
     }
 
+    /**
+     * Setter for <code>REGULAR_INCOME.financial_transaction.owner_id</code>.
+     */
+    public FinancialTransactionRecord setOwnerId(UUID value) {
+        set(9, value);
+        return this;
+    }
+
+    /**
+     * Getter for <code>REGULAR_INCOME.financial_transaction.owner_id</code>.
+     */
+    public UUID getOwnerId() {
+        return (UUID) get(9);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
 
     @Override
-    public Record1<UUID> key() {
-        return (Record1) super.key();
+    public Record3<UUID, UUID, UUID> key() {
+        return (Record3) super.key();
     }
 
     // -------------------------------------------------------------------------
@@ -184,7 +199,7 @@ public class FinancialTransactionRecord extends UpdatableRecordImpl<FinancialTra
     /**
      * Create a detached, initialised FinancialTransactionRecord
      */
-    public FinancialTransactionRecord(UUID id, UUID bankStatementId, LocalDate dateRecord, Integer amountValueCents, Boolean isPeriodic, String reason, String checksum, OffsetDateTime createdAt, UUID categoryId) {
+    public FinancialTransactionRecord(UUID id, UUID bankStatementId, LocalDate dateRecord, Integer amountValueCents, Boolean isPeriodic, String reason, String checksum, OffsetDateTime createdAt, UUID categoryId, UUID ownerId) {
         super(FinancialTransaction.FINANCIAL_TRANSACTION);
 
         setId(id);
@@ -196,6 +211,7 @@ public class FinancialTransactionRecord extends UpdatableRecordImpl<FinancialTra
         setChecksum(checksum);
         setCreatedAt(createdAt);
         setCategoryId(categoryId);
+        setOwnerId(ownerId);
         resetChangedOnNotNull();
     }
 }

@@ -111,6 +111,11 @@ public class FinancialTransaction extends TableImpl<FinancialTransactionRecord> 
      */
     public final TableField<FinancialTransactionRecord, UUID> CATEGORY_ID = createField(DSL.name("category_id"), SQLDataType.UUID.nullable(false), this, "");
 
+    /**
+     * The column <code>REGULAR_INCOME.financial_transaction.owner_id</code>.
+     */
+    public final TableField<FinancialTransactionRecord, UUID> OWNER_ID = createField(DSL.name("owner_id"), SQLDataType.UUID.nullable(false), this, "");
+
     private FinancialTransaction(Name alias, Table<FinancialTransactionRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }
@@ -181,7 +186,7 @@ public class FinancialTransaction extends TableImpl<FinancialTransactionRecord> 
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.asList(Indexes.IDX_FK_TRANSACTION_X_STATEMENT);
+        return Arrays.asList(Indexes.UQ_FINANCIAL_TRANSACTION_ID);
     }
 
     @Override
@@ -191,7 +196,7 @@ public class FinancialTransaction extends TableImpl<FinancialTransactionRecord> 
 
     @Override
     public List<ForeignKey<FinancialTransactionRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_BANK_STATEMENT_ID_FKEY);
+        return Arrays.asList(Keys.FINANCIAL_TRANSACTION__FK_FINANCIAL_TRANSACTION_TO_BANK_STATEMENT);
     }
 
     private transient BankStatementPath _bankStatement;
@@ -202,7 +207,7 @@ public class FinancialTransaction extends TableImpl<FinancialTransactionRecord> 
      */
     public BankStatementPath bankStatement() {
         if (_bankStatement == null)
-            _bankStatement = new BankStatementPath(this, Keys.FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_BANK_STATEMENT_ID_FKEY, null);
+            _bankStatement = new BankStatementPath(this, Keys.FINANCIAL_TRANSACTION__FK_FINANCIAL_TRANSACTION_TO_BANK_STATEMENT, null);
 
         return _bankStatement;
     }
