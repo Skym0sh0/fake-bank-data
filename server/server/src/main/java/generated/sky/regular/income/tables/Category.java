@@ -4,11 +4,13 @@
 package generated.sky.regular.income.tables;
 
 
+import generated.sky.regular.income.Indexes;
 import generated.sky.regular.income.Keys;
 import generated.sky.regular.income.RegularIncome;
 import generated.sky.regular.income.tables.Category.CategoryPath;
 import generated.sky.regular.income.tables.FinancialTransaction.FinancialTransactionPath;
 import generated.sky.regular.income.tables.TurnoverRow.TurnoverRowPath;
+import generated.sky.regular.income.tables.Users.UsersPath;
 import generated.sky.regular.income.tables.records.CategoryRecord;
 
 import java.time.OffsetDateTime;
@@ -20,6 +22,7 @@ import java.util.UUID;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
+import org.jooq.Index;
 import org.jooq.InverseForeignKey;
 import org.jooq.Name;
 import org.jooq.Path;
@@ -95,6 +98,11 @@ public class Category extends TableImpl<CategoryRecord> {
      */
     public final TableField<CategoryRecord, OffsetDateTime> CREATED_AT = createField(DSL.name("created_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false), this, "");
 
+    /**
+     * The column <code>REGULAR_INCOME.category.owner_id</code>.
+     */
+    public final TableField<CategoryRecord, UUID> OWNER_ID = createField(DSL.name("owner_id"), SQLDataType.UUID.nullable(false), this, "");
+
     private Category(Name alias, Table<CategoryRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }
@@ -161,18 +169,18 @@ public class Category extends TableImpl<CategoryRecord> {
     }
 
     @Override
+    public List<Index> getIndexes() {
+        return Arrays.asList(Indexes.IDX_CATEGORY_NAME_KEY);
+    }
+
+    @Override
     public UniqueKey<CategoryRecord> getPrimaryKey() {
         return Keys.CATEGORY_PKEY;
     }
 
     @Override
-    public List<UniqueKey<CategoryRecord>> getUniqueKeys() {
-        return Arrays.asList(Keys.CATEGORY_NAME_KEY);
-    }
-
-    @Override
     public List<ForeignKey<CategoryRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.CATEGORY__CATEGORY_PARENT_CATEGORY_FKEY);
+        return Arrays.asList(Keys.CATEGORY__CATEGORY_PARENT_CATEGORY_FKEY, Keys.CATEGORY__FK_CATEGORY_OWNER);
     }
 
     private transient CategoryPath _category;
@@ -185,6 +193,18 @@ public class Category extends TableImpl<CategoryRecord> {
             _category = new CategoryPath(this, Keys.CATEGORY__CATEGORY_PARENT_CATEGORY_FKEY, null);
 
         return _category;
+    }
+
+    private transient UsersPath _users;
+
+    /**
+     * Get the implicit join path to the <code>public.users</code> table.
+     */
+    public UsersPath users() {
+        if (_users == null)
+            _users = new UsersPath(this, Keys.CATEGORY__FK_CATEGORY_OWNER, null);
+
+        return _users;
     }
 
     private transient FinancialTransactionPath _financialTransaction;

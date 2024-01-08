@@ -5,6 +5,7 @@ package generated.sky.regular.income;
 
 
 import generated.sky.regular.income.tables.BackupHistory;
+import generated.sky.regular.income.tables.Category;
 import generated.sky.regular.income.tables.FinancialTransaction;
 import generated.sky.regular.income.tables.TurnoverRow;
 
@@ -25,6 +26,7 @@ public class Indexes {
     // -------------------------------------------------------------------------
 
     public static final Index IDX_BACKUP_LAST_CHECK = Internal.createIndex(DSL.name("idx_backup_last_check"), BackupHistory.BACKUP_HISTORY, new OrderField[] { BackupHistory.BACKUP_HISTORY.LAST_CHECK }, true);
+    public static final Index IDX_CATEGORY_NAME_KEY = Internal.createIndex(DSL.name("idx_category_name_key"), Category.CATEGORY, new OrderField[] { Category.CATEGORY.OWNER_ID, Category.CATEGORY.NAME }, true);
     public static final Index IDX_FK_TRANSACTION_X_STATEMENT = Internal.createIndex(DSL.name("idx_fk_transaction_x_statement"), FinancialTransaction.FINANCIAL_TRANSACTION, new OrderField[] { FinancialTransaction.FINANCIAL_TRANSACTION.BANK_STATEMENT_ID }, false);
     public static final Index UQ_TURNOVER_ROW_CHECKSUM = Internal.createIndex(DSL.name("uq_turnover_row_checksum"), TurnoverRow.TURNOVER_ROW, new OrderField[] { TurnoverRow.TURNOVER_ROW.CHECKSUM }, true);
 }

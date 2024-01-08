@@ -139,10 +139,27 @@ public class VCategoriesWithUsageCountRecord extends TableRecordImpl<VCategories
 
     /**
      * Setter for
+     * <code>REGULAR_INCOME.v_categories_with_usage_count.owner_id</code>.
+     */
+    public VCategoriesWithUsageCountRecord setOwnerId(UUID value) {
+        set(7, value);
+        return this;
+    }
+
+    /**
+     * Getter for
+     * <code>REGULAR_INCOME.v_categories_with_usage_count.owner_id</code>.
+     */
+    public UUID getOwnerId() {
+        return (UUID) get(7);
+    }
+
+    /**
+     * Setter for
      * <code>REGULAR_INCOME.v_categories_with_usage_count.use_count</code>.
      */
     public VCategoriesWithUsageCountRecord setUseCount(Long value) {
-        set(7, value);
+        set(8, value);
         return this;
     }
 
@@ -151,7 +168,7 @@ public class VCategoriesWithUsageCountRecord extends TableRecordImpl<VCategories
      * <code>REGULAR_INCOME.v_categories_with_usage_count.use_count</code>.
      */
     public Long getUseCount() {
-        return (Long) get(7);
+        return (Long) get(8);
     }
 
     // -------------------------------------------------------------------------
@@ -168,7 +185,7 @@ public class VCategoriesWithUsageCountRecord extends TableRecordImpl<VCategories
     /**
      * Create a detached, initialised VCategoriesWithUsageCountRecord
      */
-    public VCategoriesWithUsageCountRecord(UUID id, UUID parentCategory, String name, Boolean isIncome, String description, OffsetDateTime lastUpdatedAt, OffsetDateTime createdAt, Long useCount) {
+    public VCategoriesWithUsageCountRecord(UUID id, UUID parentCategory, String name, Boolean isIncome, String description, OffsetDateTime lastUpdatedAt, OffsetDateTime createdAt, UUID ownerId, Long useCount) {
         super(VCategoriesWithUsageCount.V_CATEGORIES_WITH_USAGE_COUNT);
 
         setId(id);
@@ -178,6 +195,7 @@ public class VCategoriesWithUsageCountRecord extends TableRecordImpl<VCategories
         setDescription(description);
         setLastUpdatedAt(lastUpdatedAt);
         setCreatedAt(createdAt);
+        setOwnerId(ownerId);
         setUseCount(useCount);
         resetChangedOnNotNull();
     }

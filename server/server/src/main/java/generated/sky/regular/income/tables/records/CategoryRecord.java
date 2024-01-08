@@ -126,6 +126,21 @@ public class CategoryRecord extends UpdatableRecordImpl<CategoryRecord> {
         return (OffsetDateTime) get(6);
     }
 
+    /**
+     * Setter for <code>REGULAR_INCOME.category.owner_id</code>.
+     */
+    public CategoryRecord setOwnerId(UUID value) {
+        set(7, value);
+        return this;
+    }
+
+    /**
+     * Getter for <code>REGULAR_INCOME.category.owner_id</code>.
+     */
+    public UUID getOwnerId() {
+        return (UUID) get(7);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
@@ -149,7 +164,7 @@ public class CategoryRecord extends UpdatableRecordImpl<CategoryRecord> {
     /**
      * Create a detached, initialised CategoryRecord
      */
-    public CategoryRecord(UUID id, UUID parentCategory, String name, Boolean isIncome, String description, OffsetDateTime lastUpdatedAt, OffsetDateTime createdAt) {
+    public CategoryRecord(UUID id, UUID parentCategory, String name, Boolean isIncome, String description, OffsetDateTime lastUpdatedAt, OffsetDateTime createdAt, UUID ownerId) {
         super(Category.CATEGORY);
 
         setId(id);
@@ -159,6 +174,7 @@ public class CategoryRecord extends UpdatableRecordImpl<CategoryRecord> {
         setDescription(description);
         setLastUpdatedAt(lastUpdatedAt);
         setCreatedAt(createdAt);
+        setOwnerId(ownerId);
         resetChangedOnNotNull();
     }
 }

@@ -93,6 +93,12 @@ public class VCategoriesWithUsageCount extends TableImpl<VCategoriesWithUsageCou
 
     /**
      * The column
+     * <code>REGULAR_INCOME.v_categories_with_usage_count.owner_id</code>.
+     */
+    public final TableField<VCategoriesWithUsageCountRecord, UUID> OWNER_ID = createField(DSL.name("owner_id"), SQLDataType.UUID, this, "");
+
+    /**
+     * The column
      * <code>REGULAR_INCOME.v_categories_with_usage_count.use_count</code>.
      */
     public final TableField<VCategoriesWithUsageCountRecord, Long> USE_COUNT = createField(DSL.name("use_count"), SQLDataType.BIGINT, this, "");
@@ -126,6 +132,7 @@ public class VCategoriesWithUsageCount extends TableImpl<VCategoriesWithUsageCou
                    c.description,
                    c.last_updated_at,
                    c.created_at,
+                   c.owner_id,
                    COALESCE(o.use_count, (0)::bigint) AS use_count
                   FROM (category c
                     LEFT JOIN overall_count o ON ((c.id = o.category_id)))
@@ -137,6 +144,7 @@ public class VCategoriesWithUsageCount extends TableImpl<VCategoriesWithUsageCou
            description,
            last_updated_at,
            created_at,
+           owner_id,
            use_count
           FROM completed_categories;
         """), where);
