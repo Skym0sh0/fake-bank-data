@@ -5,10 +5,11 @@ import de.sky.regular.income.api.auth.UserLogin;
 import de.sky.regular.income.api.auth.UserRegistration;
 import de.sky.regular.income.users.UserService;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping
@@ -17,13 +18,25 @@ import org.springframework.web.bind.annotation.*;
 public class UserAuthController {
     private final UserService userService;
 
-    @SneakyThrows
     @PostMapping("/user/register")
     public User registerUser(@RequestBody UserRegistration registration) {
-        Thread.sleep(2500);
         log.info("Registering user {}...", registration);
 
         return userService.register(registration);
+    }
+
+    @PatchMapping("/user/{id}/details")
+    public User changeUser(@PathVariable("id") UUID id, @RequestBody UserRegistration registration) {
+        log.info("Changing user {}...", registration);
+
+        return userService.updateUser(id, registration);
+    }
+
+    @DeleteMapping("/user/{id}")
+    public void deleteUser(@PathVariable("id") UUID id) {
+        log.info("Deleting user {}...", id);
+
+        userService.deleteUser(id);
     }
 
     @GetMapping("/auth/login")

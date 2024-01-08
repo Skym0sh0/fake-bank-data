@@ -90,6 +90,16 @@ public class Users extends TableImpl<UsersRecord> {
      */
     public final TableField<UsersRecord, OffsetDateTime> UPDATED_AT = createField(DSL.name("updated_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false), this, "");
 
+    /**
+     * The column <code>REGULAR_INCOME.users.firstname</code>.
+     */
+    public final TableField<UsersRecord, String> FIRSTNAME = createField(DSL.name("firstname"), SQLDataType.CLOB, this, "");
+
+    /**
+     * The column <code>REGULAR_INCOME.users.lastname</code>.
+     */
+    public final TableField<UsersRecord, String> LASTNAME = createField(DSL.name("lastname"), SQLDataType.CLOB, this, "");
+
     private Users(Name alias, Table<UsersRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }

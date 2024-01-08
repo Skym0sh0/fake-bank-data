@@ -111,6 +111,36 @@ public class UsersRecord extends UpdatableRecordImpl<UsersRecord> {
         return (OffsetDateTime) get(5);
     }
 
+    /**
+     * Setter for <code>REGULAR_INCOME.users.firstname</code>.
+     */
+    public UsersRecord setFirstname(String value) {
+        set(6, value);
+        return this;
+    }
+
+    /**
+     * Getter for <code>REGULAR_INCOME.users.firstname</code>.
+     */
+    public String getFirstname() {
+        return (String) get(6);
+    }
+
+    /**
+     * Setter for <code>REGULAR_INCOME.users.lastname</code>.
+     */
+    public UsersRecord setLastname(String value) {
+        set(7, value);
+        return this;
+    }
+
+    /**
+     * Getter for <code>REGULAR_INCOME.users.lastname</code>.
+     */
+    public String getLastname() {
+        return (String) get(7);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
@@ -134,7 +164,7 @@ public class UsersRecord extends UpdatableRecordImpl<UsersRecord> {
     /**
      * Create a detached, initialised UsersRecord
      */
-    public UsersRecord(UUID id, String username, String password, String roles, OffsetDateTime createdAt, OffsetDateTime updatedAt) {
+    public UsersRecord(UUID id, String username, String password, String roles, OffsetDateTime createdAt, OffsetDateTime updatedAt, String firstname, String lastname) {
         super(Users.USERS);
 
         setId(id);
@@ -143,6 +173,8 @@ public class UsersRecord extends UpdatableRecordImpl<UsersRecord> {
         setRoles(roles);
         setCreatedAt(createdAt);
         setUpdatedAt(updatedAt);
+        setFirstname(firstname);
+        setLastname(lastname);
         resetChangedOnNotNull();
     }
 }
