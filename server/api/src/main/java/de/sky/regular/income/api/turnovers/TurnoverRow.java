@@ -1,6 +1,5 @@
 package de.sky.regular.income.api.turnovers;
 
-import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.SuperBuilder;
 import lombok.experimental.Tolerate;
@@ -11,6 +10,7 @@ import java.util.UUID;
 @Data
 @SuperBuilder
 public class TurnoverRow {
+    public UUID id;
     public LocalDate date;
     public Integer amountInCents;
     public UUID categoryId;
