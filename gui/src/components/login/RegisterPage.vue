@@ -80,12 +80,12 @@ export default {
             passwordVisible: false,
             usernameRules: [
                 value => !value ? "Required" : true,
-                value => value.length < 5 ? "Minimal length is 5" : true,
+                value => value.length < 3 ? "Minimal length is 3" : true,
                 value => value.search(/\s+/) >= 0 ? "Must not contain spaces" : true,
             ],
             passwordRules: [
                 value => !value ? "Required" : true,
-                value => value.length < 8 ? "Minimal length is 8" : true,
+                value => value.length < 3 ? "Minimal length is 3" : true,
                 value => value !== this.passwordRepeat ? "Must match password repeat" : true
             ],
             passwordRepeatRules: [
