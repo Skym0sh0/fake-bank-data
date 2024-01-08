@@ -5,24 +5,25 @@ import de.sky.regular.income.api.reports.StatementsReport;
 import org.jooq.DSLContext;
 import org.jooq.DatePart;
 import org.slf4j.Logger;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.Optional;
+import java.util.UUID;
 
 import static generated.sky.regular.income.Tables.BANK_STATEMENT;
 import static generated.sky.regular.income.Tables.FINANCIAL_TRANSACTION;
 import static org.jooq.impl.DSL.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
-@Component
+@Service
 public class ReportsDAO {
     private static final Logger logger = getLogger(ReportsDAO.class);
 
     private static final int MAX_NUMBER_RECORDS = 20_000;
 
-    public StatementsReport doStatementsReport(DSLContext ctx, LocalDate begin, LocalDate end) {
+    public StatementsReport doStatementsReport(DSLContext ctx, UUID userId, LocalDate begin, LocalDate end) {
         var rprt = new StatementsReport();
 
         rprt.data = ctx.select(BANK_STATEMENT.DATE_RECORD, BANK_STATEMENT.AMOUNT_BALANCE_CENTS)
@@ -31,6 +32,7 @@ public class ReportsDAO {
                         BANK_STATEMENT.DATE_RECORD.ge(Optional.ofNullable(begin).orElse(LocalDate.of(1500, Month.JANUARY, 1))),
                         BANK_STATEMENT.DATE_RECORD.lessThan(Optional.ofNullable(end).orElse(LocalDate.of(3000, Month.JANUARY, 1)))
                 ))
+                .and(BANK_STATEMENT.OWNER_ID.eq(userId))
                 .orderBy(BANK_STATEMENT.DATE_RECORD.asc())
                 .limit(MAX_NUMBER_RECORDS + 1)
                 .fetch()
@@ -47,7 +49,7 @@ public class ReportsDAO {
         return rprt;
     }
 
-    public MonthlyIncomeExpenseReport doMonthlyIncomeExpenseReport(DSLContext ctx) {
+    public MonthlyIncomeExpenseReport doMonthlyIncomeExpenseReport(DSLContext ctx, UUID userId) {
         var date = FINANCIAL_TRANSACTION.DATE_RECORD.as("date");
         var amount = FINANCIAL_TRANSACTION.AMOUNT_VALUE_CENTS.as("amount");
 
@@ -61,6 +63,7 @@ public class ReportsDAO {
                 .from(
                         select(date, amount)
                                 .from(FINANCIAL_TRANSACTION)
+                                .where(FINANCIAL_TRANSACTION.OWNER_ID.eq(userId))
                                 .unionAll(
                                         select(
                                                 BANK_STATEMENT.DATE_RECORD.as(date),
@@ -68,6 +71,7 @@ public class ReportsDAO {
                                         )
                                                 .from(BANK_STATEMENT)
                                                 .where(BANK_STATEMENT.PREVIOUS_STATEMENT_ID.isNull())
+                                                .and(BANK_STATEMENT.OWNER_ID.eq(userId))
                                 )
                 )
                 .groupBy(month)
