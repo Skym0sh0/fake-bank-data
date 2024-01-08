@@ -9,6 +9,7 @@ import generated.sky.regular.income.Keys;
 import generated.sky.regular.income.RegularIncome;
 import generated.sky.regular.income.tables.Category.CategoryPath;
 import generated.sky.regular.income.tables.TurnoverFileImport.TurnoverFileImportPath;
+import generated.sky.regular.income.tables.Users.UsersPath;
 import generated.sky.regular.income.tables.records.TurnoverRowRecord;
 
 import java.time.LocalDate;
@@ -18,7 +19,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-import org.jooq.Check;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
@@ -38,7 +38,6 @@ import org.jooq.TableField;
 import org.jooq.TableOptions;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
-import org.jooq.impl.Internal;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
@@ -63,11 +62,6 @@ public class TurnoverRow extends TableImpl<TurnoverRowRecord> {
     public Class<TurnoverRowRecord> getRecordType() {
         return TurnoverRowRecord.class;
     }
-
-    /**
-     * The column <code>REGULAR_INCOME.turnover_row.id</code>.
-     */
-    public final TableField<TurnoverRowRecord, String> ID = createField(DSL.name("id"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
      * The column <code>REGULAR_INCOME.turnover_row.turnover_file</code>.
@@ -113,6 +107,16 @@ public class TurnoverRow extends TableImpl<TurnoverRowRecord> {
      * The column <code>REGULAR_INCOME.turnover_row.last_updated_at</code>.
      */
     public final TableField<TurnoverRowRecord, OffsetDateTime> LAST_UPDATED_AT = createField(DSL.name("last_updated_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false), this, "");
+
+    /**
+     * The column <code>REGULAR_INCOME.turnover_row.owner_id</code>.
+     */
+    public final TableField<TurnoverRowRecord, UUID> OWNER_ID = createField(DSL.name("owner_id"), SQLDataType.UUID.nullable(false), this, "");
+
+    /**
+     * The column <code>REGULAR_INCOME.turnover_row.id</code>.
+     */
+    public final TableField<TurnoverRowRecord, UUID> ID = createField(DSL.name("id"), SQLDataType.UUID.nullable(false), this, "");
 
     private TurnoverRow(Name alias, Table<TurnoverRowRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -183,7 +187,7 @@ public class TurnoverRow extends TableImpl<TurnoverRowRecord> {
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.asList(Indexes.UQ_TURNOVER_ROW_CHECKSUM);
+        return Arrays.asList(Indexes.IDX_TURNOVER_ROW_OWNER, Indexes.UQ_TURNOVER_ROW_CHECKSUM);
     }
 
     @Override
@@ -193,12 +197,12 @@ public class TurnoverRow extends TableImpl<TurnoverRowRecord> {
 
     @Override
     public List<UniqueKey<TurnoverRowRecord>> getUniqueKeys() {
-        return Arrays.asList(Keys.TURNOVER_ROW_CHECKSUM_KEY);
+        return Arrays.asList(Keys.TURNOVER_ROW_ID_KEY);
     }
 
     @Override
     public List<ForeignKey<TurnoverRowRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.TURNOVER_ROW__TURNOVER_ROW_TURNOVER_FILE_FKEY, Keys.TURNOVER_ROW__TURNOVER_ROW_CATEGORY_ID_FKEY);
+        return Arrays.asList(Keys.TURNOVER_ROW__FK_TURNOVER_ROW_FILE_FKEY, Keys.TURNOVER_ROW__FK_TURNOVER_ROW_CATEGORY_FKEY, Keys.TURNOVER_ROW__FK_TURNOVER_ROW_OWNER);
     }
 
     private transient TurnoverFileImportPath _turnoverFileImport;
@@ -209,7 +213,7 @@ public class TurnoverRow extends TableImpl<TurnoverRowRecord> {
      */
     public TurnoverFileImportPath turnoverFileImport() {
         if (_turnoverFileImport == null)
-            _turnoverFileImport = new TurnoverFileImportPath(this, Keys.TURNOVER_ROW__TURNOVER_ROW_TURNOVER_FILE_FKEY, null);
+            _turnoverFileImport = new TurnoverFileImportPath(this, Keys.TURNOVER_ROW__FK_TURNOVER_ROW_FILE_FKEY, null);
 
         return _turnoverFileImport;
     }
@@ -221,16 +225,21 @@ public class TurnoverRow extends TableImpl<TurnoverRowRecord> {
      */
     public CategoryPath category() {
         if (_category == null)
-            _category = new CategoryPath(this, Keys.TURNOVER_ROW__TURNOVER_ROW_CATEGORY_ID_FKEY, null);
+            _category = new CategoryPath(this, Keys.TURNOVER_ROW__FK_TURNOVER_ROW_CATEGORY_FKEY, null);
 
         return _category;
     }
 
-    @Override
-    public List<Check<TurnoverRowRecord>> getChecks() {
-        return Arrays.asList(
-            Internal.createCheck(this, DSL.name("turnover_row_check"), "((id = checksum))", true)
-        );
+    private transient UsersPath _users;
+
+    /**
+     * Get the implicit join path to the <code>public.users</code> table.
+     */
+    public UsersPath users() {
+        if (_users == null)
+            _users = new UsersPath(this, Keys.TURNOVER_ROW__FK_TURNOVER_ROW_OWNER, null);
+
+        return _users;
     }
 
     @Override

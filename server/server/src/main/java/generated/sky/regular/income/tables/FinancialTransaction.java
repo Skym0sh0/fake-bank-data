@@ -8,7 +8,6 @@ import generated.sky.regular.income.Indexes;
 import generated.sky.regular.income.Keys;
 import generated.sky.regular.income.RegularIncome;
 import generated.sky.regular.income.tables.BankStatement.BankStatementPath;
-import generated.sky.regular.income.tables.Category.CategoryPath;
 import generated.sky.regular.income.tables.records.FinancialTransactionRecord;
 
 import java.time.LocalDate;
@@ -192,7 +191,7 @@ public class FinancialTransaction extends TableImpl<FinancialTransactionRecord> 
 
     @Override
     public List<ForeignKey<FinancialTransactionRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_BANK_STATEMENT_ID_FKEY, Keys.FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_CATEGORY_ID_FKEY);
+        return Arrays.asList(Keys.FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_BANK_STATEMENT_ID_FKEY);
     }
 
     private transient BankStatementPath _bankStatement;
@@ -206,18 +205,6 @@ public class FinancialTransaction extends TableImpl<FinancialTransactionRecord> 
             _bankStatement = new BankStatementPath(this, Keys.FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_BANK_STATEMENT_ID_FKEY, null);
 
         return _bankStatement;
-    }
-
-    private transient CategoryPath _category;
-
-    /**
-     * Get the implicit join path to the <code>public.category</code> table.
-     */
-    public CategoryPath category() {
-        if (_category == null)
-            _category = new CategoryPath(this, Keys.FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_CATEGORY_ID_FKEY, null);
-
-        return _category;
     }
 
     @Override

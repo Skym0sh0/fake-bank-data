@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-import org.jooq.Record1;
+import org.jooq.Record3;
 import org.jooq.impl.UpdatableRecordImpl;
 
 
@@ -23,25 +23,10 @@ public class TurnoverRowRecord extends UpdatableRecordImpl<TurnoverRowRecord> {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>REGULAR_INCOME.turnover_row.id</code>.
-     */
-    public TurnoverRowRecord setId(String value) {
-        set(0, value);
-        return this;
-    }
-
-    /**
-     * Getter for <code>REGULAR_INCOME.turnover_row.id</code>.
-     */
-    public String getId() {
-        return (String) get(0);
-    }
-
-    /**
      * Setter for <code>REGULAR_INCOME.turnover_row.turnover_file</code>.
      */
     public TurnoverRowRecord setTurnoverFile(UUID value) {
-        set(1, value);
+        set(0, value);
         return this;
     }
 
@@ -49,14 +34,14 @@ public class TurnoverRowRecord extends UpdatableRecordImpl<TurnoverRowRecord> {
      * Getter for <code>REGULAR_INCOME.turnover_row.turnover_file</code>.
      */
     public UUID getTurnoverFile() {
-        return (UUID) get(1);
+        return (UUID) get(0);
     }
 
     /**
      * Setter for <code>REGULAR_INCOME.turnover_row.date</code>.
      */
     public TurnoverRowRecord setDate(LocalDate value) {
-        set(2, value);
+        set(1, value);
         return this;
     }
 
@@ -64,14 +49,14 @@ public class TurnoverRowRecord extends UpdatableRecordImpl<TurnoverRowRecord> {
      * Getter for <code>REGULAR_INCOME.turnover_row.date</code>.
      */
     public LocalDate getDate() {
-        return (LocalDate) get(2);
+        return (LocalDate) get(1);
     }
 
     /**
      * Setter for <code>REGULAR_INCOME.turnover_row.amount_value_cents</code>.
      */
     public TurnoverRowRecord setAmountValueCents(Integer value) {
-        set(3, value);
+        set(2, value);
         return this;
     }
 
@@ -79,14 +64,14 @@ public class TurnoverRowRecord extends UpdatableRecordImpl<TurnoverRowRecord> {
      * Getter for <code>REGULAR_INCOME.turnover_row.amount_value_cents</code>.
      */
     public Integer getAmountValueCents() {
-        return (Integer) get(3);
+        return (Integer) get(2);
     }
 
     /**
      * Setter for <code>REGULAR_INCOME.turnover_row.description</code>.
      */
     public TurnoverRowRecord setDescription(String value) {
-        set(4, value);
+        set(3, value);
         return this;
     }
 
@@ -94,14 +79,14 @@ public class TurnoverRowRecord extends UpdatableRecordImpl<TurnoverRowRecord> {
      * Getter for <code>REGULAR_INCOME.turnover_row.description</code>.
      */
     public String getDescription() {
-        return (String) get(4);
+        return (String) get(3);
     }
 
     /**
      * Setter for <code>REGULAR_INCOME.turnover_row.suggested_category</code>.
      */
     public TurnoverRowRecord setSuggestedCategory(String value) {
-        set(5, value);
+        set(4, value);
         return this;
     }
 
@@ -109,14 +94,14 @@ public class TurnoverRowRecord extends UpdatableRecordImpl<TurnoverRowRecord> {
      * Getter for <code>REGULAR_INCOME.turnover_row.suggested_category</code>.
      */
     public String getSuggestedCategory() {
-        return (String) get(5);
+        return (String) get(4);
     }
 
     /**
      * Setter for <code>REGULAR_INCOME.turnover_row.recipient</code>.
      */
     public TurnoverRowRecord setRecipient(String value) {
-        set(6, value);
+        set(5, value);
         return this;
     }
 
@@ -124,14 +109,14 @@ public class TurnoverRowRecord extends UpdatableRecordImpl<TurnoverRowRecord> {
      * Getter for <code>REGULAR_INCOME.turnover_row.recipient</code>.
      */
     public String getRecipient() {
-        return (String) get(6);
+        return (String) get(5);
     }
 
     /**
      * Setter for <code>REGULAR_INCOME.turnover_row.checksum</code>.
      */
     public TurnoverRowRecord setChecksum(String value) {
-        set(7, value);
+        set(6, value);
         return this;
     }
 
@@ -139,14 +124,14 @@ public class TurnoverRowRecord extends UpdatableRecordImpl<TurnoverRowRecord> {
      * Getter for <code>REGULAR_INCOME.turnover_row.checksum</code>.
      */
     public String getChecksum() {
-        return (String) get(7);
+        return (String) get(6);
     }
 
     /**
      * Setter for <code>REGULAR_INCOME.turnover_row.category_id</code>.
      */
     public TurnoverRowRecord setCategoryId(UUID value) {
-        set(8, value);
+        set(7, value);
         return this;
     }
 
@@ -154,14 +139,14 @@ public class TurnoverRowRecord extends UpdatableRecordImpl<TurnoverRowRecord> {
      * Getter for <code>REGULAR_INCOME.turnover_row.category_id</code>.
      */
     public UUID getCategoryId() {
-        return (UUID) get(8);
+        return (UUID) get(7);
     }
 
     /**
      * Setter for <code>REGULAR_INCOME.turnover_row.last_updated_at</code>.
      */
     public TurnoverRowRecord setLastUpdatedAt(OffsetDateTime value) {
-        set(9, value);
+        set(8, value);
         return this;
     }
 
@@ -169,7 +154,37 @@ public class TurnoverRowRecord extends UpdatableRecordImpl<TurnoverRowRecord> {
      * Getter for <code>REGULAR_INCOME.turnover_row.last_updated_at</code>.
      */
     public OffsetDateTime getLastUpdatedAt() {
-        return (OffsetDateTime) get(9);
+        return (OffsetDateTime) get(8);
+    }
+
+    /**
+     * Setter for <code>REGULAR_INCOME.turnover_row.owner_id</code>.
+     */
+    public TurnoverRowRecord setOwnerId(UUID value) {
+        set(9, value);
+        return this;
+    }
+
+    /**
+     * Getter for <code>REGULAR_INCOME.turnover_row.owner_id</code>.
+     */
+    public UUID getOwnerId() {
+        return (UUID) get(9);
+    }
+
+    /**
+     * Setter for <code>REGULAR_INCOME.turnover_row.id</code>.
+     */
+    public TurnoverRowRecord setId(UUID value) {
+        set(10, value);
+        return this;
+    }
+
+    /**
+     * Getter for <code>REGULAR_INCOME.turnover_row.id</code>.
+     */
+    public UUID getId() {
+        return (UUID) get(10);
     }
 
     // -------------------------------------------------------------------------
@@ -177,8 +192,8 @@ public class TurnoverRowRecord extends UpdatableRecordImpl<TurnoverRowRecord> {
     // -------------------------------------------------------------------------
 
     @Override
-    public Record1<String> key() {
-        return (Record1) super.key();
+    public Record3<UUID, UUID, UUID> key() {
+        return (Record3) super.key();
     }
 
     // -------------------------------------------------------------------------
@@ -195,10 +210,9 @@ public class TurnoverRowRecord extends UpdatableRecordImpl<TurnoverRowRecord> {
     /**
      * Create a detached, initialised TurnoverRowRecord
      */
-    public TurnoverRowRecord(String id, UUID turnoverFile, LocalDate date, Integer amountValueCents, String description, String suggestedCategory, String recipient, String checksum, UUID categoryId, OffsetDateTime lastUpdatedAt) {
+    public TurnoverRowRecord(UUID turnoverFile, LocalDate date, Integer amountValueCents, String description, String suggestedCategory, String recipient, String checksum, UUID categoryId, OffsetDateTime lastUpdatedAt, UUID ownerId, UUID id) {
         super(TurnoverRow.TURNOVER_ROW);
 
-        setId(id);
         setTurnoverFile(turnoverFile);
         setDate(date);
         setAmountValueCents(amountValueCents);
@@ -208,6 +222,8 @@ public class TurnoverRowRecord extends UpdatableRecordImpl<TurnoverRowRecord> {
         setChecksum(checksum);
         setCategoryId(categoryId);
         setLastUpdatedAt(lastUpdatedAt);
+        setOwnerId(ownerId);
+        setId(id);
         resetChangedOnNotNull();
     }
 }

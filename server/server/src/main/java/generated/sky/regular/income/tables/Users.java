@@ -7,6 +7,8 @@ package generated.sky.regular.income.tables;
 import generated.sky.regular.income.Keys;
 import generated.sky.regular.income.RegularIncome;
 import generated.sky.regular.income.tables.Category.CategoryPath;
+import generated.sky.regular.income.tables.TurnoverFileImport.TurnoverFileImportPath;
+import generated.sky.regular.income.tables.TurnoverRow.TurnoverRowPath;
 import generated.sky.regular.income.tables.records.UsersRecord;
 
 import java.time.OffsetDateTime;
@@ -174,6 +176,32 @@ public class Users extends TableImpl<UsersRecord> {
             _category = new CategoryPath(this, null, Keys.CATEGORY__FK_CATEGORY_OWNER.getInverseKey());
 
         return _category;
+    }
+
+    private transient TurnoverFileImportPath _turnoverFileImport;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.turnover_file_import</code> table
+     */
+    public TurnoverFileImportPath turnoverFileImport() {
+        if (_turnoverFileImport == null)
+            _turnoverFileImport = new TurnoverFileImportPath(this, null, Keys.TURNOVER_FILE_IMPORT__FK_TURNOVER_FILE_IMPORT_OWNER.getInverseKey());
+
+        return _turnoverFileImport;
+    }
+
+    private transient TurnoverRowPath _turnoverRow;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.turnover_row</code> table
+     */
+    public TurnoverRowPath turnoverRow() {
+        if (_turnoverRow == null)
+            _turnoverRow = new TurnoverRowPath(this, null, Keys.TURNOVER_ROW__FK_TURNOVER_ROW_OWNER.getInverseKey());
+
+        return _turnoverRow;
     }
 
     @Override

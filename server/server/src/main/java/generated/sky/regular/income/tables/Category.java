@@ -8,7 +8,6 @@ import generated.sky.regular.income.Indexes;
 import generated.sky.regular.income.Keys;
 import generated.sky.regular.income.RegularIncome;
 import generated.sky.regular.income.tables.Category.CategoryPath;
-import generated.sky.regular.income.tables.FinancialTransaction.FinancialTransactionPath;
 import generated.sky.regular.income.tables.TurnoverRow.TurnoverRowPath;
 import generated.sky.regular.income.tables.Users.UsersPath;
 import generated.sky.regular.income.tables.records.CategoryRecord;
@@ -180,7 +179,7 @@ public class Category extends TableImpl<CategoryRecord> {
 
     @Override
     public List<ForeignKey<CategoryRecord, ?>> getReferences() {
-        return Arrays.asList(Keys.CATEGORY__CATEGORY_PARENT_CATEGORY_FKEY, Keys.CATEGORY__FK_CATEGORY_OWNER);
+        return Arrays.asList(Keys.CATEGORY__FK_CATEGORY_PARENT_CATEGORY, Keys.CATEGORY__FK_CATEGORY_OWNER);
     }
 
     private transient CategoryPath _category;
@@ -190,7 +189,7 @@ public class Category extends TableImpl<CategoryRecord> {
      */
     public CategoryPath category() {
         if (_category == null)
-            _category = new CategoryPath(this, Keys.CATEGORY__CATEGORY_PARENT_CATEGORY_FKEY, null);
+            _category = new CategoryPath(this, Keys.CATEGORY__FK_CATEGORY_PARENT_CATEGORY, null);
 
         return _category;
     }
@@ -207,19 +206,6 @@ public class Category extends TableImpl<CategoryRecord> {
         return _users;
     }
 
-    private transient FinancialTransactionPath _financialTransaction;
-
-    /**
-     * Get the implicit to-many join path to the
-     * <code>public.financial_transaction</code> table
-     */
-    public FinancialTransactionPath financialTransaction() {
-        if (_financialTransaction == null)
-            _financialTransaction = new FinancialTransactionPath(this, null, Keys.FINANCIAL_TRANSACTION__FINANCIAL_TRANSACTION_CATEGORY_ID_FKEY.getInverseKey());
-
-        return _financialTransaction;
-    }
-
     private transient TurnoverRowPath _turnoverRow;
 
     /**
@@ -228,7 +214,7 @@ public class Category extends TableImpl<CategoryRecord> {
      */
     public TurnoverRowPath turnoverRow() {
         if (_turnoverRow == null)
-            _turnoverRow = new TurnoverRowPath(this, null, Keys.TURNOVER_ROW__TURNOVER_ROW_CATEGORY_ID_FKEY.getInverseKey());
+            _turnoverRow = new TurnoverRowPath(this, null, Keys.TURNOVER_ROW__FK_TURNOVER_ROW_CATEGORY_FKEY.getInverseKey());
 
         return _turnoverRow;
     }

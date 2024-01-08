@@ -9,7 +9,7 @@ import generated.sky.regular.income.tables.TurnoverFileImport;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-import org.jooq.Record1;
+import org.jooq.Record2;
 import org.jooq.impl.UpdatableRecordImpl;
 
 
@@ -145,13 +145,28 @@ public class TurnoverFileImportRecord extends UpdatableRecordImpl<TurnoverFileIm
         return (String) get(7);
     }
 
+    /**
+     * Setter for <code>REGULAR_INCOME.turnover_file_import.owner_id</code>.
+     */
+    public TurnoverFileImportRecord setOwnerId(UUID value) {
+        set(8, value);
+        return this;
+    }
+
+    /**
+     * Getter for <code>REGULAR_INCOME.turnover_file_import.owner_id</code>.
+     */
+    public UUID getOwnerId() {
+        return (UUID) get(8);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
 
     @Override
-    public Record1<UUID> key() {
-        return (Record1) super.key();
+    public Record2<UUID, UUID> key() {
+        return (Record2) super.key();
     }
 
     // -------------------------------------------------------------------------
@@ -168,7 +183,7 @@ public class TurnoverFileImportRecord extends UpdatableRecordImpl<TurnoverFileIm
     /**
      * Create a detached, initialised TurnoverFileImportRecord
      */
-    public TurnoverFileImportRecord(UUID id, OffsetDateTime importedAt, String filename, Long fileSize, String fileContentType, byte[] fileContent, String checksum, String turnoverFileFormat) {
+    public TurnoverFileImportRecord(UUID id, OffsetDateTime importedAt, String filename, Long fileSize, String fileContentType, byte[] fileContent, String checksum, String turnoverFileFormat, UUID ownerId) {
         super(TurnoverFileImport.TURNOVER_FILE_IMPORT);
 
         setId(id);
@@ -179,6 +194,7 @@ public class TurnoverFileImportRecord extends UpdatableRecordImpl<TurnoverFileIm
         setFileContent(fileContent);
         setChecksum(checksum);
         setTurnoverFileFormat(turnoverFileFormat);
+        setOwnerId(ownerId);
         resetChangedOnNotNull();
     }
 }

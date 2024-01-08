@@ -9,7 +9,7 @@ import generated.sky.regular.income.tables.Category;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-import org.jooq.Record1;
+import org.jooq.Record2;
 import org.jooq.impl.UpdatableRecordImpl;
 
 
@@ -146,8 +146,8 @@ public class CategoryRecord extends UpdatableRecordImpl<CategoryRecord> {
     // -------------------------------------------------------------------------
 
     @Override
-    public Record1<UUID> key() {
-        return (Record1) super.key();
+    public Record2<UUID, UUID> key() {
+        return (Record2) super.key();
     }
 
     // -------------------------------------------------------------------------

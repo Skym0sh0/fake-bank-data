@@ -4,9 +4,11 @@
 package generated.sky.regular.income.tables;
 
 
+import generated.sky.regular.income.Indexes;
 import generated.sky.regular.income.Keys;
 import generated.sky.regular.income.RegularIncome;
 import generated.sky.regular.income.tables.TurnoverRow.TurnoverRowPath;
+import generated.sky.regular.income.tables.Users.UsersPath;
 import generated.sky.regular.income.tables.records.TurnoverFileImportRecord;
 
 import java.time.OffsetDateTime;
@@ -19,6 +21,7 @@ import org.jooq.Check;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
+import org.jooq.Index;
 import org.jooq.InverseForeignKey;
 import org.jooq.Name;
 import org.jooq.Path;
@@ -103,6 +106,11 @@ public class TurnoverFileImport extends TableImpl<TurnoverFileImportRecord> {
      */
     public final TableField<TurnoverFileImportRecord, String> TURNOVER_FILE_FORMAT = createField(DSL.name("turnover_file_format"), SQLDataType.CLOB.nullable(false), this, "");
 
+    /**
+     * The column <code>REGULAR_INCOME.turnover_file_import.owner_id</code>.
+     */
+    public final TableField<TurnoverFileImportRecord, UUID> OWNER_ID = createField(DSL.name("owner_id"), SQLDataType.UUID.nullable(false), this, "");
+
     private TurnoverFileImport(Name alias, Table<TurnoverFileImportRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }
@@ -171,8 +179,30 @@ public class TurnoverFileImport extends TableImpl<TurnoverFileImportRecord> {
     }
 
     @Override
+    public List<Index> getIndexes() {
+        return Arrays.asList(Indexes.IDX_TURNOVER_FILE_IMPORT_OWNER);
+    }
+
+    @Override
     public UniqueKey<TurnoverFileImportRecord> getPrimaryKey() {
         return Keys.TURNOVER_FILE_IMPORT_PKEY;
+    }
+
+    @Override
+    public List<ForeignKey<TurnoverFileImportRecord, ?>> getReferences() {
+        return Arrays.asList(Keys.TURNOVER_FILE_IMPORT__FK_TURNOVER_FILE_IMPORT_OWNER);
+    }
+
+    private transient UsersPath _users;
+
+    /**
+     * Get the implicit join path to the <code>public.users</code> table.
+     */
+    public UsersPath users() {
+        if (_users == null)
+            _users = new UsersPath(this, Keys.TURNOVER_FILE_IMPORT__FK_TURNOVER_FILE_IMPORT_OWNER, null);
+
+        return _users;
     }
 
     private transient TurnoverRowPath _turnoverRow;
@@ -183,7 +213,7 @@ public class TurnoverFileImport extends TableImpl<TurnoverFileImportRecord> {
      */
     public TurnoverRowPath turnoverRow() {
         if (_turnoverRow == null)
-            _turnoverRow = new TurnoverRowPath(this, null, Keys.TURNOVER_ROW__TURNOVER_ROW_TURNOVER_FILE_FKEY.getInverseKey());
+            _turnoverRow = new TurnoverRowPath(this, null, Keys.TURNOVER_ROW__FK_TURNOVER_ROW_FILE_FKEY.getInverseKey());
 
         return _turnoverRow;
     }
