@@ -93,21 +93,6 @@ public class TransactionsDAO {
                 .map(TransactionsDAO::map);
     }
 
-    public List<Reason> fetchReasons(DSLContext ctx, UUID userId) {
-        return ctx.selectDistinct(FINANCIAL_TRANSACTION.REASON)
-                .from(FINANCIAL_TRANSACTION)
-                .where(FINANCIAL_TRANSACTION.OWNER_ID.eq(userId))
-                .fetch()
-                .into(String.class)
-                .stream()
-                .map(str -> {
-                    Reason r = new Reason();
-                    r.reason = str;
-                    return r;
-                })
-                .toList();
-    }
-
     private static Transaction map(FinancialTransactionRecord rec) {
         if (rec == null)
             return null;
