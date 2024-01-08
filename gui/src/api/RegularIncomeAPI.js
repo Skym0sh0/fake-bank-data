@@ -2,7 +2,6 @@ import axios from "axios";
 import {v4 as uuidv4} from 'uuid';
 import {
     denormalizeCategory,
-    denormalizeReason,
     denormalizeStatement,
     denormalizeTransaction,
     denormalizeTurnoverImport,
@@ -77,11 +76,6 @@ class RegularIncomeAPI {
     getTransactionsForStatement(stmtId) {
         return this.getClient().get(`statements/${stmtId}/transactions`)
             .then(res => res.data.map(stmt => denormalizeTransaction(stmt)))
-    }
-
-    getReasonsForTransactions() {
-        return this.getClient().get('transactions/reasons')
-            .then(res => res.data.map(rsn => denormalizeReason(rsn)))
     }
 
     getStatementSummary(stmtId) {
