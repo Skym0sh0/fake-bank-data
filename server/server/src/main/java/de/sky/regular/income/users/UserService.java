@@ -33,11 +33,10 @@ public class UserService implements UserDetailsService, UserProvider {
 
     private final DatabaseConnection db;
     private final PasswordEncoder passwordEncoder;
-    private final UserProvider user;
 
     @Autowired
-    public UserService(DatabaseSupplier supplier, PasswordEncoder passwordEncoder, UserProvider user) {
-        this(supplier.get(), passwordEncoder, user);
+    public UserService(DatabaseSupplier supplier, PasswordEncoder passwordEncoder) {
+        this(supplier.get(), passwordEncoder);
     }
 
     @Override
@@ -96,7 +95,7 @@ public class UserService implements UserDetailsService, UserProvider {
         var ts = ZonedDateTime.now().toOffsetDateTime();
 
         return db.transactionWithResult(ctx -> {
-            if (!Objects.equals(id, user.getCurrentUser(ctx).getId()))
+            if (!Objects.equals(id, getCurrentUser(ctx).getId()))
                 throw new IllegalStateException("Current user can only change itself");
 
             var rec = ctx.selectFrom(USERS)
@@ -121,7 +120,7 @@ public class UserService implements UserDetailsService, UserProvider {
 
     public void deleteUser(UUID id) {
         db.transactionWithoutResult(ctx -> {
-            if (!Objects.equals(id, user.getCurrentUser(ctx).getId()))
+            if (!Objects.equals(id, getCurrentUser(ctx).getId()))
                 throw new IllegalStateException("Current user can only change itself");
 
             ctx.deleteFrom(FINANCIAL_TRANSACTION)
