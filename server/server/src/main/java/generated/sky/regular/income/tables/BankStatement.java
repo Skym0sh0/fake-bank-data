@@ -168,7 +168,7 @@ public class BankStatement extends TableImpl<BankStatementRecord> {
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.asList(Indexes.UQ_BANK_STATEMENT_ID);
+        return Arrays.asList(Indexes.UQ_BANK_STATEMENT_ID, Indexes.UQ_BANK_STATEMENT_SINGLE_PARENT);
     }
 
     @Override

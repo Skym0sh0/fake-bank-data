@@ -11,6 +11,7 @@ import de.sky.regular.income.database.DatabaseSupplier;
 import de.sky.regular.income.importing.excel.ExcelImporter;
 import de.sky.regular.income.users.UserProvider;
 import lombok.RequiredArgsConstructor;
+import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
@@ -36,7 +37,7 @@ public class StatementController {
 
 
     @Autowired
-    public StatementController(DatabaseSupplier supplier, StatementDAO statementDAO, CategoryDAO categoryDAO, ExcelImporter importer, UserProvider user) {
+    public StatementController(DatabaseSupplier supplier, StatementDAO statementDAO, CategoryDAO categoryDAO, UserProvider user, ExcelImporter importer) {
         this(supplier.getDatabase(), statementDAO, categoryDAO, user, importer);
     }
 
@@ -47,60 +48,64 @@ public class StatementController {
         requireNonNull(patch.finalBalanceInCents, "finalBalanceInCents");
 
         return db.transactionWithResult(ctx -> {
+            var userId = user.getCurrentUser(ctx).getId();
+
             if (patch.previousStatementId == null) {
                 if (!CollectionUtils.isEmpty(patch.transactions))
                     throw new IllegalArgumentException("Initial Statement must not contain transactions");
 
-                if (statementDAO.existsAnyStatement(ctx))
+                if (statementDAO.existsAnyStatement(ctx, userId))
                     throw new IllegalArgumentException("Initial Statement can only created if there are no previous statements");
             } else {
                 requireNonNull(patch.previousBalanceInCents, "previousBalanceInCents");
 
-                Statement prev = statementDAO.readStatement(ctx, patch.previousStatementId);
+                Statement prev = statementDAO.readStatement(ctx, userId, patch.previousStatementId);
 
                 if (!Objects.equals(patch.previousBalanceInCents, prev.finalBalanceInCents))
                     throw new IllegalArgumentException(String.format("Previous balance [%d] must match with previous statement [%d]", patch.previousBalanceInCents, prev.finalBalanceInCents));
             }
 
-            return statementDAO.createStatement(ctx, id, patch);
+            return statementDAO.createStatement(ctx, userId, id, patch);
         });
     }
 
     @GetMapping
     public List<Statement> getAllStatements() {
-        return db.transactionWithResult(statementDAO::readAllStatements);
+        return db.transactionWithResult((DSLContext ctx) -> statementDAO.readAllStatements(ctx, user.getCurrentUser(ctx).getId()));
     }
 
     @GetMapping("{id}")
     public Statement getStatementByID(@PathVariable("id") UUID id) {
-        return db.transactionWithResult(ctx -> statementDAO.readStatement(ctx, id));
+        return db.transactionWithResult(ctx -> statementDAO.readStatement(ctx, user.getCurrentUser(ctx).getId(), id));
     }
 
     @DeleteMapping("{id}")
     public void deleteStatementByID(@PathVariable("id") UUID id) {
-        db.transactionWithoutResult(ctx -> statementDAO.deleteStatement(ctx, id));
+        db.transactionWithoutResult(ctx -> statementDAO.deleteStatement(ctx, user.getCurrentUser(ctx).getId(), id));
     }
 
     @GetMapping("{id}/summary")
     public StatementTransactionSummary getStatementSummary(@PathVariable("id") UUID id) {
-        return db.transactionWithResult(ctx -> statementDAO.fetchSummaryFor(ctx, id));
+        return db.transactionWithResult(ctx -> statementDAO.fetchSummaryFor(ctx, user.getCurrentUser(ctx).getId(), id));
     }
 
     @GetMapping("{id}/transactions")
     public List<Transaction> getTransactionsForStatement(@PathVariable("id") UUID id) {
-        return db.transactionWithResult(ctx -> statementDAO.readTransactionsFor(ctx, id));
+        return db.transactionWithResult(ctx -> statementDAO.readTransactionsFor(ctx, user.getCurrentUser(ctx).getId(), id));
     }
 
     @PutMapping("/import")
     public void importFile(@RequestParam("file") MultipartFile file) {
         db.transactionWithoutResult(ctx -> {
-            if (statementDAO.existsAnyStatement(ctx))
+            var userId = user.getCurrentUser(ctx).getId();
+
+            if (statementDAO.existsAnyStatement(ctx, userId))
                 throw new IllegalStateException("Import can only be used as initial Statement Creation");
 
             var result = importer.prepareExcelImport(file);
 
-            result.categories.forEach(cat -> categoryDAO.createCategory(ctx, user.getCurrentUser(ctx).getId(), null, cat));
-            result.statements.forEach(stmt -> this.statementDAO.createStatement(ctx, stmt.getId(), stmt));
+            result.categories.forEach(cat -> categoryDAO.createCategory(ctx, userId, null, cat));
+            result.statements.forEach(stmt -> this.statementDAO.createStatement(ctx, userId, stmt.getId(), stmt));
         });
     }
 }

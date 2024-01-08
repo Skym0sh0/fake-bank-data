@@ -87,6 +87,12 @@ public class VOrderedBankStatements extends TableImpl<VOrderedBankStatementsReco
     public final TableField<VOrderedBankStatementsRecord, OffsetDateTime> UPDATED_AT = createField(DSL.name("updated_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6), this, "");
 
     /**
+     * The column
+     * <code>REGULAR_INCOME.v_ordered_bank_statements.owner_id</code>.
+     */
+    public final TableField<VOrderedBankStatementsRecord, UUID> OWNER_ID = createField(DSL.name("owner_id"), SQLDataType.UUID, this, "");
+
+    /**
      * The column <code>REGULAR_INCOME.v_ordered_bank_statements.rank</code>.
      */
     public final TableField<VOrderedBankStatementsRecord, Integer> RANK = createField(DSL.name("rank"), SQLDataType.INTEGER, this, "");
@@ -104,6 +110,7 @@ public class VOrderedBankStatements extends TableImpl<VOrderedBankStatementsReco
                    bank_statement.previous_statement_id,
                    bank_statement.created_at,
                    bank_statement.updated_at,
+                   bank_statement.owner_id,
                    0 AS rank
                   FROM bank_statement
                  WHERE (bank_statement.previous_statement_id IS NULL)
@@ -114,6 +121,7 @@ public class VOrderedBankStatements extends TableImpl<VOrderedBankStatementsReco
                    e.previous_statement_id,
                    e.created_at,
                    e.updated_at,
+                   e.owner_id,
                    (c.rank + 1)
                   FROM (cte c
                     JOIN bank_statement e ON ((e.previous_statement_id = c.id)))
@@ -124,6 +132,7 @@ public class VOrderedBankStatements extends TableImpl<VOrderedBankStatementsReco
            previous_statement_id,
            created_at,
            updated_at,
+           owner_id,
            rank
           FROM cte;
         """), where);

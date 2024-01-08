@@ -122,10 +122,27 @@ public class VOrderedBankStatementsRecord extends TableRecordImpl<VOrderedBankSt
     }
 
     /**
+     * Setter for
+     * <code>REGULAR_INCOME.v_ordered_bank_statements.owner_id</code>.
+     */
+    public VOrderedBankStatementsRecord setOwnerId(UUID value) {
+        set(6, value);
+        return this;
+    }
+
+    /**
+     * Getter for
+     * <code>REGULAR_INCOME.v_ordered_bank_statements.owner_id</code>.
+     */
+    public UUID getOwnerId() {
+        return (UUID) get(6);
+    }
+
+    /**
      * Setter for <code>REGULAR_INCOME.v_ordered_bank_statements.rank</code>.
      */
     public VOrderedBankStatementsRecord setRank(Integer value) {
-        set(6, value);
+        set(7, value);
         return this;
     }
 
@@ -133,7 +150,7 @@ public class VOrderedBankStatementsRecord extends TableRecordImpl<VOrderedBankSt
      * Getter for <code>REGULAR_INCOME.v_ordered_bank_statements.rank</code>.
      */
     public Integer getRank() {
-        return (Integer) get(6);
+        return (Integer) get(7);
     }
 
     // -------------------------------------------------------------------------
@@ -150,7 +167,7 @@ public class VOrderedBankStatementsRecord extends TableRecordImpl<VOrderedBankSt
     /**
      * Create a detached, initialised VOrderedBankStatementsRecord
      */
-    public VOrderedBankStatementsRecord(UUID id, LocalDate dateRecord, Integer amountBalanceCents, UUID previousStatementId, OffsetDateTime createdAt, OffsetDateTime updatedAt, Integer rank) {
+    public VOrderedBankStatementsRecord(UUID id, LocalDate dateRecord, Integer amountBalanceCents, UUID previousStatementId, OffsetDateTime createdAt, OffsetDateTime updatedAt, UUID ownerId, Integer rank) {
         super(VOrderedBankStatements.V_ORDERED_BANK_STATEMENTS);
 
         setId(id);
@@ -159,6 +176,7 @@ public class VOrderedBankStatementsRecord extends TableRecordImpl<VOrderedBankSt
         setPreviousStatementId(previousStatementId);
         setCreatedAt(createdAt);
         setUpdatedAt(updatedAt);
+        setOwnerId(ownerId);
         setRank(rank);
         resetChangedOnNotNull();
     }

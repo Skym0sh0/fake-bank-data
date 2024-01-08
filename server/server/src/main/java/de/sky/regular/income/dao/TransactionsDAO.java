@@ -7,48 +7,52 @@ import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record6;
 import org.jooq.impl.DSL;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static generated.sky.regular.income.Tables.FINANCIAL_TRANSACTION;
+import static org.jooq.impl.DSL.and;
 
-@Component
+@Service
 public class TransactionsDAO {
     private final TransactionChecksumCalculator checksumCalculator = new TransactionChecksumCalculator();
 
-    public List<Transaction> readAllTransactions(DSLContext ctx) {
-        return ctx.fetch(FINANCIAL_TRANSACTION)
+    public List<Transaction> readAllTransactions(DSLContext ctx, UUID userId) {
+        return ctx.fetch(FINANCIAL_TRANSACTION, FINANCIAL_TRANSACTION.OWNER_ID.eq(userId))
                 .map(TransactionsDAO::map);
     }
 
-    public Transaction readTransaction(DSLContext ctx, UUID id) {
-        return map(ctx.fetchOne(FINANCIAL_TRANSACTION, FINANCIAL_TRANSACTION.ID.eq(id)));
+    public Transaction readTransaction(DSLContext ctx, UUID userId, UUID id) {
+        return map(ctx.fetchOne(FINANCIAL_TRANSACTION, and(
+                FINANCIAL_TRANSACTION.ID.eq(id),
+                FINANCIAL_TRANSACTION.OWNER_ID.eq(userId)
+        )));
     }
 
-    public void deleteTransactionForStatement(DSLContext ctx, UUID stmtId) {
+    public void deleteTransactionForStatement(DSLContext ctx, UUID userId, UUID stmtId) {
         ctx.deleteFrom(FINANCIAL_TRANSACTION)
                 .where(FINANCIAL_TRANSACTION.BANK_STATEMENT_ID.eq(stmtId))
+                .and(FINANCIAL_TRANSACTION.OWNER_ID.eq(userId))
                 .execute();
     }
 
-    public StatementTransactionSummary fetchStatementSummaryFor(DSLContext ctx, UUID id) {
+    public StatementTransactionSummary fetchStatementSummaryFor(DSLContext ctx, UUID userId, UUID id) {
         StatementTransactionSummary summary = new StatementTransactionSummary();
 
-        summary.income = fetchSummary(ctx, id, FINANCIAL_TRANSACTION.AMOUNT_VALUE_CENTS.greaterOrEqual(0));
-        summary.expense = fetchSummary(ctx, id, FINANCIAL_TRANSACTION.AMOUNT_VALUE_CENTS.lessThan(0));
-        summary.total = fetchSummary(ctx, id);
+        summary.income = fetchSummary(ctx, userId, id, FINANCIAL_TRANSACTION.AMOUNT_VALUE_CENTS.greaterOrEqual(0));
+        summary.expense = fetchSummary(ctx, userId, id, FINANCIAL_TRANSACTION.AMOUNT_VALUE_CENTS.lessThan(0));
+        summary.total = fetchSummary(ctx, userId, id);
 
         return summary;
     }
 
-    public void updateTransactionsFor(DSLContext ctx, UUID stmtId, OffsetDateTime timestamp, List<TransactionPatch> transactions) {
-        this.deleteTransactionForStatement(ctx, stmtId);
+    public void updateTransactionsFor(DSLContext ctx, UUID userId, UUID stmtId, OffsetDateTime timestamp, List<TransactionPatch> transactions) {
+        this.deleteTransactionForStatement(ctx, userId, stmtId);
 
         if (CollectionUtils.isEmpty(transactions))
             return;
@@ -58,6 +62,7 @@ public class TransactionsDAO {
                     FinancialTransactionRecord rec = ctx.newRecord(FINANCIAL_TRANSACTION);
 
                     rec.setId(t.id);
+                    rec.setOwnerId(userId);
 
                     rec.setCreatedAt(timestamp);
 
@@ -73,23 +78,25 @@ public class TransactionsDAO {
 
                     return rec;
                 })
-                .collect(Collectors.toList());
+                .toList();
 
         ctx.batchStore(transactionRecords)
                 .execute();
     }
 
-    public List<Transaction> fetchTransactionsForStatement(DSLContext ctx, UUID stmtId) {
+    public List<Transaction> fetchTransactionsForStatement(DSLContext ctx, UUID userId, UUID stmtId) {
         return ctx.selectFrom(FINANCIAL_TRANSACTION)
                 .where(FINANCIAL_TRANSACTION.BANK_STATEMENT_ID.eq(stmtId))
+                .and(FINANCIAL_TRANSACTION.OWNER_ID.eq(userId))
                 .orderBy(FINANCIAL_TRANSACTION.DATE_RECORD.desc())
                 .fetch()
                 .map(TransactionsDAO::map);
     }
 
-    public List<Reason> fetchReasons(DSLContext ctx) {
+    public List<Reason> fetchReasons(DSLContext ctx, UUID userId) {
         return ctx.selectDistinct(FINANCIAL_TRANSACTION.REASON)
                 .from(FINANCIAL_TRANSACTION)
+                .where(FINANCIAL_TRANSACTION.OWNER_ID.eq(userId))
                 .fetch()
                 .into(String.class)
                 .stream()
@@ -98,7 +105,7 @@ public class TransactionsDAO {
                     r.reason = str;
                     return r;
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private static Transaction map(FinancialTransactionRecord rec) {
@@ -121,18 +128,19 @@ public class TransactionsDAO {
         return t;
     }
 
-    private static StatisticalSummary fetchSummary(DSLContext ctx, UUID id, Condition... c) {
+    private static StatisticalSummary fetchSummary(DSLContext ctx, UUID userId, UUID id, Condition... c) {
         Record6<Integer, BigDecimal, BigDecimal, BigDecimal, Integer, Integer> rec = ctx.select(
-                DSL.count(),
-                DSL.sum(FINANCIAL_TRANSACTION.AMOUNT_VALUE_CENTS),
-                DSL.avg(FINANCIAL_TRANSACTION.AMOUNT_VALUE_CENTS),
-                DSL.median(FINANCIAL_TRANSACTION.AMOUNT_VALUE_CENTS),
-                DSL.min(FINANCIAL_TRANSACTION.AMOUNT_VALUE_CENTS),
-                DSL.max(FINANCIAL_TRANSACTION.AMOUNT_VALUE_CENTS)
-        )
+                        DSL.count(),
+                        DSL.sum(FINANCIAL_TRANSACTION.AMOUNT_VALUE_CENTS),
+                        DSL.avg(FINANCIAL_TRANSACTION.AMOUNT_VALUE_CENTS),
+                        DSL.median(FINANCIAL_TRANSACTION.AMOUNT_VALUE_CENTS),
+                        DSL.min(FINANCIAL_TRANSACTION.AMOUNT_VALUE_CENTS),
+                        DSL.max(FINANCIAL_TRANSACTION.AMOUNT_VALUE_CENTS)
+                )
                 .from(FINANCIAL_TRANSACTION)
                 .where(FINANCIAL_TRANSACTION.BANK_STATEMENT_ID.eq(id))
-                .and(DSL.and(c))
+                .and(FINANCIAL_TRANSACTION.OWNER_ID.eq(userId))
+                .and(and(c))
                 .groupBy(FINANCIAL_TRANSACTION.BANK_STATEMENT_ID)
                 .fetchOne();
 
