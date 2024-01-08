@@ -1,196 +1,213 @@
 package de.sky.regular.income.dao;
 
+import static generated.sky.regular.income.Tables.CATEGORY;
+import static generated.sky.regular.income.Tables.FINANCIAL_TRANSACTION;
+import static generated.sky.regular.income.Tables.TURNOVER_ROW;
+import static generated.sky.regular.income.Tables.V_CATEGORIES_WITH_USAGE_COUNT;
+import static org.jooq.impl.DSL.and;
+import static org.jooq.impl.DSL.name;
+import static org.jooq.impl.DSL.select;
+
 import de.sky.regular.income.api.Category;
 import de.sky.regular.income.api.CategoryPatch;
 import generated.sky.regular.income.tables.records.CategoryRecord;
 import generated.sky.regular.income.tables.records.VCategoriesWithUsageCountRecord;
+import java.time.ZonedDateTime;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 import org.springframework.stereotype.Component;
 
-import java.time.ZonedDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static generated.sky.regular.income.Tables.*;
-import static org.jooq.impl.DSL.*;
-
 @Component
 public class CategoryDAO {
-    public Category createCategory(DSLContext ctx, UUID parentId, CategoryPatch patch) {
-        var now = ZonedDateTime.now().toOffsetDateTime();
 
-        CategoryRecord rec = ctx.newRecord(CATEGORY);
+	public Category createCategory(DSLContext ctx, UUID userId, UUID parentId, CategoryPatch patch) {
+		var now = ZonedDateTime.now().toOffsetDateTime();
 
-        rec.setId(UUID.randomUUID());
-        rec.setParentCategory(parentId);
-        rec.setName(patch.name.trim());
-        rec.setDescription(Optional.ofNullable(patch.description).map(String::trim).orElse(null));
-        rec.setIsIncome(false);
-        rec.setCreatedAt(now);
-        rec.setLastUpdatedAt(now);
+		CategoryRecord rec = ctx.newRecord(CATEGORY);
 
-        rec.insert();
+		rec.setId(UUID.randomUUID());
+		rec.setOwnerId(userId);
+		rec.setParentCategory(parentId);
+		rec.setName(patch.name.trim());
+		rec.setDescription(Optional.ofNullable(patch.description).map(String::trim).orElse(null));
+		rec.setIsIncome(false);
+		rec.setCreatedAt(now);
+		rec.setLastUpdatedAt(now);
 
-        return fetchById(ctx, rec.getId());
-    }
+		rec.insert();
 
-    public Category updateCategory(DSLContext ctx, UUID id, CategoryPatch patch) {
-        CategoryRecord rec = ctx.selectFrom(CATEGORY)
-                .where(CATEGORY.ID.eq(id))
-                .fetchOne();
+		return fetchById(ctx, userId, rec.getId());
+	}
 
-        rec.setName(patch.name.trim());
-        rec.setDescription(Optional.ofNullable(patch.description).map(String::trim).orElse(null));
-        rec.setLastUpdatedAt(ZonedDateTime.now().toOffsetDateTime());
+	public Category updateCategory(DSLContext ctx, UUID userId, UUID id, CategoryPatch patch) {
+		CategoryRecord rec = ctx.selectFrom(CATEGORY)
+				.where(CATEGORY.ID.eq(id))
+				.and(CATEGORY.OWNER_ID.eq(userId))
+				.fetchOne();
 
-        rec.update();
+		rec.setName(patch.name.trim());
+		rec.setDescription(Optional.ofNullable(patch.description).map(String::trim).orElse(null));
+		rec.setLastUpdatedAt(ZonedDateTime.now().toOffsetDateTime());
 
-        return fetchById(ctx, id);
-    }
+		rec.update();
 
-    public Category fetchById(DSLContext ctx, UUID id) {
-        return fetchAllCategoriesFlatted(ctx, true)
-                .stream()
-                .filter(cat -> Objects.equals(id, cat.getId()))
-                .findAny()
-                .orElseThrow();
-    }
+		return fetchById(ctx, userId, id);
+	}
 
-    public void deleteCategory(DSLContext ctx, UUID id) {
-        var transaction = FINANCIAL_TRANSACTION.as("transaction");
-        var turnovers = TURNOVER_ROW.as("turnovers");
-        var parent = CATEGORY.as("parent");
-        var child = CATEGORY.as("child");
+	public Category fetchById(DSLContext ctx, UUID userId, UUID id) {
+		return fetchAllCategoriesFlatted(ctx, userId, true)
+				.stream()
+				.filter(cat -> Objects.equals(id, cat.getId()))
+				.findAny()
+				.orElseThrow();
+	}
 
-        ctx.update(transaction)
-                .set(transaction.CATEGORY_ID, child.PARENT_CATEGORY)
-                .from(child)
-                .where(DSL.and(
-                        child.ID.eq(transaction.CATEGORY_ID),
-                        child.ID.eq(id),
-                        child.PARENT_CATEGORY.isNotNull()
-                ))
-                .execute();
+	public void deleteCategory(DSLContext ctx, UUID userId, UUID id) {
+		var transaction = FINANCIAL_TRANSACTION.as("transaction");
+		var turnovers = TURNOVER_ROW.as("turnovers");
+		var parent = CATEGORY.as("parent");
+		var child = CATEGORY.as("child");
 
-        ctx.update(turnovers)
-                .set(turnovers.CATEGORY_ID, child.PARENT_CATEGORY)
-                .from(child)
-                .where(DSL.and(
-                        child.ID.eq(turnovers.CATEGORY_ID),
-                        child.ID.eq(id),
-                        child.PARENT_CATEGORY.isNotNull()
-                ))
-                .execute();
+		ctx.update(transaction)
+				.set(transaction.CATEGORY_ID, child.PARENT_CATEGORY)
+				.from(child)
+				.where(DSL.and(
+						child.ID.eq(transaction.CATEGORY_ID),
+						child.ID.eq(id),
+						child.PARENT_CATEGORY.isNotNull()
+				))
+				.execute();
 
-        ctx.update(child)
-                .set(CATEGORY.PARENT_CATEGORY, parent.PARENT_CATEGORY)
-                .from(parent)
-                .where(and(
-                        child.PARENT_CATEGORY.eq(parent.ID),
-                        parent.ID.eq(id)
-                ))
-                .execute();
+		ctx.update(turnovers)
+				.set(turnovers.CATEGORY_ID, child.PARENT_CATEGORY)
+				.from(child)
+				.where(DSL.and(
+						child.ID.eq(turnovers.CATEGORY_ID),
+						child.ID.eq(id),
+						child.PARENT_CATEGORY.isNotNull()
+				))
+				.execute();
 
-        ctx.deleteFrom(CATEGORY)
-                .where(CATEGORY.ID.eq(id))
-                .execute();
-    }
+		ctx.update(child)
+				.set(CATEGORY.PARENT_CATEGORY, parent.PARENT_CATEGORY)
+				.from(parent)
+				.where(and(
+						child.PARENT_CATEGORY.eq(parent.ID),
+						parent.ID.eq(id)
+				))
+				.execute();
 
-    public Category reassignParent(DSLContext ctx, UUID childId, UUID newParentId) {
-        var now = ZonedDateTime.now().toOffsetDateTime();
+		ctx.deleteFrom(CATEGORY)
+				.where(CATEGORY.ID.eq(id))
+				.execute();
+	}
 
-        ctx.update(CATEGORY)
-                .set(CATEGORY.PARENT_CATEGORY, newParentId)
-                .set(CATEGORY.LAST_UPDATED_AT, now)
-                .where(CATEGORY.ID.eq(childId))
-                .execute();
-        ctx.update(CATEGORY)
-                .set(CATEGORY.LAST_UPDATED_AT, now)
-                .where(CATEGORY.ID.eq(childId))
-                .or(CATEGORY.ID.eq(newParentId))
-                .execute();
+	public Category reassignParent(DSLContext ctx, UUID userId, UUID childId, UUID newParentId) {
+		var now = ZonedDateTime.now().toOffsetDateTime();
 
-        var parent = CATEGORY.as("parent");
-        var cteName = name("cte");
-        var cte = CATEGORY.as(cteName);
+		ctx.update(CATEGORY)
+				.set(CATEGORY.PARENT_CATEGORY, newParentId)
+				.set(CATEGORY.LAST_UPDATED_AT, now)
+				.where(CATEGORY.ID.eq(childId))
+				.and(CATEGORY.OWNER_ID.eq(userId))
+				.execute();
+		ctx.update(CATEGORY)
+				.set(CATEGORY.LAST_UPDATED_AT, now)
+				.where(CATEGORY.OWNER_ID.eq(userId).and(
+						CATEGORY.ID.eq(childId).or(CATEGORY.ID.eq(newParentId))
+				))
+				.execute();
 
-        UUID rootParentId = ctx.withRecursive(cte.getName())
-                .as(
-                        select(CATEGORY.ID, CATEGORY.PARENT_CATEGORY)
-                                .from(CATEGORY)
-                                .where(CATEGORY.ID.eq(childId))
-                                .unionAll(
-                                        select(parent.ID, parent.PARENT_CATEGORY)
-                                                .from(cteName)
-                                                .join(parent)
-                                                .on(parent.ID.eq(cte.PARENT_CATEGORY))
-                                )
-                )
-                .select(cte.ID)
-                .from(cteName)
-                .where(cte.PARENT_CATEGORY.isNull())
-                .fetchOneInto(CATEGORY.ID.getType());
+		var parent = CATEGORY.as("parent");
+		var cteName = name("cte");
+		var cte = CATEGORY.as(cteName);
 
-        return fetchById(ctx, rootParentId);
-    }
+		UUID rootParentId = ctx.withRecursive(cte.getName())
+				.as(
+						select(CATEGORY.ID, CATEGORY.PARENT_CATEGORY)
+								.from(CATEGORY)
+								.where(CATEGORY.ID.eq(childId))
+								.and(CATEGORY.OWNER_ID.eq(userId))
+								.unionAll(
+										select(parent.ID, parent.PARENT_CATEGORY)
+												.from(cteName)
+												.join(parent)
+												.on(parent.ID.eq(cte.PARENT_CATEGORY))
+								)
+				)
+				.select(cte.ID)
+				.from(cteName)
+				.where(cte.PARENT_CATEGORY.isNull())
+				.fetchOneInto(CATEGORY.ID.getType());
 
-    public List<Category> fetchAllCategoriesFlatted(DSLContext ctx, boolean deep) {
-        var allCategories = ctx.selectFrom(V_CATEGORIES_WITH_USAGE_COUNT)
-                .orderBy(V_CATEGORIES_WITH_USAGE_COUNT.NAME)
-                .limit(10_000)
-                .fetchInto(V_CATEGORIES_WITH_USAGE_COUNT);
+		return fetchById(ctx, userId, rootParentId);
+	}
 
-        var categoriesByParentId = allCategories
-                .stream()
-                .filter(cat -> cat.getParentCategory() != null)
-                .collect(Collectors.groupingBy(VCategoriesWithUsageCountRecord::getParentCategory));
+	public List<Category> fetchAllCategoriesFlatted(DSLContext ctx, UUID userId, boolean deep) {
+		var allCategories = ctx.selectFrom(V_CATEGORIES_WITH_USAGE_COUNT)
+				.where(V_CATEGORIES_WITH_USAGE_COUNT.OWNER_ID.eq(userId))
+				.orderBy(V_CATEGORIES_WITH_USAGE_COUNT.NAME)
+				.limit(10_000)
+				.fetchInto(V_CATEGORIES_WITH_USAGE_COUNT);
 
-        return allCategories.map(rec -> {
-            if (!deep)
-                return mapFlat(rec);
+		var categoriesByParentId = allCategories
+				.stream()
+				.filter(cat -> cat.getParentCategory() != null)
+				.collect(Collectors.groupingBy(VCategoriesWithUsageCountRecord::getParentCategory));
 
-            return mapRecursively(categoriesByParentId, rec);
-        });
-    }
+		return allCategories.map(rec -> {
+			if (!deep) {
+				return mapFlat(rec);
+			}
 
-    public List<Category> fetchCategoryTree(DSLContext ctx) {
-        return fetchAllCategoriesFlatted(ctx, true)
-                .stream()
-                .filter(cat -> cat.getParentId() == null)
-                .collect(Collectors.toList());
-    }
+			return mapRecursively(categoriesByParentId, rec);
+		});
+	}
 
-    private Category mapRecursively(Map<UUID, List<VCategoriesWithUsageCountRecord>> categoriesByParentId, VCategoriesWithUsageCountRecord rec) {
-        var c = mapFlat(rec);
+	public List<Category> fetchCategoryTree(DSLContext ctx, UUID userId) {
+		return fetchAllCategoriesFlatted(ctx, userId, true)
+				.stream()
+				.filter(cat -> cat.getParentId() == null)
+				.toList();
+	}
 
-        c.setSubCategories(
-                Optional.ofNullable(categoriesByParentId.get(rec.getId()))
-                        .stream()
-                        .flatMap(Collection::stream)
-                        .map(child -> mapRecursively(categoriesByParentId, child))
-                        .collect(Collectors.toList())
-        );
+	private Category mapRecursively(Map<UUID, List<VCategoriesWithUsageCountRecord>> categoriesByParentId, VCategoriesWithUsageCountRecord rec) {
+		var c = mapFlat(rec);
 
-        return c;
-    }
+		c.setSubCategories(
+				Optional.ofNullable(categoriesByParentId.get(rec.getId()))
+						.stream()
+						.flatMap(Collection::stream)
+						.map(child -> mapRecursively(categoriesByParentId, child))
+						.toList()
+		);
 
-    private Category mapFlat(VCategoriesWithUsageCountRecord rec) {
-        var c = new Category();
+		return c;
+	}
 
-        c.setId(rec.getId());
-        c.setParentId(rec.getParentCategory());
+	private Category mapFlat(VCategoriesWithUsageCountRecord rec) {
+		var c = new Category();
 
-        c.setName(rec.getName());
-        c.setDescription(rec.getDescription());
+		c.setId(rec.getId());
+		c.setParentId(rec.getParentCategory());
 
-        c.setSubCategories(null);
+		c.setName(rec.getName());
+		c.setDescription(rec.getDescription());
 
-        c.setUsageCount(rec.getUseCount());
+		c.setSubCategories(null);
 
-        c.setCreatedAt(rec.getCreatedAt().toZonedDateTime());
-        c.setUpdatedAt(rec.getLastUpdatedAt().toZonedDateTime());
+		c.setUsageCount(rec.getUseCount());
 
-        return c;
-    }
+		c.setCreatedAt(rec.getCreatedAt().toZonedDateTime());
+		c.setUpdatedAt(rec.getLastUpdatedAt().toZonedDateTime());
+
+		return c;
+	}
 }

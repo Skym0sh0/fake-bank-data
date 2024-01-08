@@ -4,6 +4,7 @@ import de.sky.common.database.DatabaseConnection;
 import de.sky.regular.income.api.Category;
 import de.sky.regular.income.dao.CategoryDAO;
 import de.sky.regular.income.database.DatabaseSupplier;
+import de.sky.regular.income.users.UserProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,14 +22,15 @@ public class CategorySuggester {
 
     private final DatabaseConnection db;
     private final CategoryDAO dao;
+    private final UserProvider user;
 
     @Autowired
-    public CategorySuggester(DatabaseSupplier supplier, CategoryDAO dao) {
-        this(supplier.getDatabase(), dao);
+    public CategorySuggester(DatabaseSupplier supplier, CategoryDAO dao, UserProvider user) {
+        this(supplier.getDatabase(), dao, user);
     }
 
     public CategoryBatchSuggester openForBatchSuggestion() {
-        var allCategories = db.transactionWithResult(ctx -> dao.fetchAllCategoriesFlatted(ctx, false));
+        var allCategories = db.transactionWithResult(ctx -> dao.fetchAllCategoriesFlatted(ctx, user.getCurrentUser(ctx).getId(), false));
 
         log.info("Fetched {} categories for batch suggestion...", allCategories.size());
 

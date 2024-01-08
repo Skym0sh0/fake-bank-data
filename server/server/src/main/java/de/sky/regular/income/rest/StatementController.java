@@ -9,6 +9,8 @@ import de.sky.regular.income.dao.CategoryDAO;
 import de.sky.regular.income.dao.StatementDAO;
 import de.sky.regular.income.database.DatabaseSupplier;
 import de.sky.regular.income.importing.excel.ExcelImporter;
+import de.sky.regular.income.users.UserProvider;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
@@ -23,23 +25,19 @@ import static de.sky.regular.income.rest.Validations.requireNonNullAndEquality;
 
 @RestController
 @RequestMapping("/statements")
+@RequiredArgsConstructor
 public class StatementController {
     private final DatabaseConnection db;
     private final StatementDAO statementDAO;
     private final CategoryDAO categoryDAO;
+    private final UserProvider user;
 
     private final ExcelImporter importer;
 
-    public StatementController(DatabaseConnection db, StatementDAO statementDAO, CategoryDAO categoryDAO, ExcelImporter importer) {
-        this.db = Objects.requireNonNull(db);
-        this.statementDAO = Objects.requireNonNull(statementDAO);
-        this.categoryDAO = Objects.requireNonNull(categoryDAO);
-        this.importer = Objects.requireNonNull(importer);
-    }
 
     @Autowired
-    public StatementController(DatabaseSupplier supplier, StatementDAO statementDAO, CategoryDAO categoryDAO, ExcelImporter importer) {
-        this(supplier.getDatabase(), statementDAO, categoryDAO, importer);
+    public StatementController(DatabaseSupplier supplier, StatementDAO statementDAO, CategoryDAO categoryDAO, ExcelImporter importer, UserProvider user) {
+        this(supplier.getDatabase(), statementDAO, categoryDAO, user, importer);
     }
 
     @PostMapping("{id}")
@@ -101,7 +99,7 @@ public class StatementController {
 
             var result = importer.prepareExcelImport(file);
 
-            result.categories.forEach(cat -> categoryDAO.createCategory(ctx, null, cat));
+            result.categories.forEach(cat -> categoryDAO.createCategory(ctx, user.getCurrentUser(ctx).getId(), null, cat));
             result.statements.forEach(stmt -> this.statementDAO.createStatement(ctx, stmt.getId(), stmt));
         });
     }
