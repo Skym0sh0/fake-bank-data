@@ -5,7 +5,8 @@ import {
     denormalizeStatement,
     denormalizeTransaction,
     denormalizeTurnoverImport,
-    denormalizeTurnoverPreview
+    denormalizeTurnoverPreview,
+    denormalizeUser
 } from "@/util/Normalizer";
 import {userService} from '@/auth/auth-header';
 
@@ -61,14 +62,25 @@ class RegularIncomeAPI {
         return {
             registerUser(user) {
                 return ref.getClient({})
-                    .post("user/register", {username: user.username, password: user.password})
-                    .then();
+                    .post("user/register", user)
+                    .then(res => denormalizeUser(res.data));
             },
 
             login(username, password) {
                 return ref.getClient(authHeader({username: username, password: password}))
                     .get("auth/login")
-                    .then();
+                    .then(res => denormalizeUser(res.data));
+            },
+
+            updateUser(id, user) {
+                return ref.getClient()
+                    .patch(`user/${id}/details`, user)
+                    .then(res => denormalizeUser(res.data));
+            },
+
+            deleteUser(id) {
+                return ref.getClient()
+                    .delete(`user/${id}`);
             },
         }
     }

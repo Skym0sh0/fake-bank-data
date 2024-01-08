@@ -1,3 +1,15 @@
+export function denormalizeUser(u) {
+    if (!u)
+        return null
+
+    return {
+        id: u.id,
+        username: u.username,
+        firstname: u.firstname,
+        lastname: u.lastname,
+    }
+}
+
 export function normalizeTransaction(t) {
     if (!t)
         return null

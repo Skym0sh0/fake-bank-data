@@ -19,13 +19,8 @@ function initUser() {
     userReference.user = JSON.parse(userJson)
 }
 
-function login(username, password) {
-    const user = {
-        username: username,
-        password: password,
-    }
-
-    setUser(user);
+function login(user, password) {
+    setUser({...user, password: password});
 }
 
 function logout() {

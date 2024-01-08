@@ -94,15 +94,16 @@ export default {
             this.isLoading = true;
 
             api.getAuth().login(this.username, this.password)
-                .then(() => {
-                    userService.login(this.username, this.password);
+                .then((user) => {
+                        userService.login(user, this.password);
 
-                    this.$router.replace({
-                        path: this.$route.query.returnUrl || '/'
-                    })
+                        this.$router.replace({
+                            path: this.$route.query.returnUrl || '/'
+                        })
 
-                    // location.reload();
-                })
+                        // location.reload();
+                    }
+                )
                 .catch(e => this.errorMessage = e)
                 .finally(() => this.isLoading = false)
         },

@@ -8,6 +8,7 @@ import TurnoversDetail from "./components/turnovers/TurnoversDetail";
 import {userService} from "@/auth/auth-header";
 import LoginPage from "@/components/login/LoginPage.vue";
 import RegisterPage from "@/components/login/RegisterPage.vue";
+import UserDetailsPage from "@/components/login/UserDetailsPage.vue";
 
 Vue.use(Router)
 
@@ -22,6 +23,11 @@ let router = new Router({
             path: '/login',
             name: 'login',
             component: LoginPage,
+        },
+        {
+            path: '/user-details',
+            name: 'user-details',
+            component: UserDetailsPage,
         },
         {
             path: '/register',
