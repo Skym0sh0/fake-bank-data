@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -49,6 +50,7 @@ public class DKBTurnoverCsvParser implements TurnoverParser {
         result.forEach(r -> log.info("  --> {}", r));
 
         return result.stream()
+                .filter(r -> !Objects.equals(r.getType(), "Abschluss"))
                 .map(DKBRecord::toTurnOverRecord)
                 .toList();
     }
