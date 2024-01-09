@@ -10,7 +10,6 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.List;
@@ -21,12 +20,6 @@ public class VRBankTurnoverCsvParser implements TurnoverParser {
     @Override
     public TurnoverImportFormat getSupportedFormat() {
         return TurnoverImportFormat.VR_BANK_CSV;
-    }
-
-    public List<TurnoverRecord> parseCsv(String csv) throws Exception {
-        try (var is = new ByteArrayInputStream(csv.getBytes())) {
-            return parseCsv(is);
-        }
     }
 
     public List<TurnoverRecord> parseCsv(InputStream is) {
