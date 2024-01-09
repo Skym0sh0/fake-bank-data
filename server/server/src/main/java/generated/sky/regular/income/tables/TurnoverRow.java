@@ -88,7 +88,7 @@ public class TurnoverRow extends TableImpl<TurnoverRowRecord> {
     /**
      * The column <code>REGULAR_INCOME.turnover_row.suggested_category</code>.
      */
-    public final TableField<TurnoverRowRecord, String> SUGGESTED_CATEGORY = createField(DSL.name("suggested_category"), SQLDataType.CLOB.nullable(false), this, "");
+    public final TableField<TurnoverRowRecord, String> SUGGESTED_CATEGORY = createField(DSL.name("suggested_category"), SQLDataType.CLOB, this, "");
 
     /**
      * The column <code>REGULAR_INCOME.turnover_row.recipient</code>.
