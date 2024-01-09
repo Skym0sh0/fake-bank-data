@@ -10,7 +10,11 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -24,35 +28,52 @@ public class DKBTurnoverCsvParser implements TurnoverParser {
     }
 
     @Override
-    public List<TurnoverRecord> parseCsv(InputStream is) throws Exception {
-        log.info("Preparing CSV parser...");
-        var proc = new BeanListProcessor<>(DKBRecord.class, 1000);
+    public List<TurnoverRecord> parseCsv(InputStream rowIs) throws Exception {
+        try (var is = skipBeginningRubbish(rowIs)) {
+            log.info("Preparing CSV parser...");
+            var proc = new BeanListProcessor<>(DKBRecord.class, 1000);
 
-        var settings = new CsvParserSettings();
-        settings.setHeaderExtractionEnabled(true);
-        settings.setProcessor(proc);
-        settings.setDelimiterDetectionEnabled(true);
-        settings.setLineSeparatorDetectionEnabled(true);
-        settings.setQuoteDetectionEnabled(true);
-        settings.setNumberOfRowsToSkip(7);
+            var settings = new CsvParserSettings();
+            settings.setHeaderExtractionEnabled(true);
+            settings.setProcessor(proc);
+            settings.setDelimiterDetectionEnabled(true);
+            settings.setLineSeparatorDetectionEnabled(true);
+            settings.setQuoteDetectionEnabled(true);
 
-        var parser = new CsvParser(settings);
+            var parser = new CsvParser(settings);
 
-        log.info("Parsing CSV...");
+            log.info("Parsing CSV...");
 
-        parser.parse(is);
+            parser.parse(is);
 
-        log.info("CSV parsed successfully");
+            log.info("CSV parsed successfully");
 
-        var result = proc.getBeans();
+            var result = proc.getBeans();
 
-        log.info("Found {} records", result.size());
-        result.forEach(r -> log.info("  --> {}", r));
+            log.info("Found {} records", result.size());
 
-        return result.stream()
-                .filter(r -> !Objects.equals(r.getType(), "Abschluss"))
-                .map(DKBRecord::toTurnOverRecord)
-                .toList();
+            return result.stream()
+                    .filter(r -> !Objects.equals(r.getType(), "Abschluss"))
+                    .map(DKBRecord::toTurnOverRecord)
+                    .toList();
+        }
+    }
+
+    private Reader skipBeginningRubbish(InputStream is) throws Exception {
+        var buffered = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8), 8192);
+
+        while (true) {
+            buffered.mark(1024);
+
+            var line = buffered.readLine();
+            if (line == null)
+                return buffered;
+
+            if (line.contains("Buchungstag") && line.contains("Wertstellung")) {
+                buffered.reset();
+                return buffered;
+            }
+        }
     }
 
     @Data

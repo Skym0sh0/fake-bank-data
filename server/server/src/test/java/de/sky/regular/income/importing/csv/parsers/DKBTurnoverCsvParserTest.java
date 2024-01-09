@@ -1,6 +1,10 @@
 package de.sky.regular.income.importing.csv.parsers;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,6 +34,20 @@ class DKBTurnoverCsvParserTest {
     @Test
     void checkThatParsingWorks() throws Exception {
         var result = parser.parseCsv(EXAMPLE_RAW_DATA);
+
+        assertThat(result)
+                .isNotNull()
+                .hasSize(7);
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 2, 3, 4, 5, 6, 7, 8})
+    void whenHeaderIsDifferent(int skipFirstLines) throws Exception {
+        var data = EXAMPLE_RAW_DATA.lines()
+                .skip(skipFirstLines)
+                .collect(Collectors.joining("\n"));
+
+        var result = parser.parseCsv(data);
 
         assertThat(result)
                 .isNotNull()
