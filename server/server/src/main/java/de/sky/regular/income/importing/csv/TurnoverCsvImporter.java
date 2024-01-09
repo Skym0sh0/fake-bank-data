@@ -5,6 +5,7 @@ import de.sky.common.database.DatabaseConnection;
 import de.sky.regular.income.api.detail.CreatedMetaInformation;
 import de.sky.regular.income.api.turnovers.*;
 import de.sky.regular.income.database.DatabaseSupplier;
+import de.sky.regular.income.importing.csv.parsers.TurnoverRecord;
 import de.sky.regular.income.users.UserProvider;
 import generated.sky.regular.income.tables.records.TurnoverFileImportRecord;
 import generated.sky.regular.income.tables.records.TurnoverRowRecord;
@@ -171,22 +172,22 @@ public class TurnoverCsvImporter {
         }
     }
 
-    private boolean filterInvalidRows(TurnoverCsvParser.TurnoverRecord rec) {
+    private boolean filterInvalidRows(TurnoverRecord rec) {
         if (rec.getDate() == null || rec.getAmountInCents() == 0)
             return false;
         return true;
     }
 
-    private Set<String> findExistentRows(List<TurnoverCsvParser.TurnoverRecord> recs) {
+    private Set<String> findExistentRows(List<TurnoverRecord> recs) {
         var minDate = recs.stream()
                 .filter(Objects::nonNull)
-                .map(TurnoverCsvParser.TurnoverRecord::getDate)
+                .map(TurnoverRecord::getDate)
                 .filter(Objects::nonNull)
                 .min(Comparator.naturalOrder())
                 .orElse(LocalDate.of(1500, 1, 1));
         var maxDate = recs.stream()
                 .filter(Objects::nonNull)
-                .map(TurnoverCsvParser.TurnoverRecord::getDate)
+                .map(TurnoverRecord::getDate)
                 .filter(Objects::nonNull)
                 .max(Comparator.naturalOrder())
                 .orElse(LocalDate.of(2500, 12, 31));
@@ -204,18 +205,18 @@ public class TurnoverCsvImporter {
         );
     }
 
-    private TurnoverRowPreview enrichAndMap(CategorySuggester.CategoryBatchSuggester categorySuggester, Set<String> alreadyExistentRowChecksums, TurnoverCsvParser.TurnoverRecord rec) {
+    private TurnoverRowPreview enrichAndMap(CategorySuggester.CategoryBatchSuggester categorySuggester, Set<String> alreadyExistentRowChecksums, TurnoverRecord rec) {
         String checksum = checksummer.computeChecksum(rec);
 
         return TurnoverRowPreview.builder()
                 .date(rec.getDate())
                 .amountInCents(rec.getAmountInCents())
                 .description(rec.getDescription())
-                .suggestedCategory(rec.getCategory())
+                .suggestedCategory(rec.getSuggestedCategory())
                 .recipient(rec.getRecipient())
                 .checksum(checksum)
                 .categoryId(
-                        categorySuggester.findCategorySuggestion(rec.getDescription(), rec.getCategory())
+                        categorySuggester.findCategorySuggestion(rec.getDescription(), rec.getSuggestedCategory())
                                 .map(CreatedMetaInformation::getId)
                                 .orElse(null)
                 )

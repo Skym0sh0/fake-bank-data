@@ -1,5 +1,6 @@
 package de.sky.regular.income.importing.csv;
 
+import de.sky.regular.income.importing.csv.parsers.TurnoverRecord;
 import lombok.SneakyThrows;
 import org.apache.commons.codec.binary.Hex;
 import org.springframework.stereotype.Service;
@@ -9,7 +10,7 @@ import java.security.MessageDigest;
 import java.util.function.Function;
 
 @Service
-public class ChecksumComputer implements Function<TurnoverCsvParser.TurnoverRecord, String> {
+public class ChecksumComputer implements Function<TurnoverRecord, String> {
     private final MessageDigest digester;
 
     @SneakyThrows
@@ -18,11 +19,11 @@ public class ChecksumComputer implements Function<TurnoverCsvParser.TurnoverReco
     }
 
     @Override
-    public String apply(TurnoverCsvParser.TurnoverRecord rec) {
+    public String apply(TurnoverRecord rec) {
         return computeChecksum(rec);
     }
 
-    public String computeChecksum(TurnoverCsvParser.TurnoverRecord rec) {
+    public String computeChecksum(TurnoverRecord rec) {
         String sb = String.valueOf(rec.getDate()) +
                 rec.getAmountInCents() +
                 rec.getDescription() +
