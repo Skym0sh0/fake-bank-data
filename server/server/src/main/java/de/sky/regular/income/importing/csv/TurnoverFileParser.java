@@ -2,7 +2,6 @@ package de.sky.regular.income.importing.csv;
 
 import com.google.common.base.Stopwatch;
 import de.sky.regular.income.api.turnovers.TurnoverImportFormat;
-import de.sky.regular.income.importing.csv.parsers.VRBankTurnoverCsvParser;
 import de.sky.regular.income.importing.csv.parsers.TurnoverParser;
 import de.sky.regular.income.importing.csv.parsers.TurnoverRecord;
 import lombok.SneakyThrows;
@@ -33,8 +32,8 @@ public class TurnoverFileParser {
     }
 
     @Autowired
-    public TurnoverFileParser(VRBankTurnoverCsvParser csvParser) {
-        this(List.of(csvParser));
+    public TurnoverFileParser(TurnoverParser... parsers) {
+        this(List.of(parsers));
     }
 
     @SneakyThrows
