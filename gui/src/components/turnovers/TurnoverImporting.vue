@@ -63,12 +63,13 @@
                     <v-row>
                         <v-col :cols="4">
                             <b-form-select v-model="selectedFileType"
-                                           :options="supportedFileTypes"/>
+                                           :options="supportedFileTypes"
+                                           :state="!$v.selectedFileType.$invalid"/>
                         </v-col>
                         <v-col>
                             <b-form-file id="general-file-import-file"
                                          v-model="fileSelection"
-                                         :disabled="isUploading"
+                                         :disabled="isUploading || $v.selectedFileType.$invalid"
                                          :multiple="false"
                                          :state="!$v.fileSelection.$invalid"
                                          placeholder="Select file to import"
@@ -83,8 +84,8 @@
                 <b-card v-if="isReadilyLoaded" id="preview-card"
                         body-class="p-2">
                     <b-card-header class="d-flex justify-content-between py-2" id="preview-card-header">
-                        <h6>{{ fileSelection.name }}</h6>
-                        <h6>{{ selectedFileType }}</h6>
+                        <h6>{{ parsedPreview.filename }}</h6>
+                        <h6>{{ parsedPreview.format }}</h6>
                     </b-card-header>
 
                     <b-card-body id="preview-card-body" class="p-2">
@@ -215,6 +216,7 @@ export default {
         },
         reset() {
             this.categories = null;
+            this.selectedFileType = null;
             this.fileSelection = null;
             this.parsedPreview = null;
             this.previewedData = null;
@@ -252,7 +254,6 @@ export default {
             .getSupportedPreviewFormats()
             .then(res => {
                 this.supportedFileTypes = res
-                this.selectedFileType = this.supportedFileTypes[0] || null
             })
             .finally(() => this.isUploading = false)
     }
