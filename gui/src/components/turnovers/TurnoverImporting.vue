@@ -14,7 +14,7 @@
                  @hidden="reset"
                  @hide="checkToHide"
                  body-class="p-0">
-            <template v-slot:modal-footer>
+            <template v-if="parsedPreview" v-slot:modal-footer>
                 <div class="w-100" style="display: flex;">
                     <b-container class="p-0">
                         <b-row>
@@ -58,25 +58,36 @@
 
             <waiting-indicator :is-loading="isUploading"/>
 
-            <div v-if="!fileSelection">
-                <b-container>
-                    <v-row>
-                        <v-col :cols="4">
+            <div v-if="!parsedPreview">
+                <b-container :fluid="true" class="p-3">
+                    <b-row>
+                        <b-col :sm="4" :md="4">
                             <b-form-select v-model="selectedFileType"
                                            :options="supportedFileTypes"
                                            :state="!$v.selectedFileType.$invalid"/>
-                        </v-col>
-                        <v-col>
+                        </b-col>
+                        <b-col :sm="6" :md="7">
                             <b-form-file id="general-file-import-file"
                                          v-model="fileSelection"
-                                         :disabled="isUploading || $v.selectedFileType.$invalid"
+                                         :disabled="isUploading"
                                          :multiple="false"
                                          :state="!$v.fileSelection.$invalid"
                                          placeholder="Select file to import"
                                          drop-placeholder="Drop file here to import"
                                          accept=".csv"/>
-                        </v-col>
-                    </v-row>
+                        </b-col>
+                        <b-col :sm="2" :md="1">
+                            <b-btn @click="onStartPreview"
+                                   :disabled="$v.fileSelection.$invalid || $v.selectedFileType.$invalid"
+                                   variant="primary">
+                                Preview
+                            </b-btn>
+                        </b-col>
+                    </b-row>
+
+                    <b-row v-if="fileSelection">
+                        <raw-csv-file-table :file="fileSelection"/>
+                    </b-row>
                 </b-container>
             </div>
 
@@ -101,15 +112,26 @@
 
 <script>
 import {required} from 'vuelidate/dist/validators.min'
-import {api} from "../../api/RegularIncomeAPI";
+import {api} from "@/api/RegularIncomeAPI";
 import TurnoverPreviewTable from "@/components/turnovers/TurnoverPreviewTable.vue";
 import WaitingIndicator from "@/components/misc/WaitingIndicator.vue";
 import {normalizeCategory} from "@/util/Normalizer";
+import RawCsvFileTable from "@/components/turnovers/RawCsvFileTable.vue";
 
+function getBankFormatName(frmt) {
+    const BANK_FORMAT_NAMES = {
+        "VR_BANK_CSV": "CSV VR-Bank",
+        "DKB": "CSV DKB",
+        "PAYPAL": "CSV PayPal"
+    };
+
+    return BANK_FORMAT_NAMES[frmt] || frmt;
+}
 
 export default {
     name: "TurnoverImporting",
     components: {
+        RawCsvFileTable,
         WaitingIndicator,
         TurnoverPreviewTable
     },
@@ -164,6 +186,15 @@ export default {
                 .then(res => {
                     this.categories = res
                 })
+        },
+        onStartPreview() {
+            this.isUploading = true;
+
+            Promise.all([this.loadCategories(), this.doPreviewRequest()])
+                .catch(e => {
+                    this.errorMessage = e.response.data;
+                })
+                .finally(() => this.isUploading = false)
         },
         doPreviewRequest() {
             return api.getTurnovers()
@@ -234,26 +265,21 @@ export default {
             }
         },
     },
-    watch: {
-        fileSelection(newFile/*, oldFile*/) {
-            if (newFile) {
-                this.isUploading = true;
-
-                Promise.all([this.loadCategories(), this.doPreviewRequest()])
-                    .catch(e => {
-                        this.errorMessage = e.response.data;
-                    })
-                    .finally(() => this.isUploading = false)
-            }
-        },
-    },
     mounted() {
         this.isUploading = true;
 
         api.getTurnovers()
             .getSupportedPreviewFormats()
             .then(res => {
-                this.supportedFileTypes = res
+                this.supportedFileTypes = [
+                    {
+                        value: null,
+                        text: "Dateiformat",
+                    },
+                    ...res.map(b => ({
+                        value: b,
+                        text: getBankFormatName(b)
+                    }))];
             })
             .finally(() => this.isUploading = false)
     }

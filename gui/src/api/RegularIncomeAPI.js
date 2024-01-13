@@ -157,6 +157,22 @@ class RegularIncomeAPI {
                     .then(res => res.data)
             },
 
+            rawCsvTablePreview(file) {
+                const formData = new FormData()
+                formData.append('file', file)
+
+                return ref.getClient().post(
+                    `turnover-import/preview/csv`,
+                    formData,
+                    {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        },
+                        params: {},
+                    },
+                ).then(res => res.data);
+            },
+
             previewTurnoverImport(type, file) {
                 const formData = new FormData()
                 formData.append('file', file)
