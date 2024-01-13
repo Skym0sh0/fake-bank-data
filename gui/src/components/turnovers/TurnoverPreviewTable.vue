@@ -52,7 +52,7 @@
         </template>
 
         <template v-slot:cell(suggestedCategory)="row">
-            <b-button v-if="!categoriesByName[row.item.suggestedCategory]"
+            <b-button v-if="row.item.suggestedCategory && !categoriesByName[row.item.suggestedCategory]"
                       size="sm"
                       @click="onCreateSuggestedCategory(row.item.suggestedCategory)"
                       :disabled="!row.item.importable"

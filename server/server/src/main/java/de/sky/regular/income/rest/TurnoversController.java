@@ -66,7 +66,7 @@ public class TurnoversController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteTurnoverImport(@PathVariable UUID id) {
+    public void deleteTurnoverImport(@PathVariable("id") UUID id) {
         importer.deleteImport(id);
     }
 }

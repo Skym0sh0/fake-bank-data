@@ -221,7 +221,7 @@ public class TurnoverFileImport extends TableImpl<TurnoverFileImportRecord> {
     @Override
     public List<Check<TurnoverFileImportRecord>> getChecks() {
         return Arrays.asList(
-            Internal.createCheck(this, DSL.name("turnover_file_import_turnover_file_format_check"), "((turnover_file_format = 'VR_BANK_CSV'::text))", true)
+            Internal.createCheck(this, DSL.name("turnover_file_import_turnover_file_format_check"), "((turnover_file_format = ANY (ARRAY['VR_BANK_CSV'::text, 'DKB'::text, 'PAYPAL'::text])))", true)
         );
     }
 

@@ -2,13 +2,14 @@ package de.sky.regular.income.importing.csv;
 
 import com.google.common.base.Stopwatch;
 import de.sky.regular.income.api.turnovers.TurnoverImportFormat;
+import de.sky.regular.income.importing.csv.parsers.TurnoverParser;
+import de.sky.regular.income.importing.csv.parsers.TurnoverRecord;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -31,12 +32,12 @@ public class TurnoverFileParser {
     }
 
     @Autowired
-    public TurnoverFileParser(TurnoverCsvParser csvParser) {
-        this(List.of(csvParser));
+    public TurnoverFileParser(TurnoverParser... parsers) {
+        this(List.of(parsers));
     }
 
     @SneakyThrows
-    public List<TurnoverCsvParser.TurnoverRecord> parseCsv(TurnoverImportFormat format, InputStream is) {
+    public List<TurnoverRecord> parseCsv(TurnoverImportFormat format, InputStream is) {
         log.info("Parsing file...");
 
         var parser = parsers.get(format);

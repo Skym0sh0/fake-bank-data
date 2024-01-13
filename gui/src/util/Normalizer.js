@@ -118,6 +118,7 @@ export function denormalizeTurnoverImport(turnoverImport) {
 export function denormalizeTurnoverPreview(turnover) {
     return {
         filename: turnover.filename,
+        format: turnover.format,
         uploadTime: turnover.uploadTime,
         rows: (turnover.rows || []).map(denormalizeTurnoverPreviewRow)
     };
