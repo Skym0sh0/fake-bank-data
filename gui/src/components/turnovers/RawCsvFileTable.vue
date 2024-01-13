@@ -34,6 +34,10 @@ export default {
             type: File,
             required: true,
         },
+        encoding: {
+            type: String,
+            required: false,
+        },
     },
     data() {
         return {
@@ -48,9 +52,8 @@ export default {
                 return;
 
             api.getTurnovers()
-                .rawCsvTablePreview(this.file)
+                .rawCsvTablePreview(this.file, this.encoding)
                 .then(data => {
-                    console.log(data)
                     return this.parsedData = data;
                 })
         },
@@ -78,6 +81,9 @@ export default {
     },
     watch: {
         file() {
+            this.triggerParsing();
+        },
+        encoding() {
             this.triggerParsing();
         },
     },

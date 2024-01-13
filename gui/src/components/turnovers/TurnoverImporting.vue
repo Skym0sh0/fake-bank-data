@@ -61,11 +61,12 @@
             <div v-if="!parsedPreview">
                 <b-container :fluid="true" class="p-3">
                     <b-row>
-                        <b-col :sm="4" :md="4">
+                        <b-col :sm="2" :md="2">
                             <b-form-select v-model="selectedFileType"
                                            :options="supportedFileTypes"
                                            :state="!$v.selectedFileType.$invalid"/>
                         </b-col>
+
                         <b-col :sm="6" :md="7">
                             <b-form-file id="general-file-import-file"
                                          v-model="fileSelection"
@@ -76,9 +77,14 @@
                                          drop-placeholder="Drop file here to import"
                                          accept=".csv"/>
                         </b-col>
+                        <b-col :sm="2" :md="2">
+                            <b-form-select v-model="selectedFileEncoding"
+                                           :options="supportedFileEncodings"
+                                           :state="!$v.selectedFileEncoding.$invalid"/>
+                        </b-col>
                         <b-col :sm="2" :md="1">
                             <b-btn @click="onStartPreview"
-                                   :disabled="$v.fileSelection.$invalid || $v.selectedFileType.$invalid"
+                                   :disabled="$v.$invalid"
                                    variant="primary">
                                 Preview
                             </b-btn>
@@ -86,7 +92,8 @@
                     </b-row>
 
                     <b-row v-if="fileSelection">
-                        <raw-csv-file-table :file="fileSelection"/>
+                        <raw-csv-file-table :file="fileSelection"
+                                            :encoding="selectedFileEncoding"/>
                     </b-row>
                 </b-container>
             </div>
@@ -139,9 +146,14 @@ export default {
         return {
             isUploading: false,
             categories: null,
+
             supportedFileTypes: [],
+            supportedFileEncodings: ["UTF-8", "Windows-1250", "UTF-16", "UTF-32"],
+
             selectedFileType: null,
+            selectedFileEncoding: "UTF-8",
             fileSelection: null,
+
             parsedPreview: null,
             previewedData: null,
             errorMessage: null
@@ -149,6 +161,9 @@ export default {
     },
     validations: {
         selectedFileType: {
+            required,
+        },
+        selectedFileEncoding: {
             required,
         },
         fileSelection: {
@@ -198,7 +213,7 @@ export default {
         },
         doPreviewRequest() {
             return api.getTurnovers()
-                .previewTurnoverImport(this.selectedFileType, this.fileSelection)
+                .previewTurnoverImport(this.selectedFileType, this.fileSelection, this.selectedFileEncoding)
                 .then(preview => {
                     this.parsedPreview = preview;
                     this.previewedData = (this.parsedPreview.rows || [])
@@ -215,7 +230,7 @@ export default {
             this.isUploading = true;
 
             api.getTurnovers()
-                .createTurnoverImport(this.fileSelection, this.selectedFileType, this.importableRows)
+                .createTurnoverImport(this.fileSelection, this.selectedFileType, this.selectedFileEncoding, this.importableRows)
                 .then(() => {
                     this.$emit("uploadSucceeded")
                     this.$refs["file-upload-modal"].hide();

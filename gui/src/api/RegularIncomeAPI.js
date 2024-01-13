@@ -157,7 +157,7 @@ class RegularIncomeAPI {
                     .then(res => res.data)
             },
 
-            rawCsvTablePreview(file) {
+            rawCsvTablePreview(file, encoding) {
                 const formData = new FormData()
                 formData.append('file', file)
 
@@ -168,12 +168,14 @@ class RegularIncomeAPI {
                         headers: {
                             'Content-Type': 'multipart/form-data'
                         },
-                        params: {},
+                        params: {
+                            encoding: encoding,
+                        },
                     },
                 ).then(res => res.data);
             },
 
-            previewTurnoverImport(type, file) {
+            previewTurnoverImport(type, file, encoding) {
                 const formData = new FormData()
                 formData.append('file', file)
 
@@ -186,16 +188,18 @@ class RegularIncomeAPI {
                         },
                         params: {
                             format: type,
+                            encoding: encoding
                         },
                     },
                 ).then(res => denormalizeTurnoverPreview(res.data));
             },
 
-            createTurnoverImport(file, format, data) {
+            createTurnoverImport(file, format, encoding, data) {
                 const formData = new FormData()
                 formData.append('file', file)
                 formData.append('data', new Blob([JSON.stringify({
                     format: format,
+                    encoding: encoding,
                     rows: data,
                 })], {type: "application/json"}))
 
