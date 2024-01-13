@@ -111,6 +111,12 @@ public class TurnoverFileImport extends TableImpl<TurnoverFileImportRecord> {
      */
     public final TableField<TurnoverFileImportRecord, UUID> OWNER_ID = createField(DSL.name("owner_id"), SQLDataType.UUID.nullable(false), this, "");
 
+    /**
+     * The column
+     * <code>REGULAR_INCOME.turnover_file_import.file_encoding</code>.
+     */
+    public final TableField<TurnoverFileImportRecord, String> FILE_ENCODING = createField(DSL.name("file_encoding"), SQLDataType.CLOB.nullable(false), this, "");
+
     private TurnoverFileImport(Name alias, Table<TurnoverFileImportRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }

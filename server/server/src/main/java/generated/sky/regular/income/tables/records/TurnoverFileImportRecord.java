@@ -160,6 +160,23 @@ public class TurnoverFileImportRecord extends UpdatableRecordImpl<TurnoverFileIm
         return (UUID) get(8);
     }
 
+    /**
+     * Setter for
+     * <code>REGULAR_INCOME.turnover_file_import.file_encoding</code>.
+     */
+    public TurnoverFileImportRecord setFileEncoding(String value) {
+        set(9, value);
+        return this;
+    }
+
+    /**
+     * Getter for
+     * <code>REGULAR_INCOME.turnover_file_import.file_encoding</code>.
+     */
+    public String getFileEncoding() {
+        return (String) get(9);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
@@ -183,7 +200,7 @@ public class TurnoverFileImportRecord extends UpdatableRecordImpl<TurnoverFileIm
     /**
      * Create a detached, initialised TurnoverFileImportRecord
      */
-    public TurnoverFileImportRecord(UUID id, OffsetDateTime importedAt, String filename, Long fileSize, String fileContentType, byte[] fileContent, String checksum, String turnoverFileFormat, UUID ownerId) {
+    public TurnoverFileImportRecord(UUID id, OffsetDateTime importedAt, String filename, Long fileSize, String fileContentType, byte[] fileContent, String checksum, String turnoverFileFormat, UUID ownerId, String fileEncoding) {
         super(TurnoverFileImport.TURNOVER_FILE_IMPORT);
 
         setId(id);
@@ -195,6 +212,7 @@ public class TurnoverFileImportRecord extends UpdatableRecordImpl<TurnoverFileIm
         setChecksum(checksum);
         setTurnoverFileFormat(turnoverFileFormat);
         setOwnerId(ownerId);
+        setFileEncoding(fileEncoding);
         resetChangedOnNotNull();
     }
 }
