@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -50,10 +51,21 @@ public class TurnoverFileParser {
 
         var rows = parser.parseAll(is);
 
+        var maxColumns = rows.stream().mapToInt(s -> s.length).max().orElse(0);
+
+        var processedRows = rows.stream()
+                .map(row -> {
+                    if (row.length == maxColumns)
+                        return row;
+
+                    return Arrays.copyOf(row, maxColumns);
+                })
+                .toList();
+
         return new RawCsvTable(
                 rows.size(),
-                rows.stream().mapToInt(s -> s.length).max().orElse(0),
-                rows
+                maxColumns,
+                processedRows
         );
     }
 

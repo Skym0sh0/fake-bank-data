@@ -2,6 +2,8 @@ package de.sky.regular.income.importing.csv.parsers;
 
 import de.sky.regular.income.api.turnovers.RawCsvTable;
 import de.sky.regular.income.importing.csv.TurnoverFileParser;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -50,9 +52,9 @@ class TurnoverFileParserTest {
                 });
     }
 
-    @Test
-    void checkUnregularCsv() {
-        var csv = """
+    @Nested
+    class WithUnregularCsv {
+        private final String csv = """
                 x|x
                                 
                 a|b|c|d|e
@@ -62,19 +64,42 @@ class TurnoverFileParserTest {
                                 
                 """;
 
-        var result = parser.parseRawCsv(new ByteArrayInputStream(csv.getBytes()));
+        @Test
+        void checkUnregularCsv() {
+            var result = parser.parseRawCsv(new ByteArrayInputStream(csv.getBytes()));
 
-        assertThat(result)
-                .as("CSV is: %n%s", csv)
-                .returns(4, RawCsvTable::getRows)
-                .returns(7, RawCsvTable::getColumns)
-                .extracting(RawCsvTable::getData, as(list(String[].class)))
-                .containsExactly(
-                        new String[]{"x", "x"},
-                        new String[]{"a", "b", "c", "d", "e"},
-                        new String[]{"1", "2"},
-                        new String[]{"1", "2", "3", "4", "5", "6", "7"}
-                )
-                .doesNotContain(new String[]{});
+            assertThat(result)
+                    .as("CSV is: %n%s", csv)
+                    .returns(4, RawCsvTable::getRows)
+                    .returns(7, RawCsvTable::getColumns)
+                    .extracting(RawCsvTable::getData, as(list(String[].class)))
+                    .containsExactly(
+                            new String[]{"x", "x", null, null, null, null, null},
+                            new String[]{"a", "b", "c", "d", "e", null, null},
+                            new String[]{"1", "2", null, null, null, null, null},
+                            new String[]{"1", "2", "3", "4", "5", "6", "7"}
+                    )
+                    .doesNotContain(new String[]{});
+        }
+
+        @Test
+        void printAsTable() {
+            var table = parser.parseRawCsv(new ByteArrayInputStream(csv.getBytes()));
+
+            System.out.println("Rows: " + table.getRows() + " Columns: " + table.getColumns());
+            int length = 5;
+
+            table.getData()
+                    .stream()
+                    .map(row -> {
+                        return Arrays.stream(row)
+                                .map(cell -> cell != null ? cell : "")
+                                .map(cell -> StringUtils.abbreviate(cell, length))
+                                .map(cell -> cell + StringUtils.repeat(' ', length))
+                                .map(cell -> cell.substring(0, length))
+                                .collect(Collectors.joining(" | ", "| ", " |"));
+                    })
+                    .forEach(System.out::println);
+        }
     }
 }
