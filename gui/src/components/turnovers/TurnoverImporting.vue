@@ -14,8 +14,8 @@
                  @hidden="reset"
                  @hide="checkToHide"
                  body-class="p-0">
-            <template v-if="parsedPreview" v-slot:modal-footer>
-                <div class="w-100" style="display: flex;">
+            <template v-slot:modal-footer>
+                <div v-if="parsedPreview" class="w-100" style="display: flex;">
                     <b-container class="p-0">
                         <b-row>
                             <b-col class="p-0 px-2">
