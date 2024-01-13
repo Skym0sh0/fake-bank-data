@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.io.StringReader;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,7 +34,7 @@ class DKBTurnoverCsvParserTest {
 
     @Test
     void checkThatParsingWorks() throws Exception {
-        var result = parser.parseCsv(EXAMPLE_RAW_DATA);
+        var result = parser.parseCsv(new StringReader(EXAMPLE_RAW_DATA));
 
         assertThat(result)
                 .isNotNull()
@@ -47,7 +48,7 @@ class DKBTurnoverCsvParserTest {
                 .skip(skipFirstLines)
                 .collect(Collectors.joining("\n"));
 
-        var result = parser.parseCsv(data);
+        var result = parser.parseCsv(new StringReader(data));
 
         assertThat(result)
                 .isNotNull()

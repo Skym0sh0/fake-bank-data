@@ -14,6 +14,7 @@ public class TurnoverImport {
     public UUID id;
     public ZonedDateTime importedAt;
     public TurnoverImportFormat format;
+    public String encoding;
 
     public LocalDate firstTurnover;
     public LocalDate lastTurnover;

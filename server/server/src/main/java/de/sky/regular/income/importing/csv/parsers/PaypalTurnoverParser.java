@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 
-import java.io.InputStream;
+import java.io.Reader;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
@@ -30,7 +30,7 @@ public class PaypalTurnoverParser implements TurnoverParser {
     }
 
     @Override
-    public List<TurnoverRecord> parseCsv(InputStream is) throws Exception {
+    public List<TurnoverRecord> parseCsv(Reader reader) throws Exception {
         log.info("Preparing CSV parser...");
         var proc = new BeanListProcessor<>(PaypalRecord.class, 1000);
 
@@ -44,7 +44,7 @@ public class PaypalTurnoverParser implements TurnoverParser {
 
         log.info("Parsing CSV...");
 
-        parser.parse(is);
+        parser.parse(reader);
 
         log.info("CSV parsed successfully");
 

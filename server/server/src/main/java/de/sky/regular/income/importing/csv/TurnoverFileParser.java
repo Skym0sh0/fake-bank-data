@@ -13,6 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
+import java.io.Reader;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +43,7 @@ public class TurnoverFileParser {
         this(List.of(parsers));
     }
 
-    public RawCsvTable parseRawCsv(InputStream is) {
+    public RawCsvTable parseRawCsv(Reader is) {
         var settings = new CsvParserSettings();
         settings.setHeaderExtractionEnabled(false);
         settings.setDelimiterDetectionEnabled(true);
@@ -70,7 +73,7 @@ public class TurnoverFileParser {
     }
 
     @SneakyThrows
-    public List<TurnoverRecord> parseCsv(TurnoverImportFormat format, InputStream is) {
+    public List<TurnoverRecord> parseCsv(TurnoverImportFormat format, Reader is) {
         log.info("Parsing file...");
 
         var parser = parsers.get(format);

@@ -2,6 +2,8 @@ package de.sky.regular.income.importing.csv.parsers;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.StringReader;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PaypalTurnoverCsvParserTest {
@@ -18,7 +20,7 @@ class PaypalTurnoverCsvParserTest {
 
     @Test
     void checkThatParsingWorks() throws Exception {
-        var result = parser.parseCsv(EXAMPLE_RAW_DATA);
+        var result = parser.parseCsv(new StringReader(EXAMPLE_RAW_DATA));
 
         assertThat(result)
                 .isNotNull()

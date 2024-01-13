@@ -28,8 +28,8 @@ public class DKBTurnoverCsvParser implements TurnoverParser {
     }
 
     @Override
-    public List<TurnoverRecord> parseCsv(InputStream rowIs) throws Exception {
-        try (var is = skipBeginningRubbish(rowIs)) {
+    public List<TurnoverRecord> parseCsv(Reader rawReader) throws Exception {
+        try (var reader = skipBeginningRubbish(rawReader)) {
             log.info("Preparing CSV parser...");
             var proc = new BeanListProcessor<>(DKBRecord.class, 1000);
 
@@ -44,7 +44,7 @@ public class DKBTurnoverCsvParser implements TurnoverParser {
 
             log.info("Parsing CSV...");
 
-            parser.parse(is);
+            parser.parse(reader);
 
             log.info("CSV parsed successfully");
 
@@ -59,8 +59,8 @@ public class DKBTurnoverCsvParser implements TurnoverParser {
         }
     }
 
-    private Reader skipBeginningRubbish(InputStream is) throws Exception {
-        var buffered = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8), 8192);
+    private Reader skipBeginningRubbish(Reader reader) throws Exception {
+        var buffered = new BufferedReader(reader, 8192);
 
         while (true) {
             buffered.mark(1024);

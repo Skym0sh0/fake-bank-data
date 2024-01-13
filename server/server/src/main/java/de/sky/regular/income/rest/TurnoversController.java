@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -31,30 +33,31 @@ public class TurnoversController {
     }
 
     @PostMapping("preview/csv")
-    public RawCsvTable processPreview(@RequestParam("file") MultipartFile file) throws Exception {
+    public RawCsvTable processPreview(@RequestParam("file") MultipartFile file, @RequestParam(value = "encoding", defaultValue = "UTF-8") String encoding) throws Exception {
         log.info("CSV Preview table processing file {} with {} bytes...", file.getOriginalFilename(), file.getSize());
 
         var sw = Stopwatch.createStarted();
 
-        try (var is = new BufferedInputStream(file.getInputStream())) {
-            return importer.parseCsvAsTablePreview(is);
+        try (var reader = new BufferedReader(new InputStreamReader(file.getInputStream(), Charset.forName(encoding)))) {
+            return importer.parseCsvAsTablePreview(reader);
         } finally {
             log.info("Preview processing finished in {}", sw.stop());
         }
     }
 
     @PostMapping("preview")
-    public TurnOverPreview processPreview(@RequestParam("file") MultipartFile file, @RequestParam("format") TurnoverImportFormat format) throws Exception {
+    public TurnOverPreview processPreview(@RequestParam("file") MultipartFile file, @RequestParam("format") TurnoverImportFormat format, @RequestParam(value = "encoding", defaultValue = "UTF-8") String encoding) throws Exception {
         log.info("Preview-processing {} file {} with {} bytes...", format, file.getOriginalFilename(), file.getSize());
 
         var sw = Stopwatch.createStarted();
 
-        try (var is = new BufferedInputStream(file.getInputStream())) {
-            var rows = importer.parseForPreview(format, is);
+        try (var reader = new BufferedReader(new InputStreamReader(file.getInputStream(), Charset.forName(encoding)))) {
+            var rows = importer.parseForPreview(format, reader);
 
             return TurnOverPreview.builder()
                     .filename(file.getOriginalFilename())
                     .format(format)
+                    .encoding(encoding)
                     .uploadTime(ZonedDateTime.now())
                     .rows(rows)
                     .build();

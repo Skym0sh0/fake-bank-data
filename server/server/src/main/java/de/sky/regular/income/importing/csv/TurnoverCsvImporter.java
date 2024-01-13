@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.InputStream;
+import java.io.Reader;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -64,6 +64,7 @@ public class TurnoverCsvImporter {
 
             imp.setChecksum(checksum);
             imp.setTurnoverFileFormat(String.valueOf(patch.format));
+            imp.setFileEncoding(Optional.ofNullable(patch.encoding).orElse("UTF-8"));
 
             imp.insert();
 
@@ -149,11 +150,11 @@ public class TurnoverCsvImporter {
         });
     }
 
-    public RawCsvTable parseCsvAsTablePreview(InputStream is) {
+    public RawCsvTable parseCsvAsTablePreview(Reader is) {
         return parser.parseRawCsv(is);
     }
 
-    public List<TurnoverRowPreview> parseForPreview(TurnoverImportFormat format, InputStream is) {
+    public List<TurnoverRowPreview> parseForPreview(TurnoverImportFormat format, Reader is) {
         var sw = Stopwatch.createStarted();
 
         log.info("Previewing file ...");
@@ -237,6 +238,7 @@ public class TurnoverCsvImporter {
         return TurnoverImport.builder()
                 .id(rec.getId())
                 .format(TurnoverImportFormat.valueOf(rec.getTurnoverFileFormat()))
+                .encoding(rec.getFileEncoding())
                 .importedAt(rec.getImportedAt().atZoneSameInstant(ZoneId.systemDefault()))
                 .firstTurnover(mappedRows.stream().map(TurnoverRow::getDate).min(Comparator.naturalOrder()).orElse(null))
                 .lastTurnover(mappedRows.stream().map(TurnoverRow::getDate).max(Comparator.naturalOrder()).orElse(null))

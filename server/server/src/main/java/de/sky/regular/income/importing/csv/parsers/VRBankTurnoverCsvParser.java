@@ -10,7 +10,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.io.InputStream;
+import java.io.Reader;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -22,7 +22,7 @@ public class VRBankTurnoverCsvParser implements TurnoverParser {
         return TurnoverImportFormat.VR_BANK_CSV;
     }
 
-    public List<TurnoverRecord> parseCsv(InputStream is) {
+    public List<TurnoverRecord> parseCsv(Reader reader) {
         log.info("Preparing CSV parser...");
         var proc = new BeanListProcessor<>(VRBankRecord.class, 1000);
 
@@ -36,7 +36,7 @@ public class VRBankTurnoverCsvParser implements TurnoverParser {
 
         log.info("Parsing CSV...");
 
-        parser.parse(is);
+        parser.parse(reader);
 
         log.info("CSV parsed successfully");
 

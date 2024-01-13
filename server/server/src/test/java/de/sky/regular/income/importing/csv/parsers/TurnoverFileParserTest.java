@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.io.ByteArrayInputStream;
+import java.io.StringReader;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -38,7 +38,7 @@ class TurnoverFileParserTest {
 
                     var csv = header + "\n" + data;
 
-                    var result = parser.parseRawCsv(new ByteArrayInputStream(csv.getBytes()));
+                    var result = parser.parseRawCsv(new StringReader(csv));
 
                     assertThat(result)
                             .as("CSV is: %n%s", csv)
@@ -66,7 +66,7 @@ class TurnoverFileParserTest {
 
         @Test
         void checkUnregularCsv() {
-            var result = parser.parseRawCsv(new ByteArrayInputStream(csv.getBytes()));
+            var result = parser.parseRawCsv(new StringReader(csv));
 
             assertThat(result)
                     .as("CSV is: %n%s", csv)
@@ -84,7 +84,7 @@ class TurnoverFileParserTest {
 
         @Test
         void printAsTable() {
-            var table = parser.parseRawCsv(new ByteArrayInputStream(csv.getBytes()));
+            var table = parser.parseRawCsv(new StringReader(csv));
 
             System.out.println("Rows: " + table.getRows() + " Columns: " + table.getColumns());
             int length = 5;
