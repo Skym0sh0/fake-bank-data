@@ -1,10 +1,7 @@
 package de.sky.regular.income.rest;
 
 import com.google.common.base.Stopwatch;
-import de.sky.regular.income.api.turnovers.TurnOverPreview;
-import de.sky.regular.income.api.turnovers.TurnoverImport;
-import de.sky.regular.income.api.turnovers.TurnoverImportFormat;
-import de.sky.regular.income.api.turnovers.TurnoverImportPatch;
+import de.sky.regular.income.api.turnovers.*;
 import de.sky.regular.income.importing.csv.TurnoverCsvImporter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +28,19 @@ public class TurnoversController {
     @GetMapping("/formats")
     public List<TurnoverImportFormat> getSupportedFormats() {
         return List.of(TurnoverImportFormat.values());
+    }
+
+    @PostMapping("preview/csv")
+    public RawCsvTable processPreview(@RequestParam("file") MultipartFile file) throws Exception {
+        log.info("CSV Preview table processing file {} with {} bytes...", file.getOriginalFilename(), file.getSize());
+
+        var sw = Stopwatch.createStarted();
+
+        try (var is = new BufferedInputStream(file.getInputStream())) {
+            return importer.parseCsvAsTablePreview(is);
+        } finally {
+            log.info("Preview processing finished in {}", sw.stop());
+        }
     }
 
     @PostMapping("preview")

@@ -128,6 +128,7 @@ public class TurnoverCsvImporter {
 
             return imports.stream()
                     .map(rec -> map(rec, rows.get(rec.getId())))
+                    .sorted(Comparator.comparing(TurnoverImport::getImportedAt).reversed())
                     .toList();
         });
     }
@@ -146,6 +147,10 @@ public class TurnoverCsvImporter {
                     .and(TURNOVER_FILE_IMPORT.OWNER_ID.eq(userId))
                     .execute();
         });
+    }
+
+    public RawCsvTable parseCsvAsTablePreview(InputStream is) {
+        return parser.parseRawCsv(is);
     }
 
     public List<TurnoverRowPreview> parseForPreview(TurnoverImportFormat format, InputStream is) {

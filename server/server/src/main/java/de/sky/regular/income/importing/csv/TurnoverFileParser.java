@@ -1,6 +1,9 @@
 package de.sky.regular.income.importing.csv;
 
 import com.google.common.base.Stopwatch;
+import com.univocity.parsers.csv.CsvParser;
+import com.univocity.parsers.csv.CsvParserSettings;
+import de.sky.regular.income.api.turnovers.RawCsvTable;
 import de.sky.regular.income.api.turnovers.TurnoverImportFormat;
 import de.sky.regular.income.importing.csv.parsers.TurnoverParser;
 import de.sky.regular.income.importing.csv.parsers.TurnoverRecord;
@@ -34,6 +37,24 @@ public class TurnoverFileParser {
     @Autowired
     public TurnoverFileParser(TurnoverParser... parsers) {
         this(List.of(parsers));
+    }
+
+    public RawCsvTable parseRawCsv(InputStream is) {
+        var settings = new CsvParserSettings();
+        settings.setHeaderExtractionEnabled(false);
+        settings.setDelimiterDetectionEnabled(true);
+        settings.setLineSeparatorDetectionEnabled(true);
+        settings.setQuoteDetectionEnabled(true);
+
+        var parser = new CsvParser(settings);
+
+        var rows = parser.parseAll(is);
+
+        return new RawCsvTable(
+                rows.size(),
+                rows.stream().mapToInt(s -> s.length).max().orElse(0),
+                rows
+        );
     }
 
     @SneakyThrows
