@@ -11,9 +11,14 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.Period;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static generated.sky.regular.income.Tables.*;
 import static org.jooq.impl.DSL.*;
@@ -69,6 +74,59 @@ public class ReportsDAO {
         return rprt;
     }
 
+    public MonthlyIncomeExpenseReport doMonthlyIncomeExpenseReport(DSLContext ctx, UUID userId) {
+        var date = TURNOVER_ROW.DATE.as("date");
+        var amount = TURNOVER_ROW.AMOUNT_VALUE_CENTS.as("amount");
+
+        var month = trunc(date, DatePart.MONTH);
+        var positiveSum = sum(when(amount.greaterOrEqual(0), amount).otherwise(0));
+        var negativeSum = sum(when(amount.lessThan(0), amount).otherwise(0));
+
+        var monthData = ctx.select(month, positiveSum, negativeSum)
+                .from(
+                        select(date, amount)
+                                .from(TURNOVER_ROW)
+                                .where(TURNOVER_ROW.OWNER_ID.eq(userId))
+                )
+                .groupBy(month)
+                .orderBy(month)
+                .limit(MAX_NUMBER_RECORDS + 1)
+                .fetch()
+                .map(rec -> {
+                    var point = new MonthlyIncomeExpenseReport.DataPoint();
+
+                    point.month = rec.get(month);
+                    point.incomeInCents = rec.get(positiveSum).intValue();
+                    point.expenseInCents = -rec.get(negativeSum).intValue();
+
+                    return point;
+                });
+
+        if (monthData.size() > MAX_NUMBER_RECORDS)
+            logger.warn("There are too many datapoints: {}", MAX_NUMBER_RECORDS);
+
+        var monthsToAdd = new ArrayList<MonthlyIncomeExpenseReport.DataPoint>();
+        for (int i = 1; i < monthData.size(); i++) {
+            var previous = monthData.get(i - 1).getMonth();
+            var current = monthData.get(i).getMonth();
+
+            var months = Period.between(previous, current).toTotalMonths();
+
+            var range = LongStream.range(1, months)
+                    .mapToObj(previous::plusMonths)
+                    .map(m -> new MonthlyIncomeExpenseReport.DataPoint(m, 0, 0))
+                    .toList();
+
+            monthsToAdd.addAll(range);
+        }
+
+        return new MonthlyIncomeExpenseReport(
+                Stream.concat(monthData.stream(), monthsToAdd.stream())
+                        .sorted(Comparator.comparing(MonthlyIncomeExpenseReport.DataPoint::getMonth))
+                        .toList()
+        );
+    }
+
     public StatementsReport doOldStatementsReport(DSLContext ctx, UUID userId, LocalDate begin, LocalDate end) {
         var rprt = new StatementsReport();
 
@@ -95,7 +153,7 @@ public class ReportsDAO {
         return rprt;
     }
 
-    public MonthlyIncomeExpenseReport doMonthlyIncomeExpenseReport(DSLContext ctx, UUID userId) {
+    public MonthlyIncomeExpenseReport doMonthlyIncomeExpenseStatementReport(DSLContext ctx, UUID userId) {
         var date = FINANCIAL_TRANSACTION.DATE_RECORD.as("date");
         var amount = FINANCIAL_TRANSACTION.AMOUNT_VALUE_CENTS.as("amount");
 
