@@ -4,16 +4,18 @@ import de.sky.regular.income.api.reports.MonthlyIncomeExpenseReport;
 import de.sky.regular.income.api.reports.StatementsReport;
 import org.jooq.DSLContext;
 import org.jooq.DatePart;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.ZoneId;
 import java.util.Optional;
 import java.util.UUID;
 
-import static generated.sky.regular.income.Tables.BANK_STATEMENT;
-import static generated.sky.regular.income.Tables.FINANCIAL_TRANSACTION;
+import static generated.sky.regular.income.Tables.*;
 import static org.jooq.impl.DSL.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -24,6 +26,50 @@ public class ReportsDAO {
     private static final int MAX_NUMBER_RECORDS = 20_000;
 
     public StatementsReport doStatementsReport(DSLContext ctx, UUID userId, LocalDate begin, LocalDate end) {
+        var start = Optional.ofNullable(begin)
+                .orElse(LocalDate.of(1500, Month.JANUARY, 1))
+                .atStartOfDay(ZoneId.systemDefault())
+                .toOffsetDateTime();
+        var ending = Optional.ofNullable(end)
+                .orElse(LocalDate.of(3000, Month.JANUARY, 1))
+                .atStartOfDay(ZoneId.systemDefault())
+                .toOffsetDateTime();
+
+        var rprt = new StatementsReport();
+
+        var balance = DSL.sum(TURNOVER_ROW.AMOUNT_VALUE_CENTS).as("BALANCE");
+        var balanceOrZero = DSL.coalesce(balance, BigDecimal.ZERO);
+
+        var innerTable = DSL.table(DSL.select(TURNOVER_ROW.TURNOVER_FILE, balance)
+                .from(TURNOVER_ROW)
+                .where(TURNOVER_ROW.OWNER_ID.eq(userId))
+                .groupBy(TURNOVER_ROW.TURNOVER_FILE)
+        );
+
+        rprt.data = ctx.select(TURNOVER_FILE_IMPORT.IMPORTED_AT, balanceOrZero)
+                .from(TURNOVER_FILE_IMPORT)
+                .leftJoin(innerTable)
+                .on(TURNOVER_FILE_IMPORT.ID.eq(innerTable.field(TURNOVER_ROW.TURNOVER_FILE)))
+                .where(TURNOVER_FILE_IMPORT.OWNER_ID.eq(userId))
+                .and(TURNOVER_FILE_IMPORT.IMPORTED_AT.ge(start))
+                .and(TURNOVER_FILE_IMPORT.IMPORTED_AT.lessThan(ending))
+                .orderBy(TURNOVER_FILE_IMPORT.IMPORTED_AT.asc())
+                .limit(MAX_NUMBER_RECORDS + 1)
+                .fetch()
+                .map(rec -> {
+                    var p = new StatementsReport.DataPoint();
+                    p.setDate(rec.get(TURNOVER_FILE_IMPORT.IMPORTED_AT).toLocalDate());
+                    p.setBalanceInCents(rec.get(balanceOrZero).intValueExact());
+                    return p;
+                });
+
+        if (rprt.data.size() > MAX_NUMBER_RECORDS)
+            logger.warn("Between [{}, {}) were more than {} datapoints", begin, end, MAX_NUMBER_RECORDS);
+
+        return rprt;
+    }
+
+    public StatementsReport doOldStatementsReport(DSLContext ctx, UUID userId, LocalDate begin, LocalDate end) {
         var rprt = new StatementsReport();
 
         rprt.data = ctx.select(BANK_STATEMENT.DATE_RECORD, BANK_STATEMENT.AMOUNT_BALANCE_CENTS)
