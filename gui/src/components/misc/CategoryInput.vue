@@ -10,10 +10,10 @@
                       size="sm"
                       type="text">
         </b-form-input>
-        <b-input-group-append v-if="isUnknownCategory">
+        <b-input-group-append>
             <b-button size="sm"
                       @click="onAddCategory"
-                      :disabled="$v.currentSearch.$invalid">
+                      :disabled="!isUnknownCategory || $v.currentSearch.$invalid">
                 +
             </b-button>
         </b-input-group-append>
