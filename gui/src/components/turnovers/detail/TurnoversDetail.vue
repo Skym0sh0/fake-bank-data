@@ -22,6 +22,7 @@
             <v-card-text>
                 <turnover-rows-table v-if="categories"
                                      :rows="turnoverImport.turnovers"
+                                     :touchedRowsIdsById="currentRowCategoryChangesById"
                                      :categories="categories"
                                      @onCreateCategory="onCreateCategory"/>
             </v-card-text>
@@ -101,7 +102,7 @@ export default {
             this.$router.back()
         },
         onSave() {
-            const changes = this.currentRowCategoryChanges;
+            const changes = {rows: this.currentRowCategoryChanges};
 
             this.isLoading = true
             api.getTurnovers()
@@ -128,6 +129,9 @@ export default {
 
             return this.extractTurnoverRowsWithCategories(this.turnoverImport)
                 .filter(row => rowsById[row.id].categoryId !== row.categoryId);
+        },
+        currentRowCategoryChangesById() {
+            return this.currentRowCategoryChanges.reduce((prev, cur) => ({...prev, [cur.id]: cur}), {})
         },
         isValidToSave() {
             return this.currentRowCategoryChanges.length > 0 && this.currentRowCategoryChanges.every(row => !!row.categoryId)

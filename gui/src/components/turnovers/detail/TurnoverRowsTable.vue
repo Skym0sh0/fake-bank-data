@@ -44,6 +44,10 @@ export default {
             type: Array,
             required: true,
         },
+        touchedRowsIdsById: {
+            type: Object,
+            required: true,
+        },
     },
     methods: {
         onCreateCategory(categoryName) {
@@ -53,6 +57,11 @@ export default {
     computed: {
         columns() {
             return [
+                {
+                    key: "id",
+                    label: "",
+                    formatter: (value) => this.touchedRowsIdsById[value] ? '*' : ' '
+                },
                 {
                     key: "date",
                     label: "Datum",
