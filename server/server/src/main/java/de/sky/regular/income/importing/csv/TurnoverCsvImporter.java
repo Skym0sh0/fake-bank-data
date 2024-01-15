@@ -134,6 +134,32 @@ public class TurnoverCsvImporter {
         });
     }
 
+    public TurnoverImport patchTurnoverImport(UUID id, TurnoverImportRowsPatch patch) {
+        var ts = ZonedDateTime.now().toOffsetDateTime();
+
+        return db.transactionWithResult(ctx -> {
+            UUID userId = user.getCurrentUser(ctx).getId();
+
+            var updates = patch.rows.stream()
+                    .map(r ->
+                            ctx.update(TURNOVER_ROW)
+                                    .set(TURNOVER_ROW.CATEGORY_ID, r.getCategoryId())
+                                    .set(TURNOVER_ROW.LAST_UPDATED_AT, ts)
+                                    .where(TURNOVER_ROW.ID.eq(r.getId()))
+                                    .and(TURNOVER_ROW.OWNER_ID.eq(userId))
+                                    .and(TURNOVER_ROW.TURNOVER_FILE.eq(id))
+                    )
+                    .toList();
+
+            var updated = Arrays.stream(ctx.batch(updates).execute()).sum();
+
+            if (updated != patch.rows.size())
+                throw new RuntimeException("Could not update rows");
+
+            return fetchTurnoverImport(ctx, userId, id);
+        });
+    }
+
     public void deleteImport(UUID id) {
         db.transactionWithoutResult(ctx -> {
             UUID userId = user.getCurrentUser(ctx).getId();
