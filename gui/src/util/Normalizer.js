@@ -108,6 +108,11 @@ export function denormalizeTurnoverImport(turnoverImport) {
         id: turnoverImport.id,
         importedAt: turnoverImport.importedAt,
 
+        filename: turnoverImport.filename,
+        filesizeBytes: turnoverImport.filesizeBytes,
+        encoding: turnoverImport.encoding,
+        format: turnoverImport.format,
+
         firstTurnover: turnoverImport.firstTurnover,
         lastTurnover: turnoverImport.lastTurnover,
 
@@ -125,7 +130,16 @@ export function denormalizeTurnoverPreview(turnover) {
 }
 
 export function denormalizeTurnoverRow(row) {
-    return denormalizeTurnoverPreview(row);
+    return {
+        id: row.id,
+        date: row.date,
+        amountInCents: row.amountInCents,
+        categoryId: row.categoryId,
+        checksum: row.checksum,
+        description: row.description,
+        suggestedCategory: row.suggestedCategory,
+        recipient: row.recipient,
+    }
 }
 
 export function denormalizeTurnoverPreviewRow(row) {

@@ -217,6 +217,10 @@ class RegularIncomeAPI {
                 return ref.getClient().get('turnover-import')
                     .then(res => res.data.map(c => denormalizeTurnoverImport(c)))
             },
+            fetchTurnoverImport(id) {
+                return ref.getClient().get(`turnover-import/${id}`)
+                    .then(res => denormalizeTurnoverImport(res.data))
+            },
             deleteTurnoverImport(turnoverImport) {
                 return ref.getClient().delete(`turnover-import/${turnoverImport.id}`)
             }

@@ -4,7 +4,7 @@ import Home from './components/Home.vue'
 import StatementOverview from './components/statements/StatementOverview.vue'
 import StatementEntering from "./components/statements/StatementEntering.vue";
 import TurnoverOverview from "./components/turnovers/TurnoverOverview";
-import TurnoversDetail from "./components/turnovers/TurnoversDetail";
+import TurnoversDetail from "./components/turnovers/detail/TurnoversDetail.vue";
 import {userService} from "@/auth/auth-header";
 import LoginPage from "@/components/login/LoginPage.vue";
 import RegisterPage from "@/components/login/RegisterPage.vue";
@@ -53,6 +53,7 @@ let router = new Router({
         {
             path: '/turnovers/:id',
             name: "turnovers-detail",
+            props: true,
             component: TurnoversDetail,
         },
         {

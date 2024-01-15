@@ -13,6 +13,9 @@ import java.util.UUID;
 public class TurnoverImport {
     public UUID id;
     public ZonedDateTime importedAt;
+
+    public String filename;
+    public Long filesizeBytes;
     public TurnoverImportFormat format;
     public String encoding;
 

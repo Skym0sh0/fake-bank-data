@@ -237,9 +237,11 @@ public class TurnoverCsvImporter {
 
         return TurnoverImport.builder()
                 .id(rec.getId())
+                .importedAt(rec.getImportedAt().atZoneSameInstant(ZoneId.systemDefault()))
+                .filename(rec.getFilename())
+                .filesizeBytes(rec.getFileSize())
                 .format(TurnoverImportFormat.valueOf(rec.getTurnoverFileFormat()))
                 .encoding(rec.getFileEncoding())
-                .importedAt(rec.getImportedAt().atZoneSameInstant(ZoneId.systemDefault()))
                 .firstTurnover(mappedRows.stream().map(TurnoverRow::getDate).min(Comparator.naturalOrder()).orElse(null))
                 .lastTurnover(mappedRows.stream().map(TurnoverRow::getDate).max(Comparator.naturalOrder()).orElse(null))
                 .turnovers(mappedRows)

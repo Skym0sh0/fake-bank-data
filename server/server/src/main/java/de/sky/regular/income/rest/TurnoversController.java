@@ -78,6 +78,11 @@ public class TurnoversController {
         return importer.fetchTurnoverImports();
     }
 
+    @GetMapping("/{id}")
+    public TurnoverImport fetchTurnoverImport(@PathVariable("id") UUID id) {
+        return importer.fetchTurnoverImport(id);
+    }
+
     @DeleteMapping("/{id}")
     public void deleteTurnoverImport(@PathVariable("id") UUID id) {
         importer.deleteImport(id);
