@@ -27,15 +27,23 @@
                                      @onCreateCategory="onCreateCategory"/>
             </v-card-text>
 
-            <v-card-actions class="d-flex justify-content-end">
-                <v-btn @click="onBack">
-                    Zurück
-                </v-btn>
-                <v-btn @click="onSave"
+            <v-card-actions class="d-flex justify-content-between">
+                <v-btn @click="onReset"
                        :disabled="!isValidToSave"
-                       color="info">
-                    Speichern
+                       color="error">
+                    Verwerfen
                 </v-btn>
+
+                <div class="d-flex" style="gap: 0.5em">
+                    <v-btn @click="onBack">
+                        Zurück
+                    </v-btn>
+                    <v-btn @click="onSave"
+                           :disabled="!isValidToSave"
+                           color="info">
+                        Speichern
+                    </v-btn>
+                </div>
             </v-card-actions>
         </v-card>
     </div>
@@ -97,6 +105,9 @@ export default {
                 .postCategory(normalized)
                 .then(() => this.loadCategories())
                 .finally(() => this.isLoading = false)
+        },
+        onReset() {
+            this.reload()
         },
         onBack() {
             this.$router.back()
