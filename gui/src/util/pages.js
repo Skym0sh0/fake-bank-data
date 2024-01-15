@@ -4,11 +4,11 @@ const pages = [
         icon: 'mdi-apps',
         isStartPage: true,
     },
-    {
-        link: "/statements",
-        title: "Statement Overview",
-        icon: 'mdi-cash',
-    },
+    // {
+    //     link: "/statements",
+    //     title: "Statement Overview",
+    //     icon: 'mdi-cash',
+    // },
     {
         link: "/turnovers",
         title: "Turnover Overview",
