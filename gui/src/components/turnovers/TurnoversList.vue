@@ -48,8 +48,6 @@ export default {
             return moment(d).format("YYYY-MM-DD");
         },
         onOpen(item) {
-            console.log("open button", item)
-
             this.$router.push({name: "turnovers-detail", params: {id: item.id}});
         },
         onDelete(item) {

@@ -213,17 +213,25 @@ class RegularIncomeAPI {
                     },
                 ).then(res => denormalizeTurnoverImport(res.data));
             },
+
             fetchTurnoverImports() {
                 return ref.getClient().get('turnover-import')
                     .then(res => res.data.map(c => denormalizeTurnoverImport(c)))
             },
+
             fetchTurnoverImport(id) {
                 return ref.getClient().get(`turnover-import/${id}`)
                     .then(res => denormalizeTurnoverImport(res.data))
             },
+
+            patchTurnovers(id, changes) {
+                return ref.getClient().patch(`turnover-import/${id}`, changes)
+                    .then(res => denormalizeTurnoverImport(res.data))
+            },
+
             deleteTurnoverImport(turnoverImport) {
                 return ref.getClient().delete(`turnover-import/${turnoverImport.id}`)
-            }
+            },
         };
     }
 
