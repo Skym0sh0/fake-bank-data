@@ -23,35 +23,37 @@
             </div>
         </v-card-title>
 
-        <v-container class="pt-0">
-            <v-row class="py-0">
-                <v-col class="py-0" :cols="showDetails ? 8 : 12">
-                    <category-list :categories-by-id="categoriesById"
-                                   :categories="categories"
-                                   @newCategory="addNewCategoryTo"
-                                   @deleteCategory="deleteCategory"
-                                   @onReassign="reassignCategories"
-                                   @edit="openEditView"/>
-                </v-col>
+        <v-card-text>
+            <v-container class="pt-0">
+                <v-row class="py-0">
+                    <v-col class="py-0" :cols="showDetails ? 8 : 12">
+                        <category-list :categories-by-id="categoriesById"
+                                       :categories="categories"
+                                       @newCategory="addNewCategoryTo"
+                                       @deleteCategory="deleteCategory"
+                                       @onReassign="reassignCategories"
+                                       @edit="openEditView"/>
+                    </v-col>
 
-                <v-col v-if="showDetails" :cols="4">
-                    <div class="fixed-position-editor">
-                        <div class="details-view">
-                            <category-details v-if="selectedForDetails.isSelected"
-                                              ref="detail-form"
-                                              :categories-by-id="categoriesById"
-                                              :entity="selectedForDetails.entity"
-                                              :is-new="selectedForDetails.isNew"
-                                              :is-loading="isLoading"
-                                              @createAsChild="createNewChildCategory"
-                                              @createAsRoot="createNewRootCategory"
-                                              @update="updateCategory"
-                                              @close="cancelActiveForm"/>
+                    <v-col v-if="showDetails" :cols="4">
+                        <div class="fixed-position-editor">
+                            <div class="details-view">
+                                <category-details v-if="selectedForDetails.isSelected"
+                                                  ref="detail-form"
+                                                  :categories-by-id="categoriesById"
+                                                  :entity="selectedForDetails.entity"
+                                                  :is-new="selectedForDetails.isNew"
+                                                  :is-loading="isLoading"
+                                                  @createAsChild="createNewChildCategory"
+                                                  @createAsRoot="createNewRootCategory"
+                                                  @update="updateCategory"
+                                                  @close="cancelActiveForm"/>
+                            </div>
                         </div>
-                    </div>
-                </v-col>
-            </v-row>
-        </v-container>
+                    </v-col>
+                </v-row>
+            </v-container>
+        </v-card-text>
     </v-card>
 </template>
 

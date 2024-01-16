@@ -1,10 +1,10 @@
 <template>
-    <v-container class="py-0">
+    <v-container class="px-0">
         <!--        <global-events @keydown.17.prevent="reallocationEnabled = true"-->
         <!--                       @keyup.17.prevent="reallocationEnabled = false"/>-->
 
         <v-row>
-          <v-col>
+            <v-col>
                 <v-text-field id="quickfilter-text-input-field"
                               v-model="quickfilter"
                               type="text"
