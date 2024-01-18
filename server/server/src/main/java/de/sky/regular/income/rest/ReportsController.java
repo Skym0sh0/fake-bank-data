@@ -1,13 +1,14 @@
 package de.sky.regular.income.rest;
 
 import de.sky.common.database.DatabaseConnection;
+import de.sky.regular.income.api.reports.IncomeExpenseFlowReport;
 import de.sky.regular.income.api.reports.MonthlyIncomeExpenseReport;
 import de.sky.regular.income.api.reports.StatementsReport;
+import de.sky.regular.income.dao.IncomeExpenseFlowDataReporter;
 import de.sky.regular.income.dao.ReportsDAO;
 import de.sky.regular.income.database.DatabaseSupplier;
 import de.sky.regular.income.users.UserProvider;
 import lombok.RequiredArgsConstructor;
-import org.jooq.DSLContext;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,11 +28,12 @@ public class ReportsController {
 
     private final DatabaseConnection db;
     private final ReportsDAO dao;
+    private final IncomeExpenseFlowDataReporter flowReporter;
     private final UserProvider user;
 
     @Autowired
-    public ReportsController(DatabaseSupplier supplier, ReportsDAO dao, UserProvider user) {
-        this(supplier.getDatabase(), dao, user);
+    public ReportsController(DatabaseSupplier supplier, ReportsDAO dao, IncomeExpenseFlowDataReporter flowReporter, UserProvider user) {
+        this(supplier.getDatabase(), dao, flowReporter, user);
     }
 
     @GetMapping("/statements")
@@ -45,6 +47,13 @@ public class ReportsController {
     public MonthlyIncomeExpenseReport fetchMonthlyIncomeExpenseReport() {
         logger.info("Fetch monthly IncomeExpenseReport");
 
-        return db.transactionWithResult((DSLContext ctx) -> dao.doMonthlyIncomeExpenseReport(ctx, user.getCurrentUser(ctx).getId()));
+        return db.transactionWithResult(ctx -> dao.doMonthlyIncomeExpenseReport(ctx, user.getCurrentUser(ctx).getId()));
+    }
+
+    @GetMapping("/income-expenses-flow")
+    public IncomeExpenseFlowReport fetchIncomeExpenseFlowReport() {
+        logger.info("Fetch IncomeExpense Flow Report");
+
+        return db.transactionWithResult(ctx -> flowReporter.doReport(ctx, user.getCurrentUser(ctx).getId()));
     }
 }
