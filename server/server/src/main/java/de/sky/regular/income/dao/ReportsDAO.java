@@ -2,10 +2,10 @@ package de.sky.regular.income.dao;
 
 import de.sky.regular.income.api.reports.MonthlyIncomeExpenseReport;
 import de.sky.regular.income.api.reports.StatementsReport;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jooq.DSLContext;
 import org.jooq.DatePart;
-import org.jooq.impl.DSL;
-import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -22,12 +22,11 @@ import java.util.stream.Stream;
 
 import static generated.sky.regular.income.Tables.*;
 import static org.jooq.impl.DSL.*;
-import static org.slf4j.LoggerFactory.getLogger;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class ReportsDAO {
-    private static final Logger logger = getLogger(ReportsDAO.class);
-
     private static final int MAX_NUMBER_RECORDS = 20_000;
 
     public StatementsReport doStatementsReport(DSLContext ctx, UUID userId, LocalDate begin, LocalDate end) {
@@ -42,10 +41,10 @@ public class ReportsDAO {
 
         var rprt = new StatementsReport();
 
-        var balance = DSL.sum(TURNOVER_ROW.AMOUNT_VALUE_CENTS).as("BALANCE");
-        var balanceOrZero = DSL.coalesce(balance, BigDecimal.ZERO);
+        var balance = sum(TURNOVER_ROW.AMOUNT_VALUE_CENTS).as("BALANCE");
+        var balanceOrZero = coalesce(balance, BigDecimal.ZERO);
 
-        var innerTable = DSL.table(DSL.select(TURNOVER_ROW.TURNOVER_FILE, balance)
+        var innerTable = table(select(TURNOVER_ROW.TURNOVER_FILE, balance)
                 .from(TURNOVER_ROW)
                 .where(TURNOVER_ROW.OWNER_ID.eq(userId))
                 .groupBy(TURNOVER_ROW.TURNOVER_FILE)
@@ -69,7 +68,7 @@ public class ReportsDAO {
                 });
 
         if (rprt.data.size() > MAX_NUMBER_RECORDS)
-            logger.warn("Between [{}, {}) were more than {} datapoints", begin, end, MAX_NUMBER_RECORDS);
+            log.warn("Between [{}, {}) were more than {} datapoints", begin, end, MAX_NUMBER_RECORDS);
 
         return rprt;
     }
@@ -103,7 +102,7 @@ public class ReportsDAO {
                 });
 
         if (monthData.size() > MAX_NUMBER_RECORDS)
-            logger.warn("There are too many datapoints: {}", MAX_NUMBER_RECORDS);
+            log.warn("There are too many datapoints: {}", MAX_NUMBER_RECORDS);
 
         var monthsToAdd = new ArrayList<MonthlyIncomeExpenseReport.DataPoint>();
         for (int i = 1; i < monthData.size(); i++) {
@@ -148,7 +147,7 @@ public class ReportsDAO {
                 });
 
         if (rprt.data.size() > MAX_NUMBER_RECORDS)
-            logger.warn("Between [{}, {}) were more than {} datapoints", begin, end, MAX_NUMBER_RECORDS);
+            log.warn("Between [{}, {}) were more than {} datapoints", begin, end, MAX_NUMBER_RECORDS);
 
         return rprt;
     }
@@ -193,7 +192,7 @@ public class ReportsDAO {
                 });
 
         if (rprt.data.size() > MAX_NUMBER_RECORDS)
-            logger.warn("There are too many datapoints: {}", MAX_NUMBER_RECORDS);
+            log.warn("There are too many datapoints: {}", MAX_NUMBER_RECORDS);
 
         return rprt;
     }
