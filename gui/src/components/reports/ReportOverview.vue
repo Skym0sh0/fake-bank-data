@@ -33,7 +33,7 @@
                                        class="ma-2">
 
                         <v-expansion-panel-header :id="`report-overview-graph-panel-header-${graph.id}`">
-                            {{graph.title}}
+                            {{ graph.title }}
                         </v-expansion-panel-header>
 
                         <v-expansion-panel-content :id="`report-overview-graph-panel-content-${graph.id}`" eager>
@@ -57,93 +57,93 @@
 </template>
 
 <script>
-    import {api} from "../../api/RegularIncomeAPI";
-    import RawStatementsReport from "./RawStatementsReport";
-    import IncomeExpenseReport from "./IncomeExpenseReport";
-    import IncomeExpenseSankeyReport from "@/components/reports/IncomeExpenseSankeyReport.vue";
+import {api} from "@/api/RegularIncomeAPI";
+import RawStatementsReport from "./RawStatementsReport";
+import IncomeExpenseReport from "./IncomeExpenseReport";
+import IncomeExpenseSankeyReport from "@/components/reports/IncomeExpenseSankeyReport.vue";
 
-    export default {
-        name: "ReportOverview",
-        components: {
-            IncomeExpenseReport,
-            RawStatementsReport,
+export default {
+    name: "ReportOverview",
+    components: {
+        IncomeExpenseReport,
+        RawStatementsReport,
+    },
+    data() {
+        return {
+            statements: [],
+            incomeExpenses: [],
+            incomeExpensesSankey: [],
+            chartHeight: 800,
+            openCharts: [],
+            charts: [],
+        }
+    },
+    methods: {
+        showAll() {
+            this.hideAll()
+            this.openCharts.push(...this.charts.map(c => c.id))
         },
-        data() {
-            return {
-                statements: [],
-                incomeExpenses: [],
-                incomeExpensesSankey: [],
-                chartHeight: 800,
-                openCharts: [],
-                charts: [],
-            }
+        hideAll() {
+            this.openCharts.splice(0, this.openCharts.length)
         },
-        methods: {
-            showAll() {
-                this.hideAll()
-                this.openCharts.push(...this.charts.map(c => c.id))
-            },
-            hideAll() {
-                this.openCharts.splice(0, this.openCharts.length)
-            },
+    },
+    computed: {
+        areAllChartsOpen() {
+            return this.openCharts.length === this.charts.length
         },
-        computed: {
-            areAllChartsOpen() {
-                return this.openCharts.length === this.charts.length
-            },
-            areNoChartsOpen() {
-                return this.openCharts.length === 0
-            },
+        areNoChartsOpen() {
+            return this.openCharts.length === 0
         },
-        mounted() {
-            api.getReports().fetchStatementsReport()
-                .then(res => {
-                    this.statements.splice(0, this.statements.length)
-                    return this.statements.push(...res.data);
-                })
-                .catch(e => console.log(e))
-
-            api.getReports().fetchIncomeExpenseReport()
-                .then(res => {
-                    this.incomeExpenses.splice(0, this.incomeExpenses.length)
-                    return this.incomeExpenses.push(...res.data);
-                })
-                .catch(e => console.log(e))
-
-            api.getReports().fetchIncomeExpenseFlowReport()
-                .then(res => {
-                    this.incomeExpensesSankey.splice(0, this.incomeExpensesSankey.length)
-                    return this.incomeExpensesSankey.push(...res.flows)
-                })
-                .catch(e => console.log(e))
-        },
-        created() {
-            this.charts.push({
-                title: 'Bank Statement Report',
-                component: RawStatementsReport,
-                loadingCondition: () => !this.statements,
-                props: {statements: this.statements},
+    },
+    mounted() {
+        api.getReports().fetchStatementsReport()
+            .then(res => {
+                this.statements.splice(0, this.statements.length)
+                return this.statements.push(...res.data);
             })
+            .catch(e => console.log(e))
 
-            this.charts.push({
-                title: 'Income & Expense Report',
-                component: IncomeExpenseReport,
-                loadingCondition: () => !this.incomeExpenses,
-                props: {incomeExpenses: this.incomeExpenses},
+        api.getReports().fetchIncomeExpenseReport()
+            .then(res => {
+                this.incomeExpenses.splice(0, this.incomeExpenses.length)
+                return this.incomeExpenses.push(...res.data);
             })
+            .catch(e => console.log(e))
 
-            this.charts.push({
-                title: 'Income & Expense Sankey Report',
-                component: IncomeExpenseSankeyReport,
-                loadingCondition: () => !this.incomeExpensesSankey,
-                props: {incomeExpensesSankey: this.incomeExpensesSankey},
+        api.getReports().fetchIncomeExpenseFlowReport()
+            .then(res => {
+                this.incomeExpensesSankey.splice(0, this.incomeExpensesSankey.length)
+                return this.incomeExpensesSankey.push(...res.flows)
             })
+            .catch(e => console.log(e))
+    },
+    created() {
+        this.charts.push({
+            title: 'Bank Statement Report',
+            component: RawStatementsReport,
+            loadingCondition: () => !this.statements,
+            props: {statements: this.statements},
+        })
 
-            this.charts.forEach((chart, idx) => chart.id = idx)
+        this.charts.push({
+            title: 'Income & Expense Report',
+            component: IncomeExpenseReport,
+            loadingCondition: () => !this.incomeExpenses,
+            props: {incomeExpenses: this.incomeExpenses},
+        })
 
-            this.openCharts.push(...this.charts.map(c => c.id).filter((id, idx) => idx < 1))
-        },
-    }
+        this.charts.push({
+            title: 'Income & Expense Sankey Report',
+            component: IncomeExpenseSankeyReport,
+            loadingCondition: () => !this.incomeExpensesSankey,
+            props: {incomeExpensesSankey: this.incomeExpensesSankey},
+        })
+
+        this.charts.forEach((chart, idx) => chart.id = idx)
+
+        this.openCharts.push(...this.charts.map(c => c.id).filter((id, idx) => idx < 1))
+    },
+}
 </script>
 
 <style scoped>
