@@ -69,12 +69,10 @@ export default {
                         return [c, ...c.subCategories.flatMap(child => traverse(child))]
                     };
 
-                    const flatMap = tree.flatMap(c => traverse(c)).reduce((prev, cur) => ({
+                    this.categories = tree.flatMap(c => traverse(c)).reduce((prev, cur) => ({
                         ...prev,
                         [cur.id]: cur.name
-                    }));
-                    console.log("loaded", flatMap)
-                    this.categories = flatMap
+                    }))
                 })
                 .catch(e => console.log(e))
         },
@@ -85,7 +83,6 @@ export default {
             if (!this.isReportPresent)
                 return
 
-            console.log("draw chart", this.categories)
             const chart = am4core.create(this.$refs.chartDiv, am4charts.SankeyDiagram)
 
             // chart.orientation = "vertical";

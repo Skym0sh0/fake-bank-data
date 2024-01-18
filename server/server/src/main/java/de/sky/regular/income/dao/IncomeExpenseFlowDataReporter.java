@@ -55,14 +55,15 @@ public class IncomeExpenseFlowDataReporter {
                 .sorted(Comparator.comparingInt(CategoryTreeNode::amount).reversed())
                 .toList();
 
-        Predicate<CategoryTreeNode> isBigEnough = node -> {
-            return true;
-        };
+        var stats = costTree.stream()
+                .mapToInt(CategoryTreeNode::amount)
+                .summaryStatistics();
+
+        Predicate<CategoryTreeNode> isBigEnough = node -> node.amount() > stats.getMax() * 0.05;
 
         return costTree.stream()
-                .filter(t -> t.amount() != 0)
                 .takeWhile(isBigEnough)
-                .limit(25)
+//                .limit(25)
                 .flatMap(t -> traverse(Integer.MAX_VALUE, null, t, creator))
                 .toList();
 
@@ -81,7 +82,7 @@ public class IncomeExpenseFlowDataReporter {
     }
 
     private static Stream<IncomeExpenseFlowReport.FlowDataPoint> traverse(int level, CategoryTreeNode parent, CategoryTreeNode current, DataPointCreator creator) {
-        if (level == 0)
+        if (level == 0 || current.amount() == 0)
             return Stream.empty();
 
         var children = current.children()
