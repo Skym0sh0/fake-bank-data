@@ -60,6 +60,7 @@
     import {api} from "../../api/RegularIncomeAPI";
     import RawStatementsReport from "./RawStatementsReport";
     import IncomeExpenseReport from "./IncomeExpenseReport";
+    import IncomeExpenseSankeyReport from "@/components/reports/IncomeExpenseSankeyReport.vue";
 
     export default {
         name: "ReportOverview",
@@ -71,6 +72,7 @@
             return {
                 statements: [],
                 incomeExpenses: [],
+                incomeExpensesSankey: [],
                 chartHeight: 800,
                 openCharts: [],
                 charts: [],
@@ -94,17 +96,24 @@
             },
         },
         mounted() {
-            api.fetchStatementsReport()
+            api.getReports().fetchStatementsReport()
                 .then(res => {
                     this.statements.splice(0, this.statements.length)
                     return this.statements.push(...res.data);
                 })
                 .catch(e => console.log(e))
 
-            api.fetchIncomeExpenseReport()
+            api.getReports().fetchIncomeExpenseReport()
                 .then(res => {
                     this.incomeExpenses.splice(0, this.incomeExpenses.length)
                     return this.incomeExpenses.push(...res.data);
+                })
+                .catch(e => console.log(e))
+
+            api.getReports().fetchIncomeExpenseFlowReport()
+                .then(res => {
+                    this.incomeExpensesSankey.splice(0, this.incomeExpensesSankey.length)
+                    return this.incomeExpensesSankey.push(...res.flows)
                 })
                 .catch(e => console.log(e))
         },
@@ -121,6 +130,13 @@
                 component: IncomeExpenseReport,
                 loadingCondition: () => !this.incomeExpenses,
                 props: {incomeExpenses: this.incomeExpenses},
+            })
+
+            this.charts.push({
+                title: 'Income & Expense Sankey Report',
+                component: IncomeExpenseSankeyReport,
+                loadingCondition: () => !this.incomeExpensesSankey,
+                props: {incomeExpensesSankey: this.incomeExpensesSankey},
             })
 
             this.charts.forEach((chart, idx) => chart.id = idx)

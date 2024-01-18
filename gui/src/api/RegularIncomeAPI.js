@@ -133,18 +133,29 @@ class RegularIncomeAPI {
         }
     }
 
-    fetchStatementsReport(begin, end) {
-        return this.getClient().get('reports/statements', {
-            params: {
-                begin: begin,
-                end: end,
-            }
-        }).then(res => res.data)
-    }
+    getReports() {
+        const ref = this
 
-    fetchIncomeExpenseReport() {
-        return this.getClient().get('reports/monthly-income-expenses')
-            .then(res => res.data)
+        return {
+            fetchStatementsReport(begin, end) {
+                return ref.getClient().get('reports/statements', {
+                    params: {
+                        begin: begin,
+                        end: end,
+                    }
+                }).then(res => res.data)
+            },
+
+            fetchIncomeExpenseReport() {
+                return ref.getClient().get('reports/monthly-income-expenses')
+                    .then(res => res.data)
+            },
+
+            fetchIncomeExpenseFlowReport() {
+                return ref.getClient().get('reports/income-expenses-flow')
+                    .then(res => res.data)
+            },
+        }
     }
 
     getTurnovers() {
