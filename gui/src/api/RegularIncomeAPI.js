@@ -3,7 +3,7 @@ import {v4 as uuidv4} from 'uuid';
 import {
     denormalizeCategory,
     denormalizeTurnoverImport,
-    denormalizeTurnoverPreview,
+    denormalizeTurnoverPreview, denormalizeTurnoverRow,
     denormalizeUser
 } from "@/util/Normalizer";
 import {userService} from '@/auth/auth-header';
@@ -213,6 +213,11 @@ class RegularIncomeAPI {
 
             deleteTurnoverImport(turnoverImport) {
                 return ref.getClient().delete(`turnover-import/${turnoverImport.id}`)
+            },
+
+            fetchTurnoversForCategory(categoryId) {
+                return ref.getClient().get(`turnover-import/category/${categoryId}`)
+                    .then(res => res.data.map(c => denormalizeTurnoverRow(c)))
             },
         };
     }
