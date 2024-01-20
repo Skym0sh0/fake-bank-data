@@ -92,4 +92,10 @@ public class TurnoversController {
     public void deleteTurnoverImport(@PathVariable("id") UUID id) {
         importer.deleteImport(id);
     }
+
+
+    @GetMapping("/category/{category-id}")
+    public List<TurnoverRow> fetchTurnoversForCategory(@PathVariable("category-id") UUID categoryId) {
+        return importer.fetchTurnoversForImport(categoryId);
+    }
 }

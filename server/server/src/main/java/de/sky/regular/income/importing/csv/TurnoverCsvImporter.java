@@ -23,9 +23,9 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
 
-import static generated.sky.regular.income.Tables.TURNOVER_FILE_IMPORT;
-import static generated.sky.regular.income.Tables.TURNOVER_ROW;
+import static generated.sky.regular.income.Tables.*;
 import static org.jooq.impl.DSL.and;
+import static org.jooq.impl.DSL.selectFrom;
 
 @Service
 @RequiredArgsConstructor
@@ -95,6 +95,27 @@ public class TurnoverCsvImporter {
             ctx.batchInsert(rows).execute();
 
             return fetchTurnoverImport(ctx, userId, imp.getId());
+        });
+    }
+
+    public List<TurnoverRow> fetchTurnoversForImport(UUID categoryId) {
+        return db.transactionWithResult(ctx -> {
+            UUID userId = user.getCurrentUser(ctx).getId();
+
+            var isValidCategory = ctx.fetchExists(
+                    selectFrom(CATEGORY)
+                            .where(CATEGORY.ID.eq(categoryId))
+                            .and(CATEGORY.OWNER_ID.eq(userId))
+            );
+
+            if (!isValidCategory)
+                throw new IllegalArgumentException("Category ID is either unknown or belongs to another user: " + categoryId);
+
+            return ctx.fetch(TURNOVER_ROW, and(
+                            TURNOVER_ROW.OWNER_ID.eq(userId),
+                            TURNOVER_ROW.CATEGORY_ID.eq(categoryId)
+                    ))
+                    .map(TurnoverCsvImporter::map);
         });
     }
 
