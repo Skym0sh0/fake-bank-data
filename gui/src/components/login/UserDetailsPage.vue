@@ -68,7 +68,10 @@
             <waiting-indicator :is-loading="isLoading"/>
 
             <v-card-actions class="d-flex justify-content-center">
-                <delete-button @delete="onDelete"/>
+                <confirmationed-button @click="onDelete"
+                                       default-caption="Account Löschen?"
+                                       request-caption="Account wirklich löschen?"
+                                       confirmed-caption="Jetzt Löschen !"/>
 
                 <v-btn type="submit"
                        color="primary"
@@ -82,14 +85,17 @@
 </template>
 
 <script>
-import DeleteButton from "@/components/login/DeleteButton.vue";
+import ConfirmationedButton from "@/components/misc/ConfirmationedButton.vue";
 import {userService} from "@/auth/auth-header";
 import WaitingIndicator from "@/components/misc/WaitingIndicator.vue";
 import {api} from "@/api/RegularIncomeAPI";
 
 export default {
     name: "UserDetailsPage",
-    components: {WaitingIndicator, DeleteButton},
+    components: {
+        WaitingIndicator,
+        ConfirmationedButton
+    },
     data() {
         return {
             isLoading: false,
