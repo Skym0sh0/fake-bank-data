@@ -9,16 +9,17 @@
                  :fixed="true">
             <template v-slot:cell(Actions)="row">
                 <div class="action-buttons">
-                    <b-button variant="primary"
-                              size="sm"
-                              @click="() => onOpen(row.item)">
+                    <v-btn color="primary"
+                           :small="true"
+                           @click="() => onOpen(row.item)">
                         Öffnen
-                    </b-button>
-                    <b-button variant="danger"
-                              size="sm"
-                              @click="() => onDelete(row.item)">
-                        Löschen
-                    </b-button>
+                    </v-btn>
+                    <confirmationed-button @click="() => onDelete(row.item)"
+                                           default-caption="Löschen"
+                                           request-caption="Löschen??"
+                                           confirmed-caption="Löschen!!!"
+                                           default-color="secondary"
+                                           :small="true"/>
                 </div>
             </template>
         </b-table>
@@ -27,9 +28,11 @@
 
 <script>
 import moment from 'moment/moment';
+import ConfirmationedButton from "@/components/misc/ConfirmationedButton.vue";
 
 export default {
     name: "TurnoversList",
+    components: {ConfirmationedButton},
     props: {
         imports: {
             required: true,

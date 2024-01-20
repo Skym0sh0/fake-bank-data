@@ -1,7 +1,8 @@
 <template>
     <v-btn :color="color"
            @click="onClick"
-           :loading="isLoading">
+           :loading="isLoading"
+           v-bind="$attrs">
         {{ caption }}
     </v-btn>
 </template>
@@ -11,6 +12,12 @@
 export default {
     name: "ConfirmationedButton",
     props: {
+        defaultColor: {
+            type: String,
+            default() {
+                return "info";
+            },
+        },
         defaultCaption: {
             type: String,
             required: true,
@@ -73,7 +80,7 @@ export default {
         },
         color() {
             if (!this.actionRequested)
-                return "info";
+                return this.defaultColor;
 
             if (!this.actionConfirmed)
                 return "warning"
