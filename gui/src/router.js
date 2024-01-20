@@ -1,8 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './components/Home.vue'
-import StatementOverview from './components/statements/StatementOverview.vue'
-import StatementEntering from "./components/statements/StatementEntering.vue";
 import TurnoverOverview from "./components/turnovers/TurnoverOverview";
 import TurnoversDetail from "./components/turnovers/detail/TurnoversDetail.vue";
 import {userService} from "@/auth/auth-header";
@@ -35,17 +33,6 @@ let router = new Router({
             component: RegisterPage,
         },
         {
-            path: '/statements/',
-            name: 'statements-overview',
-            component: StatementOverview,
-        },
-        {
-            path: '/statements/:id',
-            name: 'statement-edit',
-            props: true,
-            component: StatementEntering,
-        },
-        {
             path: '/turnovers/',
             name: 'turnover-overview',
             component: TurnoverOverview,
@@ -73,7 +60,7 @@ let router = new Router({
             // this generates a separate chunk (about.[hash].js) for this route
             // which is lazy-loaded when the route is visited.
             component: () => import(/* webpackChunkName: "about" */ './components/about/About.vue'),
-        }
+        },
     ]
 });
 
@@ -81,6 +68,9 @@ router.beforeEach((to, from, next) => {
     const publicPages = ['/login', '/register'];
     const authRequired = !publicPages.includes(to.path);
     const loggedIn = userService.getUser();
+
+    if (!to.matched.length)
+        return next({name: "home"});
 
     if (authRequired && !loggedIn) {
         return next({

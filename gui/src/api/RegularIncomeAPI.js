@@ -2,8 +2,6 @@ import axios from "axios";
 import {v4 as uuidv4} from 'uuid';
 import {
     denormalizeCategory,
-    denormalizeStatement,
-    denormalizeTransaction,
     denormalizeTurnoverImport,
     denormalizeTurnoverPreview,
     denormalizeUser
@@ -83,33 +81,6 @@ class RegularIncomeAPI {
                     .delete(`user/${id}`);
             },
         }
-    }
-
-    getTransactionsForStatement(stmtId) {
-        return this.getClient().get(`statements/${stmtId}/transactions`)
-            .then(res => res.data.map(stmt => denormalizeTransaction(stmt)))
-    }
-
-    getStatementSummary(stmtId) {
-        return this.getClient().get(`statements/${stmtId}/summary`)
-    }
-
-    getAllStatements() {
-        return this.getClient().get('statements')
-            .then(res => res.data.map(stmt => denormalizeStatement(stmt)))
-    }
-
-    readStatement(id) {
-        return this.getClient().get(`statements/${id}`)
-            .then(res => denormalizeStatement(res.data))
-    }
-
-    deleteStatement(id) {
-        return this.getClient().delete(`statements/${id}`)
-    }
-
-    postStatement(stmt) {
-        return this.getClient().post(`statements/${stmt.id}`, stmt)
     }
 
     getFileImports() {
