@@ -147,25 +147,10 @@ public class FinancialTransactionRecord extends UpdatableRecordImpl<FinancialTra
     }
 
     /**
-     * Setter for <code>REGULAR_INCOME.financial_transaction.category_id</code>.
-     */
-    public FinancialTransactionRecord setCategoryId(UUID value) {
-        set(8, value);
-        return this;
-    }
-
-    /**
-     * Getter for <code>REGULAR_INCOME.financial_transaction.category_id</code>.
-     */
-    public UUID getCategoryId() {
-        return (UUID) get(8);
-    }
-
-    /**
      * Setter for <code>REGULAR_INCOME.financial_transaction.owner_id</code>.
      */
     public FinancialTransactionRecord setOwnerId(UUID value) {
-        set(9, value);
+        set(8, value);
         return this;
     }
 
@@ -173,7 +158,22 @@ public class FinancialTransactionRecord extends UpdatableRecordImpl<FinancialTra
      * Getter for <code>REGULAR_INCOME.financial_transaction.owner_id</code>.
      */
     public UUID getOwnerId() {
-        return (UUID) get(9);
+        return (UUID) get(8);
+    }
+
+    /**
+     * Setter for <code>REGULAR_INCOME.financial_transaction.category</code>.
+     */
+    public FinancialTransactionRecord setCategory(String value) {
+        set(9, value);
+        return this;
+    }
+
+    /**
+     * Getter for <code>REGULAR_INCOME.financial_transaction.category</code>.
+     */
+    public String getCategory() {
+        return (String) get(9);
     }
 
     // -------------------------------------------------------------------------
@@ -199,7 +199,7 @@ public class FinancialTransactionRecord extends UpdatableRecordImpl<FinancialTra
     /**
      * Create a detached, initialised FinancialTransactionRecord
      */
-    public FinancialTransactionRecord(UUID id, UUID bankStatementId, LocalDate dateRecord, Integer amountValueCents, Boolean isPeriodic, String reason, String checksum, OffsetDateTime createdAt, UUID categoryId, UUID ownerId) {
+    public FinancialTransactionRecord(UUID id, UUID bankStatementId, LocalDate dateRecord, Integer amountValueCents, Boolean isPeriodic, String reason, String checksum, OffsetDateTime createdAt, UUID ownerId, String category) {
         super(FinancialTransaction.FINANCIAL_TRANSACTION);
 
         setId(id);
@@ -210,8 +210,8 @@ public class FinancialTransactionRecord extends UpdatableRecordImpl<FinancialTra
         setReason(reason);
         setChecksum(checksum);
         setCreatedAt(createdAt);
-        setCategoryId(categoryId);
         setOwnerId(ownerId);
+        setCategory(category);
         resetChangedOnNotNull();
     }
 }

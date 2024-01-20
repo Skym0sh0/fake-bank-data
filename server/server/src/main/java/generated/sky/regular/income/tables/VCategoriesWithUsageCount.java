@@ -109,21 +109,11 @@ public class VCategoriesWithUsageCount extends TableImpl<VCategoriesWithUsageCou
 
     private VCategoriesWithUsageCount(Name alias, Table<VCategoriesWithUsageCountRecord> aliased, Field<?>[] parameters, Condition where) {
         super(alias, null, aliased, parameters, DSL.comment(""), TableOptions.view("""
-        create view "v_categories_with_usage_count" as  WITH fin_transaction_count AS (
-                SELECT financial_transaction.category_id,
-                   count(*) AS financial_transaction_count
-                  FROM financial_transaction
-                 GROUP BY financial_transaction.category_id
-               ), turnovers_count AS (
+        create view "v_categories_with_usage_count" as  WITH turnovers_count AS (
                 SELECT turnover_row.category_id,
-                   count(*) AS turnover_count
+                   count(*) AS use_count
                   FROM turnover_row
                  GROUP BY turnover_row.category_id
-               ), overall_count AS (
-                SELECT COALESCE(c.category_id, t.category_id) AS category_id,
-                   (COALESCE(c.financial_transaction_count, (0)::bigint) + COALESCE(t.turnover_count, (0)::bigint)) AS use_count
-                  FROM (fin_transaction_count c
-                    FULL JOIN turnovers_count t ON ((c.category_id = t.category_id)))
                ), completed_categories AS (
                 SELECT c.id,
                    c.parent_category,
@@ -135,7 +125,7 @@ public class VCategoriesWithUsageCount extends TableImpl<VCategoriesWithUsageCou
                    c.owner_id,
                    COALESCE(o.use_count, (0)::bigint) AS use_count
                   FROM (category c
-                    LEFT JOIN overall_count o ON ((c.id = o.category_id)))
+                    LEFT JOIN turnovers_count o ON ((c.id = o.category_id)))
                )
         SELECT id,
            parent_category,

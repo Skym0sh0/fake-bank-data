@@ -107,14 +107,14 @@ public class FinancialTransaction extends TableImpl<FinancialTransactionRecord> 
     public final TableField<FinancialTransactionRecord, OffsetDateTime> CREATED_AT = createField(DSL.name("created_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
     /**
-     * The column <code>REGULAR_INCOME.financial_transaction.category_id</code>.
-     */
-    public final TableField<FinancialTransactionRecord, UUID> CATEGORY_ID = createField(DSL.name("category_id"), SQLDataType.UUID.nullable(false), this, "");
-
-    /**
      * The column <code>REGULAR_INCOME.financial_transaction.owner_id</code>.
      */
     public final TableField<FinancialTransactionRecord, UUID> OWNER_ID = createField(DSL.name("owner_id"), SQLDataType.UUID.nullable(false), this, "");
+
+    /**
+     * The column <code>REGULAR_INCOME.financial_transaction.category</code>.
+     */
+    public final TableField<FinancialTransactionRecord, String> CATEGORY = createField(DSL.name("category"), SQLDataType.CLOB.nullable(false), this, "");
 
     private FinancialTransaction(Name alias, Table<FinancialTransactionRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
