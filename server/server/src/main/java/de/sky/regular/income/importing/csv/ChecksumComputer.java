@@ -1,8 +1,8 @@
 package de.sky.regular.income.importing.csv;
 
+import com.google.common.io.BaseEncoding;
 import de.sky.regular.income.importing.csv.parsers.TurnoverRecord;
 import lombok.SneakyThrows;
-import org.apache.commons.codec.binary.Hex;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -33,6 +33,6 @@ public class ChecksumComputer implements Function<TurnoverRecord, String> {
     }
 
     public String computeChecksum(byte[] data) {
-        return Hex.encodeHexString(digester.digest(data));
+        return BaseEncoding.base16().encode((digester.digest(data)));
     }
 }

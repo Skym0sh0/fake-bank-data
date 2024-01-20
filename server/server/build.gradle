@@ -48,7 +48,7 @@ dependencies {
     testImplementation group: 'org.mockito', name: 'mockito-core', version: "$mockito_version"
     testImplementation group: 'org.assertj', name: 'assertj-core', version: "$assertj_version"
 
-    implementation group: 'org.apache.poi', name: 'poi', version: '5.2.5'
+//    implementation group: 'org.apache.poi', name: 'poi', version: '5.2.5'
     implementation group: 'com.univocity', name: 'univocity-parsers', version: '2.9.1'
 }
 
