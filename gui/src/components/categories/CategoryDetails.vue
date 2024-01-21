@@ -3,12 +3,7 @@
         <v-card-title class="justify-content-between">
             <span>Category Details</span>
 
-            <b-badge id="usage-count"
-                     variant="success"
-                     v-b-tooltip.hover
-                     :title="`Diese Kategorie wird in ${entity.usageCount} Transaktionen benutzt.`">
-                {{ entity.usageCount }}
-            </b-badge>
+            <category-usage-dialog v-if="entity && entity.id" :category="entity"/>
         </v-card-title>
 
         <v-card-subtitle class="py-0">
@@ -60,10 +55,11 @@
 import * as moment from "moment";
 import {normalizeCategory} from "@/util/Normalizer";
 import Breadcrumps from "@/components/misc/Breadcrumps.vue";
+import CategoryUsageDialog from "@/components/categories/CategoryUsageDialog.vue";
 
 export default {
     name: "CategoryDetails",
-    components: {Breadcrumps},
+    components: {CategoryUsageDialog, Breadcrumps},
     props: {
         categoriesById: {
             type: Object,
