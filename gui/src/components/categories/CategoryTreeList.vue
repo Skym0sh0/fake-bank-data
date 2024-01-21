@@ -35,7 +35,8 @@
 
             <template v-slot:append="{ item }">
                 <b-btn-group>
-                    <v-btn :icon="true" :small="true"
+                    <v-btn :icon="true"
+                           :small="true"
                            color="success"
                            @click.stop="editCategory(item.id)">
                         <v-icon :small="true">
@@ -52,7 +53,8 @@
                         </v-icon>
                     </v-btn>
 
-                    <v-btn :icon="true" :small="true"
+                    <v-btn :icon="true"
+                           :small="true"
                            color="error"
                            @click.stop="deleteCategory(item.id)"
                            :disabled="isDeletionForbidden(item)">
@@ -84,7 +86,9 @@ import SelectedCategoryInfo from "@/components/categories/SelectedCategoryInfo.v
 
 export default {
     name: "CategoryTreeList",
-    components: {SelectedCategoryInfo},
+    components: {
+        SelectedCategoryInfo
+    },
     props: {
         categoriesById: {
             type: Object,
@@ -117,6 +121,9 @@ export default {
             this.opened = [...newlyOpened]
         },
         editCategory(id) {
+            if (!this.opened.includes(id))
+                this.opened.push(id)
+
             this.$emit("edit", id)
         },
         addNewCategoryTo(id) {
@@ -163,7 +170,7 @@ export default {
 
                 return {
                     ...cat,
-                    children: _.sortBy(children, x => x.name),
+                    children: _.sortBy(children, x => x.name.toLowerCase()),
                 }
             }
 

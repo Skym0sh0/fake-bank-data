@@ -13,7 +13,7 @@
         <b-modal ref="modal-turnovers"
                  :scrollable="true"
                  :centered="true"
-                 title="Turnovers, die diese Kategorie verwenden"
+                 :title="`Turnovers mit Kategorie ${category.name}`"
                  :ok-only="true">
             <waiter :is-loading="!referencedRows">
                 <b-table :striped="true"
@@ -64,6 +64,8 @@ export default {
             this.$refs["modal-turnovers"].show();
         },
         loadReferencedRows() {
+            this.referencedRows = null;
+
             api.getTurnovers()
                 .fetchTurnoversForCategory(this.category.id)
                 .then(rows => this.referencedRows = rows)

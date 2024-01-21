@@ -176,7 +176,8 @@ export default {
         deleteCategory(category) {
             this.isLoading = true
 
-            this.cancelActiveForm()
+            if (this.selectedForDetails.entity && this.selectedForDetails.entity.id === category.id)
+                this.cancelActiveForm()
 
             api.getCategories()
                 .deleteCategory(category)
