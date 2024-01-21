@@ -3,6 +3,7 @@ package de.sky.regular.income.importing.csv.parsers;
 import com.univocity.parsers.conversions.ObjectConversion;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
@@ -12,17 +13,30 @@ import java.time.format.DateTimeFormatter;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CsvProcessorConverters {
-    public static class DateConverter extends ObjectConversion<LocalDate> {
-        private static final DateTimeFormatter FRMT = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    @RequiredArgsConstructor
+    public static abstract class BaseDateConverter extends ObjectConversion<LocalDate> {
+        private final DateTimeFormatter frmt;
 
         @Override
         protected LocalDate fromString(String input) {
-            return LocalDate.parse(input, FRMT);
+            return LocalDate.parse(input, frmt);
         }
 
         @Override
         public String revert(LocalDate input) {
-            return input.format(FRMT);
+            return input.format(frmt);
+        }
+    }
+
+    public static class FullGermanDateConverter extends BaseDateConverter {
+        public FullGermanDateConverter() {
+            super(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+        }
+    }
+
+    public static class ShortGermanDateConverter extends BaseDateConverter {
+        public ShortGermanDateConverter() {
+            super(DateTimeFormatter.ofPattern("dd.MM.yy"));
         }
     }
 
@@ -67,6 +81,5 @@ public class CsvProcessorConverters {
         public String revert(ZoneId input) {
             return input.getId();
         }
-
     }
 }

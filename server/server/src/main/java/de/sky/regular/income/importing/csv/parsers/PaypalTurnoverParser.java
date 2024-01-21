@@ -60,7 +60,7 @@ public class PaypalTurnoverParser implements TurnoverParser {
     @Data
     public static class PaypalRecord {
         @Parsed(field = "Datum")
-        @Convert(conversionClass = CsvProcessorConverters.DateConverter.class)
+        @Convert(conversionClass = CsvProcessorConverters.FullGermanDateConverter.class)
         private LocalDate date;
         @Parsed(field = "Uhrzeit")
         @Convert(conversionClass = CsvProcessorConverters.TimeConverter.class)

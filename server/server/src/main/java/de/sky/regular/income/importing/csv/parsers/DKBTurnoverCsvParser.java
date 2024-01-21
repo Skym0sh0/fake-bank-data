@@ -11,10 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -79,11 +76,11 @@ public class DKBTurnoverCsvParser implements TurnoverParser {
     @Data
     public static class DKBRecord {
         @Parsed(field = "Buchungstag")
-        @Convert(conversionClass = CsvProcessorConverters.DateConverter.class)
+        @Convert(conversionClass = CsvProcessorConverters.FullGermanDateConverter.class)
         private LocalDate buchungsTag;
 
         @Parsed(field = "Wertstellung")
-        @Convert(conversionClass = CsvProcessorConverters.DateConverter.class)
+        @Convert(conversionClass = CsvProcessorConverters.FullGermanDateConverter.class)
         private LocalDate date;
 
         @Parsed(field = "Buchungstext")

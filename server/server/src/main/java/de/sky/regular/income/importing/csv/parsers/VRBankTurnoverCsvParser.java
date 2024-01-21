@@ -52,7 +52,7 @@ public class VRBankTurnoverCsvParser implements TurnoverParser {
     @Data
     public static class VRBankRecord {
         @Parsed(field = "Valutadatum")
-        @Convert(conversionClass = CsvProcessorConverters.DateConverter.class)
+        @Convert(conversionClass = CsvProcessorConverters.FullGermanDateConverter.class)
         private LocalDate date;
 
         @Parsed(field = "Name Zahlungsbeteiligter")
