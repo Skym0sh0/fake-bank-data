@@ -35,6 +35,19 @@
 
             <template v-slot:append="{ item }">
                 <b-btn-group>
+                    <category-usage-dialog :category="item">
+                        <template v-slot:button="{ clickCallback }">
+                            <v-btn :icon="true"
+                                   :small="true"
+                                   color="warning"
+                                   @click="clickCallback">
+                                <v-icon :small="true">
+                                    mdi-format-list-bulleted
+                                </v-icon>
+                            </v-btn>
+                        </template>
+                    </category-usage-dialog>
+
                     <v-btn :icon="true"
                            :small="true"
                            color="success"
@@ -83,10 +96,12 @@
 <script>
 import _ from 'lodash';
 import SelectedCategoryInfo from "@/components/categories/SelectedCategoryInfo.vue";
+import CategoryUsageDialog from "@/components/categories/CategoryUsageDialog.vue";
 
 export default {
     name: "CategoryTreeList",
     components: {
+        CategoryUsageDialog,
         SelectedCategoryInfo
     },
     props: {

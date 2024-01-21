@@ -1,14 +1,16 @@
 <template>
     <div>
-        <b-button id="usage-count"
-                  variant="success"
-                  :pill="true"
-                  size="sm"
-                  @click="onOpenModal"
-                  v-b-tooltip.hover
-                  :title="`Diese Kategorie wird in ${category.usageCount} Transaktionen benutzt.`">
-            {{ category.usageCount }}
-        </b-button>
+        <slot name="button" :clickCallback="onOpenModal">
+            <b-button id="usage-count"
+                      variant="success"
+                      :pill="true"
+                      size="sm"
+                      @click="onOpenModal"
+                      v-b-tooltip.hover
+                      :title="`Diese Kategorie wird in ${category.usageCount} Transaktionen benutzt.`">
+                {{ category.usageCount }}
+            </b-button>
+        </slot>
 
         <b-modal ref="modal-turnovers"
                  :scrollable="true"
