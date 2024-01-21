@@ -1,9 +1,9 @@
 <template>
     <div>
-        <div :id="`value-element-${index}`">
+        <span :id="`value-element-${index}`">
             {{ shortValue }}
-        </div>
-        <b-tooltip :target="`value-element-${index}`" triggers="hover">
+        </span>
+        <b-tooltip :target="`value-element-${index}`" triggers="hover" v-if="isTooLong">
             <div>
                 {{ value }}
             </div>
@@ -27,6 +27,9 @@ export default {
         }
     },
     computed: {
+        isTooLong() {
+            return this.value !== this.shortValue
+        },
         shortValue() {
             return _.truncate(this.value, {length: 32});
         }

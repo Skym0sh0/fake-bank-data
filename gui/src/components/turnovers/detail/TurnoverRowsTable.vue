@@ -14,9 +14,7 @@
                 <category-input :id="`category-input-${row.index}`"
                                 v-model="row.item.categoryId"
                                 @createCategory="onCreateCategory"
-                                :options="categories"
-
-                />
+                                :options="categories"/>
             </template>
 
             <template v-slot:cell(description)="row">

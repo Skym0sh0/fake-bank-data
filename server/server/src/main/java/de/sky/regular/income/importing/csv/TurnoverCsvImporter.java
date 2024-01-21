@@ -111,10 +111,11 @@ public class TurnoverCsvImporter {
             if (!isValidCategory)
                 throw new IllegalArgumentException("Category ID is either unknown or belongs to another user: " + categoryId);
 
-            return ctx.fetch(TURNOVER_ROW, and(
-                            TURNOVER_ROW.OWNER_ID.eq(userId),
-                            TURNOVER_ROW.CATEGORY_ID.eq(categoryId)
-                    ))
+            return ctx.selectFrom(TURNOVER_ROW)
+                    .where(TURNOVER_ROW.OWNER_ID.eq(userId))
+                    .and(TURNOVER_ROW.CATEGORY_ID.eq(categoryId))
+                    .orderBy(TURNOVER_ROW.DATE.desc())
+                    .fetch()
                     .map(TurnoverCsvImporter::map);
         });
     }
