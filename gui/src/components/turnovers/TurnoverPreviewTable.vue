@@ -39,7 +39,7 @@
         </template>
 
         <template v-slot:cell(amount)="row">
-            <table-cell-monetary :value="row.item.amountInCents"/>
+            <table-cell-monetary :value="row.item.amountInCents" class="float-right"/>
         </template>
 
         <template v-slot:cell(categoryId)="row">

@@ -61,12 +61,6 @@
             <div v-if="!parsedPreview">
                 <b-container :fluid="true" class="p-3">
                     <b-row>
-                        <b-col :sm="2" :md="2">
-                            <b-form-select v-model="selectedFileType"
-                                           :options="supportedFileTypes"
-                                           :state="!$v.selectedFileType.$invalid"/>
-                        </b-col>
-
                         <b-col :sm="6" :md="7">
                             <b-form-file id="general-file-import-file"
                                          v-model="fileSelection"
@@ -77,11 +71,19 @@
                                          drop-placeholder="Drop file here to import"
                                          accept=".csv"/>
                         </b-col>
+
+                        <b-col :sm="2" :md="2">
+                            <b-form-select v-model="selectedFileType"
+                                           :options="supportedFileTypes"
+                                           :state="!$v.selectedFileType.$invalid"/>
+                        </b-col>
+
                         <b-col :sm="2" :md="2">
                             <b-form-select v-model="selectedFileEncoding"
                                            :options="supportedFileEncodings"
                                            :state="!$v.selectedFileEncoding.$invalid"/>
                         </b-col>
+
                         <b-col :sm="2" :md="1">
                             <b-btn @click="onStartPreview"
                                    :disabled="$v.$invalid"
