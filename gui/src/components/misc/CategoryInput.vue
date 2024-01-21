@@ -13,14 +13,15 @@
         <b-input-group-append>
             <b-button size="sm"
                       @click="onAddCategory"
-                      :disabled="!isUnknownCategory || $v.currentSearch.$invalid">
+                      :variant="isAddableCategory ? 'primary' : 'secondary'"
+                      :disabled="!isAddableCategory">
                 +
             </b-button>
         </b-input-group-append>
 
         <datalist :id="`${id}-category-input-list`">
-            <option v-for="cat in categories" :key="cat.id">
-                {{ cat.name }}
+            <option v-for="cat in completableOptions" :key="cat.id" :value="cat.name">
+                {{ cat.displayParentChain }}
             </option>
         </datalist>
     </b-input-group>
@@ -47,7 +48,7 @@ export default {
             type: Boolean,
             default: false,
         },
-        options: {
+        categories: {
             required: true,
             type: Array,
         },
@@ -72,23 +73,32 @@ export default {
         }
     },
     computed: {
-        categories() {
-            const extract = (cat) => {
+        flattedCategories() {
+            const extract = (cat, parentCategoryNames) => {
                 return [
-                    cat,
-                    ...cat.subCategories.flatMap(extract)
+                    {
+                        ...cat,
+                        parentCategoryNames: parentCategoryNames
+                    },
+                    ...cat.subCategories.flatMap(c => extract(c, [...parentCategoryNames, cat.name]))
                 ];
             };
 
-            const flatted = this.options.flatMap(extract)
-
-            return _.sortBy(flatted, cat => cat.name)
+            return this.categories.flatMap(c => extract(c, []))
+                .map(c => ({
+                        ...c,
+                        displayParentChain: [...c.parentCategoryNames, c.name].join(" > ")
+                    })
+                )
+        },
+        completableOptions() {
+            return _.sortBy(this.flattedCategories, cat => cat.name)
         },
         categoriesByName() {
-            return this.categories.reduce((old, cur) => ({...old, [cur.name]: cur}), {})
+            return this.flattedCategories.reduce((old, cur) => ({...old, [cur.name]: cur}), {})
         },
         categoriesById() {
-            return this.categories.reduce((old, cur) => ({...old, [cur.id]: cur}), {})
+            return this.flattedCategories.reduce((old, cur) => ({...old, [cur.id]: cur}), {})
         },
         isValidState() {
             return this.state && !this.isUnknownCategory && !this.$v.currentSearch.$invalid;
@@ -102,6 +112,9 @@ export default {
             }
 
             return this.isValidState
+        },
+        isAddableCategory() {
+            return !(!this.isUnknownCategory || this.$v.currentSearch.$invalid)
         },
     },
     watch: {

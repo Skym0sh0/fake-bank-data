@@ -46,7 +46,7 @@
             <category-input :id="`csv-category-input-${row.index}`"
                             v-model="row.item.categoryId"
                             @createCategory="onCreateCategory"
-                            :options="categories"
+                            :categories="categories"
                             :required="row.item.importable"
                             :disabled="!row.item.importable"/>
         </template>
