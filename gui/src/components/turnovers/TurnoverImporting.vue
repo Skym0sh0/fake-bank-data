@@ -129,6 +129,7 @@ function getBankFormatName(frmt) {
     const BANK_FORMAT_NAMES = {
         "VR_BANK_CSV": "CSV VR-Bank",
         "DKB": "CSV DKB",
+        "NEW_DKB": "CSV DKB (neue GUI)",
         "PAYPAL": "CSV PayPal"
     };
 

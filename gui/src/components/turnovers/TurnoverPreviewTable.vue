@@ -101,6 +101,8 @@ export default {
     },
     computed: {
         fields() {
+            const hasSuggestions = this.value.some(r => !!r.suggestedCategory)
+
             return [
                 {
                     key: 'checksum',
@@ -138,11 +140,11 @@ export default {
                         return cat.name;
                     },
                 },
-                {
+                hasSuggestions ? {
                     key: "suggestedCategory",
                     label: "Bank Vorschlag",
                     sortable: true,
-                },
+                } : undefined,
                 {
                     key: "Description"
                 }
