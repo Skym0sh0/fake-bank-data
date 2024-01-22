@@ -11,6 +11,8 @@ public class Category extends UpdatedMetaInformation {
     public String name;
     public String description;
 
+    public boolean isNew;
+
     public UUID parentId;
     public List<Category> subCategories;
 

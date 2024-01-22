@@ -180,6 +180,7 @@ public class CategoryDAO {
 
         c.setName(rec.getName());
         c.setDescription(rec.getDescription());
+        c.setNew(Objects.equals(rec.getCreatedAt(), rec.getLastUpdatedAt()));
 
         c.setSubCategories(null);
 
