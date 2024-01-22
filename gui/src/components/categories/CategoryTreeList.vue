@@ -10,7 +10,7 @@
                     :dense="true"
                     :return-object="false"
                     :transition="true"
-                    :rounded="true">
+                    :rounded="false">
 
             <template v-slot:prepend="{ item }">
                 <drop @drop="onDrop(item, ...arguments)">
@@ -24,12 +24,18 @@
 
             <template v-slot:label="{ item }">
                 <drop @drop="onDrop(item, ...arguments)">
-                    <v-badge :content="item.children.length"
-                             :value="item.children.length"
-                             color="accent"
-                             :inline="true">
-                        {{ item.name }}
-                    </v-badge>
+                    <div class="d-flex justify-content-between" :style="item.isNew ? 'background-color: rgba(60,255, 128, 0.25)' : null">
+                        <v-badge :content="item.children.length"
+                                 :value="item.children.length"
+                                 color="accent"
+                                 :inline="true">
+                            {{ item.name }}
+                        </v-badge>
+
+                        <span v-if="item.isNew" class="font-weight-light">
+                            *neu*
+                        </span>
+                    </div>
                 </drop>
             </template>
 
