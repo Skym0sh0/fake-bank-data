@@ -177,7 +177,7 @@ export default {
     },
     computed: {
         parentCategories() {
-            return _.sortBy(this.categories.filter(cat => !cat.parentId), x => x.name)
+            return _.sortBy(this.categories.filter(cat => !cat.parentId), x => x.name.toLowerCase())
         },
         categoriesAsTree() {
             const resolver = cat => {

@@ -93,6 +93,7 @@ export function denormalizeCategory(cat) {
         parentId: cat.parentId,
         name: cat.name,
         description: cat.description,
+        isNew: cat.isNew,
 
         subCategories: (cat.subCategories || []).map(denormalizeCategory),
 
