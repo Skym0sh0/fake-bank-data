@@ -24,8 +24,7 @@
 
             <template v-slot:label="{ item }">
                 <drop @drop="onDrop(item, ...arguments)">
-                    <div class="d-flex justify-content-between"
-                         :style="item.isNew ? 'background-color: rgba(60,255, 128, 0.25)' : null">
+                    <div class="d-flex justify-content-between">
                         <v-badge :content="item.children.length"
                                  :value="item.children.length"
                                  color="accent"
@@ -33,9 +32,9 @@
                             {{ item.name }}
                         </v-badge>
 
-                        <span v-if="item.isNew" class="font-weight-light">
-                            *neu*
-                        </span>
+                        <v-icon v-if="item.isNew" color="red">
+                            mdi-new-box
+                        </v-icon>
                     </div>
                 </drop>
             </template>
