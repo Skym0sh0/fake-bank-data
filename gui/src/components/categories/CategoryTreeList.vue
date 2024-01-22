@@ -24,7 +24,8 @@
 
             <template v-slot:label="{ item }">
                 <drop @drop="onDrop(item, ...arguments)">
-                    <div class="d-flex justify-content-between" :style="item.isNew ? 'background-color: rgba(60,255, 128, 0.25)' : null">
+                    <div class="d-flex justify-content-between"
+                         :style="item.isNew ? 'background-color: rgba(60,255, 128, 0.25)' : null">
                         <v-badge :content="item.children.length"
                                  :value="item.children.length"
                                  color="accent"
@@ -40,48 +41,10 @@
             </template>
 
             <template v-slot:append="{ item }">
-                <b-btn-group>
-                    <category-usage-dialog :category="item">
-                        <template v-slot:button="{ clickCallback }">
-                            <v-btn :icon="true"
-                                   :small="true"
-                                   color="warning"
-                                   @click="clickCallback">
-                                <v-icon :small="true">
-                                    mdi-format-list-bulleted
-                                </v-icon>
-                            </v-btn>
-                        </template>
-                    </category-usage-dialog>
-
-                    <v-btn :icon="true"
-                           :small="true"
-                           color="success"
-                           @click.stop="editCategory(item.id)">
-                        <v-icon :small="true">
-                            mdi-playlist-edit
-                        </v-icon>
-                    </v-btn>
-
-                    <v-btn :icon="true"
-                           :small="true"
-                           color="purple"
-                           @click.stop="addNewCategoryTo(item.id)">
-                        <v-icon :small="true">
-                            mdi-playlist-plus
-                        </v-icon>
-                    </v-btn>
-
-                    <v-btn :icon="true"
-                           :small="true"
-                           color="error"
-                           @click.stop="deleteCategory(item.id)"
-                           :disabled="isDeletionForbidden(item)">
-                        <v-icon :small="true">
-                            mdi-trash-can-outline
-                        </v-icon>
-                    </v-btn>
-                </b-btn-group>
+                <category-tree-item-buttons :category="item"
+                                            @editCategory="editCategory"
+                                            @addNewChildCategory="addNewCategoryTo"
+                                            @deleteCategory="deleteCategory"/>
             </template>
         </v-treeview>
 
@@ -102,12 +65,12 @@
 <script>
 import _ from 'lodash';
 import SelectedCategoryInfo from "@/components/categories/SelectedCategoryInfo.vue";
-import CategoryUsageDialog from "@/components/categories/CategoryUsageDialog.vue";
+import CategoryTreeItemButtons from "@/components/categories/CategoryTreeItemButtons.vue";
 
 export default {
     name: "CategoryTreeList",
     components: {
-        CategoryUsageDialog,
+        CategoryTreeItemButtons,
         SelectedCategoryInfo
     },
     props: {
@@ -169,12 +132,6 @@ export default {
 
             // this.$nextTick(() => this.opened.push(trgtItem.id, srcItem.id));
         },
-        isDeletionForbidden(category) {
-            const isRoot = !category.parentId;
-            const hasChildren = category.children && category.children.length > 0;
-            const isUsed = category.usageCount > 0;
-            return hasChildren || (isRoot && isUsed);
-        }
     },
     watch: {
         categories() {
