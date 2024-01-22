@@ -34,6 +34,16 @@ public class CategoryDAO {
 
         rec.insert();
 
+        if (parentId != null) {
+            var updated = ctx.update(CATEGORY)
+                    .set(CATEGORY.LAST_UPDATED_AT, now)
+                    .where(CATEGORY.ID.eq(parentId))
+                    .and(CATEGORY.OWNER_ID.eq(userId))
+                    .execute();
+            if (updated != 1)
+                throw new RuntimeException("Creating child category failed due to updates " + updated);
+        }
+
         return fetchById(ctx, userId, rec.getId());
     }
 
@@ -41,7 +51,9 @@ public class CategoryDAO {
         CategoryRecord rec = ctx.selectFrom(CATEGORY)
                 .where(CATEGORY.ID.eq(id))
                 .and(CATEGORY.OWNER_ID.eq(userId))
-                .fetchOne();
+                .forUpdate()
+                .fetchOptional()
+                .orElseThrow(() -> new RuntimeException("Not category found: " + id));
 
         rec.setName(patch.name.trim());
         rec.setDescription(Optional.ofNullable(patch.description).map(String::trim).orElse(null));
@@ -61,31 +73,49 @@ public class CategoryDAO {
     }
 
     public void deleteCategory(DSLContext ctx, UUID userId, UUID id) {
+        var now = ZonedDateTime.now().toOffsetDateTime();
+
         var turnovers = TURNOVER_ROW.as("turnovers");
         var parent = CATEGORY.as("parent");
         var child = CATEGORY.as("child");
 
         ctx.update(turnovers)
                 .set(turnovers.CATEGORY_ID, child.PARENT_CATEGORY)
+                .set(turnovers.LAST_UPDATED_AT, now)
                 .from(child)
                 .where(DSL.and(
                         child.ID.eq(turnovers.CATEGORY_ID),
                         child.ID.eq(id),
                         child.PARENT_CATEGORY.isNotNull()
                 ))
+                .and(turnovers.OWNER_ID.eq(userId))
+                .and(child.OWNER_ID.eq(userId))
                 .execute();
 
         ctx.update(child)
                 .set(CATEGORY.PARENT_CATEGORY, parent.PARENT_CATEGORY)
+                .set(CATEGORY.LAST_UPDATED_AT, now)
                 .from(parent)
                 .where(and(
                         child.PARENT_CATEGORY.eq(parent.ID),
                         parent.ID.eq(id)
                 ))
+                .and(child.OWNER_ID.eq(userId))
+                .and(parent.OWNER_ID.eq(userId))
+                .execute();
+
+        ctx.update(parent)
+                .set(CATEGORY.LAST_UPDATED_AT, now)
+                .from(child)
+                .where(parent.ID.eq(child.PARENT_CATEGORY))
+                .and(child.ID.eq(id))
+                .and(child.OWNER_ID.eq(userId))
+                .and(parent.OWNER_ID.eq(userId))
                 .execute();
 
         ctx.deleteFrom(CATEGORY)
                 .where(CATEGORY.ID.eq(id))
+                .and(CATEGORY.OWNER_ID.eq(userId))
                 .execute();
     }
 
@@ -100,9 +130,8 @@ public class CategoryDAO {
                 .execute();
         ctx.update(CATEGORY)
                 .set(CATEGORY.LAST_UPDATED_AT, now)
-                .where(CATEGORY.OWNER_ID.eq(userId).and(
-                        CATEGORY.ID.eq(childId).or(CATEGORY.ID.eq(newParentId))
-                ))
+                .where(CATEGORY.OWNER_ID.eq(userId))
+                .and(CATEGORY.ID.eq(childId).or(CATEGORY.ID.eq(newParentId)))
                 .execute();
 
         var parent = CATEGORY.as("parent");
