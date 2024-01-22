@@ -83,27 +83,6 @@ class RegularIncomeAPI {
         }
     }
 
-    getFileImports() {
-        const ref = this
-
-        return {
-            putFileToImport(file) {
-                const formData = new FormData()
-                formData.append('file', file)
-
-                return ref.getClient().put(
-                    'statements/import',
-                    formData,
-                    {
-                        headers: {
-                            'Content-Type': 'multipart/form-data'
-                        }
-                    }
-                )
-            },
-        }
-    }
-
     getReports() {
         const ref = this
 
