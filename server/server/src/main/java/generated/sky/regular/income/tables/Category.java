@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+import org.jooq.Check;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
@@ -37,6 +38,7 @@ import org.jooq.TableField;
 import org.jooq.TableOptions;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
+import org.jooq.impl.Internal;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
@@ -217,6 +219,13 @@ public class Category extends TableImpl<CategoryRecord> {
             _turnoverRow = new TurnoverRowPath(this, null, Keys.TURNOVER_ROW__FK_TURNOVER_ROW_CATEGORY_FKEY.getInverseKey());
 
         return _turnoverRow;
+    }
+
+    @Override
+    public List<Check<CategoryRecord>> getChecks() {
+        return Arrays.asList(
+            Internal.createCheck(this, DSL.name("category_not_self_referencing"), "(((parent_category IS NULL) OR (parent_category <> id)))", true)
+        );
     }
 
     @Override
