@@ -14,7 +14,9 @@
                 <category-input :id="`category-input-${row.index}`"
                                 v-model="row.item.categoryId"
                                 @createCategory="onCreateCategory"
-                                :categories="categories"/>
+                                :flatted-categories="flattedCategories"
+                                :categories-by-id="categoriesById"
+                                :categories-by-name="categoriesByName"/>
             </template>
 
             <template v-slot:cell(description)="row">
@@ -29,6 +31,11 @@
 import TableCellDescription from "@/components/turnovers/TableCellDescription.vue";
 import TableCellMonetary from "@/components/turnovers/TableCellMonetary.vue";
 import CategoryInput from "@/components/misc/CategoryInput.vue";
+import {
+    flatCategoryTreeWithParentChain,
+    mapCategoriesById,
+    mapCategoriesByName
+} from "@/components/turnovers/category-helpers";
 
 export default {
     name: "TurnoverRowsTable",
@@ -85,6 +92,15 @@ export default {
                     sortable: true,
                 },
             ];
+        },
+        flattedCategories() {
+            return flatCategoryTreeWithParentChain(this.categories, parents => parents.join(" > "));
+        },
+        categoriesByName() {
+            return mapCategoriesByName(this.flattedCategories)
+        },
+        categoriesById() {
+            return mapCategoriesById(this.flattedCategories)
         },
     },
 }

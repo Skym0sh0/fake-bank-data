@@ -20,8 +20,8 @@
         </b-input-group-append>
 
         <datalist :id="`${id}-category-input-list`">
-            <option v-for="cat in completableOptions" :key="cat.id" :value="cat.name">
-                {{ cat.displayParentChain }}
+            <option v-for="cat in flattedCategories" :key="cat.id" :value="cat.name">
+                {{ cat.parentChain }}
             </option>
         </datalist>
     </b-input-group>
@@ -30,7 +30,6 @@
 <script>
 import {validationMixin} from 'vuelidate'
 import {required} from 'vuelidate/dist/validators.min'
-import _ from 'lodash'
 
 export default {
     name: "CategoryInput",
@@ -48,9 +47,17 @@ export default {
             type: Boolean,
             default: false,
         },
-        categories: {
+        flattedCategories: {
             required: true,
             type: Array,
+        },
+        categoriesById: {
+            required: true,
+            type: Object,
+        },
+        categoriesByName: {
+            required: true,
+            type: Object,
         },
         state: {
             type: Boolean,
@@ -73,33 +80,6 @@ export default {
         }
     },
     computed: {
-        flattedCategories() {
-            const extract = (cat, parentCategoryNames) => {
-                return [
-                    {
-                        ...cat,
-                        parentCategoryNames: parentCategoryNames
-                    },
-                    ...cat.subCategories.flatMap(c => extract(c, [...parentCategoryNames, cat.name]))
-                ];
-            };
-
-            return this.categories.flatMap(c => extract(c, []))
-                .map(c => ({
-                        ...c,
-                        displayParentChain: [...c.parentCategoryNames, c.name].join(" > ")
-                    })
-                )
-        },
-        completableOptions() {
-            return _.sortBy(this.flattedCategories, cat => cat.name)
-        },
-        categoriesByName() {
-            return this.flattedCategories.reduce((old, cur) => ({...old, [cur.name]: cur}), {})
-        },
-        categoriesById() {
-            return this.flattedCategories.reduce((old, cur) => ({...old, [cur.id]: cur}), {})
-        },
         isValidState() {
             return this.state && !this.isUnknownCategory && !this.$v.currentSearch.$invalid;
         },
@@ -121,7 +101,7 @@ export default {
         value(/*newValue, oldValue*/) {
             this.initWhenOnlyValueIsSet()
         },
-        options(/*newOptions, oldOptions*/) {
+        categoriesByName(/*newOptions, oldOptions*/) {
             this.findOption()
         },
     },

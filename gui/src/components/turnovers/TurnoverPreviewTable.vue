@@ -46,7 +46,9 @@
             <category-input :id="`csv-category-input-${row.index}`"
                             v-model="row.item.categoryId"
                             @createCategory="onCreateCategory"
-                            :categories="categories"
+                            :flatted-categories="flattedCategories"
+                            :categories-by-id="categoriesById"
+                            :categories-by-name="categoriesByName"
                             :required="row.item.importable"
                             :disabled="!row.item.importable"/>
         </template>
@@ -74,6 +76,11 @@
 import TableCellDescription from "@/components/turnovers/TableCellDescription.vue";
 import TableCellMonetary from "@/components/turnovers/TableCellMonetary.vue";
 import CategoryInput from "@/components/misc/CategoryInput.vue";
+import {
+    flatCategoryTreeWithParentChain,
+    mapCategoriesById,
+    mapCategoriesByName
+} from "@/components/turnovers/category-helpers";
 
 export default {
     name: "TurnoverPreviewTable",
@@ -150,11 +157,14 @@ export default {
                 }
             ];
         },
+        flattedCategories() {
+            return flatCategoryTreeWithParentChain(this.categories, parents => parents.join(" > "));
+        },
         categoriesByName() {
-            return (this.categories || []).reduce((a, v) => ({...a, [v.name]: v}), {})
+            return mapCategoriesByName(this.flattedCategories)
         },
         categoriesById() {
-            return (this.categories || []).reduce((a, v) => ({...a, [v.id]: v}), {})
+            return mapCategoriesById(this.flattedCategories)
         },
     },
     methods: {
