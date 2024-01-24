@@ -58,7 +58,7 @@
 
 <script>
 import {api} from "@/api/RegularIncomeAPI";
-import RawStatementsReport from "./RawStatementsReport";
+import BalanceProgressionReport from "./BalanceProgressionReport";
 import IncomeExpenseReport from "./IncomeExpenseReport";
 import IncomeExpenseSankeyReport from "@/components/reports/IncomeExpenseSankeyReport.vue";
 
@@ -66,7 +66,7 @@ export default {
     name: "ReportOverview",
     components: {
         IncomeExpenseReport,
-        RawStatementsReport,
+        BalanceProgressionReport,
     },
     data() {
         return {
@@ -96,7 +96,7 @@ export default {
         },
     },
     mounted() {
-        api.getReports().fetchStatementsReport()
+        api.getReports().fetchBalanceProgressionReport()
             .then(res => {
                 this.statements.splice(0, this.statements.length)
                 return this.statements.push(...res.data);
@@ -119,8 +119,8 @@ export default {
     },
     created() {
         this.charts.push({
-            title: 'Bank Statement Report',
-            component: RawStatementsReport,
+            title: 'Balance Progression Report',
+            component: BalanceProgressionReport,
             loadingCondition: () => !this.statements,
             props: {statements: this.statements},
         })

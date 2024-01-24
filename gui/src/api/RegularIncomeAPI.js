@@ -87,8 +87,8 @@ class RegularIncomeAPI {
         const ref = this
 
         return {
-            fetchStatementsReport(begin, end) {
-                return ref.getClient().get('reports/statements', {
+            fetchBalanceProgressionReport(begin, end) {
+                return ref.getClient().get('reports/balance-progression', {
                     params: {
                         begin: begin,
                         end: end,
