@@ -20,6 +20,7 @@ import static org.assertj.core.api.InstanceOfAssertFactories.list;
 class TurnoverFileParserTest {
     private final TurnoverFileParser parser = new TurnoverFileParser(
             new DKBTurnoverCsvParser(),
+            new NewDKBTurnoverCsvParser(),
             new VRBankTurnoverCsvParser(),
             new PaypalTurnoverParser()
     );
