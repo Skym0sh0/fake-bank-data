@@ -1,8 +1,8 @@
 <template>
     <div>
-        <span :id="`value-element-${index}`">
+        <div :id="`value-element-${index}`">
             {{ shortValue }}
-        </span>
+        </div>
         <b-tooltip :target="`value-element-${index}`" triggers="hover" v-if="isTooLong">
             <div>
                 {{ value }}

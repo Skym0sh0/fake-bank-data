@@ -12,6 +12,18 @@
              :foot-clone="value.length > 25"
              :tbody-tr-class="rowClass">
 
+        <template v-slot:head(originalImportable)>
+            <div class="d-flex justify-content-start align-items-center">
+                <v-btn :icon="true"
+                       :x-small="!filters.onlyImportables"
+                       @click="filters.onlyImportables = !filters.onlyImportables">
+                    <v-icon color="success">
+                        {{ filters.onlyImportables ? 'mdi-filter-check' : 'mdi-filter' }}
+                    </v-icon>
+                </v-btn>
+            </div>
+        </template>
+
         <template v-slot:head(importable)>
             <b-checkbox @input="onSelectImportable" :checked="true"/>
         </template>
@@ -103,18 +115,30 @@ export default {
         return {
             filters: {
                 onlyMissingCategories: false,
+                onlyImportables: true,
             },
         }
     },
     computed: {
         fields() {
             const hasSuggestions = this.value.some(r => !!r.suggestedCategory)
+            const hasImportables = this.value.some(r => !!r.originalImportable)
 
             return [
                 {
                     key: 'checksum',
                     label: '#',
                 },
+                hasImportables ?
+                    {
+                        key: "originalImportable",
+                        label: "X",
+                        sortable: true,
+                        formatter: (importable) => {
+                            return importable ? '' : 'X';
+                        }
+                    }
+                    : undefined,
                 {
                     key: "importable",
                     label: "?",
@@ -181,7 +205,10 @@ export default {
             return undefined;
         },
         doFilter(row, filterProp) {
-            return filterProp.onlyMissingCategories ? !row.categoryId : true;
+            const importable = filterProp.onlyImportables ? row.originalImportable : true
+            const missingCategory = filterProp.onlyMissingCategories ? !row.categoryId : true;
+
+            return importable && missingCategory;
         },
         onCreateCategory(categoryName) {
             this.$emit("onCreateCategory", {
