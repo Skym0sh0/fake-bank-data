@@ -1,18 +1,17 @@
 package de.sky.regular.income.dao;
 
 import de.sky.regular.income.api.reports.MonthlyIncomeExpenseReport;
-import de.sky.regular.income.api.reports.StatementsReport;
+import de.sky.regular.income.api.reports.BalanceProgressionReport;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.DSLContext;
 import org.jooq.DatePart;
+import org.jooq.impl.DSL;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.Period;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Optional;
@@ -20,7 +19,6 @@ import java.util.UUID;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static generated.sky.regular.income.Tables.TURNOVER_FILE_IMPORT;
 import static generated.sky.regular.income.Tables.TURNOVER_ROW;
 import static org.jooq.impl.DSL.*;
 
@@ -30,43 +28,39 @@ import static org.jooq.impl.DSL.*;
 public class ReportsDAO {
     private static final int MAX_NUMBER_RECORDS = 20_000;
 
-    public StatementsReport doStatementsReport(DSLContext ctx, UUID userId, LocalDate begin, LocalDate end) {
+    public BalanceProgressionReport doBalanceProgressionReport(DSLContext ctx, UUID userId, LocalDate begin, LocalDate end) {
         var start = Optional.ofNullable(begin)
-                .orElse(LocalDate.of(1500, Month.JANUARY, 1))
-                .atStartOfDay(ZoneId.systemDefault())
-                .toOffsetDateTime();
+                .orElse(LocalDate.of(1500, Month.JANUARY, 1));
         var ending = Optional.ofNullable(end)
-                .orElse(LocalDate.of(3000, Month.JANUARY, 1))
-                .atStartOfDay(ZoneId.systemDefault())
-                .toOffsetDateTime();
+                .orElse(LocalDate.of(3000, Month.JANUARY, 1));
 
-        var rprt = new StatementsReport();
+        var sumPerDay = sum(TURNOVER_ROW.AMOUNT_VALUE_CENTS).cast(Integer.class);
+        var sumPerDayAliased = sumPerDay.as("sumPerDay");
+        var index = DSL.rank().over(DSL.orderBy(TURNOVER_ROW.DATE)).minus(1).as("index");
+        var cumulativeSum = DSL.sum(sumPerDay).over(DSL.orderBy(TURNOVER_ROW.DATE)).cast(Integer.class).as("cumulativeSum");
 
-        var balance = sum(TURNOVER_ROW.AMOUNT_VALUE_CENTS).as("BALANCE");
-        var balanceOrZero = coalesce(balance, BigDecimal.ZERO);
+        var rprt = new BalanceProgressionReport();
 
-        var innerTable = table(select(TURNOVER_ROW.TURNOVER_FILE, balance)
+        rprt.data = ctx.select(
+                        TURNOVER_ROW.DATE,
+                        sumPerDayAliased,
+                        index,
+                        cumulativeSum
+                )
                 .from(TURNOVER_ROW)
                 .where(TURNOVER_ROW.OWNER_ID.eq(userId))
-                .groupBy(TURNOVER_ROW.TURNOVER_FILE)
-        );
-
-        rprt.data = ctx.select(TURNOVER_FILE_IMPORT.IMPORTED_AT, balanceOrZero)
-                .from(TURNOVER_FILE_IMPORT)
-                .leftJoin(innerTable)
-                .on(TURNOVER_FILE_IMPORT.ID.eq(innerTable.field(TURNOVER_ROW.TURNOVER_FILE)))
-                .where(TURNOVER_FILE_IMPORT.OWNER_ID.eq(userId))
-                .and(TURNOVER_FILE_IMPORT.IMPORTED_AT.ge(start))
-                .and(TURNOVER_FILE_IMPORT.IMPORTED_AT.lessThan(ending))
-                .orderBy(TURNOVER_FILE_IMPORT.IMPORTED_AT.asc())
+                .and(TURNOVER_ROW.DATE.greaterOrEqual(start))
+                .and(TURNOVER_ROW.DATE.lessOrEqual(ending))
+                .groupBy(TURNOVER_ROW.DATE)
+                .orderBy(TURNOVER_ROW.DATE)
                 .limit(MAX_NUMBER_RECORDS + 1)
                 .fetch()
-                .map(rec -> {
-                    var p = new StatementsReport.DataPoint();
-                    p.setDate(rec.get(TURNOVER_FILE_IMPORT.IMPORTED_AT).toLocalDate());
-                    p.setBalanceInCents(rec.get(balanceOrZero).intValueExact());
-                    return p;
-                });
+                .map(rec -> new BalanceProgressionReport.DataPoint(
+                        rec.get(index),
+                        rec.get(TURNOVER_ROW.DATE),
+                        rec.get(sumPerDayAliased),
+                        rec.get(cumulativeSum)
+                ));
 
         if (rprt.data.size() > MAX_NUMBER_RECORDS)
             log.warn("Between [{}, {}) were more than {} datapoints", begin, end, MAX_NUMBER_RECORDS);

@@ -3,7 +3,7 @@ package de.sky.regular.income.rest;
 import de.sky.common.database.DatabaseConnection;
 import de.sky.regular.income.api.reports.IncomeExpenseFlowReport;
 import de.sky.regular.income.api.reports.MonthlyIncomeExpenseReport;
-import de.sky.regular.income.api.reports.StatementsReport;
+import de.sky.regular.income.api.reports.BalanceProgressionReport;
 import de.sky.regular.income.dao.IncomeExpenseFlowDataReporter;
 import de.sky.regular.income.dao.ReportsDAO;
 import de.sky.regular.income.database.DatabaseSupplier;
@@ -36,11 +36,11 @@ public class ReportsController {
         this(supplier.getDatabase(), dao, flowReporter, user);
     }
 
-    @GetMapping("/statements")
-    public StatementsReport fetchStatementsReport(@RequestParam(value = "begin", required = false) LocalDate begin, @RequestParam(value = "end", required = false) LocalDate end) {
+    @GetMapping("/balance-progression")
+    public BalanceProgressionReport fetchBalanceProgressionReport(@RequestParam(value = "begin", required = false) LocalDate begin, @RequestParam(value = "end", required = false) LocalDate end) {
         logger.info("Fetch StatementsReport between [{}, {})", begin, end);
 
-        return db.transactionWithResult(ctx -> dao.doStatementsReport(ctx, user.getCurrentUser(ctx).getId(), begin, end));
+        return db.transactionWithResult(ctx -> dao.doBalanceProgressionReport(ctx, user.getCurrentUser(ctx).getId(), begin, end));
     }
 
     @GetMapping("/monthly-income-expenses")
