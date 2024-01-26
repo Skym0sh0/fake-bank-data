@@ -38,7 +38,7 @@ public class IncomeExpenseFlowDataReporter {
                 null,
                 null,
                 0,
-                0
+                depth
         );
 
         var allDatapoints = Stream.of(List.of(root), positive, negative)

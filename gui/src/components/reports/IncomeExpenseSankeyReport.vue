@@ -79,8 +79,6 @@ export default {
             // chart.orientation = "vertical";
 
             chart.data = this.processedData
-            //chart.data.map(c=>`${c.from} -> ${c.to} => ${c.amount}`).forEach(c=> console.log(c))
-            console.table(chart.data)
             chart.dataFields.fromName = "from";
             chart.dataFields.toName = "to";
             chart.dataFields.value = "amount";
