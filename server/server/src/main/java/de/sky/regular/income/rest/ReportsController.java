@@ -1,9 +1,9 @@
 package de.sky.regular.income.rest;
 
 import de.sky.common.database.DatabaseConnection;
+import de.sky.regular.income.api.reports.BalanceProgressionReport;
 import de.sky.regular.income.api.reports.IncomeExpenseFlowReport;
 import de.sky.regular.income.api.reports.MonthlyIncomeExpenseReport;
-import de.sky.regular.income.api.reports.BalanceProgressionReport;
 import de.sky.regular.income.dao.IncomeExpenseFlowDataReporter;
 import de.sky.regular.income.dao.ReportsDAO;
 import de.sky.regular.income.database.DatabaseSupplier;
@@ -51,9 +51,9 @@ public class ReportsController {
     }
 
     @GetMapping("/income-expenses-flow")
-    public IncomeExpenseFlowReport fetchIncomeExpenseFlowReport() {
+    public IncomeExpenseFlowReport fetchIncomeExpenseFlowReport(@RequestParam(value = "max-depth", defaultValue = "5") int depth) {
         logger.info("Fetch IncomeExpense Flow Report");
 
-        return db.transactionWithResult(ctx -> flowReporter.doReport(ctx, user.getCurrentUser(ctx).getId()));
+        return db.transactionWithResult(ctx -> flowReporter.doReport(ctx, user.getCurrentUser(ctx).getId(), depth));
     }
 }

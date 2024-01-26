@@ -3,7 +3,8 @@ import {v4 as uuidv4} from 'uuid';
 import {
     denormalizeCategory,
     denormalizeTurnoverImport,
-    denormalizeTurnoverPreview, denormalizeTurnoverRow,
+    denormalizeTurnoverPreview,
+    denormalizeTurnoverRow,
     denormalizeUser
 } from "@/util/Normalizer";
 import {userService} from '@/auth/auth-header';
@@ -102,8 +103,11 @@ class RegularIncomeAPI {
             },
 
             fetchIncomeExpenseFlowReport() {
-                return ref.getClient().get('reports/income-expenses-flow')
-                    .then(res => res.data)
+                return ref.getClient().get('reports/income-expenses-flow', {
+                    params: {
+                        "max-depth": 3,
+                    }
+                }).then(res => res.data)
             },
         }
     }

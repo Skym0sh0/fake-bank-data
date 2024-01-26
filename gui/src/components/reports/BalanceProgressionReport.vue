@@ -1,6 +1,8 @@
 <template>
-    <div>
-        <div v-show="isReportPresent" :id="target" :style="{width: getWidth, height: getHeight}"/>
+    <div :style="{width: getWidth, height: getHeight}">
+        <waiter :is-loading="isLoading">
+            <div :id="target" class="h-100 w-100"/>
+        </waiter>
     </div>
 </template>
 
@@ -10,15 +12,15 @@ import * as am4charts from "@amcharts/amcharts4/charts";
 import am4themes_amcharts from "@amcharts/amcharts4/themes/amcharts";
 import {moneyFormat} from "@/util/Formatters";
 import {setInitialZoom} from "./ZoomUtil";
+import {api} from "@/api/RegularIncomeAPI";
+import Waiter from "@/components/misc/Waiter.vue";
 
 am4core.useTheme(am4themes_amcharts);
 
 export default {
     name: "BalanceProgressionReport",
+    components: {Waiter},
     props: {
-        statements: {
-            type: Array,
-        },
         height: {
             type: Number,
             required: true,
@@ -29,16 +31,13 @@ export default {
             target: `chart-target-div-${Math.round(Math.random() * 1000000)}`,
             width: null,
             chart: null,
+            isLoading: false,
+            data: [],
         }
-    },
-    watch: {
-        statements() {
-            this.draw()
-        },
     },
     computed: {
         isReportPresent() {
-            return this.statements && this.statements.length > 0
+            return this.data.length > 0
         },
         getWidth() {
             if (!this.width)
@@ -51,6 +50,19 @@ export default {
         },
     },
     methods: {
+        loadData() {
+            this.isLoading = true;
+
+            api.getReports().fetchBalanceProgressionReport()
+                .then(res => {
+                    this.data = res.data;
+                    this.isLoading = false
+
+                    this.$nextTick(() => this.draw())
+                })
+                .catch(e => console.log(e))
+                .finally(() => this.isLoading = false)
+        },
         draw() {
             if (this.chart)
                 this.chart.dispose()
@@ -60,7 +72,7 @@ export default {
 
             const chart = am4core.create(this.target, am4charts.XYChart)
 
-            chart.data = this.statements.map(rec => ({
+            chart.data = this.data.map(rec => ({
                 date: new Date(rec.date),
                 value: rec.balanceInCents / 100.0,
             }))
@@ -109,7 +121,7 @@ export default {
             this.chart.dispose()
     },
     mounted() {
-        this.draw()
+        this.loadData()
     }
 }
 </script>

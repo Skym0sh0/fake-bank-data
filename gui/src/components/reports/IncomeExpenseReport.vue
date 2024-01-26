@@ -1,6 +1,8 @@
 <template>
-    <div>
-        <div v-show="isReportPresent" ref="chartDiv" :style="{width: getWidth, height: getHeight}"/>
+    <div :style="{width: getWidth, height: getHeight}">
+        <waiter :is-loading="isLoading">
+            <div :id="target" class="h-100 w-100"/>
+        </waiter>
     </div>
 </template>
 
@@ -10,15 +12,15 @@ import * as am4charts from "@amcharts/amcharts4/charts";
 import {moneyFormat} from "@/util/Formatters";
 import am4themes_animated from "@amcharts/amcharts4/themes/animated";
 import {setInitialZoom} from "./ZoomUtil";
+import {api} from "@/api/RegularIncomeAPI";
+import Waiter from "@/components/misc/Waiter.vue";
 
 am4core.useTheme(am4themes_animated);
 
 export default {
     name: "IncomeExpenseReport",
+    components: {Waiter},
     props: {
-        incomeExpenses: {
-            type: Array,
-        },
         height: {
             type: Number,
             required: true,
@@ -26,14 +28,12 @@ export default {
     },
     data() {
         return {
+            target: `chart-target-div-${Math.round(Math.random() * 1000000)}`,
             width: null,
             chart: null,
+            isLoading: false,
+            incomeExpenses: [],
         }
-    },
-    watch: {
-        incomeExpenses() {
-            this.draw()
-        },
     },
     computed: {
         isReportPresent() {
@@ -50,6 +50,19 @@ export default {
         },
     },
     methods: {
+        loadData() {
+            this.isLoading = true;
+
+            api.getReports().fetchIncomeExpenseReport()
+                .then(res => {
+                    this.incomeExpenses = res.data;
+                    this.isLoading = false
+
+                    this.$nextTick(() => this.draw())
+                })
+                .catch(e => console.log(e))
+                .finally(() => this.isLoading = false)
+        },
         draw() {
             if (this.chart)
                 this.chart.dispose()
@@ -57,7 +70,7 @@ export default {
             if (!this.isReportPresent)
                 return
 
-            const chart = am4core.create(this.$refs.chartDiv, am4charts.XYChart)
+            const chart = am4core.create(this.target, am4charts.XYChart)
 
             chart.data = this.incomeExpenses.map(d => {
                 const inc = parseInt(d.incomeInCents)
@@ -212,7 +225,7 @@ export default {
             this.chart.dispose()
     },
     mounted() {
-        this.draw()
+        this.loadData()
     }
 }
 </script>

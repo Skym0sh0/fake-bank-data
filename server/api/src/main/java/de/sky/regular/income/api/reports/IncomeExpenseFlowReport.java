@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -21,8 +20,13 @@ public class IncomeExpenseFlowReport {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class FlowDataPoint {
-        public UUID fromCategoryId;
-        public UUID toCategoryId;
+        public String fromCategory;
+        public String toCategory;
         public Integer amountInCents;
+        public int depthLevel;
+
+        public FlowDataPoint(String fromCategory, String toCategory, Integer amountInCents) {
+            this(fromCategory, toCategory, amountInCents, 0);
+        }
     }
 }
