@@ -7,6 +7,7 @@ import org.apache.commons.lang3.function.TriFunction;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -22,23 +23,30 @@ import static org.jooq.impl.DSL.sum;
 public class IncomeExpenseFlowDataReporter {
     private final CategoryDAO categoryDao;
 
-    public IncomeExpenseFlowReport doReport(DSLContext ctx, UUID userId) {
+    public IncomeExpenseFlowReport doReport(DSLContext ctx, UUID userId, int depth) {
+        Assert.isTrue(depth >= 0, "Depth must be positive");
+
         var categories = categoryDao.fetchCategoryTree(ctx, userId);
 
         var negativeSumByCategoryId = fetchSumPerCategoryWhere(ctx, userId, TURNOVER_ROW.AMOUNT_VALUE_CENTS.lessThan(0));
-        var negative = createDataPoints(categories, negativeSumByCategoryId, (parent, child, amount) -> new IncomeExpenseFlowReport.FlowDataPoint(parent, child, amount));
+        var negative = createDataPoints(categories, negativeSumByCategoryId, depth, (parent, child, amount) -> new IncomeExpenseFlowReport.FlowDataPoint(parent, child, amount));
 
         var positiveSumByCategoryId = fetchSumPerCategoryWhere(ctx, userId, TURNOVER_ROW.AMOUNT_VALUE_CENTS.greaterThan(0));
-        var positive = createDataPoints(categories, positiveSumByCategoryId, (parent, child, amount) -> new IncomeExpenseFlowReport.FlowDataPoint(child, parent, amount));
+        var positive = createDataPoints(categories, positiveSumByCategoryId, depth, (parent, child, amount) -> new IncomeExpenseFlowReport.FlowDataPoint(child, parent, amount));
 
         var root = new IncomeExpenseFlowReport.FlowDataPoint(
                 null,
                 null,
+                0,
                 0
         );
 
-        var allDatapoints = Stream.of(negative, positive, List.of(root))
+        var allDatapoints = Stream.of(List.of(root), positive, negative)
                 .flatMap(Collection::stream)
+                .map(d -> {
+                    d.setDepthLevel(depth - d.getDepthLevel());
+                    return d;
+                })
                 .toList();
 
         var now = LocalDate.now();
@@ -49,7 +57,7 @@ public class IncomeExpenseFlowDataReporter {
         );
     }
 
-    private static List<IncomeExpenseFlowReport.FlowDataPoint> createDataPoints(List<Category> categories, Map<UUID, Integer> sumByCategoryId, DataPointCreator creator) {
+    private static List<IncomeExpenseFlowReport.FlowDataPoint> createDataPoints(List<Category> categories, Map<UUID, Integer> sumByCategoryId, int depth, DataPointCreator creator) {
         var costTree = categories.stream()
                 .map(c -> CategoryTreeNode.create(c, sumByCategoryId))
                 .sorted(Comparator.comparingInt(CategoryTreeNode::amount).reversed())
@@ -62,9 +70,10 @@ public class IncomeExpenseFlowDataReporter {
         Predicate<CategoryTreeNode> isBigEnough = node -> node.amount() > stats.getMax() * 0.05;
 
         return costTree.stream()
-                .takeWhile(isBigEnough)
+                .filter(isBigEnough)
 //                .limit(25)
-                .flatMap(t -> traverse(Integer.MAX_VALUE, null, t, creator))
+                .map(t -> traverse(depth, null, t, creator))
+                .flatMap(Collection::stream)
                 .toList();
 
     }
@@ -81,21 +90,25 @@ public class IncomeExpenseFlowDataReporter {
                 .intoMap(TURNOVER_ROW.CATEGORY_ID, sumField);
     }
 
-    private static Stream<IncomeExpenseFlowReport.FlowDataPoint> traverse(int level, CategoryTreeNode parent, CategoryTreeNode current, DataPointCreator creator) {
+    private static List<IncomeExpenseFlowReport.FlowDataPoint> traverse(int level, CategoryTreeNode parent, CategoryTreeNode current, DataPointCreator creator) {
         if (level == 0 || current.amount() == 0)
-            return Stream.empty();
+            return List.of();
 
         var children = current.children()
                 .stream()
-                .flatMap(child -> traverse(level - 1, current, child, creator));
+                .map(child -> traverse(level - 1, current, child, creator))
+                .flatMap(Collection::stream)
+                .toList();
 
         var c = creator.apply(
-                parent != null ? parent.c().getId() : null,
-                current.c().id,
+                Optional.ofNullable(parent).map(CategoryTreeNode::c).map(Category::getName).orElse(null),
+                current.c().getName(),
                 current.amount()
         );
+        c.setDepthLevel(level);
 
-        return Stream.concat(Stream.of(c), children);
+        return Stream.concat(Stream.of(c), children.stream())
+                .toList();
     }
 
     private record CategoryTreeNode(Category c, List<CategoryTreeNode> children, int amount) {
@@ -117,7 +130,7 @@ public class IncomeExpenseFlowDataReporter {
         }
     }
 
-    private interface DataPointCreator extends TriFunction<UUID, UUID, Integer, IncomeExpenseFlowReport.FlowDataPoint> {
+    private interface DataPointCreator extends TriFunction<String, String, Integer, IncomeExpenseFlowReport.FlowDataPoint> {
 
     }
 }
