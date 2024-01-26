@@ -38,15 +38,9 @@
 
                         <v-expansion-panel-content :id="`report-overview-graph-panel-content-${graph.id}`" eager>
                             <keep-alive>
-                                <v-skeleton-loader :id="`report-overview-graph-loader-${graph.id}`"
-                                                   :loading="graph.loadingCondition()"
-                                                   :height="chartHeight"
-                                                   type="image@3">
-                                    <component :id="`report-overview-graph-${graph.id}`"
-                                               :is="graph.component"
-                                               v-bind="graph.props"
-                                               :height="chartHeight"/>
-                                </v-skeleton-loader>
+                                <component :id="`report-overview-graph-${graph.id}`"
+                                           :is="graph.component"
+                                           :height="chartHeight"/>
                             </keep-alive>
                         </v-expansion-panel-content>
                     </v-expansion-panel>
@@ -57,7 +51,6 @@
 </template>
 
 <script>
-import {api} from "@/api/RegularIncomeAPI";
 import BalanceProgressionReport from "./BalanceProgressionReport";
 import IncomeExpenseReport from "./IncomeExpenseReport";
 import IncomeExpenseSankeyReport from "@/components/reports/IncomeExpenseSankeyReport.vue";
@@ -70,9 +63,6 @@ export default {
     },
     data() {
         return {
-            statements: [],
-            incomeExpenses: [],
-            incomeExpensesSankey: [],
             chartHeight: 800,
             openCharts: [],
             charts: [],
@@ -96,47 +86,19 @@ export default {
         },
     },
     mounted() {
-        api.getReports().fetchBalanceProgressionReport()
-            .then(res => {
-                this.statements.splice(0, this.statements.length)
-                return this.statements.push(...res.data);
-            })
-            .catch(e => console.log(e))
-
-        api.getReports().fetchIncomeExpenseReport()
-            .then(res => {
-                this.incomeExpenses.splice(0, this.incomeExpenses.length)
-                return this.incomeExpenses.push(...res.data);
-            })
-            .catch(e => console.log(e))
-
-        api.getReports().fetchIncomeExpenseFlowReport()
-            .then(res => {
-                this.incomeExpensesSankey.splice(0, this.incomeExpensesSankey.length)
-                return this.incomeExpensesSankey.push(...res.flows)
-            })
-            .catch(e => console.log(e))
-    },
-    created() {
         this.charts.push({
             title: 'Balance Progression Report',
             component: BalanceProgressionReport,
-            loadingCondition: () => !this.statements,
-            props: {statements: this.statements},
         })
 
         this.charts.push({
             title: 'Income & Expense Report',
             component: IncomeExpenseReport,
-            loadingCondition: () => !this.incomeExpenses,
-            props: {incomeExpenses: this.incomeExpenses},
         })
 
         this.charts.push({
             title: 'Income & Expense Sankey Report',
             component: IncomeExpenseSankeyReport,
-            loadingCondition: () => !this.incomeExpensesSankey,
-            props: {incomeExpensesSankey: this.incomeExpensesSankey},
         })
 
         this.charts.forEach((chart, idx) => chart.id = idx)

@@ -1,6 +1,8 @@
 <template>
-    <div>
-        <div v-show="isReportPresent" ref="chartDiv" :style="{width: getWidth, height: getHeight}"/>
+    <div :style="{width: getWidth, height: getHeight}">
+        <waiter :is-loading="isLoading">
+            <div :id="target" class="h-100 w-100"/>
+        </waiter>
     </div>
 </template>
 
@@ -9,16 +11,14 @@ import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
 import am4themes_animated from "@amcharts/amcharts4/themes/animated";
 import {api} from "@/api/RegularIncomeAPI";
+import Waiter from "@/components/misc/Waiter.vue";
 
 am4core.useTheme(am4themes_animated);
 
 export default {
     name: "IncomeExpenseSankeyReport",
+    components: {Waiter},
     props: {
-        incomeExpensesSankey: {
-            type: Array,
-            required: true,
-        },
         height: {
             type: Number,
             required: true,
@@ -26,19 +26,16 @@ export default {
     },
     data() {
         return {
+            target: `chart-target-div-${Math.round(Math.random() * 1000000)}`,
             width: null,
             chart: null,
-            categories: null,
+            isLoading: false,
+            incomeExpensesSankey: [],
         }
-    },
-    watch: {
-        incomeExpensesSankey() {
-            this.draw()
-        },
     },
     computed: {
         isReportPresent() {
-            return this.incomeExpensesSankey && this.incomeExpensesSankey.length > 0
+            return this.incomeExpensesSankey.length > 0
         },
         getWidth() {
             if (!this.width)
@@ -49,32 +46,26 @@ export default {
         getHeight() {
             return `${this.height}px`
         },
-        getData() {
-            if (!this.categories)
-                return [];
-
+        processedData() {
             return this.incomeExpensesSankey.map(dp => ({
-                from: this.categories[dp.fromCategoryId] || "Budget",
-                to: this.categories[dp.toCategoryId] || "Budget",
-                amount: Math.abs(dp.amountInCents / 100.0),
+                from: dp.fromCategory || "Budget",
+                to: dp.toCategory || "Budget",
+                amount: dp.amountInCents / 100.0,
             }));
         },
     },
     methods: {
-        loadCategories() {
-            return api.getCategories()
-                .fetchCategoryTree()
-                .then(tree => {
-                    const traverse = (c) => {
-                        return [c, ...c.subCategories.flatMap(child => traverse(child))]
-                    };
+        loadData() {
+            this.isLoading = true;
 
-                    this.categories = tree.flatMap(c => traverse(c)).reduce((prev, cur) => ({
-                        ...prev,
-                        [cur.id]: cur.name
-                    }))
+            api.getReports().fetchIncomeExpenseFlowReport()
+                .then(res => this.incomeExpensesSankey = res.flows)
+                .catch(e => console.error(e))
+                .finally(() => {
+                    this.isLoading = false;
+
+                    this.$nextTick(() => this.draw())
                 })
-                .catch(e => console.log(e))
         },
         draw() {
             if (this.chart)
@@ -83,11 +74,13 @@ export default {
             if (!this.isReportPresent)
                 return
 
-            const chart = am4core.create(this.$refs.chartDiv, am4charts.SankeyDiagram)
+            const chart = am4core.create(this.target, am4charts.SankeyDiagram)
 
             // chart.orientation = "vertical";
 
-            chart.data = this.getData
+            chart.data = this.processedData
+            //chart.data.map(c=>`${c.from} -> ${c.to} => ${c.amount}`).forEach(c=> console.log(c))
+            console.table(chart.data)
             chart.dataFields.fromName = "from";
             chart.dataFields.toName = "to";
             chart.dataFields.value = "amount";
@@ -117,8 +110,7 @@ export default {
             this.chart.dispose()
     },
     mounted() {
-        this.loadCategories()
-            .then(() => this.draw())
+        this.loadData()
     }
 }
 </script>
