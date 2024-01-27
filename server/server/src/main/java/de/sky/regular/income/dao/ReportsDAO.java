@@ -1,12 +1,12 @@
 package de.sky.regular.income.dao;
 
-import de.sky.regular.income.api.reports.MonthlyIncomeExpenseReport;
 import de.sky.regular.income.api.reports.BalanceProgressionReport;
+import de.sky.regular.income.api.reports.BasicCoarseInfo;
+import de.sky.regular.income.api.reports.MonthlyIncomeExpenseReport;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.DSLContext;
 import org.jooq.DatePart;
-import org.jooq.impl.DSL;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -28,6 +28,29 @@ import static org.jooq.impl.DSL.*;
 public class ReportsDAO {
     private static final int MAX_NUMBER_RECORDS = 20_000;
 
+    public BasicCoarseInfo fetchCoarseInfos(DSLContext ctx, UUID userId) {
+        var rec = ctx.select(
+                        countDistinct(TURNOVER_ROW.ID),
+                        countDistinct(TURNOVER_ROW.CATEGORY_ID),
+                        min(TURNOVER_ROW.DATE),
+                        max(TURNOVER_ROW.DATE)
+                )
+                .from(TURNOVER_ROW)
+                .where(TURNOVER_ROW.OWNER_ID.eq(userId))
+                .fetchOne();
+
+        if (rec == null)
+            throw new RuntimeException("No result found");
+
+        return new BasicCoarseInfo(
+                userId,
+                rec.get(min(TURNOVER_ROW.DATE)),
+                rec.get(max(TURNOVER_ROW.DATE)),
+                rec.get(countDistinct(TURNOVER_ROW.ID)),
+                rec.get(countDistinct(TURNOVER_ROW.CATEGORY_ID))
+        );
+    }
+
     public BalanceProgressionReport doBalanceProgressionReport(DSLContext ctx, UUID userId, LocalDate begin, LocalDate end) {
         var start = Optional.ofNullable(begin)
                 .orElse(LocalDate.of(1500, Month.JANUARY, 1));
@@ -36,8 +59,8 @@ public class ReportsDAO {
 
         var sumPerDay = sum(TURNOVER_ROW.AMOUNT_VALUE_CENTS).cast(Integer.class);
         var sumPerDayAliased = sumPerDay.as("sumPerDay");
-        var index = DSL.rank().over(DSL.orderBy(TURNOVER_ROW.DATE)).minus(1).as("index");
-        var cumulativeSum = DSL.sum(sumPerDay).over(DSL.orderBy(TURNOVER_ROW.DATE)).cast(Integer.class).as("cumulativeSum");
+        var index = rank().over(orderBy(TURNOVER_ROW.DATE)).minus(1).as("index");
+        var cumulativeSum = sum(sumPerDay).over(orderBy(TURNOVER_ROW.DATE)).cast(Integer.class).as("cumulativeSum");
 
         var rprt = new BalanceProgressionReport();
 

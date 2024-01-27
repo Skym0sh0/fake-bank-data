@@ -2,6 +2,7 @@ package de.sky.regular.income.rest;
 
 import de.sky.common.database.DatabaseConnection;
 import de.sky.regular.income.api.reports.BalanceProgressionReport;
+import de.sky.regular.income.api.reports.BasicCoarseInfo;
 import de.sky.regular.income.api.reports.IncomeExpenseFlowReport;
 import de.sky.regular.income.api.reports.MonthlyIncomeExpenseReport;
 import de.sky.regular.income.dao.IncomeExpenseFlowDataReporter;
@@ -36,6 +37,13 @@ public class ReportsController {
         this(supplier.getDatabase(), dao, flowReporter, user);
     }
 
+    @GetMapping("/info")
+    public BasicCoarseInfo fetchCoarseInfos() {
+        logger.info("Fetch coarse infos");
+
+        return db.transactionWithResult(ctx -> dao.fetchCoarseInfos(ctx, user.getCurrentUser(ctx).getId()));
+    }
+
     @GetMapping("/balance-progression")
     public BalanceProgressionReport fetchBalanceProgressionReport(@RequestParam(value = "begin", required = false) LocalDate begin, @RequestParam(value = "end", required = false) LocalDate end) {
         logger.info("Fetch StatementsReport between [{}, {})", begin, end);
@@ -51,9 +59,28 @@ public class ReportsController {
     }
 
     @GetMapping("/income-expenses-flow")
-    public IncomeExpenseFlowReport fetchIncomeExpenseFlowReport(@RequestParam(value = "max-depth", defaultValue = "5") int depth) {
-        logger.info("Fetch IncomeExpense Flow Report");
+    public IncomeExpenseFlowReport fetchIncomeExpenseFlowReport(
+            @RequestParam(value = "max-depth", defaultValue = "5") int depth,
+            @RequestParam(value = "year", required = false) Integer year,
+            @RequestParam(value = "month", required = false) Integer month
+    ) {
+        logger.info("Fetch IncomeExpense Flow Report for year={} and month={} with depth={}", year, month, depth);
 
-        return db.transactionWithResult(ctx -> flowReporter.doReport(ctx, user.getCurrentUser(ctx).getId(), depth));
+        return db.transactionWithResult(ctx -> {
+            var begin = LocalDate.of(1900, 1, 1);
+            var end = LocalDate.of(3000, 1, 1);
+
+            if (year != null) {
+                begin = begin.withYear(year);
+                end = begin.plusYears(1);
+
+                if (month != null) {
+                    begin = begin.withMonth(month);
+                    end = begin.plusMonths(1);
+                }
+            }
+
+            return flowReporter.doReport(ctx, user.getCurrentUser(ctx).getId(), begin, end, depth);
+        });
     }
 }

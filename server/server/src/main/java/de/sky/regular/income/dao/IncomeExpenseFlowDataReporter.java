@@ -23,15 +23,15 @@ import static org.jooq.impl.DSL.sum;
 public class IncomeExpenseFlowDataReporter {
     private final CategoryDAO categoryDao;
 
-    public IncomeExpenseFlowReport doReport(DSLContext ctx, UUID userId, int depth) {
+    public IncomeExpenseFlowReport doReport(DSLContext ctx, UUID userId, LocalDate begin, LocalDate end, int depth) {
         Assert.isTrue(depth >= 0, "Depth must be positive");
 
         var categories = categoryDao.fetchCategoryTree(ctx, userId);
 
-        var negativeSumByCategoryId = fetchSumPerCategoryWhere(ctx, userId, TURNOVER_ROW.AMOUNT_VALUE_CENTS.lessThan(0));
+        var negativeSumByCategoryId = fetchSumPerCategoryWhere(ctx, userId, begin, end, TURNOVER_ROW.AMOUNT_VALUE_CENTS.lessThan(0));
         var negative = createDataPoints(categories, negativeSumByCategoryId, depth, (parent, child, amount) -> new IncomeExpenseFlowReport.FlowDataPoint(parent, child, amount));
 
-        var positiveSumByCategoryId = fetchSumPerCategoryWhere(ctx, userId, TURNOVER_ROW.AMOUNT_VALUE_CENTS.greaterThan(0));
+        var positiveSumByCategoryId = fetchSumPerCategoryWhere(ctx, userId, begin, end, TURNOVER_ROW.AMOUNT_VALUE_CENTS.greaterThan(0));
         var positive = createDataPoints(categories, positiveSumByCategoryId, depth, (parent, child, amount) -> new IncomeExpenseFlowReport.FlowDataPoint(child, parent, amount));
 
         var root = new IncomeExpenseFlowReport.FlowDataPoint(
@@ -49,11 +49,10 @@ public class IncomeExpenseFlowDataReporter {
                 })
                 .toList();
 
-        var now = LocalDate.now();
         return new IncomeExpenseFlowReport(
-                now.withDayOfYear(1),
-                now.plusYears(1).withDayOfYear(1).minusDays(1),
-                allDatapoints
+                begin,
+                end,
+                allDatapoints.size() <= 1 ? List.of() : allDatapoints
         );
     }
 
@@ -75,15 +74,16 @@ public class IncomeExpenseFlowDataReporter {
                 .map(t -> traverse(depth, null, t, creator))
                 .flatMap(Collection::stream)
                 .toList();
-
     }
 
-    private static Map<UUID, Integer> fetchSumPerCategoryWhere(DSLContext ctx, UUID userId, Condition condition) {
+    private static Map<UUID, Integer> fetchSumPerCategoryWhere(DSLContext ctx, UUID userId, LocalDate begin, LocalDate end, Condition condition) {
         var sumField = sum(abs(TURNOVER_ROW.AMOUNT_VALUE_CENTS)).cast(Integer.class).as("sum");
 
         return ctx.select(TURNOVER_ROW.CATEGORY_ID, sumField)
                 .from(TURNOVER_ROW)
                 .where(TURNOVER_ROW.OWNER_ID.eq(userId))
+                .and(TURNOVER_ROW.DATE.greaterOrEqual(begin))
+                .and(TURNOVER_ROW.DATE.lessThan(end))
                 .and(condition)
                 .groupBy(TURNOVER_ROW.CATEGORY_ID)
                 .fetch()
