@@ -18,4 +18,5 @@ public class BasicCoarseInfo {
 
     public Integer numberOfTransactions;
     public Integer numberOfUsedCategories;
+    public Integer maxDepthOfCategories;
 }

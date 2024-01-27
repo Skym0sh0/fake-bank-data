@@ -1,5 +1,6 @@
 package de.sky.regular.income.dao;
 
+import de.sky.regular.income.api.Category;
 import de.sky.regular.income.api.reports.BalanceProgressionReport;
 import de.sky.regular.income.api.reports.BasicCoarseInfo;
 import de.sky.regular.income.api.reports.MonthlyIncomeExpenseReport;
@@ -12,10 +13,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.Period;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -27,6 +25,8 @@ import static org.jooq.impl.DSL.*;
 @Slf4j
 public class ReportsDAO {
     private static final int MAX_NUMBER_RECORDS = 20_000;
+
+    private final CategoryDAO categoryDao;
 
     public BasicCoarseInfo fetchCoarseInfos(DSLContext ctx, UUID userId) {
         var rec = ctx.select(
@@ -42,12 +42,15 @@ public class ReportsDAO {
         if (rec == null)
             throw new RuntimeException("No result found");
 
+        var maxDepth = findMaxDepth(ctx, userId);
+
         return new BasicCoarseInfo(
                 userId,
                 rec.get(min(TURNOVER_ROW.DATE)),
                 rec.get(max(TURNOVER_ROW.DATE)),
                 rec.get(countDistinct(TURNOVER_ROW.ID)),
-                rec.get(countDistinct(TURNOVER_ROW.CATEGORY_ID))
+                rec.get(countDistinct(TURNOVER_ROW.CATEGORY_ID)),
+                maxDepth.orElse(0)
         );
     }
 
@@ -142,5 +145,21 @@ public class ReportsDAO {
                         .sorted(Comparator.comparing(MonthlyIncomeExpenseReport.DataPoint::getMonth))
                         .toList()
         );
+    }
+
+    private OptionalInt findMaxDepth(DSLContext ctx, UUID userId) {
+        var tree = categoryDao.fetchCategoryTree(ctx, userId);
+
+        return tree.stream()
+                .mapToInt(c -> depth(c, 0))
+                .max();
+    }
+
+    private static int depth(Category cat, int level) {
+        return cat.getSubCategories()
+                .stream()
+                .mapToInt(c -> depth(c, level + 1))
+                .max()
+                .orElse(level);
     }
 }
