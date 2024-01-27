@@ -54,6 +54,11 @@ let router = new Router({
             component: () => import("./components/reports/ReportOverview"),
         },
         {
+            path: '/timely-reports/',
+            name: 'timely-reports-overview',
+            component: () => import("./components/reports/TimelyReportOverview"),
+        },
+        {
             path: '/about',
             name: 'about',
             // route level code-splitting

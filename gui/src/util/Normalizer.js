@@ -159,3 +159,14 @@ export function denormalizeTurnoverPreviewRow(row) {
 export function normalizeTurnoverPreview(turnover) {
     return turnover;
 }
+
+export function denormalizeBasicReportInfo(info) {
+    return {
+        userId: info.userId,
+        earliestTransaction: info.earliestTransaction,
+        latestTransaction: info.latestTransaction,
+        numberOfTransactions: info.numberOfTransactions,
+        numberOfUsedCategories: info.numberOfUsedCategories,
+        maxDepthOfCategories: info.maxDepthOfCategories,
+    }
+}

@@ -5,7 +5,8 @@ import {
     denormalizeTurnoverImport,
     denormalizeTurnoverPreview,
     denormalizeTurnoverRow,
-    denormalizeUser
+    denormalizeUser,
+    denormalizeBasicReportInfo
 } from "@/util/Normalizer";
 import {userService} from '@/auth/auth-header';
 
@@ -88,6 +89,11 @@ class RegularIncomeAPI {
         const ref = this
 
         return {
+            fetchBasicInfo() {
+                return ref.getClient().get('reports/info')
+                    .then(res => denormalizeBasicReportInfo(res.data))
+            },
+
             fetchBalanceProgressionReport(begin, end) {
                 return ref.getClient().get('reports/balance-progression', {
                     params: {
@@ -102,10 +108,12 @@ class RegularIncomeAPI {
                     .then(res => res.data)
             },
 
-            fetchIncomeExpenseFlowReport() {
-                return ref.getClient().get('reports/income-expenses-flow', {
+            fetchIncomeExpenseFlowYearReport({depth, year, month}) {
+                return ref.getClient().get(`reports/income-expenses-flow`, {
                     params: {
-                        "max-depth": 3,
+                        "max-depth": depth,
+                        "year": year,
+                        "month": month,
                     }
                 }).then(res => res.data)
             },

@@ -53,7 +53,6 @@
 <script>
 import BalanceProgressionReport from "./BalanceProgressionReport";
 import IncomeExpenseReport from "./IncomeExpenseReport";
-import IncomeExpenseSankeyReport from "@/components/reports/IncomeExpenseSankeyReport.vue";
 
 export default {
     name: "ReportOverview",
@@ -94,11 +93,6 @@ export default {
         this.charts.push({
             title: 'Income & Expense Report',
             component: IncomeExpenseReport,
-        })
-
-        this.charts.push({
-            title: 'Income & Expense Sankey Report',
-            component: IncomeExpenseSankeyReport,
         })
 
         this.charts.forEach((chart, idx) => chart.id = idx)

@@ -1,9 +1,22 @@
 <template>
-    <div :style="{width: getWidth, height: getHeight}">
-        <waiter :is-loading="isLoading">
-            <div :id="target" class="h-100 w-100"/>
-        </waiter>
-    </div>
+    <v-card>
+        <v-card-title>
+            Sankey
+        </v-card-title>
+
+        <v-card-subtitle>
+            {{ helptext }}
+        </v-card-subtitle>
+
+        <v-card-text>
+            <v-sheet :height="getHeight" :width="getWidth">
+                <waiter :is-loading="isLoading">
+                    <div v-if="!isReportPresent" class="m-auto">Keine Daten vorhanden</div>
+                    <div v-else :id="target" class="h-100 w-100"/>
+                </waiter>
+            </v-sheet>
+        </v-card-text>
+    </v-card>
 </template>
 
 <script>
@@ -12,6 +25,8 @@ import * as am4charts from "@amcharts/amcharts4/charts";
 import am4themes_animated from "@amcharts/amcharts4/themes/animated";
 import {api} from "@/api/RegularIncomeAPI";
 import Waiter from "@/components/misc/Waiter.vue";
+import _ from "lodash";
+import {MonthIndexToName} from "@/util/months";
 
 am4core.useTheme(am4themes_animated);
 
@@ -19,6 +34,10 @@ export default {
     name: "IncomeExpenseSankeyReport",
     components: {Waiter},
     props: {
+        select: {
+            type: Object,
+            required: true,
+        },
         height: {
             type: Number,
             required: true,
@@ -53,12 +72,36 @@ export default {
                 amount: dp.amountInCents / 100.0,
             }));
         },
+        helptext() {
+            const prefix = "Alle Ein- und Ausgaben"
+            const levels = `aufgefächert auf bis zu ${this.select.depth} Ebene(n)`;
+
+            if (this.select.year && this.select.month)
+                return `${prefix} für ${MonthIndexToName[this.select.month]} ${this.select.year} ${levels}`;
+            if (this.select.year)
+                return `${prefix} für ${this.select.year} ${levels}`;
+
+            return `${prefix} ${levels}`
+        },
+    },
+    watch: {
+        select: {
+            handler() {
+                _.debounce(() => {
+                    this.loadData()
+                }, 500)();
+            },
+            deep: true,
+        },
     },
     methods: {
         loadData() {
+            if (this.select.depth < 0)
+                return;
+
             this.isLoading = true;
 
-            api.getReports().fetchIncomeExpenseFlowReport()
+            api.getReports().fetchIncomeExpenseFlowYearReport(this.select)
                 .then(res => this.incomeExpensesSankey = res.flows)
                 .catch(e => console.error(e))
                 .finally(() => {
@@ -100,6 +143,9 @@ export default {
             const linkTemplate = chart.links.template;
             // linkTemplate.inert = true;
             linkTemplate.colorMode = "toNode";
+
+            chart.exporting.menu = new am4core.ExportMenu();
+
             this.chart = chart
         },
     },

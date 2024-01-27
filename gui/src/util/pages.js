@@ -20,6 +20,11 @@ const pages = [
         icon: 'mdi-chart-bar',
     },
     {
+        link: "/timely-reports",
+        title: "Timely Reports",
+        icon: 'mdi-chart-areaspline',
+    },
+    {
         link: "/about",
         title: "About",
         icon: 'mdi-help-circle',
