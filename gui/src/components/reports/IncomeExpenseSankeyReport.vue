@@ -12,8 +12,12 @@
         <v-card-text>
             <v-sheet :height="getHeight" :width="getWidth">
                 <waiter :is-loading="isLoading">
-                    <div v-if="!isReportPresent" class="m-auto">Keine Daten vorhanden</div>
-                    <div v-else :id="target" class="h-100 w-100"/>
+                    <div class="h-100 w-100">
+                        <div v-if="!isReportPresent" class="h-100 w-100 m-auto">
+                            Keine Daten vorhanden
+                        </div>
+                        <div v-else :id="target" class="h-100 w-100"/>
+                    </div>
                 </waiter>
             </v-sheet>
         </v-card-text>
@@ -97,13 +101,13 @@ export default {
 
             return [
                 connectionIncomeExpense,
-                ...this.incomeExpensesSankey.map(dp => ({
-                    from: dp.fromCategory || this.rootCategories.expense,
-                    to: dp.toCategory || this.rootCategories.income,
-                    amount: Math.abs(dp.amountInCents) / 100.0,
-                    isIncome: dp.amountInCents > 0,
-                    isExpense: dp.amountInCents < 0,
-                }))
+                ...this.incomeExpensesSankey.map(dp => {
+                    return {
+                        from: dp.fromCategory || this.rootCategories.expense,
+                        to: dp.toCategory || this.rootCategories.income,
+                        amount: Math.abs(dp.amountInCents) / 100.0,
+                    };
+                })
             ];
         },
         helptext() {
@@ -118,7 +122,7 @@ export default {
             return `${prefix} ${levels}`
         },
         timespanText() {
-            if ( !this.sankeyData )
+            if (!this.sankeyData)
                 return "";
 
             return `Von ${this.sankeyData.start} bis ${this.sankeyData.end}`;
@@ -151,11 +155,14 @@ export default {
                 })
         },
         draw() {
-            if (this.chart)
+            if (this.chart) {
                 this.chart.dispose()
+                this.chart = null
+            }
 
-            if (!this.isReportPresent)
+            if (!this.isReportPresent) {
                 return
+            }
 
             const chart = am4core.create(this.target, am4charts.SankeyDiagram)
 
@@ -179,9 +186,12 @@ export default {
             // nodeTemplate.width = 50;
             // nodeTemplate.nameLabel.label
             nodeTemplate.nameLabel.label.hideOversized = true;
+            // nodeTemplate.nameLabel.label.textAlign = "middle";
 
             const linkTemplate = chart.links.template;
             // linkTemplate.inert = true;
+            // linkTemplate.tension = 0.5;
+            // linkTemplate.controlPointDistance = 0.1;
             linkTemplate.colorMode = "toNode";
 
             chart.exporting.menu = new am4core.ExportMenu();

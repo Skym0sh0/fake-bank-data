@@ -85,9 +85,11 @@ public class IncomeExpenseFlowDataReporter {
                 .flatMap(Collection::stream)
                 .toList();
 
+        var prefix = current.amount() > 0 ? "+" : "-";
+
         var c = creator.apply(
-                Optional.ofNullable(parent).map(CategoryTreeNode::c).map(Category::getName).orElse(null),
-                current.c().getName(),
+                Optional.ofNullable(parent).map(CategoryTreeNode::c).map(Category::getName).map(n -> prefix + n).orElse(null),
+                prefix + current.c().getName(),
                 current.level(),
                 current.amount()
         );
