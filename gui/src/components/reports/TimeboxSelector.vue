@@ -7,7 +7,28 @@
                       label="Jahr"
                       :clearable="true"
                       :placeholder="`${latest.year()}`"
-            />
+            >
+                <template v-slot:prepend>
+                    <v-btn :icon="true"
+                           :x-small="true"
+                           :disabled="!value.year"
+                           @click="decreaseYear">
+                        <v-icon>
+                            mdi-menu-left
+                        </v-icon>
+                    </v-btn>
+                </template>
+                <template v-slot:append-outer>
+                    <v-btn :icon="true"
+                           :x-small="true"
+                           :disabled="!value.year"
+                           @click="increaseYear">
+                        <v-icon>
+                            mdi-menu-right
+                        </v-icon>
+                    </v-btn>
+                </template>
+            </v-select>
         </v-col>
 
         <v-col :cols="5">
@@ -17,7 +38,28 @@
                       label="Monat"
                       :clearable="true"
                       :placeholder="`${latest.month()}`"
-            />
+            >
+                <template v-slot:prepend>
+                    <v-btn :icon="true"
+                           :x-small="true"
+                           :disabled="!value.month"
+                           @click="decreaseMonth">
+                        <v-icon>
+                            mdi-menu-left
+                        </v-icon>
+                    </v-btn>
+                </template>
+                <template v-slot:append-outer>
+                    <v-btn :icon="true"
+                           :x-small="true"
+                           :disabled="!value.month"
+                           @click="increaseMonth">
+                        <v-icon>
+                            mdi-menu-right
+                        </v-icon>
+                    </v-btn>
+                </template>
+            </v-select>
         </v-col>
 
         <v-col :cols="2">
@@ -100,6 +142,33 @@ export default {
                 v => (v && v > 0) || "Tiefe muss positiv sein",
                 v => (v && v <= this.maxDepth) || `Tiefe muss kleiner oder gleich ${this.maxDepth} sein`,
             ];
+        },
+    },
+    methods: {
+        decreaseYear() {
+            this.value.year = Math.max(this.earliest.year(), this.value.year - 1)
+        },
+        increaseYear() {
+            this.value.year = Math.min(this.value.year + 1, this.latest.year())
+        },
+        updateMonth(callback) {
+            this.value.month = `${callback(Number.parseInt(this.value.month))}`
+        },
+        decreaseMonth() {
+            this.updateMonth(month => {
+                if (month === 1)
+                    this.decreaseYear()
+
+                return 1 + (month - 1 - 1 + this.months.length) % this.months.length
+            })
+        },
+        increaseMonth() {
+            this.updateMonth(month => {
+                if (month === this.months.length)
+                    this.increaseYear()
+
+                return 1 + (month - 1 + 1 + this.months.length) % this.months.length
+            })
         },
     },
     mounted() {

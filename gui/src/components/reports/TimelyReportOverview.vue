@@ -6,7 +6,7 @@
 
         <v-card-subtitle v-if="isDataQueryable">
             <v-row>
-                <v-col class="py-0 d-flex justify-content-around align-items-center">
+                <v-col :cols="4" class="py-0 d-flex justify-content-around align-items-center">
                     <div>
                         Transaktionen: {{ basicInfo.numberOfTransactions }}
                     </div>
@@ -15,7 +15,7 @@
                     </div>
                 </v-col>
 
-                <v-col class="py-0">
+                <v-col :cols="8" class="py-0">
                     <timebox-selector v-if="basicInfo"
                                       v-model="select"
                                       :earliest="basicInfo.earliest"
