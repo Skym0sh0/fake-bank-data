@@ -270,9 +270,10 @@ public class TurnoverCsvImporter {
                 .recipient(rec.getRecipient())
                 .checksum(checksum)
                 .categoryId(
-                        categorySuggester.findCategorySuggestion(rec.getDescription(), rec.getSuggestedCategory())
-                                .map(CreatedMetaInformation::getId)
-                                .orElse(null)
+//                        categorySuggester.findCategorySuggestion(rec.getDescription(), rec.getSuggestedCategory())
+//                                .map(CreatedMetaInformation::getId)
+//                                .orElse(null)
+                        null
                 )
                 .importable(!alreadyExistentRowChecksums.contains(checksum))
                 .build();
