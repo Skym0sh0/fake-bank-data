@@ -4,8 +4,9 @@
             Sankey
         </v-card-title>
 
-        <v-card-subtitle>
-            {{ helptext }}
+        <v-card-subtitle class="d-flex justify-content-between">
+            <span>{{ helptext }}</span>
+            <span>{{ timespanText }}</span>
         </v-card-subtitle>
 
         <v-card-text>
@@ -49,7 +50,7 @@ export default {
             width: null,
             chart: null,
             isLoading: false,
-            incomeExpensesSankey: [],
+            sankeyData: null,
         }
     },
     computed: {
@@ -65,12 +66,45 @@ export default {
         getHeight() {
             return `${this.height}px`
         },
+        incomeExpensesSankey() {
+            if (!this.sankeyData)
+                return [];
+
+            return this.sankeyData.flows || [];
+        },
+        rootCategories() {
+            const categories = new Set(this.incomeExpensesSankey.flatMap(dp => [dp.fromCategory, dp.toCategory]))
+            const permutate = candidate => {
+                while (categories.has(candidate))
+                    candidate = "_" + candidate;
+                return candidate;
+            }
+
+            return {
+                income: permutate("Einkommen"),
+                expense: permutate("Ausgaben"),
+            }
+        },
         processedData() {
-            return this.incomeExpensesSankey.map(dp => ({
-                from: dp.fromCategory || "Budget",
-                to: dp.toCategory || "Budget",
-                amount: dp.amountInCents / 100.0,
-            }));
+            const totalIncome = this.incomeExpensesSankey.filter(dp => dp.fromCategory && !dp.toCategory)
+                .reduce((prev, cur) => prev + cur.amountInCents, 0);
+
+            const connectionIncomeExpense = {
+                from: this.rootCategories.income,
+                to: this.rootCategories.expense,
+                amount: totalIncome / 100.0,
+            };
+
+            return [
+                connectionIncomeExpense,
+                ...this.incomeExpensesSankey.map(dp => ({
+                    from: dp.fromCategory || this.rootCategories.expense,
+                    to: dp.toCategory || this.rootCategories.income,
+                    amount: Math.abs(dp.amountInCents) / 100.0,
+                    isIncome: dp.amountInCents > 0,
+                    isExpense: dp.amountInCents < 0,
+                }))
+            ];
         },
         helptext() {
             const prefix = "Alle Ein- und Ausgaben"
@@ -82,6 +116,12 @@ export default {
                 return `${prefix} für ${this.select.year} ${levels}`;
 
             return `${prefix} ${levels}`
+        },
+        timespanText() {
+            if ( !this.sankeyData )
+                return "";
+
+            return `Von ${this.sankeyData.start} bis ${this.sankeyData.end}`;
         },
     },
     watch: {
@@ -102,7 +142,7 @@ export default {
             this.isLoading = true;
 
             api.getReports().fetchIncomeExpenseFlowYearReport(this.select)
-                .then(res => this.incomeExpensesSankey = res.flows)
+                .then(res => this.sankeyData = res)
                 .catch(e => console.error(e))
                 .finally(() => {
                     this.isLoading = false;

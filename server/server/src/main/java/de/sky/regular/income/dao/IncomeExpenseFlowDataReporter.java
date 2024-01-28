@@ -66,7 +66,7 @@ public class IncomeExpenseFlowDataReporter {
     private static Stream<CategoryTreeNode> checkAndPrune(CategoryTreeNode current, int maxDepth, double totalSum) {
         var quotient = current.amount() / totalSum;
 
-        if (quotient < 0.005 || current.level() >= maxDepth)
+        if (current.amount() == 0 || quotient < 0.005 || current.level() >= maxDepth)
             return Stream.empty();
 
         var newChildren = current.children()
