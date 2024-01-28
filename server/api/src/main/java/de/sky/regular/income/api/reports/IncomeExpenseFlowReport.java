@@ -22,11 +22,7 @@ public class IncomeExpenseFlowReport {
     public static class FlowDataPoint {
         public String fromCategory;
         public String toCategory;
-        public Integer amountInCents;
         public int depthLevel;
-
-        public FlowDataPoint(String fromCategory, String toCategory, Integer amountInCents) {
-            this(fromCategory, toCategory, amountInCents, 0);
-        }
+        public Integer amountInCents;
     }
 }
