@@ -19,7 +19,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayInputStream;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -176,12 +175,18 @@ public class BackupSender {
             helper.setText(String.format("Regular Income Backup at %s", FRMT_BODY.format(timestamp)));
 
             var data = dataFileSupplier.get();
-            for (Map.Entry<String, String> entry : data.entrySet()) {
-                String name = entry.getKey();
-                String dataChunk = entry.getValue();
 
-                helper.addAttachment(String.format("regular_income_backup_%s_[%s].csv", FRMT_FILE.format(timestamp), name), () -> new ByteArrayInputStream(dataChunk.getBytes()));
+            var compressor = new Compressor("regular_income_backup_%s.zip".formatted(FRMT_FILE.format(timestamp)));
+            try (var cmp = compressor.open()) {
+                for (Map.Entry<String, String> entry : data.entrySet()) {
+                    String name = entry.getKey();
+                    String dataChunk = entry.getValue();
+
+                    cmp.addFile(name + ".csv", dataChunk);
+                }
             }
+
+            helper.addAttachment(compressor.getFilename(), compressor::getRawInputStream);
 
             logger.info("Execute actual Email sending...");
 
