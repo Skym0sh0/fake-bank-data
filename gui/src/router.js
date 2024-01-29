@@ -51,12 +51,12 @@ let router = new Router({
         {
             path: '/reports/',
             name: 'reports-overview',
-            component: () => import("./components/reports/ReportOverview"),
+            component: () => import("./components/reports/simples/ReportOverview.vue"),
         },
         {
             path: '/timely-reports/',
             name: 'timely-reports-overview',
-            component: () => import("./components/reports/TimelyReportOverview"),
+            component: () => import("./components/reports/sankeys/TimelyReportOverview.vue"),
         },
         {
             path: '/about',

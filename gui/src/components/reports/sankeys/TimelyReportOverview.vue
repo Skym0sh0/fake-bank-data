@@ -44,8 +44,8 @@
 
 <script>
 import {api} from "@/api/RegularIncomeAPI";
-import IncomeExpenseSankeyReport from "@/components/reports/IncomeExpenseSankeyReport.vue";
-import TimeboxSelector from "@/components/reports/TimeboxSelector.vue";
+import IncomeExpenseSankeyReport from "@/components/reports/sankeys/IncomeExpenseSankeyReport.vue";
+import TimeboxSelector from "@/components/reports/sankeys/TimeboxSelector.vue";
 import WaitingIndicator from "@/components/misc/WaitingIndicator.vue";
 import moment from "moment";
 

@@ -138,6 +138,12 @@ export default {
         },
     },
     watch: {
+        depth(newValue, oldValue) {
+            if (newValue === oldValue)
+                return;
+
+            this.draw();
+        },
         year(newValue, oldValue) {
             if (newValue === oldValue)
                 return;

@@ -11,7 +11,7 @@ import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
 import {moneyFormat} from "@/util/Formatters";
 import am4themes_animated from "@amcharts/amcharts4/themes/animated";
-import {setInitialZoom} from "./ZoomUtil";
+import {setInitialZoom} from "../ZoomUtil";
 import {api} from "@/api/RegularIncomeAPI";
 import Waiter from "@/components/misc/Waiter.vue";
 

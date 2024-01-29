@@ -51,8 +51,8 @@
 </template>
 
 <script>
-import BalanceProgressionReport from "./BalanceProgressionReport";
-import IncomeExpenseReport from "./IncomeExpenseReport";
+import BalanceProgressionReport from "./BalanceProgressionReport.vue";
+import IncomeExpenseReport from "./IncomeExpenseReport.vue";
 
 export default {
     name: "ReportOverview",
