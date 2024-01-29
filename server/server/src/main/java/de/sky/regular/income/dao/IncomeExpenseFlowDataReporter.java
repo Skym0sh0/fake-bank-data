@@ -7,9 +7,9 @@ import lombok.With;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -21,16 +21,26 @@ import static org.jooq.impl.DSL.sum;
 public class IncomeExpenseFlowDataReporter {
     private final CategoryDAO categoryDao;
 
-    public IncomeExpenseFlowReport doReport(DSLContext ctx, UUID userId, LocalDate begin, LocalDate end, int depth) {
-        Assert.isTrue(depth >= 0, "Depth must be positive");
+    public IncomeExpenseFlowReport doSlidingWindowReport(DSLContext ctx, UUID userId, LocalDate begin, LocalDate end, ChronoUnit unit) {
+        var diff = unit.between(begin, end);
 
+        var rprt = doReport(ctx, userId, begin, end);
+        rprt.getFlows().forEach(dp -> {
+            var newResult = (double) dp.getAmountInCents() / diff;
+            dp.setAmountInCents((int) newResult);
+        });
+
+        return rprt;
+    }
+
+    public IncomeExpenseFlowReport doReport(DSLContext ctx, UUID userId, LocalDate begin, LocalDate end) {
         var categories = categoryDao.fetchCategoryTree(ctx, userId);
 
         var negativeSumByCategoryId = fetchSumPerCategoryWhere(ctx, userId, begin, end, TURNOVER_ROW.AMOUNT_VALUE_CENTS.lessThan(0));
-        var negative = createDataPoints(categories, negativeSumByCategoryId, depth, (parent, child, level, amount) -> new IncomeExpenseFlowReport.FlowDataPoint(parent, child, level, amount));
+        var negative = createDataPoints(categories, negativeSumByCategoryId, (parent, child, level, amount) -> new IncomeExpenseFlowReport.FlowDataPoint(parent, child, level, amount));
 
         var positiveSumByCategoryId = fetchSumPerCategoryWhere(ctx, userId, begin, end, TURNOVER_ROW.AMOUNT_VALUE_CENTS.greaterThan(0));
-        var positive = createDataPoints(categories, positiveSumByCategoryId, depth, (parent, child, level, amount) -> new IncomeExpenseFlowReport.FlowDataPoint(child, parent, level, amount));
+        var positive = createDataPoints(categories, positiveSumByCategoryId, (parent, child, level, amount) -> new IncomeExpenseFlowReport.FlowDataPoint(child, parent, level, amount));
 
         var allDatapoints = Stream.of(positive, negative)
                 .flatMap(Collection::stream)
@@ -43,7 +53,7 @@ public class IncomeExpenseFlowDataReporter {
         );
     }
 
-    private static List<IncomeExpenseFlowReport.FlowDataPoint> createDataPoints(List<Category> categories, Map<UUID, Integer> sumByCategoryId, int depth, DataPointCreator creator) {
+    private static List<IncomeExpenseFlowReport.FlowDataPoint> createDataPoints(List<Category> categories, Map<UUID, Integer> sumByCategoryId, DataPointCreator creator) {
         var costTree = categories.stream()
                 .map(c -> CategoryTreeNode.create(c, 0, sumByCategoryId))
                 .toList();
@@ -54,7 +64,7 @@ public class IncomeExpenseFlowDataReporter {
                 .getSum();
 
         var prunedCostTree = costTree.stream()
-                .flatMap(node -> checkAndPrune(node, depth, (double) total))
+                .flatMap(node -> checkAndPrune(node, total))
                 .toList();
 
         return prunedCostTree.stream()
@@ -63,15 +73,15 @@ public class IncomeExpenseFlowDataReporter {
                 .toList();
     }
 
-    private static Stream<CategoryTreeNode> checkAndPrune(CategoryTreeNode current, int maxDepth, double totalSum) {
+    private static Stream<CategoryTreeNode> checkAndPrune(CategoryTreeNode current, double totalSum) {
         var quotient = current.amount() / totalSum;
 
-        if (current.amount() == 0 || quotient < 0.005 || current.level() >= maxDepth)
+        if (current.amount() == 0 || quotient < 0.005)
             return Stream.empty();
 
         var newChildren = current.children()
                 .stream()
-                .flatMap(child -> checkAndPrune(child, maxDepth, totalSum))
+                .flatMap(child -> checkAndPrune(child, totalSum))
                 .sorted(Comparator.comparing((CategoryTreeNode s) -> Math.abs(s.amount())).reversed())
                 .toList();
 
