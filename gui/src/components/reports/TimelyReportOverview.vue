@@ -29,7 +29,9 @@
         <v-card-text>
             <income-expense-sankey-report v-if="isDataQueryable"
                                           :height="800"
-                                          :select="select"/>
+                                          :year="select.year"
+                                          :month="select.month"
+                                          :depth="select.depth"/>
 
             <div v-if="!isDataQueryable">
                 No data present

@@ -108,10 +108,9 @@ class RegularIncomeAPI {
                     .then(res => res.data)
             },
 
-            fetchIncomeExpenseFlowYearReport({depth, year, month}) {
+            fetchIncomeExpenseFlowYearReport(year, month) {
                 return ref.getClient().get(`reports/income-expenses-flow`, {
                     params: {
-                        "max-depth": depth,
                         "year": year,
                         "month": month,
                     }

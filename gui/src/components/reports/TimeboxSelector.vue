@@ -118,7 +118,7 @@ export default {
                 // {value: null, text: ""},
                 ...Object.keys(MonthIndexToName)
                     .map(idx => ({
-                        value: idx,
+                        value: Number.parseInt(idx),
                         text: MonthIndexToName[idx],
                     })),
             ];
@@ -151,24 +151,11 @@ export default {
         increaseYear() {
             this.value.year = Math.min(this.value.year + 1, this.latest.year())
         },
-        updateMonth(callback) {
-            this.value.month = `${callback(Number.parseInt(this.value.month))}`
-        },
         decreaseMonth() {
-            this.updateMonth(month => {
-                if (month === 1)
-                    this.decreaseYear()
-
-                return 1 + (month - 1 - 1 + this.months.length) % this.months.length
-            })
+            this.value.month = 1 + (this.value.month - 1 - 1 + this.months.length) % this.months.length
         },
         increaseMonth() {
-            this.updateMonth(month => {
-                if (month === this.months.length)
-                    this.increaseYear()
-
-                return 1 + (month - 1 + 1 + this.months.length) % this.months.length
-            })
+            this.value.month = 1 + (this.value.month - 1 + 1 + this.months.length) % this.months.length
         },
     },
     mounted() {

@@ -39,9 +39,17 @@ export default {
     name: "IncomeExpenseSankeyReport",
     components: {Waiter},
     props: {
-        select: {
-            type: Object,
-            required: true,
+        depth: {
+            type: Number,
+            required: false,
+        },
+        year: {
+            type: Number,
+            required: false,
+        },
+        month: {
+            type: Number,
+            required: false,
         },
         height: {
             type: Number,
@@ -74,7 +82,8 @@ export default {
             if (!this.sankeyData)
                 return [];
 
-            return this.sankeyData.flows || [];
+            return (this.sankeyData.flows || [])
+                .filter(dp => !this.depth || dp.depthLevel < this.depth);
         },
         rootCategories() {
             const categories = new Set(this.incomeExpensesSankey.flatMap(dp => [dp.fromCategory, dp.toCategory]))
@@ -112,12 +121,12 @@ export default {
         },
         helptext() {
             const prefix = "Alle Ein- und Ausgaben"
-            const levels = `aufgefächert auf bis zu ${this.select.depth} Ebene(n)`;
+            const levels = `aufgefächert auf bis zu ${this.depth} Ebene(n)`;
 
-            if (this.select.year && this.select.month)
-                return `${prefix} für ${MonthIndexToName[this.select.month]} ${this.select.year} ${levels}`;
-            if (this.select.year)
-                return `${prefix} für ${this.select.year} ${levels}`;
+            if (this.year && this.month)
+                return `${prefix} für ${MonthIndexToName[this.month]} ${this.year} ${levels}`;
+            if (this.year)
+                return `${prefix} für ${this.year} ${levels}`;
 
             return `${prefix} ${levels}`
         },
@@ -129,23 +138,32 @@ export default {
         },
     },
     watch: {
-        select: {
-            handler() {
-                _.debounce(() => {
-                    this.loadData()
-                }, 500)();
-            },
-            deep: true,
+        year(newValue, oldValue) {
+            if (newValue === oldValue)
+                return;
+
+            this.reload();
+        },
+        month(newValue, oldValue) {
+            if (newValue === oldValue)
+                return;
+
+            this.reload();
         },
     },
     methods: {
+        reload() {
+            _.debounce(() => {
+                this.loadData()
+            }, 500)();
+        },
         loadData() {
-            if (this.select.depth < 0)
+            if (this.depth < 0)
                 return;
 
             this.isLoading = true;
 
-            api.getReports().fetchIncomeExpenseFlowYearReport(this.select)
+            api.getReports().fetchIncomeExpenseFlowYearReport(this.year, this.month)
                 .then(res => this.sankeyData = res)
                 .catch(e => console.error(e))
                 .finally(() => {
