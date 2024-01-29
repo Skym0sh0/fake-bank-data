@@ -6,8 +6,7 @@
                       :rules="yearRules"
                       label="Jahr"
                       :clearable="true"
-                      :placeholder="`${latest.year()}`"
-            >
+                      :placeholder="`${latest.year()}`">
                 <template v-slot:prepend>
                     <v-btn :icon="true"
                            :x-small="true"
@@ -37,8 +36,7 @@
                       :rules="monthRules"
                       label="Monat"
                       :clearable="true"
-                      :placeholder="`${latest.month()}`"
-            >
+                      :placeholder="`${latest.month()}`">
                 <template v-slot:prepend>
                     <v-btn :icon="true"
                            :x-small="true"
