@@ -148,6 +148,7 @@ export function denormalizeTurnoverPreviewRow(row) {
         date: row.date,
         amountInCents: row.amountInCents,
         categoryId: row.categoryId,
+        suggestedCategories: (row.suggestedCategories || []).map(denormalizeTurnoverPreviewCategorySuggestion),
         suggestedCategory: row.suggestedCategory,
         description: row.description,
         recipient: row.recipient,
@@ -156,8 +157,11 @@ export function denormalizeTurnoverPreviewRow(row) {
     };
 }
 
-export function normalizeTurnoverPreview(turnover) {
-    return turnover;
+export function denormalizeTurnoverPreviewCategorySuggestion(suggestions) {
+    return {
+        categoryId: suggestions.categoryId,
+        frequency: suggestions.frequency,
+    };
 }
 
 export function denormalizeBasicReportInfo(info) {
