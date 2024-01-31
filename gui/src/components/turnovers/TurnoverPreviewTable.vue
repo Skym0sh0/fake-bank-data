@@ -65,6 +65,13 @@
                             :disabled="!row.item.importable"/>
         </template>
 
+        <template v-slot:cell(suggestedCategories)="row">
+            <category-suggestion :index="row.index"
+                                 :suggestions="row.item.suggestedCategories || []"
+                                 :categories-by-id="categoriesById"
+                                 @select="onSelectCategory"/>
+        </template>
+
         <template v-slot:cell(suggestedCategory)="row">
             <b-button v-if="row.item.suggestedCategory && !categoriesByName[row.item.suggestedCategory]"
                       size="sm"
@@ -93,10 +100,12 @@ import {
     mapCategoriesById,
     mapCategoriesByName
 } from "@/components/turnovers/category-helpers";
+import CategorySuggestion from "@/components/turnovers/CategorySuggestion.vue";
 
 export default {
     name: "TurnoverPreviewTable",
     components: {
+        CategorySuggestion,
         CategoryInput,
         TableCellMonetary,
         TableCellDescription,
@@ -171,6 +180,10 @@ export default {
                         return cat.name;
                     },
                 },
+                {
+                    key: "suggestedCategories",
+                    label: "Vorschläge",
+                },
                 hasSuggestions ? {
                     key: "suggestedCategory",
                     label: "Bank Vorschlag",
@@ -209,6 +222,9 @@ export default {
             const missingCategory = filterProp.onlyMissingCategories ? !row.categoryId : true;
 
             return importable && missingCategory;
+        },
+        onSelectCategory(select) {
+            this.value[select.index].categoryId = select.categoryId;
         },
         onCreateCategory(categoryName) {
             this.$emit("onCreateCategory", {
