@@ -80,7 +80,8 @@
             <v-col :cols="3" class="d-flex align-items-end">
                 <v-text-field v-model="value.units"
                               label="Einheiten"
-                              type="number"/>
+                              type="number"
+                              :rules="unitsRules"/>
             </v-col>
 
             <v-col :cols="2" class="d-flex justify-content-center align-items-baseline">
@@ -117,6 +118,7 @@
 import {MonthIndexToName} from "@/util/months";
 import {ABSOLUTE, ASSOCIATIONS, RELATIVE} from "@/util/association";
 import moment from "moment/moment";
+import {TIMEUNITS} from "@/util/timeunits";
 
 export default {
     name: "TimeboxSelector",
@@ -155,28 +157,8 @@ export default {
             return this.value.mode === RELATIVE;
         },
         timeunits() {
-            return [
-                {
-                    value: "DECADES",
-                    text: "Dekaden",
-                },
-                {
-                    value: "YEARS",
-                    text: "Jahre",
-                },
-                {
-                    value: "MONTHS",
-                    text: "Monate",
-                },
-                {
-                    value: "WEEKS",
-                    text: "Wochen",
-                },
-                {
-                    value: "DAYS",
-                    text: "Tage",
-                }
-            ];
+            return Object.keys(TIMEUNITS)
+                .map(key => ({value: key, text: TIMEUNITS[key]}))
         },
         depths() {
             return Array(this.maxDepth)
@@ -194,7 +176,6 @@ export default {
         },
         months() {
             return [
-                // {value: null, text: ""},
                 ...Object.keys(MonthIndexToName)
                     .map(idx => ({
                         value: Number.parseInt(idx),
@@ -220,6 +201,12 @@ export default {
                 v => !!v || "Tiefe ist nötig",
                 v => (v && v > 0) || "Tiefe muss positiv sein",
                 v => (v && v <= this.maxDepth) || `Tiefe muss kleiner oder gleich ${this.maxDepth} sein`,
+            ];
+        },
+        unitsRules() {
+            return [
+                v => !!v || "Muss vorhanden sein",
+                v => v > 0 || "Muss positiv sein",
             ];
         },
     },

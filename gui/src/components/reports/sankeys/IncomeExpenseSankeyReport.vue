@@ -33,6 +33,7 @@ import Waiter from "@/components/misc/Waiter.vue";
 import _ from "lodash";
 import {MonthIndexToName} from "@/util/months";
 import {ABSOLUTE, RELATIVE} from "@/util/association";
+import {TIMEUNITS} from "@/util/timeunits";
 
 am4core.useTheme(am4themes_animated);
 
@@ -112,14 +113,26 @@ export default {
                 })
             ];
         },
+        isAbsolutTimespan() {
+            return this.select.mode === ABSOLUTE
+        },
+        isRelativeTimespan() {
+            return this.select.mode === RELATIVE
+        },
         helptext() {
             const prefix = "Alle Ein- und Ausgaben"
-            const levels = `aufgefächert auf bis zu ${this.depth} Ebene(n)`;
+            const levels = `aufgefächert auf bis zu ${this.select.depth} Ebene(n).`;
 
-            if (this.select.year && this.select.month)
-                return `${prefix} für ${MonthIndexToName[this.select.month]} ${this.select.year} ${levels}`;
-            if (this.select.year)
-                return `${prefix} für ${this.select.year} ${levels}`;
+            if (this.isAbsolutTimespan) {
+                if (this.select.year && this.select.month)
+                    return `${prefix} für ${MonthIndexToName[this.select.month]} ${this.select.year} ${levels}`;
+                if (this.select.year)
+                    return `${prefix} für ${this.select.year} ${levels}`;
+            }
+            if (this.isRelativeTimespan) {
+                console.log(this.select)
+                return `${prefix} aus ${this.select.units} ${TIMEUNITS[this.select.timeunit]} normiert auf einzelne ${TIMEUNITS[this.select.timeunit]} ${levels}`;
+            }
 
             return `${prefix} ${levels}`
         },
@@ -149,11 +162,14 @@ export default {
                 return;
 
             const apiCall = () => {
-                if (this.select.mode === ABSOLUTE)
+                if (this.isAbsolutTimespan)
                     return api.getReports().fetchIncomeExpenseFlowReport(this.select.year, this.select.month)
 
-                if (this.select.mode === RELATIVE)
+                if (this.isRelativeTimespan) {
+                    if (!this.select.timeunit || !this.select.units || this.select.units <= 0)
+                        return new Promise(resolve => resolve([]))
                     return api.getReports().fetchIncomeExpenseFlowRelativeTimeReport(this.select.timeunit, this.select.units, this.select.referenceDate)
+                }
 
                 throw new Error("Unknown mode: " + this.select.mode);
             }
