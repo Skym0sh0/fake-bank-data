@@ -6,7 +6,7 @@
 
         <v-card-subtitle v-if="isDataQueryable">
             <v-row>
-                <v-col :cols="4" class="py-0 d-flex justify-content-around align-items-center">
+                <v-col class="py-0 d-flex justify-content-around align-items-center">
                     <div>
                         Transaktionen: {{ basicInfo.numberOfTransactions }}
                     </div>
@@ -14,8 +14,10 @@
                         Kategorien: {{ basicInfo.numberOfUsedCategories }}
                     </div>
                 </v-col>
+            </v-row>
 
-                <v-col :cols="8" class="py-0">
+            <v-row>
+                <v-col class="py-0">
                     <timebox-selector v-if="basicInfo"
                                       v-model="select"
                                       :earliest="basicInfo.earliest"
@@ -29,9 +31,7 @@
         <v-card-text>
             <income-expense-sankey-report v-if="isDataQueryable"
                                           :height="800"
-                                          :year="select.year"
-                                          :month="select.month"
-                                          :depth="select.depth"/>
+                                          :select="select"/>
 
             <div v-if="!isDataQueryable">
                 No data present
@@ -48,6 +48,7 @@ import IncomeExpenseSankeyReport from "@/components/reports/sankeys/IncomeExpens
 import TimeboxSelector from "@/components/reports/sankeys/TimeboxSelector.vue";
 import WaitingIndicator from "@/components/misc/WaitingIndicator.vue";
 import moment from "moment";
+import {ASSOCIATIONS} from "@/util/association";
 
 export default {
     name: "TimelyReportOverview",
@@ -57,9 +58,14 @@ export default {
             isLoading: false,
             basicInfo: null,
             select: {
-                depth: null,
-                year: null,
-                month: null,
+                mode: ASSOCIATIONS[0],
+                depth: 2,
+
+                year: moment().year(),
+                month: moment().month(),
+
+                timeunit: "MONTHS",
+                units: 6,
             },
         }
     },

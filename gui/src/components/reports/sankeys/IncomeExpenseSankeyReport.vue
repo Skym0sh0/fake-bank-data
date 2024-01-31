@@ -32,6 +32,7 @@ import {api} from "@/api/RegularIncomeAPI";
 import Waiter from "@/components/misc/Waiter.vue";
 import _ from "lodash";
 import {MonthIndexToName} from "@/util/months";
+import {ABSOLUTE, RELATIVE} from "@/util/association";
 
 am4core.useTheme(am4themes_animated);
 
@@ -39,17 +40,9 @@ export default {
     name: "IncomeExpenseSankeyReport",
     components: {Waiter},
     props: {
-        depth: {
-            type: Number,
-            required: false,
-        },
-        year: {
-            type: Number,
-            required: false,
-        },
-        month: {
-            type: Number,
-            required: false,
+        select: {
+            type: Object,
+            required: true,
         },
         height: {
             type: Number,
@@ -83,7 +76,7 @@ export default {
                 return [];
 
             return (this.sankeyData.flows || [])
-                .filter(dp => !this.depth || dp.depthLevel < this.depth);
+                .filter(dp => !this.select.depth || dp.depthLevel < this.select.depth);
         },
         rootCategories() {
             const categories = new Set(this.incomeExpensesSankey.flatMap(dp => [dp.fromCategory, dp.toCategory]))
@@ -123,10 +116,10 @@ export default {
             const prefix = "Alle Ein- und Ausgaben"
             const levels = `aufgefächert auf bis zu ${this.depth} Ebene(n)`;
 
-            if (this.year && this.month)
-                return `${prefix} für ${MonthIndexToName[this.month]} ${this.year} ${levels}`;
-            if (this.year)
-                return `${prefix} für ${this.year} ${levels}`;
+            if (this.select.year && this.select.month)
+                return `${prefix} für ${MonthIndexToName[this.select.month]} ${this.select.year} ${levels}`;
+            if (this.select.year)
+                return `${prefix} für ${this.select.year} ${levels}`;
 
             return `${prefix} ${levels}`
         },
@@ -138,23 +131,11 @@ export default {
         },
     },
     watch: {
-        depth(newValue, oldValue) {
-            if (newValue === oldValue)
-                return;
-
-            this.draw();
-        },
-        year(newValue, oldValue) {
-            if (newValue === oldValue)
-                return;
-
-            this.reload();
-        },
-        month(newValue, oldValue) {
-            if (newValue === oldValue)
-                return;
-
-            this.reload();
+        select: {
+            handler() {
+                this.reload()
+            },
+            deep: true,
         },
     },
     methods: {
@@ -164,12 +145,22 @@ export default {
             }, 500)();
         },
         loadData() {
-            if (this.depth < 0)
+            if (this.select.depth < 0)
                 return;
+
+            const apiCall = () => {
+                if (this.select.mode === ABSOLUTE)
+                    return api.getReports().fetchIncomeExpenseFlowReport(this.select.year, this.select.month)
+
+                if (this.select.mode === RELATIVE)
+                    return api.getReports().fetchIncomeExpenseFlowRelativeTimeReport(this.select.timeunit, this.select.units)
+
+                throw new Error("Unknown mode: " + this.select.mode);
+            }
 
             this.isLoading = true;
 
-            api.getReports().fetchIncomeExpenseFlowYearReport(this.year, this.month)
+            apiCall()
                 .then(res => this.sankeyData = res)
                 .catch(e => console.error(e))
                 .finally(() => {

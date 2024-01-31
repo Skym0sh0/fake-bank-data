@@ -1,64 +1,88 @@
 <template>
     <v-row>
-        <v-col :cols="5">
-            <v-select v-model="value.year"
-                      :items="years"
-                      :rules="yearRules"
-                      label="Jahr"
-                      :clearable="true"
-                      :placeholder="`${latest.year()}`">
-                <template v-slot:prepend>
-                    <v-btn :icon="true"
-                           :x-small="true"
-                           :disabled="!value.year"
-                           @click="decreaseYear">
-                        <v-icon>
-                            mdi-menu-left
-                        </v-icon>
-                    </v-btn>
-                </template>
-                <template v-slot:append-outer>
-                    <v-btn :icon="true"
-                           :x-small="true"
-                           :disabled="!value.year"
-                           @click="increaseYear">
-                        <v-icon>
-                            mdi-menu-right
-                        </v-icon>
-                    </v-btn>
-                </template>
-            </v-select>
+        <v-col :cols="2">
+            <v-select v-model="value.mode"
+                      :items="associations"
+                      label="Bezug"
+                      :placeholder="`Relativ`"/>
         </v-col>
 
-        <v-col :cols="5">
-            <v-select v-model="value.month"
-                      :items="months"
-                      :rules="monthRules"
-                      label="Monat"
-                      :clearable="true"
-                      :placeholder="`${latest.month()}`">
-                <template v-slot:prepend>
-                    <v-btn :icon="true"
-                           :x-small="true"
-                           :disabled="!value.month"
-                           @click="decreaseMonth">
-                        <v-icon>
-                            mdi-menu-left
-                        </v-icon>
-                    </v-btn>
-                </template>
-                <template v-slot:append-outer>
-                    <v-btn :icon="true"
-                           :x-small="true"
-                           :disabled="!value.month"
-                           @click="increaseMonth">
-                        <v-icon>
-                            mdi-menu-right
-                        </v-icon>
-                    </v-btn>
-                </template>
-            </v-select>
-        </v-col>
+        <template v-if="isAbsolute">
+            <v-col :cols="4">
+                <v-select v-model="value.year"
+                          :items="years"
+                          :rules="yearRules"
+                          label="Jahr"
+                          :clearable="true"
+                          :placeholder="`${latest.year()}`">
+                    <template v-slot:prepend>
+                        <v-btn :icon="true"
+                               :x-small="true"
+                               :disabled="!value.year"
+                               @click="decreaseYear">
+                            <v-icon>
+                                mdi-menu-left
+                            </v-icon>
+                        </v-btn>
+                    </template>
+                    <template v-slot:append-outer>
+                        <v-btn :icon="true"
+                               :x-small="true"
+                               :disabled="!value.year"
+                               @click="increaseYear">
+                            <v-icon>
+                                mdi-menu-right
+                            </v-icon>
+                        </v-btn>
+                    </template>
+                </v-select>
+            </v-col>
+
+            <v-col :cols="4">
+                <v-select v-model="value.month"
+                          :items="months"
+                          :rules="monthRules"
+                          label="Monat"
+                          :clearable="true"
+                          :placeholder="`${latest.month()}`">
+                    <template v-slot:prepend>
+                        <v-btn :icon="true"
+                               :x-small="true"
+                               :disabled="!value.month"
+                               @click="decreaseMonth">
+                            <v-icon>
+                                mdi-menu-left
+                            </v-icon>
+                        </v-btn>
+                    </template>
+                    <template v-slot:append-outer>
+                        <v-btn :icon="true"
+                               :x-small="true"
+                               :disabled="!value.month"
+                               @click="increaseMonth">
+                            <v-icon>
+                                mdi-menu-right
+                            </v-icon>
+                        </v-btn>
+                    </template>
+                </v-select>
+            </v-col>
+        </template>
+
+        <template v-if="isRelative">
+            <v-col :cols="4">
+                <v-select v-model="value.timeunit"
+                          :items="timeunits"
+                          label="Zeiteinheit"
+                          :placeholder="`Jahr`"/>
+            </v-col>
+
+            <v-col :cols="4" class="d-flex align-items-end">
+                <v-text-field v-model="value.units"
+                              label="Einheiten"
+                              type="number"/>
+            </v-col>
+        </template>
 
         <v-col :cols="2">
             <v-select v-model="value.depth"
@@ -75,6 +99,7 @@
 <script>
 
 import {MonthIndexToName} from "@/util/months";
+import {ABSOLUTE, ASSOCIATIONS, RELATIVE} from "@/util/association";
 
 export default {
     name: "TimeboxSelector",
@@ -97,6 +122,39 @@ export default {
         },
     },
     computed: {
+        associations() {
+            return ASSOCIATIONS
+        },
+        isAbsolute() {
+            return this.value.mode === ABSOLUTE;
+        },
+        isRelative() {
+            return this.value.mode === RELATIVE;
+        },
+        timeunits() {
+            return [
+                {
+                    value: "DECADES",
+                    text: "Dekaden",
+                },
+                {
+                    value: "YEARS",
+                    text: "Jahre",
+                },
+                {
+                    value: "MONTHS",
+                    text: "Monate",
+                },
+                {
+                    value: "WEEKS",
+                    text: "Wochen",
+                },
+                {
+                    value: "DAYS",
+                    text: "Tage",
+                }
+            ];
+        },
         depths() {
             return Array(this.maxDepth)
                 .fill(null)

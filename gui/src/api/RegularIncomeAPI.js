@@ -108,11 +108,18 @@ class RegularIncomeAPI {
                     .then(res => res.data)
             },
 
-            fetchIncomeExpenseFlowYearReport(year, month) {
+            fetchIncomeExpenseFlowReport(year, month) {
                 return ref.getClient().get(`reports/income-expenses-flow`, {
                     params: {
                         "year": year,
                         "month": month,
+                    }
+                }).then(res => res.data)
+            },
+
+            fetchIncomeExpenseFlowRelativeTimeReport(timeunit, units) {
+                return ref.getClient().get(`reports/income-expenses-flow/sliding-window/${timeunit}/${units}`, {
+                    params: {
                     }
                 }).then(res => res.data)
             },
