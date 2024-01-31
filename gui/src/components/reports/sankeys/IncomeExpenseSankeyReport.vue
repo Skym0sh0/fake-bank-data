@@ -153,7 +153,7 @@ export default {
                     return api.getReports().fetchIncomeExpenseFlowReport(this.select.year, this.select.month)
 
                 if (this.select.mode === RELATIVE)
-                    return api.getReports().fetchIncomeExpenseFlowRelativeTimeReport(this.select.timeunit, this.select.units)
+                    return api.getReports().fetchIncomeExpenseFlowRelativeTimeReport(this.select.timeunit, this.select.units, this.select.referenceDate)
 
                 throw new Error("Unknown mode: " + this.select.mode);
             }

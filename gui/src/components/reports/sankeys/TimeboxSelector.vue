@@ -70,17 +70,33 @@
         </template>
 
         <template v-if="isRelative">
-            <v-col :cols="4">
+            <v-col :cols="3">
                 <v-select v-model="value.timeunit"
                           :items="timeunits"
                           label="Zeiteinheit"
                           :placeholder="`Jahr`"/>
             </v-col>
 
-            <v-col :cols="4" class="d-flex align-items-end">
+            <v-col :cols="3" class="d-flex align-items-end">
                 <v-text-field v-model="value.units"
                               label="Einheiten"
                               type="number"/>
+            </v-col>
+
+            <v-col :cols="2" class="d-flex justify-content-center align-items-baseline">
+                <div class="w-100">
+                    <label for="reference-date-datepicker" class="m-0" style="font-size: 12px">
+                        Referenzdatum
+                    </label>
+                    <b-form-datepicker id="reference-date-datepicker"
+                                       placeholder="Referenzdatum"
+                                       v-model="value.referenceDate"
+                                       :min="earliestDate"
+                                       :max="latestDate"
+                                       :start-weekday="1"
+                                       :date-format-options="{ year: 'numeric', month: 'numeric', day: 'numeric' }"
+                                       size="sm"/>
+                </div>
             </v-col>
         </template>
 
@@ -100,6 +116,7 @@
 
 import {MonthIndexToName} from "@/util/months";
 import {ABSOLUTE, ASSOCIATIONS, RELATIVE} from "@/util/association";
+import moment from "moment/moment";
 
 export default {
     name: "TimeboxSelector",
@@ -122,6 +139,12 @@ export default {
         },
     },
     computed: {
+        earliestDate() {
+            return this.earliest.format("YYYY-MM-DD");
+        },
+        latestDate() {
+            return /*this.latest*/ moment().format("YYYY-MM-DD");
+        },
         associations() {
             return ASSOCIATIONS
         },

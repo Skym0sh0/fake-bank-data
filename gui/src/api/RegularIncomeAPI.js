@@ -1,12 +1,12 @@
 import axios from "axios";
 import {v4 as uuidv4} from 'uuid';
 import {
+    denormalizeBasicReportInfo,
     denormalizeCategory,
     denormalizeTurnoverImport,
     denormalizeTurnoverPreview,
     denormalizeTurnoverRow,
-    denormalizeUser,
-    denormalizeBasicReportInfo
+    denormalizeUser
 } from "@/util/Normalizer";
 import {userService} from '@/auth/auth-header';
 
@@ -117,9 +117,10 @@ class RegularIncomeAPI {
                 }).then(res => res.data)
             },
 
-            fetchIncomeExpenseFlowRelativeTimeReport(timeunit, units) {
+            fetchIncomeExpenseFlowRelativeTimeReport(timeunit, units, referenceDate) {
                 return ref.getClient().get(`reports/income-expenses-flow/sliding-window/${timeunit}/${units}`, {
                     params: {
+                        "reference-date": referenceDate,
                     }
                 }).then(res => res.data)
             },

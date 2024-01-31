@@ -64,6 +64,7 @@ export default {
                 year: moment().year(),
                 month: moment().month(),
 
+                referenceDate: moment().format("YYYY-MM-DD"),
                 timeunit: "MONTHS",
                 units: 6,
             },
