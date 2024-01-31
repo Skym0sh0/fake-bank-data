@@ -266,6 +266,7 @@ export default {
         reset() {
             this.categories = null;
             this.selectedFileType = null;
+            this.selectedFileEncoding = null;
             this.fileSelection = null;
             this.parsedPreview = null;
             this.previewedData = null;

@@ -2,7 +2,6 @@ package de.sky.regular.income.importing.csv;
 
 import com.google.common.base.Stopwatch;
 import de.sky.common.database.DatabaseConnection;
-import de.sky.regular.income.api.detail.CreatedMetaInformation;
 import de.sky.regular.income.api.turnovers.*;
 import de.sky.regular.income.database.DatabaseSupplier;
 import de.sky.regular.income.importing.csv.parsers.TurnoverRecord;
@@ -269,13 +268,9 @@ public class TurnoverCsvImporter {
                 .suggestedCategory(rec.getSuggestedCategory())
                 .recipient(rec.getRecipient())
                 .checksum(checksum)
-                .categoryId(
-//                        categorySuggester.findCategorySuggestion(rec.getDescription(), rec.getSuggestedCategory())
-//                                .map(CreatedMetaInformation::getId)
-//                                .orElse(null)
-                        null
-                )
+                .categoryId(null)
                 .importable(!alreadyExistentRowChecksums.contains(checksum))
+                .suggestedCategories(categorySuggester.findSuggestions(rec, checksum))
                 .build();
     }
 
