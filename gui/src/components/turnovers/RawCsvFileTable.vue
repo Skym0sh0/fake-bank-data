@@ -51,11 +51,13 @@ export default {
             if (!this.file)
                 return;
 
+            this.$emit("isLoading", true)
             api.getTurnovers()
                 .rawCsvTablePreview(this.file, this.encoding)
                 .then(data => {
                     return this.parsedData = data;
                 })
+                .finally(() => this.$emit("isLoading", false))
         },
     },
     computed: {

@@ -66,9 +66,10 @@
         </template>
 
         <template v-slot:cell(suggestedCategories)="row">
-            <category-suggestion :index="row.index"
+            <category-suggestion :checksum="row.item.checksum"
                                  :suggestions="row.item.suggestedCategories || []"
                                  :categories-by-id="categoriesById"
+                                 :disabled="!row.item.importable"
                                  @select="onSelectCategory"/>
         </template>
 
@@ -224,7 +225,8 @@ export default {
             return importable && missingCategory;
         },
         onSelectCategory(select) {
-            this.value[select.index].categoryId = select.categoryId;
+            this.value.filter(row => row.checksum === select.checksum)
+                .forEach(row => row.categoryId = select.categoryId)
         },
         onCreateCategory(categoryName) {
             this.$emit("onCreateCategory", {

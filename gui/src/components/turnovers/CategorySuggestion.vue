@@ -2,14 +2,15 @@
     <div class="d-flex justify-content-start flex-wrap align-content-start" style="max-width: 35vh">
         <template v-for="s in enrichedSuggestions">
             <div :key="s.id">
-                <b-button :id="`index-${index}-suggestion-${s.id}`"
+                <b-button :id="`index-${checksum}-suggestion-${s.id}`"
                           @click="onClick(s.id)"
+                          :disabled="disabled"
                           :variant="s.color"
                           size="sm"
                           style="font-size: 0.75em; padding: 0 2px; margin: 0.1em">
                     {{ s.label }} - {{ s.frequency }}
                 </b-button>
-                <b-tooltip :target="`index-${index}-suggestion-${s.id}`" triggers="hover">
+                <b-tooltip :target="`index-${checksum}-suggestion-${s.id}`" triggers="hover">
                     <table>
                         <tr>
                             <th>Kategorie</th>
@@ -33,9 +34,13 @@ import _ from "lodash";
 export default {
     name: "CategorySuggestion",
     props: {
-        index: {
-            type: Number,
+        checksum: {
+            type: String,
             required: true,
+        },
+        disabled: {
+            type: Boolean,
+            default: false,
         },
         suggestions: {
             type: Array,
@@ -78,7 +83,7 @@ export default {
     },
     methods: {
         onClick(categoryId) {
-            this.$emit("select", {index: this.index, categoryId: categoryId})
+            this.$emit("select", {checksum: this.checksum, categoryId: categoryId})
         },
     },
 }

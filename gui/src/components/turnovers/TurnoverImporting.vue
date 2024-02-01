@@ -95,7 +95,8 @@
 
                     <b-row v-if="fileSelection">
                         <raw-csv-file-table :file="fileSelection"
-                                            :encoding="selectedFileEncoding"/>
+                                            :encoding="selectedFileEncoding"
+                                            @isLoading="onIsLoading"/>
                     </b-row>
                 </b-container>
             </div>
@@ -204,6 +205,9 @@ export default {
                 .then(res => {
                     this.categories = res
                 })
+        },
+        onIsLoading(isLoading) {
+            this.isUploading = isLoading
         },
         onStartPreview() {
             this.isUploading = true;
