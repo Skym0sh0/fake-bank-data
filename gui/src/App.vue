@@ -31,6 +31,8 @@
             <v-container fluid>
                 <router-view/>
             </v-container>
+
+            <api-error-bubble/>
         </v-main>
 
         <waiting-indicator :is-loading="isLoggingOut"/>
@@ -45,6 +47,7 @@ import SkyNavigation from "./components/layout/SkyNavigation";
 import {userService} from "@/auth/auth-header";
 import WaitingIndicator from "@/components/misc/WaitingIndicator.vue";
 import UserAvatar from "@/components/login/UserAvatar.vue";
+import ApiErrorBubble from "@/components/misc/ApiErrorBubble.vue";
 
 export default {
     name: "App",
@@ -68,6 +71,7 @@ export default {
         },
     },
     components: {
+        ApiErrorBubble,
         UserAvatar,
         WaitingIndicator,
         SkyNavigation,

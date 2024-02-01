@@ -10,6 +10,10 @@ import {
 } from "@/util/Normalizer";
 import {userService} from '@/auth/auth-header';
 
+export const errorReference = {
+    lastError: null,
+}
+
 function authHeader(user) {
     if (user && user.username && user.password) {
         const authdata = window.btoa(user.username + ":" + user.password)
@@ -43,13 +47,15 @@ class RegularIncomeAPI {
                 return response;
             },
             error => {
+                errorReference.lastError = error.response.data
+
                 if (error.response.status === 401) {
                     userService.logout()
                     location.reload();
                 }
 
                 // console.log("failed", error.response)
-                return error;
+                return Promise.reject(error);
             }
         )
 
