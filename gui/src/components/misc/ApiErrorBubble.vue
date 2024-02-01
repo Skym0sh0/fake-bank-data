@@ -2,7 +2,7 @@
     <v-snackbar :value="hasError"
                 :multi-line="true"
                 color="red"
-                :timeout="10000">
+                :timeout="-1">
         <template v-slot:action>
             <v-btn
                     variant="text"

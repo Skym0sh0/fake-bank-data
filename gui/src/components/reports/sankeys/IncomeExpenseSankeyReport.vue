@@ -130,7 +130,6 @@ export default {
                     return `${prefix} für ${this.select.year} ${levels}`;
             }
             if (this.isRelativeTimespan) {
-                console.log(this.select)
                 return `${prefix} aus ${this.select.units} ${TIMEUNITS[this.select.timeunit]} normiert auf einzelne ${TIMEUNITS[this.select.timeunit]} ${levels}`;
             }
 
