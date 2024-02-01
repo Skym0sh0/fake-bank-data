@@ -265,8 +265,8 @@ export default {
         },
         reset() {
             this.categories = null;
-            this.selectedFileType = null;
-            this.selectedFileEncoding = null;
+            // this.selectedFileType = null;
+            // this.selectedFileEncoding = "UTF-8";
             this.fileSelection = null;
             this.parsedPreview = null;
             this.previewedData = null;

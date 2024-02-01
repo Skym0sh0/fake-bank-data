@@ -160,7 +160,9 @@ export function denormalizeTurnoverPreviewRow(row) {
 export function denormalizeTurnoverPreviewCategorySuggestion(suggestions) {
     return {
         categoryId: suggestions.categoryId,
-        frequency: suggestions.frequency,
+        frequency: suggestions.frequency || 0,
+        precedence: suggestions.precedence || 0.0,
+        origins: suggestions.origins || [],
     };
 }
 
