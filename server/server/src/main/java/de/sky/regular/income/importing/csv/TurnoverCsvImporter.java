@@ -208,21 +208,24 @@ public class TurnoverCsvImporter {
 
         var records = parser.parseCsv(format, is);
 
-        var alreadyExistentRows = findExistentRows(records);
-
         log.info("Parsed {} turnover records from CSV", records.size());
 
-        try (var suggester = categorySuggester.openForBatchSuggestion()) {
-            log.info("Now enriching and mapping CSV rows ...");
+        return db.transactionWithResult(ctx -> {
+            var alreadyExistentRows = findExistentRows(ctx, records);
 
-            return records.stream()
-                    .filter(this::filterInvalidRows)
-                    .map(rec -> enrichAndMap(suggester, alreadyExistentRows, rec))
-                    .sorted(Comparator.comparing(TurnoverRow::getDate))
-                    .toList();
-        } finally {
-            log.info("Previewing file was done in {}", sw.stop());
-        }
+            try (var suggester = categorySuggester.openForBatchSuggestion(ctx)) {
+                log.info("Now enriching and mapping CSV rows ...");
+
+                return records.stream()
+                        .parallel()
+                        .filter(this::filterInvalidRows)
+                        .map(rec -> enrichAndMap(suggester, alreadyExistentRows, rec))
+                        .sorted(Comparator.comparing(TurnoverRow::getDate))
+                        .toList();
+            } finally {
+                log.info("Previewing file was done in {}", sw.stop());
+            }
+        });
     }
 
     private boolean filterInvalidRows(TurnoverRecord rec) {
@@ -231,7 +234,7 @@ public class TurnoverCsvImporter {
         return true;
     }
 
-    private Set<String> findExistentRows(List<TurnoverRecord> recs) {
+    private Set<String> findExistentRows(DSLContext ctx, List<TurnoverRecord> recs) {
         var minDate = recs.stream()
                 .filter(Objects::nonNull)
                 .map(TurnoverRecord::getDate)
@@ -245,17 +248,15 @@ public class TurnoverCsvImporter {
                 .max(Comparator.naturalOrder())
                 .orElse(LocalDate.of(2500, 12, 31));
 
-        return db.transactionWithResult(ctx ->
-                ctx.selectDistinct(TURNOVER_ROW.CHECKSUM)
-                        .from(TURNOVER_ROW)
-                        .where(and(
-                                TURNOVER_ROW.DATE.greaterOrEqual(minDate),
-                                TURNOVER_ROW.DATE.lessOrEqual(maxDate)
-                        ))
-                        .and(TURNOVER_ROW.OWNER_ID.eq(user.getCurrentUser(ctx).getId()))
-                        .fetch()
-                        .intoSet(TURNOVER_ROW.CHECKSUM)
-        );
+        return ctx.selectDistinct(TURNOVER_ROW.CHECKSUM)
+                .from(TURNOVER_ROW)
+                .where(and(
+                        TURNOVER_ROW.DATE.greaterOrEqual(minDate),
+                        TURNOVER_ROW.DATE.lessOrEqual(maxDate)
+                ))
+                .and(TURNOVER_ROW.OWNER_ID.eq(user.getCurrentUser(ctx).getId()))
+                .fetch()
+                .intoSet(TURNOVER_ROW.CHECKSUM);
     }
 
     private TurnoverRowPreview enrichAndMap(CategorySuggester.CategoryBatchSuggester categorySuggester, Set<String> alreadyExistentRowChecksums, TurnoverRecord rec) {
@@ -265,12 +266,12 @@ public class TurnoverCsvImporter {
                 .date(rec.getDate())
                 .amountInCents(rec.getAmountInCents())
                 .description(rec.getDescription())
-                .suggestedCategory(rec.getSuggestedCategory())
+                .suggestedCategory(null)
                 .recipient(rec.getRecipient())
                 .checksum(checksum)
                 .categoryId(null)
                 .importable(!alreadyExistentRowChecksums.contains(checksum))
-                .suggestedCategories(categorySuggester.findSuggestions(rec, checksum))
+                .suggestedCategories(categorySuggester.findSuggestions(rec))
                 .build();
     }
 
