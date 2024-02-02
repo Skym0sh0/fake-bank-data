@@ -31,7 +31,7 @@ public class ChecksumComputer implements Function<TurnoverRecord, String> {
 
     public String computeChecksum(byte[] data) {
         synchronized (this) {
-            return BaseEncoding.base16().encode((getDigest().digest(data)));
+            return BaseEncoding.base16().encode((getDigest().digest(data))).toUpperCase();
         }
     }
 
