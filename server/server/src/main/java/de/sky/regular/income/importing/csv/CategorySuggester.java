@@ -61,12 +61,13 @@ public class CategorySuggester {
         public void close() {
         }
 
-        public List<TurnoverRowPreview.CategorySuggestion> findSuggestions(TurnoverRecord rec) {
+        public List<TurnoverRowPreview.CategorySuggestion> findSuggestions(TurnoverRecord rec, String similarityChecksum) {
             var allSuggestions = Stream.of(
-                            findSuggestionsByDescription(0, rec.getDescription()),
-                            findSuggestionsByRecipient(1, rec.getRecipient()),
-                            findSuggestionsByMoney(2, rec.getAmountInCents()),
-                            findSuggestionsByBankSuggestion(3, rec.getSuggestedCategory())
+                            findSuggestionsBySimilarity(0, similarityChecksum),
+                            findSuggestionsByDescription(1, rec.getDescription()),
+                            findSuggestionsByRecipient(2, rec.getRecipient()),
+                            findSuggestionsByMoney(3, rec.getAmountInCents()),
+                            findSuggestionsByBankSuggestion(4, rec.getSuggestedCategory())
                     )
                     .flatMap(Collection::stream)
                     .toList();
@@ -103,6 +104,10 @@ public class CategorySuggester {
                     .sorted(Comparator.comparing(TurnoverRowPreview.CategorySuggestion::getPrecedence).reversed())
                     .limit(5)
                     .toList();
+        }
+
+        private List<TempSuggestion> findSuggestionsBySimilarity(int priority, String similarityChecksum) {
+            return findSuggestionsByCondition(TURNOVER_ROW.SIMILARITY_CHECKSUM.eq(similarityChecksum), priority, TURNOVER_ROW.SIMILARITY_CHECKSUM.getUnqualifiedName().last());
         }
 
         private List<TempSuggestion> findSuggestionsByDescription(int priority, String desc) {

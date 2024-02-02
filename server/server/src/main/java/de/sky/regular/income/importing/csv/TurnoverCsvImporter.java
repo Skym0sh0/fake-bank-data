@@ -275,7 +275,7 @@ public class TurnoverCsvImporter {
                 .similarityChecksum(similarityChecksum)
                 .categoryId(null)
                 .importable(!alreadyExistentRowChecksums.contains(checksum))
-                .suggestedCategories(categorySuggester.findSuggestions(rec))
+                .suggestedCategories(categorySuggester.findSuggestions(rec, similarityChecksum))
                 .build();
     }
 
