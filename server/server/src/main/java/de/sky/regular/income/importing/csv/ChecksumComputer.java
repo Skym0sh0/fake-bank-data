@@ -29,6 +29,14 @@ public class ChecksumComputer implements Function<TurnoverRecord, String> {
         return computeChecksum(sb.getBytes(StandardCharsets.UTF_8));
     }
 
+    public String computeSimilarityChecksum(TurnoverRecord rec) {
+        String sb = rec.getAmountInCents() +
+                rec.getRecipient() +
+                rec.getDescription();
+
+        return computeChecksum(sb.getBytes(StandardCharsets.UTF_8));
+    }
+
     public String computeChecksum(byte[] data) {
         synchronized (this) {
             return BaseEncoding.base16().encode((getDigest().digest(data))).toUpperCase();

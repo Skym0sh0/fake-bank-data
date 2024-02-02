@@ -187,6 +187,21 @@ public class TurnoverRowRecord extends UpdatableRecordImpl<TurnoverRowRecord> {
         return (UUID) get(10);
     }
 
+    /**
+     * Setter for <code>REGULAR_INCOME.turnover_row.similarity_checksum</code>.
+     */
+    public TurnoverRowRecord setSimilarityChecksum(String value) {
+        set(11, value);
+        return this;
+    }
+
+    /**
+     * Getter for <code>REGULAR_INCOME.turnover_row.similarity_checksum</code>.
+     */
+    public String getSimilarityChecksum() {
+        return (String) get(11);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
@@ -210,7 +225,7 @@ public class TurnoverRowRecord extends UpdatableRecordImpl<TurnoverRowRecord> {
     /**
      * Create a detached, initialised TurnoverRowRecord
      */
-    public TurnoverRowRecord(UUID turnoverFile, LocalDate date, Integer amountValueCents, String description, String suggestedCategory, String recipient, String fullChecksum, UUID categoryId, OffsetDateTime lastUpdatedAt, UUID ownerId, UUID id) {
+    public TurnoverRowRecord(UUID turnoverFile, LocalDate date, Integer amountValueCents, String description, String suggestedCategory, String recipient, String fullChecksum, UUID categoryId, OffsetDateTime lastUpdatedAt, UUID ownerId, UUID id, String similarityChecksum) {
         super(TurnoverRow.TURNOVER_ROW);
 
         setTurnoverFile(turnoverFile);
@@ -224,6 +239,7 @@ public class TurnoverRowRecord extends UpdatableRecordImpl<TurnoverRowRecord> {
         setLastUpdatedAt(lastUpdatedAt);
         setOwnerId(ownerId);
         setId(id);
+        setSimilarityChecksum(similarityChecksum);
         resetChangedOnNotNull();
     }
 }

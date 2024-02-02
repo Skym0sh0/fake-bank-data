@@ -62,6 +62,7 @@ public class TurnoverCsvImporter {
             imp.setFileContent(content);
 
             imp.setChecksum(checksum);
+            imp.setChecksum(checksum);
             imp.setTurnoverFileFormat(String.valueOf(patch.format));
             imp.setFileEncoding(Optional.ofNullable(patch.encoding).orElse("UTF-8"));
 
@@ -85,6 +86,7 @@ public class TurnoverCsvImporter {
                         rec.setCategoryId(row.getCategoryId());
 
                         rec.setFullChecksum(row.getChecksum());
+                        rec.setSimilarityChecksum(row.getSimilarityChecksum());
                         rec.setLastUpdatedAt(ts.toOffsetDateTime());
 
                         return rec;
@@ -261,6 +263,7 @@ public class TurnoverCsvImporter {
 
     private TurnoverRowPreview enrichAndMap(CategorySuggester.CategoryBatchSuggester categorySuggester, Set<String> alreadyExistentRowChecksums, TurnoverRecord rec) {
         String checksum = checksummer.computeChecksum(rec);
+        String similarityChecksum = checksummer.computeSimilarityChecksum(rec);
 
         return TurnoverRowPreview.builder()
                 .date(rec.getDate())
@@ -269,6 +272,7 @@ public class TurnoverCsvImporter {
                 .suggestedCategory(null)
                 .recipient(rec.getRecipient())
                 .checksum(checksum)
+                .similarityChecksum(similarityChecksum)
                 .categoryId(null)
                 .importable(!alreadyExistentRowChecksums.contains(checksum))
                 .suggestedCategories(categorySuggester.findSuggestions(rec))
@@ -297,6 +301,7 @@ public class TurnoverCsvImporter {
         return TurnoverRow.builder()
                 .id(row.getId())
                 .checksum(row.getFullChecksum())
+                .similarityChecksum(row.getSimilarityChecksum())
                 .date(row.getDate())
                 .description(row.getDescription())
                 .amountInCents(row.getAmountValueCents())

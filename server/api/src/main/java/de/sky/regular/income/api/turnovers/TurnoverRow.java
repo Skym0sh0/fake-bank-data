@@ -15,6 +15,7 @@ public class TurnoverRow {
     public Integer amountInCents;
     public UUID categoryId;
     public String checksum;
+    public String similarityChecksum;
     public String description;
     public String suggestedCategory;
     public String recipient;

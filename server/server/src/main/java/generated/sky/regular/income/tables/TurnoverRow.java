@@ -120,6 +120,11 @@ public class TurnoverRow extends TableImpl<TurnoverRowRecord> {
      */
     public final TableField<TurnoverRowRecord, UUID> ID = createField(DSL.name("id"), SQLDataType.UUID.nullable(false), this, "");
 
+    /**
+     * The column <code>REGULAR_INCOME.turnover_row.similarity_checksum</code>.
+     */
+    public final TableField<TurnoverRowRecord, String> SIMILARITY_CHECKSUM = createField(DSL.name("similarity_checksum"), SQLDataType.CLOB.nullable(false), this, "");
+
     private TurnoverRow(Name alias, Table<TurnoverRowRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }
@@ -249,7 +254,9 @@ public class TurnoverRow extends TableImpl<TurnoverRowRecord> {
         return Arrays.asList(
             Internal.createCheck(this, DSL.name("c_amount_not_zero"), "((amount_value_cents <> 0))", true),
             Internal.createCheck(this, DSL.name("co_checksum_is_on_chosen_data"), "((full_checksum = upper(md5(((((date)::text || amount_value_cents) || description) || recipient)))))", true),
-            Internal.createCheck(this, DSL.name("co_checksum_is_uppercase"), "((full_checksum = upper(full_checksum)))", true)
+            Internal.createCheck(this, DSL.name("co_checksum_is_uppercase"), "((full_checksum = upper(full_checksum)))", true),
+            Internal.createCheck(this, DSL.name("co_similarity_checksum_is_on_similar_data"), "((similarity_checksum = upper(md5(((amount_value_cents || recipient) || description)))))", true),
+            Internal.createCheck(this, DSL.name("co_similarity_checksum_is_uppercase"), "((similarity_checksum = upper(similarity_checksum)))", true)
         );
     }
 
