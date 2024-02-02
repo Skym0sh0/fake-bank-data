@@ -36,5 +36,5 @@ public class Indexes {
     public static final Index UQ_CATEGORY_ID = Internal.createIndex(DSL.name("uq_category_id"), Category.CATEGORY, new OrderField[] { Category.CATEGORY.ID }, true);
     public static final Index UQ_FINANCIAL_TRANSACTION_ID = Internal.createIndex(DSL.name("uq_financial_transaction_id"), FinancialTransaction.FINANCIAL_TRANSACTION, new OrderField[] { FinancialTransaction.FINANCIAL_TRANSACTION.ID }, true);
     public static final Index UQ_TURNOVER_FILE_ID = Internal.createIndex(DSL.name("uq_turnover_file_id"), TurnoverFileImport.TURNOVER_FILE_IMPORT, new OrderField[] { TurnoverFileImport.TURNOVER_FILE_IMPORT.ID }, true);
-    public static final Index UQ_TURNOVER_ROW_CHECKSUM = Internal.createIndex(DSL.name("uq_turnover_row_checksum"), TurnoverRow.TURNOVER_ROW, new OrderField[] { TurnoverRow.TURNOVER_ROW.OWNER_ID, TurnoverRow.TURNOVER_ROW.CHECKSUM }, true);
+    public static final Index UQ_TURNOVER_ROW_CHECKSUM = Internal.createIndex(DSL.name("uq_turnover_row_checksum"), TurnoverRow.TURNOVER_ROW, new OrderField[] { TurnoverRow.TURNOVER_ROW.OWNER_ID, TurnoverRow.TURNOVER_ROW.FULL_CHECKSUM }, true);
 }

@@ -113,17 +113,17 @@ public class TurnoverRowRecord extends UpdatableRecordImpl<TurnoverRowRecord> {
     }
 
     /**
-     * Setter for <code>REGULAR_INCOME.turnover_row.checksum</code>.
+     * Setter for <code>REGULAR_INCOME.turnover_row.full_checksum</code>.
      */
-    public TurnoverRowRecord setChecksum(String value) {
+    public TurnoverRowRecord setFullChecksum(String value) {
         set(6, value);
         return this;
     }
 
     /**
-     * Getter for <code>REGULAR_INCOME.turnover_row.checksum</code>.
+     * Getter for <code>REGULAR_INCOME.turnover_row.full_checksum</code>.
      */
-    public String getChecksum() {
+    public String getFullChecksum() {
         return (String) get(6);
     }
 
@@ -210,7 +210,7 @@ public class TurnoverRowRecord extends UpdatableRecordImpl<TurnoverRowRecord> {
     /**
      * Create a detached, initialised TurnoverRowRecord
      */
-    public TurnoverRowRecord(UUID turnoverFile, LocalDate date, Integer amountValueCents, String description, String suggestedCategory, String recipient, String checksum, UUID categoryId, OffsetDateTime lastUpdatedAt, UUID ownerId, UUID id) {
+    public TurnoverRowRecord(UUID turnoverFile, LocalDate date, Integer amountValueCents, String description, String suggestedCategory, String recipient, String fullChecksum, UUID categoryId, OffsetDateTime lastUpdatedAt, UUID ownerId, UUID id) {
         super(TurnoverRow.TURNOVER_ROW);
 
         setTurnoverFile(turnoverFile);
@@ -219,7 +219,7 @@ public class TurnoverRowRecord extends UpdatableRecordImpl<TurnoverRowRecord> {
         setDescription(description);
         setSuggestedCategory(suggestedCategory);
         setRecipient(recipient);
-        setChecksum(checksum);
+        setFullChecksum(fullChecksum);
         setCategoryId(categoryId);
         setLastUpdatedAt(lastUpdatedAt);
         setOwnerId(ownerId);

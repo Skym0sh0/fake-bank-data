@@ -96,9 +96,9 @@ public class TurnoverRow extends TableImpl<TurnoverRowRecord> {
     public final TableField<TurnoverRowRecord, String> RECIPIENT = createField(DSL.name("recipient"), SQLDataType.CLOB, this, "");
 
     /**
-     * The column <code>REGULAR_INCOME.turnover_row.checksum</code>.
+     * The column <code>REGULAR_INCOME.turnover_row.full_checksum</code>.
      */
-    public final TableField<TurnoverRowRecord, String> CHECKSUM = createField(DSL.name("checksum"), SQLDataType.CLOB.nullable(false), this, "");
+    public final TableField<TurnoverRowRecord, String> FULL_CHECKSUM = createField(DSL.name("full_checksum"), SQLDataType.CLOB.nullable(false), this, "");
 
     /**
      * The column <code>REGULAR_INCOME.turnover_row.category_id</code>.
@@ -248,8 +248,8 @@ public class TurnoverRow extends TableImpl<TurnoverRowRecord> {
     public List<Check<TurnoverRowRecord>> getChecks() {
         return Arrays.asList(
             Internal.createCheck(this, DSL.name("c_amount_not_zero"), "((amount_value_cents <> 0))", true),
-            Internal.createCheck(this, DSL.name("co_checksum_is_on_chosen_data"), "((checksum = upper(md5(((((date)::text || amount_value_cents) || description) || recipient)))))", true),
-            Internal.createCheck(this, DSL.name("co_checksum_is_uppercase"), "((checksum = upper(checksum)))", true)
+            Internal.createCheck(this, DSL.name("co_checksum_is_on_chosen_data"), "((full_checksum = upper(md5(((((date)::text || amount_value_cents) || description) || recipient)))))", true),
+            Internal.createCheck(this, DSL.name("co_checksum_is_uppercase"), "((full_checksum = upper(full_checksum)))", true)
         );
     }
 

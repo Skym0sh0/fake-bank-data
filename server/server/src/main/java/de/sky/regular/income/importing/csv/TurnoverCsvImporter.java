@@ -84,7 +84,7 @@ public class TurnoverCsvImporter {
 
                         rec.setCategoryId(row.getCategoryId());
 
-                        rec.setChecksum(row.getChecksum());
+                        rec.setFullChecksum(row.getChecksum());
                         rec.setLastUpdatedAt(ts.toOffsetDateTime());
 
                         return rec;
@@ -248,7 +248,7 @@ public class TurnoverCsvImporter {
                 .max(Comparator.naturalOrder())
                 .orElse(LocalDate.of(2500, 12, 31));
 
-        return ctx.selectDistinct(TURNOVER_ROW.CHECKSUM)
+        return ctx.selectDistinct(TURNOVER_ROW.FULL_CHECKSUM)
                 .from(TURNOVER_ROW)
                 .where(and(
                         TURNOVER_ROW.DATE.greaterOrEqual(minDate),
@@ -256,7 +256,7 @@ public class TurnoverCsvImporter {
                 ))
                 .and(TURNOVER_ROW.OWNER_ID.eq(user.getCurrentUser(ctx).getId()))
                 .fetch()
-                .intoSet(TURNOVER_ROW.CHECKSUM);
+                .intoSet(TURNOVER_ROW.FULL_CHECKSUM);
     }
 
     private TurnoverRowPreview enrichAndMap(CategorySuggester.CategoryBatchSuggester categorySuggester, Set<String> alreadyExistentRowChecksums, TurnoverRecord rec) {
@@ -296,7 +296,7 @@ public class TurnoverCsvImporter {
     private static TurnoverRow map(TurnoverRowRecord row) {
         return TurnoverRow.builder()
                 .id(row.getId())
-                .checksum(row.getChecksum())
+                .checksum(row.getFullChecksum())
                 .date(row.getDate())
                 .description(row.getDescription())
                 .amountInCents(row.getAmountValueCents())
