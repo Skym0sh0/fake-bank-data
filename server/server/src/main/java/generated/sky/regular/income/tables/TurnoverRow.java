@@ -194,7 +194,7 @@ public class TurnoverRow extends TableImpl<TurnoverRowRecord> {
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.asList(Indexes.IDX_TURNOVER_ROW_OWNER, Indexes.UQ_TURNOVER_ROW_CHECKSUM);
+        return Arrays.asList(Indexes.IDX_TURNOVER_ROW_DATE, Indexes.IDX_TURNOVER_ROW_DESCRIPTION, Indexes.IDX_TURNOVER_ROW_OWNER, Indexes.IDX_TURNOVER_ROW_RECIPIENT, Indexes.IDX_TURNOVER_ROW_SIMILARITY_CHECKSUM, Indexes.UQ_TURNOVER_ROW_CHECKSUM);
     }
 
     @Override
