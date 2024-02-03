@@ -14,7 +14,7 @@ export function flatCategoryTreeWithParentChain(rootCategories, parentChainTrans
     const flatted = (rootCategories || []).flatMap(c => extract(c, []))
         .map(c => ({
                 ...c,
-                parentChain: parentChainTransformer([...c.parentCategoryNames, c.name])
+                parentChain: parentChainTransformer ? parentChainTransformer([...c.parentCategoryNames, c.name]) : undefined
             })
         )
 
