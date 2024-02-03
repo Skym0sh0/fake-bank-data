@@ -15,10 +15,11 @@
                               style="min-height: 60vh; margin: 0"/>
             </b-col>
         </b-row>
-        <b-row :no-gutters="true">
+
+        <b-row :no-gutters="true" class="mt-1">
             <b-col>Bytes: {{ file.size }}</b-col>
-            <b-col>Rows: {{ parsedData.rows }}</b-col>
-            <b-col>Columns: {{ parsedData.columns }}</b-col>
+            <b-col>Zeilen: {{ parsedData.rows }}</b-col>
+            <b-col>Spalten: {{ parsedData.columns }}</b-col>
         </b-row>
     </b-container>
 </template>

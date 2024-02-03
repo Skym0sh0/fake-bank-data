@@ -5,12 +5,12 @@
         <b-card-header>
             <div class="d-flex justify-content-between align-items-center">
                 <h4>
-                    Turnovers Overview
+                    Überblick Umsätze
                 </h4>
 
                 <b-btn-group>
                     <b-btn variant="secondary" @click="onReload">
-                        Reload
+                        Neuladen
                     </b-btn>
 
                     <turnover-importing @uploadSucceeded="uploadSuccess"/>
@@ -27,7 +27,7 @@
 
 <script>
 import TurnoversList from './TurnoversList';
-import TurnoverImporting from "@/components/turnovers/TurnoverImporting.vue";
+import TurnoverImporting from "@/components/turnovers/importing/TurnoverImporting.vue";
 import {api} from "@/api/RegularIncomeAPI";
 import WaitingIndicator from "@/components/misc/WaitingIndicator.vue";
 

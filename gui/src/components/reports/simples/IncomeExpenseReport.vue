@@ -48,6 +48,21 @@ export default {
         getHeight() {
             return `${this.height}px`
         },
+        processedData() {
+            return this.incomeExpenses.map(d => {
+                const inc = parseInt(d.incomeInCents)
+                const exp = parseInt(d.expenseInCents)
+                const diff = inc - exp
+
+                return {
+                    month: new Date(d.month),
+                    income: inc / 100.0,
+                    expense: exp / 100.0,
+                    difference: diff / 100.0,
+                    isAlerting: diff / 100.0 < 0,
+                }
+            })
+        },
     },
     methods: {
         loadData() {
@@ -72,31 +87,17 @@ export default {
 
             const chart = am4core.create(this.target, am4charts.XYChart)
 
-            chart.data = this.incomeExpenses.map(d => {
-                const inc = parseInt(d.incomeInCents)
-                const exp = parseInt(d.expenseInCents)
-                const diff = inc - exp
-
-                return {
-                    month: new Date(d.month),
-                    income: inc / 100.0,
-                    expense: exp / 100.0,
-                    difference: diff / 100.0,
-                    isAlerting: function () {
-                        return this.difference < 0
-                    },
-                }
-            })
+            chart.data = this.processedData
 
             const dateAxis = chart.xAxes.push(new am4charts.DateAxis())
-            dateAxis.title.text = "Months"
+            dateAxis.title.text = "Monate"
             dateAxis.dateFormatter.dateFormat = "MMMM yyyy"
             dateAxis.renderer.grid.template.location = 0
             dateAxis.renderer.minGridDistance = 60
             dateAxis.baseInterval = {timeUnit: "month", count: 1}
 
             const valueAxis = chart.yAxes.push(new am4charts.ValueAxis())
-            valueAxis.title.text = "Income"
+            valueAxis.title.text = "Einkommen und Ausgaben"
             valueAxis.dataFields = "value"
             valueAxis.numberFormatter.numberFormat = moneyFormat.getStyle()
             valueAxis.numberFormatter.intlLocales = "de-DE"
@@ -104,7 +105,7 @@ export default {
             valueAxis.tooltip.disabled = true
 
             const incomeSeries = chart.series.push(new am4charts.LineSeries())
-            incomeSeries.name = "Income per Month"
+            incomeSeries.name = "Einkommen pro Monat"
             incomeSeries.dataFields.dateX = "month"
             incomeSeries.dataFields.valueY = "income"
             // incomeSeries.dataFields.openValueY = "expense"
@@ -120,7 +121,7 @@ export default {
             incomeBullets.circle.radius = 3
 
             const expenseSeries = chart.series.push(new am4charts.LineSeries())
-            expenseSeries.name = "Expenses per Month"
+            expenseSeries.name = "Ausgaben pro Monat"
             expenseSeries.dataFields.dateX = "month"
             expenseSeries.dataFields.valueY = "expense"
             expenseSeries.dataFields.openValueY = "income"
@@ -143,6 +144,8 @@ export default {
             chart.scrollbarY = new am4core.Scrollbar()
 
             chart.legend = new am4charts.Legend()
+
+            chart.exporting.menu = new am4core.ExportMenu();
 
             this.findTooNegativeDifferenceRanges(chart, dateAxis)
                 .forEach(range => {
@@ -194,7 +197,7 @@ export default {
 
                 const startTime = findStartTime(i, current)
 
-                if (current.isAlerting()) {
+                if (current.isAlerting) {
                     if (!tooHighExpensesRange) {
                         tooHighExpensesRange = {begin: new Date(startTime), end: null}
                     }

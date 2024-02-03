@@ -4,20 +4,20 @@
 
         <v-card-title class="p-2">
             <div class="w-100 d-flex justify-content-between align-items-center">
-                <span>Categories</span>
+                <h5>Kategorien</h5>
 
                 <v-btn-toggle :dense="true">
                     <v-btn @click="loadCategories"
                            :loading="isLoading"
                            color="accent"
                            :small="true">
-                        Reload
+                        Neuladen
                     </v-btn>
                     <v-btn @click="addNewRootCategory"
                            :loading="isLoading"
                            color="primary"
                            :small="true">
-                        Neue Category
+                        Neue Kategorie
                     </v-btn>
                 </v-btn-toggle>
             </div>

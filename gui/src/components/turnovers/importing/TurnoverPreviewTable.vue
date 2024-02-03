@@ -93,15 +93,15 @@
 </template>
 
 <script>
-import TableCellDescription from "@/components/turnovers/TableCellDescription.vue";
-import TableCellMonetary from "@/components/turnovers/TableCellMonetary.vue";
+import TableCellDescription from "@/components/turnovers/table/TableCellDescription.vue";
+import TableCellMonetary from "@/components/turnovers/table/TableCellMonetary.vue";
 import CategoryInput from "@/components/misc/CategoryInput.vue";
 import {
     flatCategoryTreeWithParentChain,
     mapCategoriesById,
     mapCategoriesByName
 } from "@/components/turnovers/category-helpers";
-import CategorySuggestion from "@/components/turnovers/CategorySuggestion.vue";
+import CategorySuggestion from "@/components/turnovers/table/CategorySuggestion.vue";
 
 export default {
     name: "TurnoverPreviewTable",

@@ -78,17 +78,17 @@ export default {
             }))
 
             const dateAxis = chart.xAxes.push(new am4charts.DateAxis())
-            dateAxis.title.text = "Dates"
+            dateAxis.title.text = "Datum"
             dateAxis.renderer.grid.template.location = 0.5
 
             const valueAxis = chart.yAxes.push(new am4charts.ValueAxis())
             valueAxis.dataFields.value = "value"
-            valueAxis.title.text = "Balance"
+            valueAxis.title.text = "Kontostand"
             valueAxis.numberFormatter.numberFormat = moneyFormat.getStyle()
             valueAxis.numberFormatter.intlLocales = "de-DE"
 
             const series = chart.series.push(new am4charts.StepLineSeries())
-            series.name = "Balance over Time"
+            series.name = "Kontostand über die Zeit"
             series.dataFields.dateX = "date"
             series.dataFields.valueY = "value"
 
@@ -110,6 +110,8 @@ export default {
 
             chart.legend = new am4charts.Legend()
             chart.legend.position = "bottom"
+
+            chart.exporting.menu = new am4core.ExportMenu();
 
             setInitialZoom(chart, dateAxis)
 

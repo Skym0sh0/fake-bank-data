@@ -42,8 +42,8 @@
 
 import {api} from "@/api/RegularIncomeAPI";
 import Waiter from "@/components/misc/Waiter.vue";
-import TableCellDescription from "@/components/turnovers/TableCellDescription.vue";
-import TableCellMonetary from "@/components/turnovers/TableCellMonetary.vue";
+import TableCellDescription from "@/components/turnovers/table/TableCellDescription.vue";
+import TableCellMonetary from "@/components/turnovers/table/TableCellMonetary.vue";
 
 export default {
     name: "CategoryUsageDialog",

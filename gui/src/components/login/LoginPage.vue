@@ -3,7 +3,7 @@
         <div style="height: 90vh" class="w-100 d-flex justify-content-center align-items-center">
             <v-card min-width="25%" max-width="80%" elevation="10">
                 <v-card-title>
-                    Login
+                    Anmelden
                 </v-card-title>
 
                 <v-card-subtitle v-if="errorMessage"
@@ -40,10 +40,10 @@
 
                     <v-card-actions class="w-100 d-flex justify-content-between">
                         <v-btn @click="onRegisterClick" color="warning">
-                            Register
+                            Registrieren
                         </v-btn>
                         <v-btn :disabled="!valid" color="success" type="submit">
-                            Login
+                            Einloggen
                         </v-btn>
                     </v-card-actions>
                 </v-card-text>
@@ -72,14 +72,14 @@ export default {
             nameRules: [
                 value => {
                     if (!value)
-                        return "Username is required"
+                        return "Username ist nötig"
                     return true;
                 }
             ],
             passwordRules: [
                 value => {
                     if (!value)
-                        return "Password is required"
+                        return "Password ist nötig"
                     return true;
                 }
             ],

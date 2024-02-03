@@ -18,7 +18,7 @@
                 <user-avatar/>
 
                 <v-btn @click="doLogout" light color="dark">
-                    Logout
+                    Ausloggen
                 </v-btn>
             </div>
         </v-app-bar>

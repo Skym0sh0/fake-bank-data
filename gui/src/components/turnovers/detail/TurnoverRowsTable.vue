@@ -28,8 +28,8 @@
 
 <script>
 
-import TableCellDescription from "@/components/turnovers/TableCellDescription.vue";
-import TableCellMonetary from "@/components/turnovers/TableCellMonetary.vue";
+import TableCellDescription from "@/components/turnovers/table/TableCellDescription.vue";
+import TableCellMonetary from "@/components/turnovers/table/TableCellMonetary.vue";
 import CategoryInput from "@/components/misc/CategoryInput.vue";
 import {
     flatCategoryTreeWithParentChain,

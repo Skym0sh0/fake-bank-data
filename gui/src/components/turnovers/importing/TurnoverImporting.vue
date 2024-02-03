@@ -2,11 +2,11 @@
     <b-btn id="statement-overview-import-new-statement"
            variant="info"
            v-b-modal="'file-upload-modal'">
-        Import CSV
+        CSV Import
 
         <b-modal id="file-upload-modal"
                  ref="file-upload-modal"
-                 title="File Upload"
+                 title="Importiere CSV Datei"
                  :centered="true"
                  :scrollable="true"
                  header-bg-variant="warning"
@@ -28,7 +28,7 @@
                             </b-col>
 
                             <b-col class="p-0 px-2">
-                                <h6>Todos</h6>
+                                <h6>Kategorisiert</h6>
                                 <b-progress :max="importableRows.length" :show-value="true">
                                     <b-progress-bar :value="importableRows.length - rowsTodo.length" variant="success"/>
                                     <b-progress-bar :value="rowsTodo.length" variant="danger"/>
@@ -46,7 +46,7 @@
                         <b-button variant="primary"
                                   @click="doImportRequest"
                                   :disabled="isImportImpossible">
-                            Import
+                            Importieren
                         </b-button>
                     </div>
                 </div>
@@ -67,8 +67,9 @@
                                          :disabled="isUploading"
                                          :multiple="false"
                                          :state="!$v.fileSelection.$invalid"
-                                         placeholder="Select file to import"
-                                         drop-placeholder="Drop file here to import"
+                                         placeholder="Datei auswählen..."
+                                         browse-text="Durchsuchen"
+                                         drop-placeholder="Datei hier hinziehen zum importieren"
                                          accept=".csv"/>
                         </b-col>
 
@@ -88,7 +89,7 @@
                             <b-btn @click="onStartPreview"
                                    :disabled="$v.$invalid"
                                    variant="primary">
-                                Preview
+                                Vorschau
                             </b-btn>
                         </b-col>
                     </b-row>
@@ -123,10 +124,10 @@
 <script>
 import {required} from 'vuelidate/dist/validators.min'
 import {api} from "@/api/RegularIncomeAPI";
-import TurnoverPreviewTable from "@/components/turnovers/TurnoverPreviewTable.vue";
+import TurnoverPreviewTable from "@/components/turnovers/importing/TurnoverPreviewTable.vue";
 import WaitingIndicator from "@/components/misc/WaitingIndicator.vue";
 import {normalizeCategory} from "@/util/Normalizer";
-import RawCsvFileTable from "@/components/turnovers/RawCsvFileTable.vue";
+import RawCsvFileTable from "@/components/turnovers/importing/RawCsvFileTable.vue";
 
 function getBankFormatName(frmt) {
     const BANK_FORMAT_NAMES = {
@@ -297,7 +298,7 @@ export default {
                 this.supportedFileTypes = [
                     {
                         value: null,
-                        text: "Dateiformat",
+                        text: "Dateiformat wählen",
                     },
                     ...res.map(b => ({
                         value: b,

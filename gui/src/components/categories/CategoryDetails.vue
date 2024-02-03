@@ -1,7 +1,7 @@
 <template>
     <v-card class="position-sticky">
         <v-card-title class="justify-content-between">
-            <span>Category Details</span>
+            <span>Kategorie Details</span>
 
             <category-usage-dialog v-if="entity && entity.id" :category="entity"/>
         </v-card-title>
@@ -20,15 +20,15 @@
                               @input="changeAnything"/>
 
                 <v-textarea v-model="entity.description"
-                            label="Description"
-                            placeholder="Description"
+                            label="Beschreibung"
+                            placeholder="Beschreibung"
                             :outlined="true"
                             @input="changeAnything"/>
 
                 <div class="category-info px-1">
-                    <p v-show="entity.updatedAt">Updated at: {{ formatDate(entity.updatedAt) }}</p>
-                    <p v-show="entity.createdAt">Created at: {{ formatDate(entity.createdAt) }}</p>
-                    <p v-show="entity.usageCount">Used in entities: {{ entity.usageCount }}</p>
+                    <p v-show="entity.updatedAt">Zuletzt geändert: {{ formatDate(entity.updatedAt) }}</p>
+                    <p v-show="entity.createdAt">Erstellt am: {{ formatDate(entity.createdAt) }}</p>
+                    <p v-show="entity.usageCount">Benutzt in: {{ entity.usageCount }}</p>
                 </div>
 
                 <div class="d-flex justify-content-end">
@@ -36,13 +36,13 @@
                         <v-btn @click="cancelActiveForm"
                                :loading="isLoading"
                                color="warning">
-                            Cancel
+                            Abbrechen
                         </v-btn>
                         <v-btn @click="saveActiveForm"
                                :disabled="!hasChanged"
                                :loading="isLoading"
                                color="success">
-                            Save
+                            Speichern
                         </v-btn>
                     </b-btn-group>
                 </div>

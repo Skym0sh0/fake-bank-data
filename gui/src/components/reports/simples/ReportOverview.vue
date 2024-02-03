@@ -86,12 +86,12 @@ export default {
     },
     mounted() {
         this.charts.push({
-            title: 'Balance Progression Report',
+            title: 'Kontostand Entwicklung',
             component: BalanceProgressionReport,
         })
 
         this.charts.push({
-            title: 'Income & Expense Report',
+            title: 'Einkommen und Ausgaben',
             component: IncomeExpenseReport,
         })
 

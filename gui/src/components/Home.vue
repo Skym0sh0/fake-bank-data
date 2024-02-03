@@ -8,13 +8,18 @@
                     width="16em"
                     height="8em"
                     elevation="8">
-                <v-card-text>
+                <v-card-title>
                     <router-link :to="link.link">
-                        <h4>{{ link.title }}</h4>
+                        {{ link.title }}
                     </router-link>
+                </v-card-title>
 
+                <v-card-text>
                     <div class="d-flex justify-content-between align-items-baseline">
-                        <p class="card-text">{{ link.title }}</p>
+                        <p class="card-text">
+                            {{ link.shortDescription }}
+                        </p>
+
                         <v-icon :x-large="true">
                             {{ link.icon }}
                         </v-icon>

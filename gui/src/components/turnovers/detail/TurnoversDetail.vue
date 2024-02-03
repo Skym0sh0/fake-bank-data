@@ -4,7 +4,7 @@
 
         <v-card v-if="!!turnoverImport">
             <v-card-title>
-                Turnover File Import
+                Importiere Umsatz Datei
             </v-card-title>
 
             <v-card-subtitle>
@@ -28,11 +28,15 @@
             </v-card-text>
 
             <v-card-actions class="d-flex justify-content-between">
-                <v-btn @click="onReset"
-                       :disabled="!isValidToSave"
-                       color="error">
-                    Verwerfen
-                </v-btn>
+                <confirmationed-button @click="onReset"
+                                       default-caption="Verwerfen"
+                                       request-caption="Verwerfen??"
+                                       confirmed-caption="Jetzt Verwerfen!!!"
+                                       :wait-time-ms="250"
+                                       default-color="error"
+                                       :small="true"
+                                       :disabled="!isValidToSave"/>
+
 
                 <div class="d-flex" style="gap: 0.5em">
                     <v-btn @click="onBack">
@@ -54,10 +58,12 @@ import {api} from "@/api/RegularIncomeAPI";
 import WaitingIndicator from "@/components/misc/WaitingIndicator.vue";
 import TurnoverRowsTable from "@/components/turnovers/detail/TurnoverRowsTable.vue";
 import {normalizeCategory} from "@/util/Normalizer";
+import moment from "moment";
+import ConfirmationedButton from "@/components/misc/ConfirmationedButton.vue";
 
 export default {
     name: "TurnoversDetail",
-    components: {TurnoverRowsTable, WaitingIndicator},
+    components: {ConfirmationedButton, TurnoverRowsTable, WaitingIndicator},
     props: {
         id: {
             type: String,
@@ -133,7 +139,7 @@ export default {
     },
     computed: {
         importTimestamp() {
-            return this.turnoverImport.importedAt;
+            return moment(this.turnoverImport.importedAt).format("YYYY-MM-DD HH:mm:ss.SSS");
         },
         currentRowCategoryChanges() {
             const rowsById = this.initialTurnoverRowsCategories.reduce((prev, cur) => ({...prev, [cur.id]: cur}), {})

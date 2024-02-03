@@ -62,32 +62,32 @@ export default {
             return [
                 {
                     key: "importedAt",
-                    label: "Import",
+                    label: "Importiert",
                     sortable: true,
                     formatter: (value) => this.formatTimestamp(value),
                 },
                 {
                     key: 'firstTurnover',
-                    label: "From",
+                    label: "Von",
                     sortable: true,
                     formatter: (value) => this.formatDate(value),
                 },
                 {
                     key: 'lastTurnover',
-                    label: "To",
+                    label: "Bis",
                     sortable: true,
                     formatter: (value) => this.formatDate(value),
                 },
                 {
                     key: "turnovers",
-                    label: "#Turnovers",
+                    label: "#Umsätze",
                     sortable: true,
                     sortByFormatted: true,
                     formatter: (value) => value.length,
                 },
                 {
                     key: "Actions",
-                    label: "Actions"
+                    label: ""
                 }
             ];
         },

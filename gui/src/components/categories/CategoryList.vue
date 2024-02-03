@@ -10,8 +10,8 @@
                               type="text"
                               :dense="true"
                               :clearable="true"
-                              label="Quickfilter"
-                              hint="Type regex to match items"
+                              label="Filter"
+                              hint="Suche Kategorie (auch Regex möglich)"
                               suffix="Regex"/>
             </v-col>
         </v-row>
