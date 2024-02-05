@@ -16,7 +16,41 @@
                  :scrollable="true"
                  :centered="true"
                  :title="`Turnovers mit Kategorie ${category.name}`"
-                 :ok-only="true">
+                 @hidden="reset"
+                 @hide="checkToHide">
+            <template v-slot:modal-footer>
+                <div class="w-100 d-flex justify-content-between">
+                    <b-btn-group>
+                        <b-button v-if="!isEditing"
+                                  @click="isEditing = true"
+                                  variant="danger">
+                            Bearbeiten
+                        </b-button>
+                    </b-btn-group>
+
+                    <b-btn-group>
+                        <b-button v-if="isEditing"
+                                  @click="reset"
+                                  variant="danger">
+                            Abbrechen
+                        </b-button>
+
+                        <b-button v-if="isEditing"
+                                  @click="save"
+                                  :disabled="!changedTurnovers.length"
+                                  variant="primary">
+                            Speichern
+                        </b-button>
+
+                        <b-button v-if="!isEditing"
+                                  @click="reset"
+                                  variant="primary">
+                            Ok
+                        </b-button>
+                    </b-btn-group>
+                </div>
+            </template>
+
             <waiter :is-loading="isLoading">
                 <b-table :striped="true"
                          :hover="true"
@@ -61,7 +95,12 @@ import {
 
 export default {
     name: "CategoryUsageDialog",
-    components: {CategoryInput, TableCellMonetary, TableCellDescription, Waiter},
+    components: {
+        CategoryInput,
+        TableCellMonetary,
+        TableCellDescription,
+        Waiter
+    },
     props: {
         category: {
             type: Object,
@@ -70,8 +109,10 @@ export default {
     },
     data() {
         return {
+            isEditing: false,
             isLoading: false,
             referencedRows: null,
+            originalValues: null,
             allCategories: null,
         }
     },
@@ -80,6 +121,31 @@ export default {
             this.loadData()
 
             this.$refs["modal-turnovers"].show();
+        },
+        reset() {
+            this.isEditing = false
+            this.isLoading = false
+            this.referencedRows = null
+            this.allCategories = null
+
+            this.$refs["modal-turnovers"].hide();
+        },
+        checkToHide(e) {
+            const mustNotBeClosed = this.changedTurnovers.length || (
+                this.isEditing && !(
+                    e.trigger === null // abort button was pressed
+                    || e.trigger === 'headerclose' // X Button in header was pressed
+                ));
+            if (mustNotBeClosed) {
+                e.preventDefault()
+            }
+        },
+        save() {
+            this.isLoading = true
+
+            api.getTurnovers().batchPatchTurnovers(this.changedTurnovers)
+                .then(() => this.reset())
+                .finally(() => this.isLoading = false)
         },
         loadData() {
             this.isLoading = true;
@@ -99,7 +165,16 @@ export default {
 
             return api.getTurnovers()
                 .fetchTurnoversForCategory(this.category.id)
-                .then(rows => this.referencedRows = rows)
+                .then(rows => {
+                    this.referencedRows = rows
+                    this.originalValues = rows.map(this.rowToChangeObject)
+                })
+        },
+        rowToChangeObject(row) {
+            return {
+                id: row.id,
+                categoryId: row.categoryId,
+            }
         },
     },
     computed: {
@@ -125,10 +200,11 @@ export default {
                     label: "Beschreibung",
                     sortable: true,
                 },
-                {
-                    key: "newCategory",
-                    label: "Neue Kategorie",
-                },
+                this.isEditing ?
+                    {
+                        key: "newCategory",
+                        label: "Neue Kategorie",
+                    } : undefined,
             ];
         },
         items() {
@@ -142,6 +218,13 @@ export default {
         },
         categoriesByName() {
             return mapCategoriesByName(this.flattedCategories)
+        },
+        changedTurnovers() {
+            const all = this.items.map(this.rowToChangeObject)
+            return all.filter(
+                row => !(this.originalValues || [])
+                    .find(orig => orig.id === row.id && orig.categoryId === row.categoryId)
+            )
         },
     },
 }

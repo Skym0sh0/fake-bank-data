@@ -215,6 +215,11 @@ class RegularIncomeAPI {
                     .then(res => denormalizeTurnoverImport(res.data))
             },
 
+            batchPatchTurnovers(changes) {
+                return ref.getClient().patch(`turnover-import/rows`, {rows: changes})
+                    .then(() => undefined)
+            },
+
             deleteTurnoverImport(turnoverImport) {
                 return ref.getClient().delete(`turnover-import/${turnoverImport.id}`)
             },

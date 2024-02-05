@@ -88,11 +88,15 @@ public class TurnoversController {
         return importer.patchTurnoverImport(id, patch);
     }
 
+    @PatchMapping("/rows")
+    public void batchPatchTurnoverImports(@RequestBody TurnoverImportRowsPatch patch) {
+        importer.batchPatchTurnoverImport(patch);
+    }
+
     @DeleteMapping("/{id}")
     public void deleteTurnoverImport(@PathVariable("id") UUID id) {
         importer.deleteImport(id);
     }
-
 
     @GetMapping("/category/{category-id}")
     public List<TurnoverRow> fetchTurnoversForCategory(@PathVariable("category-id") UUID categoryId) {
