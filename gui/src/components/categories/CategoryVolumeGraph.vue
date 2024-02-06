@@ -18,7 +18,7 @@
                  :title="`Turnovers Graph für Kategorie ${category.name}`"
                  :ok-only="true">
             <waiter :is-loading="isLoading">
-                <category-graph :data="referencedRows"/>
+                <category-graph :data="graphData"/>
             </waiter>
         </b-modal>
     </div>
@@ -46,6 +46,14 @@ export default {
             isLoading: false,
             referencedRows: null,
         }
+    },
+    computed: {
+        graphData() {
+            return (this.referencedRows || []).map(rec => ({
+                date: new Date(rec.date),
+                value: rec.amountInCents / 100.0,
+            }))
+        },
     },
     methods: {
         onOpenModal() {
