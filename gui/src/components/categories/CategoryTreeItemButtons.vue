@@ -1,6 +1,25 @@
 <template>
     <div>
         <b-btn-group>
+            <category-volume-graph :category="category">
+                <template v-slot:button="{ clickCallback }">
+                    <v-tooltip :top="true">
+                        <template v-slot:activator="{ on, attrs }">
+                            <v-btn :icon="true"
+                                   :small="true"
+                                   color="warning"
+                                   @click.stop="clickCallback"
+                                   v-bind="attrs" v-on="on">
+                                <v-icon :small="true">
+                                    mdi-chart-timeline-variant-shimmer
+                                </v-icon>
+                            </v-btn>
+                        </template>
+                        Graph
+                    </v-tooltip>
+                </template>
+            </category-volume-graph>
+
             <category-usage-dialog :category="category">
                 <template v-slot:button="{ clickCallback }">
                     <v-tooltip :top="true">
@@ -72,10 +91,11 @@
 
 <script>
 import CategoryUsageDialog from "@/components/categories/CategoryUsageDialog.vue";
+import CategoryVolumeGraph from "@/components/categories/CategoryVolumeGraph.vue";
 
 export default {
     name: "CategoryTreeItemButtons",
-    components: {CategoryUsageDialog},
+    components: {CategoryVolumeGraph, CategoryUsageDialog},
     props: {
         category: {
             type: Object,
