@@ -71,9 +71,9 @@ export default {
             this.referencedRows = null;
 
             return api.getTurnovers()
-                .fetchTurnoversForCategory(this.category.id)
-                .then(rows => {
-                    this.referencedRows = rows
+                .fetchTurnoversReportForCategory(this.category.id)
+                .then(res => {
+                    this.referencedRows = res.datapoints
                 })
         },
     },

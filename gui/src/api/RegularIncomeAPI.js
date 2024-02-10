@@ -228,6 +228,11 @@ class RegularIncomeAPI {
                 return ref.getClient().get(`turnover-import/category/${categoryId}`)
                     .then(res => res.data.map(c => denormalizeTurnoverRow(c)))
             },
+
+            fetchTurnoversReportForCategory(categoryId) {
+                return ref.getClient().get(`turnover-import/category/${categoryId}/report`)
+                    .then(res => res.data)
+            },
         };
     }
 

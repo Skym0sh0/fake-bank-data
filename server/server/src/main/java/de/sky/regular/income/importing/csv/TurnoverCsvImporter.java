@@ -2,6 +2,7 @@ package de.sky.regular.income.importing.csv;
 
 import com.google.common.base.Stopwatch;
 import de.sky.common.database.DatabaseConnection;
+import de.sky.regular.income.api.category.CategoryTurnoverReport;
 import de.sky.regular.income.api.turnovers.*;
 import de.sky.regular.income.database.DatabaseSupplier;
 import de.sky.regular.income.importing.csv.parsers.TurnoverRecord;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.DSLContext;
 import org.jooq.Result;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -118,6 +120,44 @@ public class TurnoverCsvImporter {
                     .orderBy(TURNOVER_ROW.DATE.desc())
                     .fetch()
                     .map(TurnoverCsvImporter::map);
+        });
+    }
+
+    public CategoryTurnoverReport fetchTurnoversReportForImport(UUID categoryId) {
+        return db.transactionWithResult(ctx -> {
+            UUID userId = user.getCurrentUser(ctx).getId();
+
+            var isValidCategory = ctx.fetchExists(
+                    selectFrom(CATEGORY)
+                            .where(CATEGORY.ID.eq(categoryId))
+                            .and(CATEGORY.OWNER_ID.eq(userId))
+            );
+
+            if (!isValidCategory)
+                throw new IllegalArgumentException("Category ID is either unknown or belongs to another user: " + categoryId);
+
+            var groupDate = TURNOVER_ROW.DATE;
+            var groupSum = DSL.sum(TURNOVER_ROW.AMOUNT_VALUE_CENTS).cast(Integer.class);
+
+            var datapoints = ctx.select(groupDate, groupSum)
+                    .from(TURNOVER_ROW)
+                    .where(TURNOVER_ROW.OWNER_ID.eq(userId))
+                    .and(TURNOVER_ROW.CATEGORY_ID.eq(categoryId))
+                    .groupBy(groupDate)
+                    .orderBy(groupDate)
+                    .limit(10_000)
+                    .fetch()
+                    .map(rec -> {
+                        return new CategoryTurnoverReport.ReportDatapoint(
+                                rec.get(groupDate),
+                                rec.get(groupSum)
+                        );
+                    });
+
+            return CategoryTurnoverReport.builder()
+                    .categoryId(categoryId)
+                    .datapoints(datapoints)
+                    .build();
         });
     }
 

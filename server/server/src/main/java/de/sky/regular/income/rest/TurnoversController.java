@@ -1,6 +1,7 @@
 package de.sky.regular.income.rest;
 
 import com.google.common.base.Stopwatch;
+import de.sky.regular.income.api.category.CategoryTurnoverReport;
 import de.sky.regular.income.api.turnovers.*;
 import de.sky.regular.income.importing.csv.TurnoverCsvImporter;
 import lombok.extern.slf4j.Slf4j;
@@ -101,5 +102,10 @@ public class TurnoversController {
     @GetMapping("/category/{category-id}")
     public List<TurnoverRow> fetchTurnoversForCategory(@PathVariable("category-id") UUID categoryId) {
         return importer.fetchTurnoversForImport(categoryId);
+    }
+
+    @GetMapping("/category/{category-id}/report")
+    public CategoryTurnoverReport fetchTurnoversReportForCategory(@PathVariable("category-id") UUID categoryId) {
+        return importer.fetchTurnoversReportForImport(categoryId);
     }
 }
