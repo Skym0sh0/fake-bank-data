@@ -12,6 +12,7 @@ import generated.sky.regular.income.tables.records.TurnoverRowRecord;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.DSLContext;
+import org.jooq.DatePart;
 import org.jooq.Result;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,7 +124,7 @@ public class TurnoverCsvImporter {
         });
     }
 
-    public CategoryTurnoverReport fetchTurnoversReportForImport(UUID categoryId) {
+    public CategoryTurnoverReport fetchTurnoversReportForImport(UUID categoryId, DatePart grouping) {
         return db.transactionWithResult(ctx -> {
             UUID userId = user.getCurrentUser(ctx).getId();
 
@@ -136,7 +137,7 @@ public class TurnoverCsvImporter {
             if (!isValidCategory)
                 throw new IllegalArgumentException("Category ID is either unknown or belongs to another user: " + categoryId);
 
-            var groupDate = TURNOVER_ROW.DATE;
+            var groupDate = DSL.trunc(TURNOVER_ROW.DATE, grouping);
             var groupSum = DSL.sum(TURNOVER_ROW.AMOUNT_VALUE_CENTS).cast(Integer.class);
 
             var datapoints = ctx.select(groupDate, groupSum)

@@ -5,6 +5,7 @@ import de.sky.regular.income.api.category.CategoryTurnoverReport;
 import de.sky.regular.income.api.turnovers.*;
 import de.sky.regular.income.importing.csv.TurnoverCsvImporter;
 import lombok.extern.slf4j.Slf4j;
+import org.jooq.DatePart;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -104,8 +106,11 @@ public class TurnoversController {
         return importer.fetchTurnoversForImport(categoryId);
     }
 
-    @GetMapping("/category/{category-id}/report")
-    public CategoryTurnoverReport fetchTurnoversReportForCategory(@PathVariable("category-id") UUID categoryId) {
-        return importer.fetchTurnoversReportForImport(categoryId);
+    @GetMapping("/category/{category-id}/report/{date-grouping}")
+    public CategoryTurnoverReport fetchTurnoversReportForCategory(@PathVariable("category-id") UUID categoryId, @PathVariable("date-grouping") DatePart dateGrouping) {
+        if (!Arrays.asList(DatePart.DAY, DatePart.MONTH, DatePart.YEAR).contains(dateGrouping))
+            throw new IllegalArgumentException("Unsupported date grouping: " + dateGrouping);
+
+        return importer.fetchTurnoversReportForImport(categoryId, dateGrouping);
     }
 }

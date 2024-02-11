@@ -17,9 +17,29 @@
                  :centered="true"
                  :title="`Turnovers Graph für Kategorie ${category.name}`"
                  :ok-only="true">
-            <waiter :is-loading="isLoading">
-                <category-graph :data="graphData"/>
-            </waiter>
+            <v-container :fluid="true" class="mw-100 p-0">
+                <v-row>
+                    <v-col>
+                        <waiter :is-loading="isLoading">
+                            <category-graph :data="graphData"/>
+                        </waiter>
+                    </v-col>
+                </v-row>
+
+                <v-row>
+                    <v-col>
+                        <v-select v-model="grouping"
+                                  :items="groupingKeys"
+                                  label="Zeitraum Gruppierung"/>
+                    </v-col>
+
+                    <v-col>
+                        <v-switch v-model="includeSubcategories"
+                                  label="Unterkategorien"
+                                  :disabled="true"/>
+                    </v-col>
+                </v-row>
+            </v-container>
         </b-modal>
     </div>
 </template>
@@ -45,14 +65,31 @@ export default {
         return {
             isLoading: false,
             referencedRows: null,
+            grouping: "DAY",
+            includeSubcategories: false,
         }
     },
     computed: {
+        groupingKeys() {
+            return [
+                {value: "DAY", text: "Tag",},
+                {value: "MONTH", text: "Monat",},
+                {value: "YEAR", text: "Jahr",},
+            ];
+        },
         graphData() {
             return (this.referencedRows || []).map(rec => ({
                 date: new Date(rec.date),
                 value: rec.amountInCents / 100.0,
             }))
+        },
+    },
+    watch: {
+        grouping() {
+            this.loadData()
+        },
+        includeSubcategories() {
+            this.loadData()
         },
     },
     methods: {
@@ -71,7 +108,7 @@ export default {
             this.referencedRows = null;
 
             return api.getTurnovers()
-                .fetchTurnoversReportForCategory(this.category.id)
+                .fetchTurnoversReportForCategory(this.category.id, this.grouping)
                 .then(res => {
                     this.referencedRows = res.datapoints
                 })
