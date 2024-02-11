@@ -26,17 +26,16 @@
                     </v-col>
                 </v-row>
 
-                <v-row>
-                    <v-col>
+                <v-row class="d-flex justify-content-center">
+                    <v-col :cols="2">
                         <v-select v-model="grouping"
                                   :items="groupingKeys"
                                   label="Zeitraum Gruppierung"/>
                     </v-col>
 
-                    <v-col>
-                        <v-switch v-model="includeSubcategories"
-                                  label="Unterkategorien"
-                                  :disabled="true"/>
+                    <v-col :cols="2">
+                        <v-checkbox v-model="includeSubcategories"
+                                  label="mit Unterkategorien"/>
                     </v-col>
                 </v-row>
             </v-container>
@@ -80,7 +79,8 @@ export default {
         graphData() {
             return (this.referencedRows || []).map(rec => ({
                 date: new Date(rec.date),
-                value: rec.amountInCents / 100.0,
+                income: rec.incomeAmountInCents / 100.0,
+                expense: rec.expenseAmountInCents / 100.0,
             }))
         },
     },
@@ -108,7 +108,7 @@ export default {
             this.referencedRows = null;
 
             return api.getTurnovers()
-                .fetchTurnoversReportForCategory(this.category.id, this.grouping)
+                .fetchTurnoversReportForCategory(this.category.id, this.grouping, this.includeSubcategories)
                 .then(res => {
                     this.referencedRows = res.datapoints
                 })

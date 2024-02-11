@@ -20,7 +20,9 @@ public class CategoryTurnoverReport {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class ReportDatapoint {
+        public UUID categoryId;
         public LocalDate date;
-        public Integer amountInCents;
+        public Integer incomeAmountInCents;
+        public Integer expenseAmountInCents;
     }
 }

@@ -14,10 +14,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @RestController
@@ -107,10 +104,10 @@ public class TurnoversController {
     }
 
     @GetMapping("/category/{category-id}/report/{date-grouping}")
-    public CategoryTurnoverReport fetchTurnoversReportForCategory(@PathVariable("category-id") UUID categoryId, @PathVariable("date-grouping") DatePart dateGrouping) {
+    public CategoryTurnoverReport fetchTurnoversReportForCategory(@PathVariable("category-id") UUID categoryId, @PathVariable("date-grouping") DatePart dateGrouping, @RequestParam(value = "recursion-level") Optional<Integer> recursionLevel) {
         if (!Arrays.asList(DatePart.DAY, DatePart.MONTH, DatePart.YEAR).contains(dateGrouping))
             throw new IllegalArgumentException("Unsupported date grouping: " + dateGrouping);
 
-        return importer.fetchTurnoversReportForImport(categoryId, dateGrouping);
+        return importer.fetchTurnoversReportForImport(categoryId, dateGrouping, recursionLevel.orElse(1));
     }
 }

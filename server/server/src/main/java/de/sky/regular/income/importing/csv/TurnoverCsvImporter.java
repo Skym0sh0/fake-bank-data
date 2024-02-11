@@ -2,8 +2,10 @@ package de.sky.regular.income.importing.csv;
 
 import com.google.common.base.Stopwatch;
 import de.sky.common.database.DatabaseConnection;
+import de.sky.regular.income.api.Category;
 import de.sky.regular.income.api.category.CategoryTurnoverReport;
 import de.sky.regular.income.api.turnovers.*;
+import de.sky.regular.income.dao.CategoryDAO;
 import de.sky.regular.income.database.DatabaseSupplier;
 import de.sky.regular.income.importing.csv.parsers.TurnoverRecord;
 import de.sky.regular.income.users.UserProvider;
@@ -24,6 +26,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static generated.sky.regular.income.Tables.*;
 import static org.jooq.impl.DSL.and;
@@ -37,13 +40,14 @@ public class TurnoverCsvImporter {
 
     private final DatabaseConnection db;
     private final TurnoverFileParser parser;
+    private final CategoryDAO categoryDao;
     private final CategorySuggester categorySuggester;
 
     private final UserProvider user;
 
     @Autowired
-    public TurnoverCsvImporter(ChecksumComputer checksummer, DatabaseSupplier db, TurnoverFileParser parser, CategorySuggester categorySuggester, UserProvider user) {
-        this(checksummer, db.getDatabase(), parser, categorySuggester, user);
+    public TurnoverCsvImporter(ChecksumComputer checksummer, DatabaseSupplier db, TurnoverFileParser parser, CategoryDAO categoryDao, CategorySuggester categorySuggester, UserProvider user) {
+        this(checksummer, db.getDatabase(), parser, categoryDao, categorySuggester, user);
     }
 
     public TurnoverImport createImport(ZonedDateTime ts, MultipartFile file, TurnoverImportPatch patch) throws Exception {
@@ -124,34 +128,43 @@ public class TurnoverCsvImporter {
         });
     }
 
-    public CategoryTurnoverReport fetchTurnoversReportForImport(UUID categoryId, DatePart grouping) {
+    private static Stream<UUID> traverse(Category cat, int level) {
+        if (level <= 0)
+            return Stream.empty();
+
+        return Stream.concat(
+                Stream.of(cat.getId()),
+                cat.getSubCategories()
+                        .stream()
+                        .flatMap(child -> traverse(child, level - 1))
+        );
+    }
+
+    public CategoryTurnoverReport fetchTurnoversReportForImport(UUID categoryId, DatePart grouping, int recursionLevel) {
         return db.transactionWithResult(ctx -> {
             UUID userId = user.getCurrentUser(ctx).getId();
 
-            var isValidCategory = ctx.fetchExists(
-                    selectFrom(CATEGORY)
-                            .where(CATEGORY.ID.eq(categoryId))
-                            .and(CATEGORY.OWNER_ID.eq(userId))
-            );
-
-            if (!isValidCategory)
-                throw new IllegalArgumentException("Category ID is either unknown or belongs to another user: " + categoryId);
+            var category = categoryDao.fetchById(ctx, userId, categoryId);
+            var allCategoryIds = traverse(category, recursionLevel).toList();
 
             var groupDate = DSL.trunc(TURNOVER_ROW.DATE, grouping);
-            var groupSum = DSL.sum(TURNOVER_ROW.AMOUNT_VALUE_CENTS).cast(Integer.class);
+            var groupIncome = DSL.sum(DSL.when(TURNOVER_ROW.AMOUNT_VALUE_CENTS.greaterOrEqual(0), TURNOVER_ROW.AMOUNT_VALUE_CENTS).otherwise(0)).cast(Integer.class);
+            var groupExpense = DSL.sum(DSL.when(TURNOVER_ROW.AMOUNT_VALUE_CENTS.lessThan(0), TURNOVER_ROW.AMOUNT_VALUE_CENTS).otherwise(0)).cast(Integer.class);
 
-            var datapoints = ctx.select(groupDate, groupSum)
+            var datapoints = ctx.select(/*TURNOVER_ROW.CATEGORY_ID,*/ groupDate, groupIncome, groupExpense)
                     .from(TURNOVER_ROW)
                     .where(TURNOVER_ROW.OWNER_ID.eq(userId))
-                    .and(TURNOVER_ROW.CATEGORY_ID.eq(categoryId))
-                    .groupBy(groupDate)
+                    .and(TURNOVER_ROW.CATEGORY_ID.in(allCategoryIds))
+                    .groupBy(/*TURNOVER_ROW.CATEGORY_ID,*/ groupDate)
                     .orderBy(groupDate)
                     .limit(10_000)
                     .fetch()
                     .map(rec -> {
                         return new CategoryTurnoverReport.ReportDatapoint(
+                                /*rec.get(TURNOVER_ROW.CATEGORY_ID)*/ null,
                                 rec.get(groupDate),
-                                rec.get(groupSum)
+                                rec.get(groupIncome),
+                                rec.get(groupExpense)
                         );
                     });
 

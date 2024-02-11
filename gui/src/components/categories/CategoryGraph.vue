@@ -51,24 +51,45 @@ export default {
             dateAxis.renderer.grid.template.location = 0.5
 
             const valueAxis = chart.yAxes.push(new am4charts.ValueAxis())
-            valueAxis.dataFields.value = "value"
+            // valueAxis.dataFields.value = "value"
             valueAxis.title.text = "Volumen"
             valueAxis.numberFormatter.numberFormat = moneyFormat.getStyle()
             valueAxis.numberFormatter.intlLocales = "de-DE"
 
-            const series = chart.series.push(new am4charts.LineSeries())
-            series.name = "Ausgaben"
-            series.stacked = true
-            series.dataFields.dateX = "date"
-            series.dataFields.valueY = "value"
-            series.tooltipText = "{dateX}: {valueY}"
-            series.legendSettings.valueText = ""
-            series.legendSettings.itemValueText = "[bold]{valueY}[/]"
-            series.legendSettings.labelText = "{name}"
-            series.legendSettings.itemLabelText = "{dateX}: "
-
-            series.minBulletDistance = 10
-            series.bullets.push(new am4charts.CircleBullet()).circle.radius = 2
+            {
+                const series = chart.series.push(new am4charts.ColumnSeries())
+                series.name = "Einkommen"
+                series.stacked = true
+                series.dataFields.dateX = "date"
+                series.dataFields.valueY = "income"
+                series.tooltipText = "{dateX}: {valueY}"
+                series.legendSettings.valueText = ""
+                series.legendSettings.itemValueText = "[bold]{valueY}[/]"
+                series.legendSettings.labelText = "{name}"
+                series.legendSettings.itemLabelText = "{dateX}: "
+                series.minBulletDistance = 10
+                series.bullets.push(new am4charts.CircleBullet()).circle.radius = 2
+            }
+            {
+                const col = am4core.color("#FF4547")
+                const series = chart.series.push(new am4charts.ColumnSeries())
+                series.name = "Ausgaben"
+                series.stacked = true
+                series.columns.template.fill = col;
+                series.columns.template.stroke = col.brighten(-0.1);
+                series.dataFields.dateX = "date"
+                series.dataFields.valueY = "expense"
+                series.tooltipText = "{dateX}: {valueY}"
+                series.legendSettings.valueText = ""
+                series.legendSettings.itemValueText = "[bold]{valueY}[/]"
+                series.legendSettings.labelText = "{name}"
+                series.legendSettings.itemLabelText = "{dateX}: "
+                series.minBulletDistance = 10
+                const bullets = series.bullets.push(new am4charts.CircleBullet())
+                bullets.circle.radius = 2
+                bullets.circle.fill = col
+                bullets.circle.stroke = col
+            }
 
             chart.cursor = new am4charts.XYCursor();
             chart.cursor.behavior = "zoomXY"
