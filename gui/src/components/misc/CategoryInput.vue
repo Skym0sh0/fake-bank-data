@@ -5,7 +5,7 @@
                       @input="onCategoryInput"
                       :value="currentSearch"
                       :state="showValidationState"
-                      :disabled="disabled"
+                      :disabled="disabled || loading"
                       autocomplete="off"
                       size="sm"
                       type="text">
@@ -14,8 +14,8 @@
             <b-button size="sm"
                       @click="onAddCategory"
                       :variant="isAddableCategory ? 'primary' : 'secondary'"
-                      :disabled="!isAddableCategory">
-                +
+                      :disabled="!isAddableCategory || loading">
+                <b-icon :icon="!loading ? 'plus-circle' : 'hourglas-split'" font-scale="1"/>
             </b-button>
         </b-input-group-append>
 
@@ -44,6 +44,10 @@ export default {
             type: String,
         },
         disabled: {
+            type: Boolean,
+            default: false,
+        },
+        loading: {
             type: Boolean,
             default: false,
         },

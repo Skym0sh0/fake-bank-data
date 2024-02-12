@@ -37,7 +37,7 @@
 
                         <b-button v-if="isEditing"
                                   @click="save"
-                                  :disabled="!changedTurnovers.length"
+                                  :disabled="!changedTurnovers.length || !!currentLoadingRowId"
                                   variant="primary">
                             Speichern
                         </b-button>
@@ -70,9 +70,11 @@
                     <template v-slot:cell(newCategory)="row">
                         <category-input :id="`${row.item.id}`"
                                         v-model="row.item.categoryId"
+                                        :loading="row.item.id === currentLoadingRowId"
                                         :flatted-categories="flattedCategories"
                                         :categories-by-id="categoriesById"
-                                        :categories-by-name="categoriesByName"/>
+                                        :categories-by-name="categoriesByName"
+                                        @createCategory="name => onCreateCategory(row.item.id, name)"/>
                     </template>
                 </b-table>
             </waiter>
@@ -92,6 +94,7 @@ import {
     mapCategoriesById,
     mapCategoriesByName
 } from "@/components/turnovers/category-helpers";
+import {normalizeCategory} from "@/util/Normalizer";
 
 export default {
     name: "CategoryUsageDialog",
@@ -114,6 +117,7 @@ export default {
             referencedRows: null,
             originalValues: null,
             allCategories: null,
+            currentLoadingRowId: null,
         }
     },
     methods: {
@@ -127,6 +131,7 @@ export default {
             this.isLoading = false
             this.referencedRows = null
             this.allCategories = null
+            this.currentLoadingRowId = null
 
             this.$refs["modal-turnovers"].hide();
         },
@@ -139,6 +144,25 @@ export default {
             if (mustNotBeClosed) {
                 e.preventDefault()
             }
+        },
+        onCreateCategory(id, categoryName) {
+            const normalized = normalizeCategory({
+                name: categoryName,
+            });
+
+            this.currentLoadingRowId = id
+
+            api.getCategories()
+                .postCategory(normalized)
+                .then(res => {
+                    this.referencedRows.forEach(row => {
+                        if (row.id === id)
+                            row.categoryId = res.id;
+                    })
+
+                    this.allCategories.push(res)
+                })
+                .finally(() => this.currentLoadingRowId = null)
         },
         save() {
             this.isLoading = true
