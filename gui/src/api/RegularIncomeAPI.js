@@ -6,7 +6,8 @@ import {
     denormalizeTurnoverImport,
     denormalizeTurnoverPreview,
     denormalizeTurnoverRow,
-    denormalizeUser
+    denormalizeUser,
+    normalizeTurnoversFromPreview
 } from "@/util/Normalizer";
 import {userService} from '@/auth/auth-header';
 
@@ -186,7 +187,7 @@ class RegularIncomeAPI {
                 formData.append('data', new Blob([JSON.stringify({
                     format: format,
                     encoding: encoding,
-                    rows: data,
+                    rows: normalizeTurnoversFromPreview(data),
                 })], {type: "application/json"}))
 
                 return ref.getClient().post(

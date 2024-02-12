@@ -10,71 +10,6 @@ export function denormalizeUser(u) {
     }
 }
 
-export function normalizeTransaction(t) {
-    if (!t)
-        return null
-
-    return {
-        id: t.id,
-        date: t.date,
-        amountInCents: t.amount,
-        isPeriodic: t.isPeriodic,
-        categoryId: t.category,
-    }
-}
-
-export function denormalizeTransaction(t) {
-    if (!t)
-        return null
-
-    return {
-        id: t.id,
-        date: t.date,
-        amount: t.amountInCents,
-        isPeriodic: t.isPeriodic,
-        category: t.categoryId,
-    }
-}
-
-export function normalizeStatement(stmt) {
-    if (!stmt)
-        return null
-
-    const transactions = (stmt.transactions || []).map(t => normalizeTransaction(t))
-
-    return {
-        id: stmt.id,
-        date: stmt.date,
-        finalBalanceInCents: parseInt(stmt.balance),
-        transactions: transactions,
-        previousStatementId: (stmt.previousStatement && stmt.previousStatement.id) || null,
-        previousBalanceInCents: (stmt.previousStatement && stmt.previousStatement.balance) || null, //hier das klappt nbcihtw enns 0 ist
-    }
-}
-
-export function denormalizeStatement(stmt) {
-    if (!stmt)
-        return null
-
-    return {
-        id: stmt.id,
-        date: stmt.date,
-        balance: stmt.finalBalanceInCents,
-        transactions: stmt.transactions && stmt.transactions.map(t => denormalizeTransaction(t)),
-        previousStatement: denormalizeStatement(stmt.previousStatement),
-        volume: stmt.volumeInCents,
-    }
-}
-
-export function denormalizeReason(rsn) {
-    if (!rsn)
-        return null
-
-    return {
-        ...rsn
-    }
-}
-
 export function normalizeCategory(cat) {
     if (!cat)
         return null
@@ -143,6 +78,26 @@ export function denormalizeTurnoverRow(row) {
     }
 }
 
+export function normalizeTurnoversFromPreview(turnovers) {
+    if (!turnovers)
+        return []
+
+    return turnovers.map(normalizeTurnoverFromPreview)
+}
+
+function normalizeTurnoverFromPreview(row) {
+    return {
+        date: row.date,
+        amountInCents: row.amountInCents,
+        categoryId: row.categoryId,
+        suggestedCategory: row.suggestedCategory,
+        description: row.description,
+        recipient: row.recipient,
+        checksum: row.checksum,
+        similarityChecksum: row.similarityChecksum,
+    }
+}
+
 export function denormalizeTurnoverPreviewRow(row) {
     return {
         date: row.date,
@@ -153,6 +108,7 @@ export function denormalizeTurnoverPreviewRow(row) {
         description: row.description,
         recipient: row.recipient,
         checksum: row.checksum,
+        similarityChecksum: row.similarityChecksum,
         importable: row.importable,
     };
 }
