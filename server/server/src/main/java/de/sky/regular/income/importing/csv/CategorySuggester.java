@@ -13,16 +13,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Record4;
+import org.jooq.SelectLimitPercentStep;
 import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static generated.sky.regular.income.Tables.TURNOVER_ROW;
 
@@ -62,15 +62,18 @@ public class CategorySuggester {
         }
 
         public List<TurnoverRowPreview.CategorySuggestion> findSuggestions(TurnoverRecord rec, String similarityChecksum) {
-            var allSuggestions = Stream.of(
-                            findSuggestionsBySimilarity(0, similarityChecksum),
-                            findSuggestionsByDescription(1, rec.getDescription()),
-                            findSuggestionsByRecipient(2, rec.getRecipient()),
-                            findSuggestionsByMoney(3, rec.getAmountInCents()),
-                            findSuggestionsByBankSuggestion(4, rec.getSuggestedCategory())
-                    )
-                    .flatMap(Collection::stream)
-                    .toList();
+            var allSuggestions = findSuggestionsBySimilarity(0, similarityChecksum)
+                    .unionAll(findSuggestionsByDescription(1, rec.getDescription()))
+                    .unionAll(findSuggestionsByRecipient(2, rec.getRecipient()))
+                    .unionAll(findSuggestionsByMoney(3, rec.getAmountInCents()))
+                    .unionAll(findSuggestionsByBankSuggestion(4, rec.getSuggestedCategory()))
+                    .fetch()
+                    .map(r -> new TempSuggestion(
+                            r.get("PRIORITY", Integer.class),
+                            r.get(TURNOVER_ROW.CATEGORY_ID),
+                            r.get(DSL.count()),
+                            r.get("ORIGIN", String.class)
+                    ));
 
             var sumOfFrequencies = allSuggestions.stream()
                     .mapToInt(TempSuggestion::getFrequency)
@@ -106,19 +109,19 @@ public class CategorySuggester {
                     .toList();
         }
 
-        private List<TempSuggestion> findSuggestionsBySimilarity(int priority, String similarityChecksum) {
+        private SelectLimitPercentStep<Record4<Integer, String, UUID, Integer>> findSuggestionsBySimilarity(int priority, String similarityChecksum) {
             return findSuggestionsByCondition(TURNOVER_ROW.SIMILARITY_CHECKSUM.eq(similarityChecksum), priority, TURNOVER_ROW.SIMILARITY_CHECKSUM.getUnqualifiedName().last());
         }
 
-        private List<TempSuggestion> findSuggestionsByDescription(int priority, String desc) {
+        private SelectLimitPercentStep<Record4<Integer, String, UUID, Integer>> findSuggestionsByDescription(int priority, String desc) {
             return findSuggestionsByCondition(TURNOVER_ROW.DESCRIPTION.eq(desc), priority, TURNOVER_ROW.DESCRIPTION.getUnqualifiedName().last());
         }
 
-        private List<TempSuggestion> findSuggestionsByMoney(int priority, Integer amountInCents) {
+        private SelectLimitPercentStep<Record4<Integer, String, UUID, Integer>> findSuggestionsByMoney(int priority, Integer amountInCents) {
             return findSuggestionsByCondition(TURNOVER_ROW.AMOUNT_VALUE_CENTS.eq(amountInCents), priority, TURNOVER_ROW.AMOUNT_VALUE_CENTS.getUnqualifiedName().last());
         }
 
-        private List<TempSuggestion> findSuggestionsByRecipient(int priority, String recipient) {
+        private SelectLimitPercentStep<Record4<Integer, String, UUID, Integer>> findSuggestionsByRecipient(int priority, String recipient) {
             return findSuggestionsByCondition(
                     StringUtils.isBlank(recipient)
                             ? TURNOVER_ROW.RECIPIENT.isNull()
@@ -128,28 +131,26 @@ public class CategorySuggester {
             );
         }
 
-        private List<TempSuggestion> findSuggestionsByBankSuggestion(int priority, String suggestion) {
-            if (StringUtils.isBlank(suggestion))
-                return List.of();
-
-            return findSuggestionsByCondition(TURNOVER_ROW.SUGGESTED_CATEGORY.eq(suggestion), priority, TURNOVER_ROW.SUGGESTED_CATEGORY.getUnqualifiedName().last());
+        private SelectLimitPercentStep<Record4<Integer, String, UUID, Integer>> findSuggestionsByBankSuggestion(int priority, String suggestion) {
+            return findSuggestionsByCondition(
+                    DSL.and(
+                            DSL.val(suggestion).isNotNull(),
+                            TURNOVER_ROW.SUGGESTED_CATEGORY.isNotNull(),
+                            TURNOVER_ROW.SUGGESTED_CATEGORY.eq(suggestion)
+                    ),
+                    priority,
+                    TURNOVER_ROW.SUGGESTED_CATEGORY.getUnqualifiedName().last()
+            );
         }
 
-        private List<TempSuggestion> findSuggestionsByCondition(Condition condition, int priority, String origin) {
-            return ctx.select(TURNOVER_ROW.CATEGORY_ID, DSL.count())
+        private SelectLimitPercentStep<Record4<Integer, String, UUID, Integer>> findSuggestionsByCondition(Condition condition, int priority, String origin) {
+            return ctx.select(DSL.val(priority).as("PRIORITY"), DSL.val(origin).as("ORIGIN"), TURNOVER_ROW.CATEGORY_ID, DSL.count())
                     .from(TURNOVER_ROW)
                     .where(TURNOVER_ROW.OWNER_ID.eq(userId))
                     .and(condition)
                     .groupBy(TURNOVER_ROW.CATEGORY_ID)
                     .orderBy(DSL.count())
-                    .limit(3)
-                    .fetch()
-                    .map(rec -> new TempSuggestion(
-                            priority,
-                            rec.get(TURNOVER_ROW.CATEGORY_ID),
-                            rec.get(DSL.count()),
-                            origin
-                    ));
+                    .limit(3);
         }
 
         @Value
