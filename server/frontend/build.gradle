@@ -4,4 +4,12 @@ plugins {
 
 frontend {
     nodeVersion = '21.6.2'
+    nodeInstallDirectory = layout.buildDirectory.dir("node")
+
+
+    assembleScript = "run build"
+    cleanScript = "run clean"
+    checkScript = "run check"
+
+    verboseModeEnabled = true
 }

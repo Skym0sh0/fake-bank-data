@@ -1,0 +1,14 @@
+{
+  "private": true,
+  "packageManager": "npm@10.4.0",
+  "scripts": {
+    "build": "echo Building frontend && mkdirp build/www && node config/config.js",
+    "check": "echo Checking frontend && npm run lint && npm run test",
+    "clean": "echo Cleaning frontend",
+    "lint": "echo Linting frontend",
+    "test": "echo Testing frontend"
+  },
+  "devDependencies": {
+    "mkdirp": "~3"
+  }
+}
