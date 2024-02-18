@@ -60,3 +60,5 @@ obj/
 
 
 /**/*.tgz
+
+frontend/node
