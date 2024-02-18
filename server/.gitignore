@@ -61,4 +61,4 @@ obj/
 
 /**/*.tgz
 
-frontend/node
+.frontend-gradle-plugin/
