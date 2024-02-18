@@ -3,5 +3,5 @@ plugins {
 }
 
 frontend {
-    nodeVersion = '18.17.1'
+    nodeVersion = '21.6.2'
 }
