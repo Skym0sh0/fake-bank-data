@@ -22,7 +22,7 @@ import java.util.Set;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @RestController
-@RequestMapping("/reports")
+@RequestMapping("/api/reports")
 @RequiredArgsConstructor
 public class ReportsController {
     private static final Logger logger = getLogger(ReportsController.class);
