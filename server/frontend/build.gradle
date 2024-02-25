@@ -8,6 +8,6 @@ node {
 }
 
 tasks.register('npmBuild', NpmTask) {
-    args = [ 'run', 'build' ]
+    args = ['run', 'build']
     dependsOn npmInstall
 }
