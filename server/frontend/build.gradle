@@ -1,15 +1,13 @@
 plugins {
-    id 'org.siouan.frontend-jdk17' version '8.0.0'
+    id "com.github.node-gradle.node" version "7.0.1"
 }
 
-frontend {
-    nodeVersion = '21.6.2'
-    nodeInstallDirectory = layout.buildDirectory.dir("node")
+node {
+    download = true
+    version = '21.6.2'
+}
 
-
-    assembleScript = "run build"
-    cleanScript = "run clean"
-    checkScript = "run check"
-
-    verboseModeEnabled = true
+tasks.register('npmBuild', NpmTask) {
+    args = [ 'run', 'build' ]
+    dependsOn npmInstall
 }

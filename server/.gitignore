@@ -62,3 +62,4 @@ obj/
 /**/*.tgz
 
 .frontend-gradle-plugin/
+/**/application-dev.properties
