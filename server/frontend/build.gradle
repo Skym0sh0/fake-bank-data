@@ -8,6 +8,20 @@ node {
 }
 
 tasks.register('npmBuild', NpmTask) {
-    args = ['run', 'build']
     dependsOn npmInstall
+    inputs.dir file("${projectDir}/src/")
+    inputs.files(fileTree("${projectDir}/node_modules") {
+        exclude ".cache"
+        exclude ".bin"
+    })
+    inputs.file file("${projectDir}/package.json")
+    inputs.file file("${projectDir}/package-lock.json")
+
+    outputs.dir file("${projectDir}/build")
+
+    args = ['run', 'build']
+}
+
+task npmStartGUI(type: NpmTask, dependsOn: npmInstall) {
+    args = ['run', 'start']
 }
