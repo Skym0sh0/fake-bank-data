@@ -1,6 +1,6 @@
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
-import {Paper} from "@mui/material";
+import {Paper, useTheme} from "@mui/material";
 import * as React from "react";
 import {useState} from "react";
 import Box from "@mui/material/Box";
@@ -9,23 +9,25 @@ import MenuIcon from "@mui/icons-material/Menu";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import NavigationBar from "./NavigationBar";
+import './AppLayout.css';
 
 export default function AppLayout() {
+    const theme = useTheme();
+
     const [open, setOpen] = useState(true);
     const toggleOpen = () => setOpen(prev => !prev);
 
     return (
-        <Box sx={{display: 'flex', minHeight: "100vh", minWidth: "100vw"}}>
-            <Paper sx={{height: "100vh"}} elevation={10}>
+        <Box className="AppLayout">
+            <Paper className="NavigationBarBox" sx={{backgroundColor: theme.palette.grey.A400}} elevation={8}>
                 <NavigationBar open={open} onClose={() => setOpen(false)}/>
             </Paper>
-            <Box sx={{width: '100%', height: '100%'}}>
+            <Box className="MainAppView">
                 <AppBar position="static">
                     <Toolbar>
                         <IconButton size="large"
                                     edge="start"
                                     color="inherit"
-                                    aria-label="menu"
                                     sx={{mr: 2}}
                                     onClick={toggleOpen}>
                             <MenuIcon/>

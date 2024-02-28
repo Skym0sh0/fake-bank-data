@@ -1,0 +1,14 @@
+.AppLayout {
+    display: flex;
+    min-height: 100vh;
+    min-width: 100vw;
+}
+
+.NavigationBarBox {
+    height: 100vh;
+}
+
+.MainAppView {
+    width: 100%;
+    height: 100%;
+}

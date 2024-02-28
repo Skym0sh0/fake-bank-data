@@ -1,3 +1,4 @@
+import * as React from "react";
 import {useMemo} from "react";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
@@ -8,7 +9,7 @@ import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import {Divider, List, ListItemButton, ListItemIcon, ListItemText} from "@mui/material";
-import * as React from "react";
+import Typography from "@mui/material/Typography";
 
 type NavigationBarProps = {
     open: boolean;
@@ -40,11 +41,7 @@ export default function NavigationBar({open, onClose}: NavigationBarProps) {
     ], []);
 
     return <>
-        <Toolbar sx={{display: 'flex', alignItems: 'center', justifyContent: 'flex-end',}}>
-            {open && <IconButton onClick={onClose}>
-                <ChevronLeftIcon/>
-            </IconButton>}
-        </Toolbar>
+        <NavigationToolbar open={open} onClose={onClose}/>
 
         <Divider/>
 
@@ -60,5 +57,24 @@ export default function NavigationBar({open, onClose}: NavigationBarProps) {
                 })
             }
         </List>
+
+        <Divider/>
     </>;
+}
+
+function NavigationToolbar({open, onClose}: NavigationBarProps) {
+    if (!open)
+        return <Toolbar/>
+
+    return <Toolbar sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between',}}>
+        <div>
+            <Typography variant="caption">
+                Inhalte
+            </Typography>
+        </div>
+
+        <IconButton onClick={onClose}>
+            <ChevronLeftIcon/>
+        </IconButton>
+    </Toolbar>
 }
