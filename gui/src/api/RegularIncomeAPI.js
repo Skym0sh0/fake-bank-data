@@ -34,7 +34,7 @@ class RegularIncomeAPI {
 
     getClient(auth = authHeader(userService.getUser())) {
         const client = axios.create({
-            baseURL: this.baseUrl,
+            baseURL: `${this.baseUrl}api`,
             // timeout: 1500,
             headers: {
                 correlationid: uuidv4(),

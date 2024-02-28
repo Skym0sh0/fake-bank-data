@@ -11,40 +11,53 @@ import Button from "@mui/material/Button";
 import NavigationBar from "./NavigationBar";
 import './AppLayout.css';
 
-export default function AppLayout() {
+export default function AppLayout({children}: { children?: React.ReactNode }) {
     const theme = useTheme();
+
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     const [open, setOpen] = useState(true);
     const toggleOpen = () => setOpen(prev => !prev);
 
     return (
         <Box className="AppLayout">
-            <Paper className="NavigationBarBox" sx={{backgroundColor: theme.palette.grey.A400}} elevation={8}>
-                <NavigationBar open={open} onClose={() => setOpen(false)}/>
-            </Paper>
+            {isLoggedIn &&
+                <Paper className="NavigationBarBox" sx={{backgroundColor: theme.palette.grey.A400}} elevation={8}>
+                    <NavigationBar open={open} onClose={() => setOpen(false)}/>
+                </Paper>
+            }
             <Box className="MainAppView">
                 <AppBar position="static">
                     <Toolbar>
-                        <IconButton size="large"
-                                    edge="start"
-                                    color="inherit"
-                                    sx={{mr: 2}}
-                                    onClick={toggleOpen}>
-                            <MenuIcon/>
-                        </IconButton>
+                        {isLoggedIn &&
+                            <IconButton size="large"
+                                        edge="start"
+                                        color="inherit"
+                                        sx={{mr: 2}}
+                                        onClick={toggleOpen}>
+                                <MenuIcon/>
+                            </IconButton>
+                        }
 
                         <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
                             Regular Income
                         </Typography>
 
-                        <Button color="inherit">
-                            Login
-                        </Button>
+                        {!isLoggedIn &&
+                            <Button color="inherit" onClick={() => setIsLoggedIn(true)}>
+                                Login
+                            </Button>
+                        }
+                        {isLoggedIn &&
+                            <Button color="inherit" onClick={() => setIsLoggedIn(false)}>
+                                Logout
+                            </Button>
+                        }
                     </Toolbar>
                 </AppBar>
 
                 <Box className="MainAppContent">
-
+                    {children}
                 </Box>
             </Box>
         </Box>

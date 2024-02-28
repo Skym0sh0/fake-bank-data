@@ -1,0 +1,24 @@
+.DashboardTiles {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: start;
+    align-items: baseline;
+    align-content: center;
+    flex-grow: 1;
+    column-gap: 1em;
+    row-gap: 2em;
+}
+
+.Tile {
+    width: 16em;
+    height: 10em;
+}
+
+.TileArea {
+}
+
+.TileContent {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+}

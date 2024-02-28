@@ -1,15 +1,12 @@
 import * as React from "react";
 import {useMemo} from "react";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import CardMembershipIcon from "@mui/icons-material/CardMembership";
-import LocalShippingIcon from "@mui/icons-material/LocalShipping";
-import AppSettingsAltIcon from "@mui/icons-material/AppSettingsAlt";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import {Divider, List, ListItemButton, ListItemIcon, ListItemText} from "@mui/material";
 import Typography from "@mui/material/Typography";
+import {getPages} from "../router/Routes";
+import _ from "lodash";
 
 type NavigationBarProps = {
     open: boolean;
@@ -17,28 +14,9 @@ type NavigationBarProps = {
 }
 
 export default function NavigationBar({open, onClose}: NavigationBarProps) {
-    const items = useMemo(() => [
-        {
-            text: "ToDo",
-            icon: <ErrorOutlineIcon color="error"/>,
-        },
-        {
-            text: "Shopping",
-            icon: <ShoppingCartIcon/>,
-        },
-        {
-            text: "Membership",
-            icon: <CardMembershipIcon/>,
-        },
-        {
-            text: "Shipping",
-            icon: <LocalShippingIcon/>,
-        },
-        {
-            text: "Settings",
-            icon: <AppSettingsAltIcon/>,
-        }
-    ], []);
+    const items = useMemo(() => {
+        return _.sortBy(getPages(), p => p.title);
+    }, []);
 
     return <>
         <NavigationToolbar open={open} onClose={onClose}/>
@@ -48,11 +26,14 @@ export default function NavigationBar({open, onClose}: NavigationBarProps) {
         <List component="nav">
             {
                 items.map(item => {
-                    return <ListItemButton key={item.text}>
-                        <ListItemIcon sx={{minWidth: open ? null : 0}}>
-                            {item.icon}
-                        </ListItemIcon>
-                        {open && <ListItemText primary={item.text}/>}
+                    return <ListItemButton key={item.path} href={item.path} component="a">
+                        {item.icon &&
+                            <ListItemIcon sx={{minWidth: open ? null : 0}}>
+                                {item.icon}
+                            </ListItemIcon>
+                        }
+
+                        {open && <ListItemText primary={item.title}/>}
                     </ListItemButton>
                 })
             }
