@@ -42,6 +42,10 @@ export default function AppLayout() {
                         </Button>
                     </Toolbar>
                 </AppBar>
+
+                <Box className="MainAppContent">
+
+                </Box>
             </Box>
         </Box>
     );
