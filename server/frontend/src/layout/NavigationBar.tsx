@@ -5,7 +5,7 @@ import IconButton from "@mui/material/IconButton";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import {Divider, List, ListItemButton, ListItemIcon, ListItemText} from "@mui/material";
 import Typography from "@mui/material/Typography";
-import {getPages} from "../router/Routes";
+import {getPagesToDisplay} from "../router/Routes";
 import _ from "lodash";
 
 type NavigationBarProps = {
@@ -15,7 +15,7 @@ type NavigationBarProps = {
 
 export default function NavigationBar({open, onClose}: NavigationBarProps) {
     const items = useMemo(() => {
-        return _.sortBy(getPages(), p => p.title);
+        return _.sortBy(getPagesToDisplay(), p => p.title);
     }, []);
 
     return <>

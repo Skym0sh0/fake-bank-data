@@ -3,19 +3,31 @@ import React from "react";
 export interface UserContext {
     isLoggedIn(): boolean;
 
-    login(): void;
+    login(): Promise<void>;
 
-    logout(): void;
+    logout(): Promise<void>;
 }
 
-const noopCtx: UserContext = {
+export const authenticationProvider: UserContext = {
     isLoggedIn(): boolean {
-        return false;
+        return !!localStorage.getItem("is-logged-in");
     },
-    login(): void {
+    login(): Promise<void> {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                localStorage.setItem("is-logged-in", "true")
+                resolve();
+            }, 500)
+        });
     },
-    logout(): void {
+    logout(): Promise<void> {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                localStorage.removeItem("is-logged-in")
+                resolve();
+            }, 500)
+        });
     },
 };
 
-export const LoginContext = React.createContext(noopCtx);
+export const LoginContext = React.createContext(authenticationProvider);

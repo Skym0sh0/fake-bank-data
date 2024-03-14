@@ -17,6 +17,11 @@ export default function AppLayout({children}: { children?: React.ReactNode }) {
 
     const loginCtx = useContext(LoginContext);
 
+    const logout = () => {
+        loginCtx.logout()
+            .then(() => window.location.reload())
+    };
+
     const [open, setOpen] = useState(true);
     const toggleOpen = () => setOpen(prev => !prev);
 
@@ -44,21 +49,20 @@ export default function AppLayout({children}: { children?: React.ReactNode }) {
                             Regular Income
                         </Typography>
 
-
                         {
                             <div>
                                 {loginCtx.isLoggedIn() ? "Eingeloggt" : "Nicht eingeloggt"}
                             </div>
                         }
 
-                        {false && !loginCtx.isLoggedIn() &&
+                        {!loginCtx.isLoggedIn() &&
                             <Button color="inherit" href="/login">
                                 Login
                             </Button>
                         }
 
                         {loginCtx.isLoggedIn() &&
-                            <Button color="inherit" onClick={() => loginCtx.logout()}>
+                            <Button color="inherit" onClick={logout}>
                                 Logout
                             </Button>
                         }

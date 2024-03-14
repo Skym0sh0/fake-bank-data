@@ -1,13 +1,13 @@
 import React, {useMemo} from "react";
 import _ from "lodash";
-import {getPages, Page} from "../router/Routes";
+import {getPagesToDisplay, Page} from "../router/Routes";
 import {Card, CardActionArea, CardContent, CardHeader, Paper, Tooltip} from "@mui/material";
 import './Dashboard.css';
 import Typography from "@mui/material/Typography";
 
 export default function Dashboard() {
     const items = useMemo(() => {
-        return _.sortBy(getPages(), p => p.title);
+        return _.sortBy(getPagesToDisplay(), p => p.title);
     }, []);
 
     return <Paper className="DashboardTiles">
