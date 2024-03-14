@@ -2,7 +2,7 @@ import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import {Paper, useTheme} from "@mui/material";
 import * as React from "react";
-import {useState} from "react";
+import {useContext, useState} from "react";
 import Box from "@mui/material/Box";
 import AppBar from "@mui/material/AppBar";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -10,18 +10,19 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import NavigationBar from "./NavigationBar";
 import './AppLayout.css';
+import {LoginContext} from "../login/LoginContext";
 
 export default function AppLayout({children}: { children?: React.ReactNode }) {
     const theme = useTheme();
 
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const loginCtx = useContext(LoginContext);
 
     const [open, setOpen] = useState(true);
     const toggleOpen = () => setOpen(prev => !prev);
 
     return (
         <Box className="AppLayout">
-            {isLoggedIn &&
+            {loginCtx.isLoggedIn() &&
                 <Paper className="NavigationBarBox" sx={{backgroundColor: theme.palette.grey.A400}} elevation={8}>
                     <NavigationBar open={open} onClose={() => setOpen(false)}/>
                 </Paper>
@@ -29,7 +30,7 @@ export default function AppLayout({children}: { children?: React.ReactNode }) {
             <Box className="MainAppView">
                 <AppBar position="static">
                     <Toolbar>
-                        {isLoggedIn &&
+                        {loginCtx.isLoggedIn() &&
                             <IconButton size="large"
                                         edge="start"
                                         color="inherit"
@@ -43,13 +44,21 @@ export default function AppLayout({children}: { children?: React.ReactNode }) {
                             Regular Income
                         </Typography>
 
-                        {!isLoggedIn &&
-                            <Button color="inherit" onClick={() => setIsLoggedIn(true)}>
+
+                        {
+                            <div>
+                                {loginCtx.isLoggedIn() ? "Eingeloggt" : "Nicht eingeloggt"}
+                            </div>
+                        }
+
+                        {false && !loginCtx.isLoggedIn() &&
+                            <Button color="inherit" href="/login">
                                 Login
                             </Button>
                         }
-                        {isLoggedIn &&
-                            <Button color="inherit" onClick={() => setIsLoggedIn(false)}>
+
+                        {loginCtx.isLoggedIn() &&
+                            <Button color="inherit" onClick={() => loginCtx.logout()}>
                                 Logout
                             </Button>
                         }
