@@ -1,23 +1,29 @@
 import Button from "@mui/material/Button";
-import {useContext} from "react";
-import {LoginContext} from "./LoginContext";
 import {useNavigate} from "react-router-dom";
+import {useAuth} from "./useAuth";
 
 export default function LoginForm() {
-    const loginCtx = useContext(LoginContext);
     const navigate = useNavigate();
 
+    const auth = useAuth();
+
     const login = () => {
-        loginCtx.login()
-            .then(() => navigate("/"))
+        auth.login({
+            id: 'id',
+            name: 'My Name',
+            email: 'my@email.com'
+        }).then(() => {
+            console.log("logged in")
+            navigate("/");
+        })
     };
 
     return <div>
         login form
-        <div>Is Logged In: {JSON.stringify(loginCtx.isLoggedIn())}</div>
+        <div>Is Logged In: {JSON.stringify(!!auth.user)}</div>
 
         <div>
-            <Button onClick={login}>
+            <Button onClick={login} disabled={!!auth.user}>
                 Login
             </Button>
         </div>

@@ -1,5 +1,3 @@
-import React from "react";
-
 export interface UserContext {
     isLoggedIn(): boolean;
 
@@ -8,7 +6,7 @@ export interface UserContext {
     logout(): Promise<void>;
 }
 
-export const authenticationProvider: UserContext = {
+const authenticationProvider: UserContext = {
     isLoggedIn(): boolean {
         return !!localStorage.getItem("is-logged-in");
     },
@@ -30,4 +28,4 @@ export const authenticationProvider: UserContext = {
     },
 };
 
-export const LoginContext = React.createContext(authenticationProvider);
+// export const LoginContext = React.createContext(authenticationProvider);
