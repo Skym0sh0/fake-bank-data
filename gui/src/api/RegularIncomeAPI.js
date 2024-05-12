@@ -32,7 +32,7 @@ class RegularIncomeAPI {
         this.baseUrl = baseUrl
     }
 
-    getClient(auth = authHeader(userService.getUser())) {
+    getClient(auth = authHeader(userService.getUser()), ignoreFailures = false) {
         const client = axios.create({
             baseURL: this.baseUrl,
             // timeout: 1500,
@@ -42,23 +42,25 @@ class RegularIncomeAPI {
             },
         })
 
-        client.interceptors.response.use(
-            response => {
-                // console.log("success", response)
-                return response;
-            },
-            error => {
-                errorReference.lastError = error.response.data
+        if (!ignoreFailures) {
+            client.interceptors.response.use(
+                response => {
+                    // console.log("success", response)
+                    return response;
+                },
+                error => {
+                    errorReference.lastError = error.response.data
 
-                if (error.response.status === 401) {
-                    userService.logout()
-                    location.reload();
+                    if (error.response.status === 401) {
+                        userService.logout()
+                        location.reload();
+                    }
+
+                    // console.log("failed", error.response)
+                    return Promise.reject(error);
                 }
-
-                // console.log("failed", error.response)
-                return Promise.reject(error);
-            }
-        )
+            )
+        }
 
         return client;
     }
@@ -74,7 +76,7 @@ class RegularIncomeAPI {
             },
 
             login(username, password) {
-                return ref.getClient(authHeader({username: username, password: password}))
+                return ref.getClient(authHeader({username: username, password: password}), true)
                     .get("auth/login")
                     .then(res => denormalizeUser(res.data));
             },

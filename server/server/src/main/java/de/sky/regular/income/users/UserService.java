@@ -178,6 +178,11 @@ public class UserService implements UserDetailsService, UserProvider {
     private record DBPersistedUser(UUID id, String username, String password,
                                    @Singular List<String> roles)
             implements UserDetails {
+
+        private DBPersistedUser {
+            roles = new ArrayList<>(roles);
+        }
+
         @Override
         public Collection<? extends GrantedAuthority> getAuthorities() {
             return roles.stream()
