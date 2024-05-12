@@ -8,12 +8,14 @@ import com.univocity.parsers.csv.CsvParserSettings;
 import de.sky.regular.income.api.turnovers.TurnoverImportFormat;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.Reader;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -103,10 +105,20 @@ public class NewDKBTurnoverCsvParser implements TurnoverParser {
         private String kundenreferenz;
 
         public TurnoverRecord toTurnOverRecord() {
+            var desc = Stream.of(
+                            getVerwendungszweck(),
+                            getMandatsreferenz(),
+                            getKundenreferenz(),
+                            getGlaeubigerID()
+                    )
+                    .filter(StringUtils::isNoneBlank)
+                    .findFirst()
+                    .orElse("<nicht gesetzt>");
+
             return TurnoverRecord.builder()
                     .date(getBuchungsdatum())
                     .amountInCents(getBetragEurCent())
-                    .description(getVerwendungszweck())
+                    .description(desc)
                     .suggestedCategory(null)
                     .recipient(getBetragEurCent() < 0 ? getZahlungsempfaenger() : getZahlungspflichtiger())
                     .build();

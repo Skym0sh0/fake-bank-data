@@ -69,7 +69,6 @@ public class TurnoverCsvImporter {
             imp.setFileContent(content);
 
             imp.setChecksum(checksum);
-            imp.setChecksum(checksum);
             imp.setTurnoverFileFormat(String.valueOf(patch.format));
             imp.setFileEncoding(Optional.ofNullable(patch.encoding).orElse("UTF-8"));
 
