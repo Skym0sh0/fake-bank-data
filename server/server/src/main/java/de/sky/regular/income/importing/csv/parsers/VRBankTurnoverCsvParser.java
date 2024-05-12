@@ -8,11 +8,13 @@ import com.univocity.parsers.csv.CsvParserSettings;
 import de.sky.regular.income.api.turnovers.TurnoverImportFormat;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.Reader;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -76,10 +78,19 @@ public class VRBankTurnoverCsvParser implements TurnoverParser {
         private String category;
 
         public TurnoverRecord toTurnOverRecord() {
+            var desc = Stream.of(
+                            getDescription(),
+                            getCategory(),
+                            getBookingType()
+                    )
+                    .filter(StringUtils::isNoneBlank)
+                    .findFirst()
+                    .orElse("<nicht gesetzt>");
+
             return TurnoverRecord.builder()
                     .date(this.getDate())
                     .amountInCents(this.getAmountInCents())
-                    .description(this.getDescription())
+                    .description(desc)
                     .suggestedCategory(this.getCategory())
                     .recipient(this.getRecipient())
                     .build();
