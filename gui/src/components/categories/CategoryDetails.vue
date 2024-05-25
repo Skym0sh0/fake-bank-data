@@ -25,22 +25,20 @@
                             :outlined="true"
                             @input="changeAnything"/>
 
-                <div class="category-info px-1">
-                    <p v-show="entity.updatedAt">Zuletzt geändert: {{ formatDate(entity.updatedAt) }}</p>
-                    <p v-show="entity.createdAt">Erstellt am: {{ formatDate(entity.createdAt) }}</p>
-                    <p v-show="entity.usageCount">Benutzt in: {{ entity.usageCount }}</p>
-                </div>
+                <category-infos :entity="entity"/>
 
-                <div class="d-flex justify-content-end">
+                <div class="d-flex justify-content-end mt-2">
                     <b-btn-group>
                         <v-btn @click="cancelActiveForm"
                                :loading="isLoading"
+                               :small="true"
                                color="warning">
                             Abbrechen
                         </v-btn>
                         <v-btn @click="saveActiveForm"
                                :disabled="!hasChanged"
                                :loading="isLoading"
+                               :small="true"
                                color="success">
                             Speichern
                         </v-btn>
@@ -52,14 +50,14 @@
 </template>
 
 <script>
-import * as moment from "moment";
 import {normalizeCategory} from "@/util/Normalizer";
 import Breadcrumps from "@/components/misc/Breadcrumps.vue";
 import CategoryUsageDialog from "@/components/categories/CategoryUsageDialog.vue";
+import CategoryInfos from "@/components/categories/CategoryInfos.vue";
 
 export default {
     name: "CategoryDetails",
-    components: {CategoryUsageDialog, Breadcrumps},
+    components: {CategoryInfos, CategoryUsageDialog, Breadcrumps},
     props: {
         categoriesById: {
             type: Object,
@@ -86,11 +84,6 @@ export default {
     methods: {
         reset() {
             this.$refs.form.resetValidation()
-        },
-        formatDate(date) {
-            if (!date)
-                return null
-            return moment(date).format("YYYY-MM-DD HH:mm:ss")
         },
         changeAnything() {
             this.hasChanged = true;
@@ -141,13 +134,4 @@ export default {
 </script>
 
 <style scoped>
-.category-info {
-    font-size: 10px;
-    display: flex;
-    flex-direction: column;
-}
-
-.category-info > * {
-    margin: 0;
-}
 </style>
