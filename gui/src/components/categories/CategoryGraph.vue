@@ -90,6 +90,26 @@ export default {
                 bullets.circle.fill = col
                 bullets.circle.stroke = col
             }
+            {
+                const col = am4core.color("#000000")
+                const series = chart.series.push(new am4charts.LineSeries())
+                series.name = "Budget"
+                series.stacked = false
+                // series.columns.template.fill = col;
+                // series.columns.template.stroke = col.brighten(-0.1);
+                series.dataFields.dateX = "date"
+                series.dataFields.valueY = "budget"
+                series.tooltipText = "{dateX}: {valueY}"
+                series.legendSettings.valueText = ""
+                series.legendSettings.itemValueText = "[bold]{valueY}[/]"
+                series.legendSettings.labelText = "{name}"
+                series.legendSettings.itemLabelText = "{dateX}: "
+                series.minBulletDistance = 10
+                const bullets = series.bullets.push(new am4charts.CircleBullet())
+                bullets.circle.radius = 2
+                bullets.circle.fill = col
+                bullets.circle.stroke = col
+            }
 
             chart.cursor = new am4charts.XYCursor();
             chart.cursor.behavior = "zoomXY"

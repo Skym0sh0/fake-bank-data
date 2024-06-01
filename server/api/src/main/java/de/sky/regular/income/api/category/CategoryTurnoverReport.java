@@ -17,12 +17,14 @@ public class CategoryTurnoverReport {
     public List<ReportDatapoint> datapoints;
 
     @Data
-    @AllArgsConstructor
     @NoArgsConstructor
     public static class ReportDatapoint {
         public UUID categoryId;
         public LocalDate date;
         public Integer incomeAmountInCents;
         public Integer expenseAmountInCents;
+
+        public Integer expenseBudgetInCents;
+        public Integer expenseBudgetWarningThresholdInCents;
     }
 }

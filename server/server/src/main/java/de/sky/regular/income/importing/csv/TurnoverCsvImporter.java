@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.Reader;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -156,15 +157,24 @@ public class TurnoverCsvImporter {
                     .and(TURNOVER_ROW.CATEGORY_ID.in(allCategoryIds))
                     .groupBy(/*TURNOVER_ROW.CATEGORY_ID,*/ groupDate)
                     .orderBy(groupDate)
-                    .limit(10_000)
+                    .limit(20_000)
                     .fetch()
                     .map(rec -> {
-                        return new CategoryTurnoverReport.ReportDatapoint(
-                                /*rec.get(TURNOVER_ROW.CATEGORY_ID)*/ null,
-                                rec.get(groupDate),
-                                rec.get(groupIncome),
-                                rec.get(groupExpense)
-                        );
+                        var dp = new CategoryTurnoverReport.ReportDatapoint();
+                        dp.setCategoryId(/*rec.get(TURNOVER_ROW.CATEGORY_ID)*/ null);
+                        dp.setDate(rec.get(groupDate));
+                        dp.setIncomeAmountInCents(rec.get(groupIncome));
+                        dp.setExpenseAmountInCents(rec.get(groupExpense));
+
+                        Optional.ofNullable(category.getBudget())
+                                .ifPresent(b -> {
+                                    int budget = convertMonthlyTo(b.getBudgetInCents(), grouping, dp.getDate());
+
+                                    dp.setExpenseBudgetInCents(budget);
+                                    dp.setExpenseBudgetWarningThresholdInCents((int) Math.round(budget * (1.0 + b.getExceedingThreshold())));
+                                });
+
+                        return dp;
                     });
 
             return CategoryTurnoverReport.builder()
@@ -172,6 +182,15 @@ public class TurnoverCsvImporter {
                     .datapoints(datapoints)
                     .build();
         });
+    }
+
+    private static int convertMonthlyTo(int amount, DatePart d, LocalDate date) {
+        return switch (d) {
+            case DAY -> amount / YearMonth.from(date).lengthOfMonth();
+            case MONTH -> amount;
+            case YEAR -> amount * 12;
+            default -> throw new UnsupportedOperationException("Unsupported DateRange: " + d);
+        };
     }
 
     public TurnoverImport fetchTurnoverImport(UUID id) {

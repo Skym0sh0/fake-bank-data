@@ -35,7 +35,7 @@
 
                     <v-col :cols="2">
                         <v-checkbox v-model="includeSubcategories"
-                                  label="mit Unterkategorien"/>
+                                    label="mit Unterkategorien"/>
                     </v-col>
                 </v-row>
             </v-container>
@@ -81,6 +81,7 @@ export default {
                 date: new Date(rec.date),
                 income: rec.incomeAmountInCents / 100.0,
                 expense: rec.expenseAmountInCents / 100.0,
+                budget: -rec.expenseBudgetInCents / 100.0,
             }))
         },
     },
