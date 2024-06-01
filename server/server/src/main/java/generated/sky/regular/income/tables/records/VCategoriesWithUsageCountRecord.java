@@ -6,6 +6,7 @@ package generated.sky.regular.income.tables.records;
 
 import generated.sky.regular.income.tables.VCategoriesWithUsageCount;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -171,6 +172,57 @@ public class VCategoriesWithUsageCountRecord extends TableRecordImpl<VCategories
         return (Long) get(8);
     }
 
+    /**
+     * Setter for
+     * <code>REGULAR_INCOME.v_categories_with_usage_count.has_budget</code>.
+     */
+    public VCategoriesWithUsageCountRecord setHasBudget(Boolean value) {
+        set(9, value);
+        return this;
+    }
+
+    /**
+     * Getter for
+     * <code>REGULAR_INCOME.v_categories_with_usage_count.has_budget</code>.
+     */
+    public Boolean getHasBudget() {
+        return (Boolean) get(9);
+    }
+
+    /**
+     * Setter for
+     * <code>REGULAR_INCOME.v_categories_with_usage_count.monthly_budget_amount_value_cents</code>.
+     */
+    public VCategoriesWithUsageCountRecord setMonthlyBudgetAmountValueCents(Integer value) {
+        set(10, value);
+        return this;
+    }
+
+    /**
+     * Getter for
+     * <code>REGULAR_INCOME.v_categories_with_usage_count.monthly_budget_amount_value_cents</code>.
+     */
+    public Integer getMonthlyBudgetAmountValueCents() {
+        return (Integer) get(10);
+    }
+
+    /**
+     * Setter for
+     * <code>REGULAR_INCOME.v_categories_with_usage_count.warning_threshold_fraction</code>.
+     */
+    public VCategoriesWithUsageCountRecord setWarningThresholdFraction(BigDecimal value) {
+        set(11, value);
+        return this;
+    }
+
+    /**
+     * Getter for
+     * <code>REGULAR_INCOME.v_categories_with_usage_count.warning_threshold_fraction</code>.
+     */
+    public BigDecimal getWarningThresholdFraction() {
+        return (BigDecimal) get(11);
+    }
+
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -185,7 +237,7 @@ public class VCategoriesWithUsageCountRecord extends TableRecordImpl<VCategories
     /**
      * Create a detached, initialised VCategoriesWithUsageCountRecord
      */
-    public VCategoriesWithUsageCountRecord(UUID id, UUID parentCategory, String name, Boolean isIncome, String description, OffsetDateTime lastUpdatedAt, OffsetDateTime createdAt, UUID ownerId, Long useCount) {
+    public VCategoriesWithUsageCountRecord(UUID id, UUID parentCategory, String name, Boolean isIncome, String description, OffsetDateTime lastUpdatedAt, OffsetDateTime createdAt, UUID ownerId, Long useCount, Boolean hasBudget, Integer monthlyBudgetAmountValueCents, BigDecimal warningThresholdFraction) {
         super(VCategoriesWithUsageCount.V_CATEGORIES_WITH_USAGE_COUNT);
 
         setId(id);
@@ -197,6 +249,9 @@ public class VCategoriesWithUsageCountRecord extends TableRecordImpl<VCategories
         setCreatedAt(createdAt);
         setOwnerId(ownerId);
         setUseCount(useCount);
+        setHasBudget(hasBudget);
+        setMonthlyBudgetAmountValueCents(monthlyBudgetAmountValueCents);
+        setWarningThresholdFraction(warningThresholdFraction);
         resetChangedOnNotNull();
     }
 }

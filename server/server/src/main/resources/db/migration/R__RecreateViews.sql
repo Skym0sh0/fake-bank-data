@@ -25,9 +25,14 @@ WITH TURNOVERS_COUNT AS (SELECT CATEGORY_ID,
                                 COUNT(*) AS USE_COUNT
                          FROM TURNOVER_ROW
                          GROUP BY CATEGORY_ID),
-     COMPLETED_CATEGORIES AS (SELECT c.*, COALESCE(o.USE_COUNT, 0) as USE_COUNT
+     COMPLETED_CATEGORIES AS (SELECT c.*,
+                                     COALESCE(o.USE_COUNT, 0) as USE_COUNT,
+                                     b IS NOT NULL as HAS_BUDGET,
+                                     b.MONTHLY_BUDGET_AMOUNT_VALUE_CENTS,
+                                     b.WARNING_THRESHOLD_FRACTION
                               FROM CATEGORY c
-                                       LEFT JOIN TURNOVERS_COUNT o ON c.ID = o.CATEGORY_ID)
+                                       LEFT JOIN TURNOVERS_COUNT o ON c.ID = o.CATEGORY_ID
+                                       LEFT JOIN CATEGORY_BUDGET b ON c.ID = b.CATEGORY_ID /* This works because currently there is at most ONLY ONE budget possible for ONE category */ )
 SELECT *
 FROM COMPLETED_CATEGORIES
 );

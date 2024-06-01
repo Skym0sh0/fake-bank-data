@@ -7,6 +7,7 @@ package generated.sky.regular.income.tables;
 import generated.sky.regular.income.RegularIncome;
 import generated.sky.regular.income.tables.records.VCategoriesWithUsageCountRecord;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Collection;
 import java.util.UUID;
@@ -103,6 +104,24 @@ public class VCategoriesWithUsageCount extends TableImpl<VCategoriesWithUsageCou
      */
     public final TableField<VCategoriesWithUsageCountRecord, Long> USE_COUNT = createField(DSL.name("use_count"), SQLDataType.BIGINT, this, "");
 
+    /**
+     * The column
+     * <code>REGULAR_INCOME.v_categories_with_usage_count.has_budget</code>.
+     */
+    public final TableField<VCategoriesWithUsageCountRecord, Boolean> HAS_BUDGET = createField(DSL.name("has_budget"), SQLDataType.BOOLEAN, this, "");
+
+    /**
+     * The column
+     * <code>REGULAR_INCOME.v_categories_with_usage_count.monthly_budget_amount_value_cents</code>.
+     */
+    public final TableField<VCategoriesWithUsageCountRecord, Integer> MONTHLY_BUDGET_AMOUNT_VALUE_CENTS = createField(DSL.name("monthly_budget_amount_value_cents"), SQLDataType.INTEGER, this, "");
+
+    /**
+     * The column
+     * <code>REGULAR_INCOME.v_categories_with_usage_count.warning_threshold_fraction</code>.
+     */
+    public final TableField<VCategoriesWithUsageCountRecord, BigDecimal> WARNING_THRESHOLD_FRACTION = createField(DSL.name("warning_threshold_fraction"), SQLDataType.NUMERIC, this, "");
+
     private VCategoriesWithUsageCount(Name alias, Table<VCategoriesWithUsageCountRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }
@@ -123,9 +142,13 @@ public class VCategoriesWithUsageCount extends TableImpl<VCategoriesWithUsageCou
                    c.last_updated_at,
                    c.created_at,
                    c.owner_id,
-                   COALESCE(o.use_count, (0)::bigint) AS use_count
-                  FROM (category c
+                   COALESCE(o.use_count, (0)::bigint) AS use_count,
+                   (b.* IS NOT NULL) AS has_budget,
+                   b.monthly_budget_amount_value_cents,
+                   b.warning_threshold_fraction
+                  FROM ((category c
                     LEFT JOIN turnovers_count o ON ((c.id = o.category_id)))
+                    LEFT JOIN category_budget b ON ((c.id = b.category_id)))
                )
         SELECT id,
            parent_category,
@@ -135,7 +158,10 @@ public class VCategoriesWithUsageCount extends TableImpl<VCategoriesWithUsageCou
            last_updated_at,
            created_at,
            owner_id,
-           use_count
+           use_count,
+           has_budget,
+           monthly_budget_amount_value_cents,
+           warning_threshold_fraction
           FROM completed_categories;
         """), where);
     }
