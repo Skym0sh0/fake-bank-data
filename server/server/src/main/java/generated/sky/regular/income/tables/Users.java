@@ -7,6 +7,7 @@ package generated.sky.regular.income.tables;
 import generated.sky.regular.income.Keys;
 import generated.sky.regular.income.RegularIncome;
 import generated.sky.regular.income.tables.Category.CategoryPath;
+import generated.sky.regular.income.tables.CategoryBudget.CategoryBudgetPath;
 import generated.sky.regular.income.tables.TurnoverFileImport.TurnoverFileImportPath;
 import generated.sky.regular.income.tables.TurnoverRow.TurnoverRowPath;
 import generated.sky.regular.income.tables.records.UsersRecord;
@@ -186,6 +187,19 @@ public class Users extends TableImpl<UsersRecord> {
             _category = new CategoryPath(this, null, Keys.CATEGORY__FK_CATEGORY_OWNER.getInverseKey());
 
         return _category;
+    }
+
+    private transient CategoryBudgetPath _categoryBudget;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.category_budget</code> table
+     */
+    public CategoryBudgetPath categoryBudget() {
+        if (_categoryBudget == null)
+            _categoryBudget = new CategoryBudgetPath(this, null, Keys.CATEGORY_BUDGET__FK_CATEGORY_BUDGET_TO_OWNER.getInverseKey());
+
+        return _categoryBudget;
     }
 
     private transient TurnoverFileImportPath _turnoverFileImport;

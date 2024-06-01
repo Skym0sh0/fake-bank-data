@@ -58,5 +58,7 @@ output.json
 obj/
 .externalNativeBuild
 
+/**/application-dev.properties
+
 
 /**/*.tgz

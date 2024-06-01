@@ -9,4 +9,6 @@ import lombok.EqualsAndHashCode;
 public class CategoryPatch extends PatchInformation {
     public String name;
     public String description;
+
+    public CategoryBudget budget;
 }

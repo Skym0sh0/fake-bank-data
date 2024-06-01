@@ -1,13 +1,17 @@
 package de.sky.regular.income.dao;
 
 import de.sky.regular.income.api.Category;
+import de.sky.regular.income.api.CategoryBudget;
 import de.sky.regular.income.api.CategoryPatch;
+import generated.sky.regular.income.tables.records.CategoryBudgetRecord;
 import generated.sky.regular.income.tables.records.CategoryRecord;
 import generated.sky.regular.income.tables.records.VCategoriesWithUsageCountRecord;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
+import org.jooq.impl.TableRecordImpl;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -33,6 +37,8 @@ public class CategoryDAO {
         rec.setLastUpdatedAt(now);
 
         rec.insert();
+
+        insertBudget(ctx, userId, rec.getId(), patch.budget);
 
         if (parentId != null) {
             var updated = ctx.update(CATEGORY)
@@ -61,7 +67,31 @@ public class CategoryDAO {
 
         rec.update();
 
+        insertBudget(ctx, userId, id, patch.budget);
+
         return fetchById(ctx, userId, id);
+    }
+
+    private static void insertBudget(DSLContext ctx, UUID userId, UUID categoryId, CategoryBudget categoryBudget) {
+        ctx.deleteFrom(CATEGORY_BUDGET)
+                .where(CATEGORY_BUDGET.OWNER_ID.eq(userId))
+                .and(CATEGORY_BUDGET.CATEGORY_ID.eq(categoryId))
+                .execute();
+
+        Optional.ofNullable(categoryBudget)
+                .map(b -> {
+                    var budget = ctx.newRecord(CATEGORY_BUDGET);
+
+                    budget.setOwnerId(userId);
+                    budget.setCategoryId(categoryId);
+                    budget.setId(UUID.randomUUID());
+
+                    budget.setMonthlyBudgetAmountValueCents(b.budgetInCents);
+                    budget.setWarningThresholdFraction(Optional.ofNullable(b.exceedingThreshold).map(BigDecimal::valueOf).orElse(BigDecimal.ZERO));
+
+                    return budget;
+                })
+                .ifPresent(TableRecordImpl::insert);
     }
 
     public Category fetchById(DSLContext ctx, UUID userId, UUID id) {
@@ -111,6 +141,11 @@ public class CategoryDAO {
                 .and(child.ID.eq(id))
                 .and(child.OWNER_ID.eq(userId))
                 .and(parent.OWNER_ID.eq(userId))
+                .execute();
+
+        ctx.deleteFrom(CATEGORY_BUDGET)
+                .where(CATEGORY_BUDGET.CATEGORY_ID.eq(id))
+                .and(CATEGORY_BUDGET.OWNER_ID.eq(userId))
                 .execute();
 
         ctx.deleteFrom(CATEGORY)
@@ -166,17 +201,21 @@ public class CategoryDAO {
                 .limit(10_000)
                 .fetchInto(V_CATEGORIES_WITH_USAGE_COUNT);
 
-        var categoriesByParentId = allCategories
-                .stream()
+        var categoriesByParentId = allCategories.stream()
                 .filter(cat -> cat.getParentCategory() != null)
                 .collect(Collectors.groupingBy(VCategoriesWithUsageCountRecord::getParentCategory));
 
+        var budgetsByCategoryId = ctx.selectFrom(CATEGORY_BUDGET)
+                .where(CATEGORY_BUDGET.OWNER_ID.eq(userId))
+                .fetch()
+                .intoMap(CATEGORY_BUDGET.CATEGORY_ID);
+
         return allCategories.map(rec -> {
             if (!deep) {
-                return mapFlat(rec);
+                return mapFlat(rec, budgetsByCategoryId);
             }
 
-            return mapRecursively(categoriesByParentId, rec);
+            return mapRecursively(categoriesByParentId, rec, budgetsByCategoryId);
         });
     }
 
@@ -187,21 +226,21 @@ public class CategoryDAO {
                 .toList();
     }
 
-    private Category mapRecursively(Map<UUID, List<VCategoriesWithUsageCountRecord>> categoriesByParentId, VCategoriesWithUsageCountRecord rec) {
-        var c = mapFlat(rec);
+    private Category mapRecursively(Map<UUID, List<VCategoriesWithUsageCountRecord>> categoriesByParentId, VCategoriesWithUsageCountRecord rec, Map<UUID, CategoryBudgetRecord> budgetsByCategoryId) {
+        var c = mapFlat(rec, budgetsByCategoryId);
 
         c.setSubCategories(
                 Optional.ofNullable(categoriesByParentId.get(rec.getId()))
                         .stream()
                         .flatMap(Collection::stream)
-                        .map(child -> mapRecursively(categoriesByParentId, child))
+                        .map(child -> mapRecursively(categoriesByParentId, child, budgetsByCategoryId))
                         .toList()
         );
 
         return c;
     }
 
-    private Category mapFlat(VCategoriesWithUsageCountRecord rec) {
+    private Category mapFlat(VCategoriesWithUsageCountRecord rec, Map<UUID, CategoryBudgetRecord> budgetsByCategoryId) {
         var c = new Category();
 
         c.setId(rec.getId());
@@ -211,6 +250,12 @@ public class CategoryDAO {
         c.setDescription(rec.getDescription());
         c.setNew(Objects.equals(rec.getCreatedAt(), rec.getLastUpdatedAt()));
 
+        c.setBudget(
+                Optional.ofNullable(budgetsByCategoryId.get(rec.getId()))
+                        .map(CategoryDAO::mapCategoryBudgetToAPi)
+                        .orElse(null)
+        );
+
         c.setSubCategories(null);
 
         c.setUsageCount(rec.getUseCount());
@@ -219,5 +264,12 @@ public class CategoryDAO {
         c.setUpdatedAt(rec.getLastUpdatedAt().toZonedDateTime());
 
         return c;
+    }
+
+    private static CategoryBudget mapCategoryBudgetToAPi(CategoryBudgetRecord b) {
+        var budget = new CategoryBudget();
+        budget.setBudgetInCents(b.getMonthlyBudgetAmountValueCents());
+        budget.setExceedingThreshold(b.getWarningThresholdFraction().doubleValue());
+        return budget;
     }
 }

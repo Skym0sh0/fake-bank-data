@@ -255,7 +255,7 @@ public class TurnoverRow extends TableImpl<TurnoverRowRecord> {
             Internal.createCheck(this, DSL.name("c_amount_not_zero"), "((amount_value_cents <> 0))", true),
             Internal.createCheck(this, DSL.name("co_checksum_is_on_chosen_data"), "((full_checksum = upper(md5(((((date)::text || amount_value_cents) || description) || recipient)))))", true),
             Internal.createCheck(this, DSL.name("co_checksum_is_uppercase"), "((full_checksum = upper(full_checksum)))", true),
-            Internal.createCheck(this, DSL.name("co_similarity_checksum_is_on_similar_data"), "((similarity_checksum = upper(md5(((amount_value_cents || recipient) || description)))))", true),
+            Internal.createCheck(this, DSL.name("co_similarity_checksum_is_on_similar_data"), "((similarity_checksum = upper(md5(((amount_value_cents || COALESCE(recipient, 'null'::text)) || description)))))", true),
             Internal.createCheck(this, DSL.name("co_similarity_checksum_is_uppercase"), "((similarity_checksum = upper(similarity_checksum)))", true)
         );
     }

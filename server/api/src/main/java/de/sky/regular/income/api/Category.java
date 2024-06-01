@@ -15,6 +15,8 @@ public class Category extends UpdatedMetaInformation {
 
     public boolean isNew;
 
+    public CategoryBudget budget;
+
     public UUID parentId;
     public List<Category> subCategories;
 

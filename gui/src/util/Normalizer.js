@@ -39,7 +39,7 @@ export function denormalizeBudget(budget) {
 
     return {
         budget: budget.budgetInCents / 100,
-        exceedingThreshold: budget.exceedingThresholdPercent * 100,
+        exceedingThresholdPercent: budget.exceedingThreshold * 100,
     };
 }
 
