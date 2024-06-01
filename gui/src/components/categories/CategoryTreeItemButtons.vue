@@ -1,5 +1,7 @@
 <template>
     <div>
+        <v-divider :vertical="true"/>
+
         <b-btn-group>
             <category-volume-graph :category="category">
                 <template v-slot:button="{ clickCallback }">

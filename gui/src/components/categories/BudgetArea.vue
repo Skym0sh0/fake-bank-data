@@ -1,7 +1,13 @@
 <template>
     <div>
         <div class="d-flex justify-content-between align-items-center p-1">
-            <div>Ausgaben Budget</div>
+            <div>
+                <v-icon :small="true" color="red">
+                    mdi-finance
+                </v-icon>
+
+                Ausgaben Budget
+            </div>
 
             <v-btn size="small"
                    :icon="true"

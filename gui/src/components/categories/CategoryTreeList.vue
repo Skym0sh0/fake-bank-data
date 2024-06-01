@@ -32,9 +32,24 @@
                             {{ item.name }}
                         </v-badge>
 
-                        <v-icon v-if="item.isNew" color="red">
-                            mdi-new-box
-                        </v-icon>
+                        <div class="d-flex" style="gap: 0.25em">
+                            <v-icon v-if="item.isNew" color="success">
+                                mdi-new-box
+                            </v-icon>
+
+                            <v-tooltip v-if="item.budget" :top="true">
+                                <template v-slot:activator="{on, attrs}">
+                                    <v-icon color="red"
+                                            v-bind="attrs"
+                                            v-on="on">
+                                        mdi-finance
+                                    </v-icon>
+                                </template>
+
+                                Budget: {{ new MoneyFormatter().formatCents(item.budget.budget * 100) }} +
+                                {{ item.budget.exceedingThresholdPercent }} %
+                            </v-tooltip>
+                        </div>
                     </div>
                 </drop>
             </template>
@@ -65,6 +80,7 @@
 import _ from 'lodash';
 import SelectedCategoryInfo from "@/components/categories/SelectedCategoryInfo.vue";
 import CategoryTreeItemButtons from "@/components/categories/CategoryTreeItemButtons.vue";
+import {MoneyFormatter} from "../../util/Formatters";
 
 export default {
     name: "CategoryTreeList",
@@ -138,6 +154,9 @@ export default {
         }
     },
     computed: {
+        MoneyFormatter() {
+            return MoneyFormatter
+        },
         parentCategories() {
             return _.sortBy(this.categories.filter(cat => !cat.parentId), x => x.name.toLowerCase())
         },
