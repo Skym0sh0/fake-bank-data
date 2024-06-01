@@ -40,6 +40,7 @@
                             <v-tooltip v-if="item.budget" :top="true">
                                 <template v-slot:activator="{on, attrs}">
                                     <v-icon color="red"
+                                            :small="true"
                                             v-bind="attrs"
                                             v-on="on">
                                         mdi-finance
