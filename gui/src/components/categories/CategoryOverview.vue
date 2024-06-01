@@ -115,6 +115,7 @@ export default {
                 parentId: parentId,
                 name: "",
                 description: "",
+                budget: null,
             }
         },
         addNewCategoryTo(payload) {

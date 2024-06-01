@@ -19,7 +19,28 @@ export function normalizeCategory(cat) {
         parentId: cat.parentId || null,
         name: cat.name,
         description: cat.description,
+        budget: normalizeBudget(cat.budget)
     }
+}
+
+export function normalizeBudget(budget) {
+    if (!budget)
+        return null
+
+    return {
+        budgetInCents: budget.budget * 100,
+        exceedingThreshold: budget.exceedingThresholdPercent / 100,
+    };
+}
+
+export function denormalizeBudget(budget) {
+    if (!budget)
+        return null
+
+    return {
+        budget: budget.budgetInCents / 100,
+        exceedingThreshold: budget.exceedingThresholdPercent * 100,
+    };
 }
 
 export function denormalizeCategory(cat) {
@@ -29,6 +50,7 @@ export function denormalizeCategory(cat) {
         name: cat.name,
         description: cat.description,
         isNew: cat.isNew,
+        budget: denormalizeBudget(cat.budget),
 
         subCategories: (cat.subCategories || []).map(denormalizeCategory),
 

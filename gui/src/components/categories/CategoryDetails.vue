@@ -23,7 +23,17 @@
                             label="Beschreibung"
                             placeholder="Beschreibung"
                             :outlined="true"
+                            :auto-grow="true"
                             @input="changeAnything"/>
+
+                <v-divider class="my-1"/>
+
+                <budget-area v-model="entity.budget"
+                             @newBudget="onNewBudget"
+                             @deleteBudget="onDeleteBudget"
+                             @changed="changeAnything"/>
+
+                <v-divider class="my-1"/>
 
                 <category-infos :entity="entity"/>
 
@@ -54,10 +64,11 @@ import {normalizeCategory} from "@/util/Normalizer";
 import Breadcrumps from "@/components/misc/Breadcrumps.vue";
 import CategoryUsageDialog from "@/components/categories/CategoryUsageDialog.vue";
 import CategoryInfos from "@/components/categories/CategoryInfos.vue";
+import BudgetArea from "@/components/categories/BudgetArea.vue";
 
 export default {
     name: "CategoryDetails",
-    components: {CategoryInfos, CategoryUsageDialog, Breadcrumps},
+    components: {BudgetArea, CategoryInfos, CategoryUsageDialog, Breadcrumps},
     props: {
         categoriesById: {
             type: Object,
@@ -107,6 +118,17 @@ export default {
         },
         cancelActiveForm() {
             this.$emit("close");
+        },
+        onNewBudget() {
+            this.$set(this.entity, 'budget', {
+                budget: null,
+                exceedingThresholdPercent: 10,
+            });
+            this.changeAnything()
+        },
+        onDeleteBudget() {
+            this.$set(this.entity, 'budget', null);
+            this.changeAnything()
         },
     },
     watch: {
