@@ -45,14 +45,4 @@ networks:
 volumes:
   db-data:
   db-data-backup:
-    # to migrate do the following:
-    # - bash terminal into the old postgres database container (with old postgres version)
-    #   - cd to this folder (e.g. /var/lib/postgresql/backup)
-    #   - su postgres
-    #   - pg_dump -U scott dev > dev.dump
-    # - bash terminal into the new postgres database container (with new postgres version)
-    #   - cd to this folder (e.g. /var/lib/postgresql/backup)
-    #   - su postgres
-    #   - createdb -U scott dev
-    #   - psql -U scott dev < dev.dump
   db-admin-data:
