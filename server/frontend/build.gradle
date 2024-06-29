@@ -1,0 +1,28 @@
+plugins {
+    id "com.github.node-gradle.node" version "7.0.1"
+}
+
+node {
+    download = true
+    version = '21.6.2'
+}
+
+tasks.register('npmBuild', NpmTask) {
+    dependsOn npmInstall
+    inputs.dir file("${projectDir}/src/")
+    inputs.files(fileTree("${projectDir}/node_modules") {
+        exclude ".cache"
+        exclude ".bin"
+    })
+    inputs.file file("${projectDir}/package.json")
+    inputs.file file("${projectDir}/package-lock.json")
+
+    outputs.dir file("${projectDir}/build")
+
+    args = ['run', 'build']
+}
+
+tasks.register('npmStartGUI', NpmTask) {
+    dependsOn npmInstall
+    args = ['run', 'start']
+}
