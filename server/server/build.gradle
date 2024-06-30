@@ -86,3 +86,12 @@ jib {
     }
     allowInsecureRegistries = true
 }
+
+tasks.register('copyWebApp', Copy) {
+    dependsOn ':frontend:npmBuild'
+
+    from "$rootDir/frontend/build/dist"
+    into layout.buildDirectory.dir("resources/main/static/.")
+}
+
+processResources.dependsOn 'copyWebApp'
