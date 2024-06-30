@@ -79,6 +79,8 @@ jib {
     from {
         // linux/arm/v7
         image = 'registry://eclipse-temurin:19-jre-jammy@sha256:167557501026d70f7486b631d26ae00f7551cc1daba1da67f86948ea5bd2aa41'
+//        // linux/amd64
+//        image = 'registry://eclipse-temurin:19-jre-jammy@sha256:41a7ebdfa6b25e05986b77fbbc73820a3b7a6459a505686ba43e56baa83c0c98'
     }
     to {
         image = "${docker_registry}/regular-income-backend"
