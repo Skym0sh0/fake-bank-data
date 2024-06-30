@@ -1,0 +1,23 @@
+plugins {
+}
+
+allprojects {
+    group 'de.sky.regular.income.server'
+    version '1.0-SNAPSHOT'
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+
+    sourceCompatibility = JavaVersion.VERSION_19
+    targetCompatibility = JavaVersion.VERSION_19
+
+    dependencies {
+        compileOnly group: 'org.projectlombok', name: 'lombok', version: "$version_lombok"
+        annotationProcessor group: 'org.projectlombok', name: 'lombok', version: "$version_lombok"
+    }
+}
