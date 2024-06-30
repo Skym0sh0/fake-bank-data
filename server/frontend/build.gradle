@@ -14,6 +14,11 @@ node {
     npmVersion = '10.8.1'
 }
 
+tasks.register("cleanNodeModules", Delete) {
+    delete 'node_modules'
+}
+clean.dependsOn 'cleanNodeModules'
+
 tasks.register('npmBuild', NpmTask) {
     dependsOn npmInstall
 
