@@ -3,26 +3,34 @@ plugins {
 }
 
 node {
-    download = true
+    /*
+    must be false, because otherwise node and npm are downloaded and, I dont know why, the 'npm-cli.js' from
+    inside the node_modules folder is executed which is far outdated.
+    If this is false, the globally available node/npm is used.
+     */
+    download = false
+
     version = '21.6.2'
+    npmVersion = '10.8.1'
 }
 
 tasks.register('npmBuild', NpmTask) {
     dependsOn npmInstall
+
+    inputs.file file("${projectDir}/package.json")
+    inputs.file file("${projectDir}/package-lock.json")
     inputs.dir file("${projectDir}/src/")
     inputs.files(fileTree("${projectDir}/node_modules") {
         exclude ".cache"
         exclude ".bin"
     })
-    inputs.file file("${projectDir}/package.json")
-    inputs.file file("${projectDir}/package-lock.json")
 
-    outputs.dir file("${projectDir}/build")
+    outputs.dir file("${projectDir}/build/dist")
 
     args = ['run', 'build']
 }
 
 tasks.register('npmStartGUI', NpmTask) {
     dependsOn npmInstall
-    args = ['run', 'start']
+    args = ['run', 'serve']
 }
