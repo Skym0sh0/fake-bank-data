@@ -5,8 +5,8 @@
                 :timeout="-1">
         <template v-slot:action>
             <v-btn
-                    variant="text"
-                    @click="resetError">
+                variant="text"
+                @click="resetError">
                 Close
             </v-btn>
         </template>
