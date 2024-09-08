@@ -251,6 +251,15 @@ public class TurnoverCsvImporter {
             if (updated != patch.rows.size())
                 throw new RuntimeException("Could not update rows");
 
+            var deleted = ctx.deleteFrom(TURNOVER_ROW)
+                    .where(TURNOVER_ROW.ID.in(patch.deleteRowIds))
+                    .and(TURNOVER_ROW.OWNER_ID.eq(userId))
+                    .and(TURNOVER_ROW.TURNOVER_FILE.eq(id))
+                    .execute();
+
+            if (deleted != patch.deleteRowIds.size())
+                throw new RuntimeException("Could not delete rows");
+
             return fetchTurnoverImport(ctx, userId, id);
         });
     }

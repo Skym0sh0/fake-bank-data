@@ -9,13 +9,13 @@
 
       <v-card-subtitle>
         <div class="d-flex justify-content-between">
-                    <span>
-                        {{ turnoverImport.format }}: "{{ turnoverImport.filename }}" ({{ turnoverImport.encoding }})
-                    </span>
+          <span>
+            {{ turnoverImport.format }}: "{{ turnoverImport.filename }}" ({{ turnoverImport.encoding }})
+          </span>
 
           <span>
-                        {{ importTimestamp }}
-                    </span>
+            {{ importTimestamp }}
+          </span>
         </div>
       </v-card-subtitle>
 
@@ -23,8 +23,11 @@
         <turnover-rows-table v-if="categories"
                              :rows="turnoverImport.turnovers"
                              :touchedRowsIdsById="currentRowCategoryChangesById"
+                             :deletedRowsIdsById="currentDeletedRowsById"
                              :categories="categories"
-                             @onCreateCategory="onCreateCategory"/>
+                             @onCreateCategory="onCreateCategory"
+                             @deleteTurnover="onDeleteTurnover"
+                             @undoDeleteTurnover="onUndoDeleteTurnover"/>
       </v-card-text>
 
       <v-card-actions class="d-flex justify-content-between">
@@ -37,16 +40,19 @@
                                :small="true"
                                :disabled="!isValidToSave"/>
 
-
         <div class="d-flex" style="gap: 0.5em">
           <v-btn @click="onBack">
             Zurück
           </v-btn>
-          <v-btn @click="onSave"
+          <confirmationed-button @click="onSave"
+                                 :wait-time-ms="500"
+                                 default-caption="Speichern"
+                                 request-caption="Umsätze überschreiben??"
+                                 confirmed-caption="Jetzt überschreiben"
                  :disabled="!isValidToSave"
                  color="info">
             Speichern
-          </v-btn>
+          </confirmationed-button>
         </div>
       </v-card-actions>
     </v-card>
@@ -63,7 +69,11 @@ import ConfirmationedButton from "@/components/misc/ConfirmationedButton.vue";
 
 export default {
   name: "TurnoversDetail",
-  components: {ConfirmationedButton, TurnoverRowsTable, WaitingIndicator},
+  components: {
+    ConfirmationedButton,
+    TurnoverRowsTable,
+    WaitingIndicator,
+  },
   props: {
     id: {
       type: String,
@@ -77,6 +87,7 @@ export default {
       categories: null,
 
       initialTurnoverRowsCategories: [],
+      deleteRowsWithIds: [],
     }
   },
   methods: {
@@ -84,22 +95,23 @@ export default {
       this.isLoading = true
 
       Promise.all([this.loadImport(), this.loadCategories()])
-          .finally(() => this.isLoading = false)
+        .finally(() => this.isLoading = false)
     },
     loadImport() {
       return api.getTurnovers()
-          .fetchTurnoverImport(this.id)
-          .then(res => {
-            this.turnoverImport = res
-            this.initialTurnoverRowsCategories = this.extractTurnoverRowsWithCategories(res)
-          })
+        .fetchTurnoverImport(this.id)
+        .then(res => {
+          this.turnoverImport = res
+          this.deleteRowsWithIds = []
+          this.initialTurnoverRowsCategories = this.extractTurnoverRowsWithCategories(res)
+        })
     },
     loadCategories() {
       return api.getCategories()
-          .fetchCategoryTree()
-          .then(res => {
-            this.categories = res
-          })
+        .fetchCategoryTree()
+        .then(res => {
+          this.categories = res
+        })
     },
     onCreateCategory(categoryName) {
       const normalized = normalizeCategory({
@@ -108,9 +120,20 @@ export default {
 
       this.isLoading = true
       api.getCategories()
-          .postCategory(normalized)
-          .then(() => this.loadCategories())
-          .finally(() => this.isLoading = false)
+        .postCategory(normalized)
+        .then(() => this.loadCategories())
+        .finally(() => this.isLoading = false)
+    },
+    onDeleteTurnover(row) {
+      this.deleteRowsWithIds.push(row.id)
+    },
+    onUndoDeleteTurnover(row) {
+      let idx;
+      while ((idx = this.deleteRowsWithIds.indexOf(row.id)) >= 0) {
+        if (idx < 0)
+          return;
+        this.deleteRowsWithIds.splice(idx, 1)
+      }
     },
     onReset() {
       this.reload()
@@ -119,13 +142,16 @@ export default {
       this.$router.back()
     },
     onSave() {
-      const changes = {rows: this.currentRowCategoryChanges};
+      if (!this.isValidToSave)
+        return;
+
+      const changes = {rows: this.currentRowCategoryChanges, deleteRowIds: this.deleteRowsWithIds};
 
       this.isLoading = true
       api.getTurnovers()
-          .patchTurnovers(this.id, changes)
-          .then(() => this.loadImport())
-          .finally(() => this.isLoading = false)
+        .patchTurnovers(this.id, changes)
+        .then(() => this.loadImport())
+        .finally(() => this.isLoading = false)
     },
     extractTurnoverRowsWithCategories(turnoverImport) {
       if (!turnoverImport || !turnoverImport.turnovers)
@@ -136,24 +162,36 @@ export default {
         categoryId: row.categoryId,
       }))
     },
-  },
+  }
+  ,
   computed: {
     importTimestamp() {
       return moment(this.turnoverImport.importedAt).format("YYYY-MM-DD HH:mm:ss.SSS");
-    },
+    }
+    ,
     currentRowCategoryChanges() {
       const rowsById = this.initialTurnoverRowsCategories.reduce((prev, cur) => ({...prev, [cur.id]: cur}), {})
 
       return this.extractTurnoverRowsWithCategories(this.turnoverImport)
-          .filter(row => rowsById[row.id].categoryId !== row.categoryId);
-    },
+        .filter(row => rowsById[row.id].categoryId !== row.categoryId);
+    }
+    ,
     currentRowCategoryChangesById() {
       return this.currentRowCategoryChanges.reduce((prev, cur) => ({...prev, [cur.id]: cur}), {})
-    },
+    }
+    ,
+    currentDeletedRowsById() {
+      return this.deleteRowsWithIds.reduce((prev, cur) => ({...prev, [cur]: cur}), {})
+    }
+    ,
     isValidToSave() {
-      return this.currentRowCategoryChanges.length > 0 && this.currentRowCategoryChanges.every(row => !!row.categoryId)
-    },
-  },
+      return this.deleteRowsWithIds.length > 0
+        || (this.currentRowCategoryChanges.length > 0
+          && this.currentRowCategoryChanges.every(row => !!row.categoryId))
+    }
+    ,
+  }
+  ,
   mounted() {
     this.reload()
   }

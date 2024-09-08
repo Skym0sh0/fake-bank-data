@@ -22,6 +22,28 @@
       <template v-slot:cell(description)="row">
         <table-cell-description :index="row.index" :value="row.item.description"/>
       </template>
+
+      <template v-slot:cell(actions)="row">
+        <v-btn v-if="!deletedRowsIdsById[row.item.id]"
+               :small="true"
+               :icon="true"
+               color="error"
+               @click="$emit('deleteTurnover', row.item)">
+          <v-icon small>
+            mdi-trash-can-outline
+          </v-icon>
+        </v-btn>
+
+        <v-btn v-if="deletedRowsIdsById[row.item.id]"
+               :small="true"
+               :icon="true"
+               color="info"
+               @click="$emit('undoDeleteTurnover', row.item)">
+          <v-icon small>
+            mdi-undo
+          </v-icon>
+        </v-btn>
+      </template>
     </b-table>
   </div>
 </template>
@@ -39,7 +61,11 @@ import {
 
 export default {
   name: "TurnoverRowsTable",
-  components: {CategoryInput, TableCellMonetary, TableCellDescription},
+  components: {
+    CategoryInput,
+    TableCellMonetary,
+    TableCellDescription
+  },
   props: {
     categories: {
       type: Array,
@@ -50,6 +76,10 @@ export default {
       required: true,
     },
     touchedRowsIdsById: {
+      type: Object,
+      required: true,
+    },
+    deletedRowsIdsById: {
       type: Object,
       required: true,
     },
@@ -65,7 +95,7 @@ export default {
         {
           key: "id",
           label: "",
-          formatter: (value) => this.touchedRowsIdsById[value] ? '*' : ' '
+          formatter: (value) => (this.touchedRowsIdsById[value] || this.deletedRowsIdsById[value]) ? '*' : ' '
         },
         {
           key: "date",
@@ -91,6 +121,10 @@ export default {
           label: "Beschreibung",
           sortable: true,
         },
+        {
+          key: "actions",
+          label: "Actions"
+        }
       ];
     },
     flattedCategories() {
