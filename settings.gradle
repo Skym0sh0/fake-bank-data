@@ -1,4 +1,4 @@
-rootProject.name = 'regular-income-server'
+rootProject.name = 'regular-income'
 
 include ':database'
 include ':api'
