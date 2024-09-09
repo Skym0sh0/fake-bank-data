@@ -28,9 +28,9 @@ plugins {
     id 'java'
     id 'application'
     id 'org.springframework.boot' version "$springboot_version"
-    id 'io.spring.dependency-management' version '1.1.4'
-    id 'com.google.cloud.tools.jib' version '3.4.0'
-    id "com.gorylenko.gradle-git-properties" version "2.4.1"
+    id 'io.spring.dependency-management' version '1.1.6'
+    id 'com.google.cloud.tools.jib' version '3.4.3'
+    id "com.gorylenko.gradle-git-properties" version "2.4.2"
 }
 
 group 'de.sky.regular.income.server'
@@ -61,8 +61,8 @@ dependencies {
     implementation group: "org.flywaydb", name: "flyway-core", version: flyway_version
     implementation group: "com.zaxxer", name: "HikariCP", version: "5.1.0"
 
-    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.14.0'
-    implementation group: 'com.google.guava', name: 'guava', version: '33.0.0-jre'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.17.0'
+    implementation group: 'com.google.guava', name: 'guava', version: '33.3.0-jre'
 
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: "$junit_version"
 //    testRuntime group: 'org.junit.vintage', name: 'junit-vintage-engine', version: "$junit_version"
