@@ -12,6 +12,7 @@ import de.sky.regular.income.importing.csv.TurnoverCsvImporter;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.DatePart;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,8 +25,7 @@ import java.util.*;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/turnover-import")
-public class TurnoversController {
+public class TurnoversController implements generated.sky.regular.income.api.rest.TurnoversApi {
     private final TurnoverCsvImporter importer;
 
     @Autowired
@@ -33,87 +33,104 @@ public class TurnoversController {
         this.importer = Objects.requireNonNull(importer);
     }
 
-    @GetMapping("/formats")
-    public List<TurnoverImportFormat> getSupportedFormats() {
-        return List.of(TurnoverImportFormat.values());
+    @Override
+    public ResponseEntity<List<TurnoverImportFormat>> getSupportedFormats() {
+        return ResponseEntity.ok(List.of(TurnoverImportFormat.values()));
     }
 
-    @PostMapping("preview/csv")
-    public RawCsvTable processPreview(@RequestParam("file") MultipartFile file, @RequestParam(value = "encoding", defaultValue = "UTF-8") String encoding) throws Exception {
+    @Override
+    public ResponseEntity<RawCsvTable> processCsvPreview(MultipartFile file, String encoding) {
         log.info("CSV Preview table processing file {} with {} bytes...", file.getOriginalFilename(), file.getSize());
 
         var sw = Stopwatch.createStarted();
 
         try (var reader = new BufferedReader(new InputStreamReader(file.getInputStream(), Charset.forName(encoding)))) {
-            return importer.parseCsvAsTablePreview(reader);
+            return ResponseEntity.ok(importer.parseCsvAsTablePreview(reader));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         } finally {
             log.info("Preview processing finished in {}", sw.stop());
         }
     }
 
-    @PostMapping("preview")
-    public TurnoverPreview processPreview(@RequestParam("file") MultipartFile file, @RequestParam("format") TurnoverImportFormat format, @RequestParam(value = "encoding", defaultValue = "UTF-8") String encoding) throws Exception {
+    @Override
+    public ResponseEntity<TurnoverPreview> processPreview(TurnoverImportFormat format, MultipartFile file, String encoding) {
         log.info("Preview-processing {} file {} with {} bytes...", format, file.getOriginalFilename(), file.getSize());
-
         var sw = Stopwatch.createStarted();
 
         try (var reader = new BufferedReader(new InputStreamReader(file.getInputStream(), Charset.forName(encoding)))) {
             var rows = importer.parseForPreview(format, reader);
 
-            return TurnoverPreview.builder()
-                    .filename(file.getOriginalFilename())
-                    .format(format)
-                    .encoding(encoding)
-                    .uploadTime(OffsetDateTime.now())
-                    .rows(rows)
-                    .build();
+            return ResponseEntity.ok(
+                    TurnoverPreview.builder()
+                            .filename(file.getOriginalFilename())
+                            .format(format)
+                            .encoding(encoding)
+                            .uploadTime(OffsetDateTime.now())
+                            .rows(rows)
+                            .build()
+            );
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         } finally {
             log.info("Preview processing finished in {}", sw.stop());
         }
     }
 
-    @PostMapping(consumes = "multipart/form-data")
-    public TurnoverImport createTurnoverImport(@RequestPart("file") MultipartFile file, @RequestPart("data") TurnoverImportPatch patch) throws Exception {
+    @Override
+    public ResponseEntity<TurnoverImport> createTurnoverImport(MultipartFile file, TurnoverImportPatch patch) {
         log.info("Importing {} file {} with {} bytes and {} data rows...", patch.getFormat(), file.getOriginalFilename(), file.getSize(), patch.getRows().size());
 
-        return importer.createImport(ZonedDateTime.now(), file, patch);
+        try {
+            return ResponseEntity.ok(importer.createImport(ZonedDateTime.now(), file, patch));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    @GetMapping
-    public List<TurnoverImport> fetchTurnoverImports() {
-        return importer.fetchTurnoverImports();
+    @Override
+    public ResponseEntity<List<TurnoverImport>> fetchTurnoverImports() {
+        return ResponseEntity.ok(importer.fetchTurnoverImports());
     }
 
-    @GetMapping("/{id}")
-    public TurnoverImport fetchTurnoverImport(@PathVariable("id") UUID id) {
-        return importer.fetchTurnoverImport(id);
+    @Override
+    public ResponseEntity<TurnoverImport> fetchTurnoverImport(UUID id) {
+        return ResponseEntity.ok(importer.fetchTurnoverImport(id));
     }
 
-    @PatchMapping("/{id}")
-    public TurnoverImport patchTurnoverImport(@PathVariable("id") UUID id, @RequestBody TurnoverImportRowsPatch patch) {
-        return importer.patchTurnoverImport(id, patch);
+    @Override
+    public ResponseEntity<TurnoverImport> patchTurnoverImport(UUID id, TurnoverImportRowsPatch patch) {
+        return ResponseEntity.ok(importer.patchTurnoverImport(id, patch));
     }
 
-    @PatchMapping("/rows")
-    public void batchPatchTurnoverImports(@RequestBody TurnoverImportRowsPatch patch) {
-        importer.batchPatchTurnoverImport(patch);
-    }
-
-    @DeleteMapping("/{id}")
-    public void deleteTurnoverImport(@PathVariable("id") UUID id) {
+    @Override
+    public ResponseEntity<Void> deleteTurnoverImport(UUID id) {
         importer.deleteImport(id);
+
+        return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/category/{category-id}")
-    public List<de.sky.regular.income.api.TurnoverRow> fetchTurnoversForCategory(@PathVariable("category-id") UUID categoryId) {
-        return importer.fetchTurnoversForImport(categoryId);
+    @Override
+    public ResponseEntity<Void> batchPatchTurnoverImports(TurnoverImportRowsPatch patch) {
+        importer.batchPatchTurnoverImport(patch);
+
+        return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/category/{category-id}/report/{date-grouping}")
-    public CategoryTurnoverReport fetchTurnoversReportForCategory(@PathVariable("category-id") UUID categoryId, @PathVariable("date-grouping") DatePart dateGrouping, @RequestParam(value = "recursion-level") Optional<Integer> recursionLevel) {
+    @Override
+    public ResponseEntity<List<de.sky.regular.income.api.TurnoverRow>> fetchTurnoversForCategory(UUID categoryId) {
+        return ResponseEntity.ok(importer.fetchTurnoversForImport(categoryId));
+    }
+
+    @Override
+    public ResponseEntity<CategoryTurnoverReport> fetchTurnoversReportForCategory(UUID categoryId, String iDateGrouping, Integer iRecursionLevel) {
+        var recursionLevel = Optional.ofNullable(iRecursionLevel);
+
+        var dateGrouping = DatePart.valueOf(iDateGrouping.toUpperCase());
+
         if (!Arrays.asList(DatePart.DAY, DatePart.MONTH, DatePart.YEAR).contains(dateGrouping))
             throw new IllegalArgumentException("Unsupported date grouping: " + dateGrouping);
 
-        return importer.fetchTurnoversReportForImport(categoryId, dateGrouping, recursionLevel.orElse(1));
+        return ResponseEntity.ok(importer.fetchTurnoversReportForImport(categoryId, dateGrouping, recursionLevel.orElse(1)));
     }
 }

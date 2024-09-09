@@ -6,6 +6,7 @@ import de.sky.regular.income.api.UserRegistration;
 import de.sky.regular.income.users.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,46 +15,49 @@ import java.util.UUID;
 @RestController
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("/api")
-public class UserAuthController {
+
+public class UserAuthController implements generated.sky.regular.income.api.rest.UserAuthApi {
     private final UserService userService;
 
-    @PostMapping("/user/register")
-    public User registerUser(@RequestBody UserRegistration registration) {
+    @Override
+    public ResponseEntity<User> registerUser(UserRegistration registration) {
         log.info("Registering user {}...", registration);
 
-        return userService.register(registration);
+        return ResponseEntity.ok(userService.register(registration));
     }
 
-    @PatchMapping("/user/{id}/details")
-    public User changeUser(@PathVariable("id") UUID id, @RequestBody UserRegistration registration) {
+    @Override
+    public ResponseEntity<User> updateUser(UUID id, UserRegistration registration) {
         log.info("Changing user {}...", registration);
 
-        return userService.updateUser(id, registration);
+        return ResponseEntity.ok(userService.updateUser(id, registration));
     }
 
-    @DeleteMapping("/user/{id}")
-    public void deleteUser(@PathVariable("id") UUID id) {
+    @Override
+    public ResponseEntity<Void> deleteUser(UUID id) {
         log.info("Deleting user {}...", id);
 
         userService.deleteUser(id);
+
+        return ResponseEntity.ok()
+                .build();
     }
 
-    @GetMapping("/auth/login")
-    public User login() {
+    @Override
+    public ResponseEntity<User> loginUserInfo() {
         var ctx = SecurityContextHolder.getContext();
         var auth = ctx.getAuthentication();
 
-        return userService.checkLogin(auth.getPrincipal().toString());
+        return ResponseEntity.ok(userService.checkLogin(auth.getPrincipal().toString()));
     }
 
-    @PostMapping("/auth/login")
-    public User login(@RequestBody UserLogin login) {
+    @Override
+    public ResponseEntity<User> loginUser(UserLogin userLogin) {
         throw new UnsupportedOperationException("Not implemented");
     }
 
-    @DeleteMapping("/auth/logout")
-    public void logout() {
+    @Override
+    public ResponseEntity<Void> logoutUser() {
         throw new UnsupportedOperationException("Not implemented");
     }
 }

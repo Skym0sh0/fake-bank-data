@@ -164,7 +164,7 @@ openApiGenerate {
     generatorName.set("spring")
     inputSpec.set(layout.projectDirectory.dir("..").dir("spec").file("openapi-spec.yml").asFile.path)
     outputDir.set(layout.buildDirectory.dir("generated/sources/spec").get().asFile.path)
-    apiPackage.set("de.sky.regular.income.api.api")
+    apiPackage.set("generated.sky.regular.income.api.rest")
     modelPackage.set("de.sky.regular.income.api")
     typeMappings.set([
             "time"    : "LocalTime",

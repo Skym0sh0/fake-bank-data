@@ -4,18 +4,650 @@ info:
   description: This is the API for Regular Income
   version: 1.0.0
 tags:
-  - name: Restaurant
-    description: Everything about Restaurants
-  - name: Order
-    description: Everything about Orders
+  - name: UserAuth
+    description: Everything about Users and Authentication
+  - name: Category
+    description: Everything about Categories
+  - name: Turnovers
+    description: Everything about Turnovers
+  - name: Reports
+    description: Everything about Reports
 
 paths:
-  /api/foo:
+  /api/user/register:
     post:
-      operationId: Foo
+      tags:
+        - UserAuth
+      summary: Register new user
+      description: Register new user
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserRegistration"
+      responses:
+        200:
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+  /api/user/{id}/details:
+    patch:
+      tags:
+        - UserAuth
+      summary: Updates an user
+      description: Updates an  user
+      operationId: updateUser
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: "#/components/schemas/ID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserRegistration"
+      responses:
+        200:
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+  /api/user/{id}:
+    delete:
+      tags:
+        - UserAuth
+      summary: Deletes an user
+      description: Deletes an  user
+      operationId: deleteUser
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: "#/components/schemas/ID"
       responses:
         204:
-          description: nada
+          description: Successful Operation
+  /api/auth/login:
+    get:
+      tags:
+        - UserAuth
+      summary: Gets login infos of an user
+      description: Gets login infos of an user
+      operationId: loginUserInfo
+      responses:
+        200:
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+    post:
+      tags:
+        - UserAuth
+      summary: Login an user
+      description: Login an user
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserLogin"
+      responses:
+        200:
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+  /api/auth/logout:
+    delete:
+      tags:
+        - UserAuth
+      summary: Logout an user
+      description: Logout an user
+      operationId: logoutUser
+      responses:
+        204:
+          description: Successful Operation
+
+  /api/categories:
+    get:
+      tags:
+        - Category
+      summary: Gets all categories flatted
+      description: Gets all categories flatted
+      operationId: getFlatCategories
+      parameters:
+        - in: query
+          name: deep
+          required: false
+          schema:
+            type: boolean
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+    post:
+      tags:
+        - Category
+      summary: Creates a new category
+      description: Creates a new category
+      operationId: createCategory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryPatch"
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+  /api/categories/tree:
+    get:
+      tags:
+        - Category
+      summary: Gets all categories as tree
+      description: Gets all categories as tree
+      operationId: getCategoriesAsTree
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+  /api/categories/{id}:
+    patch:
+      tags:
+        - Category
+      summary: Updates a category
+      description: Updates a category
+      operationId: updateCategory
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: "#/components/schemas/ID"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryPatch"
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+    delete:
+      tags:
+        - Category
+      summary: Deletes a category
+      description: Deletes a category
+      operationId: deleteCategory
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: "#/components/schemas/ID"
+      responses:
+        204:
+          description: Successful operation
+  /api/categories/{parent-id}/children:
+    post:
+      tags:
+        - Category
+      summary: Creates a new category as child
+      description: Creates a new category as child
+      operationId: createCategoryAsChild
+      parameters:
+        - in: path
+          name: parent-id
+          required: true
+          schema:
+            $ref: "#/components/schemas/ID"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryPatch"
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+  /api/categories/{parent-id}/children/{child-id}:
+    post:
+      tags:
+        - Category
+      summary: Moves a category to another category as child
+      description: Moves a category to another category as child
+      operationId: reallocateCategory
+      parameters:
+        - in: path
+          name: parent-id
+          required: true
+          schema:
+            $ref: "#/components/schemas/ID"
+        - in: path
+          name: child-id
+          required: true
+          schema:
+            $ref: "#/components/schemas/ID"
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+
+  /api/turnover-import/formats:
+    get:
+      tags:
+        - Turnovers
+      summary: Get supported formats
+      operationId: getSupportedFormats
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TurnoverImportFormat"
+  /api/turnover-import/preview/csv:
+    post:
+      tags:
+        - Turnovers
+      summary: previews a CSV file to a import preview
+      operationId: processCsvPreview
+      parameters:
+        - in: query
+          name: encoding
+          required: false
+          schema:
+            type: string
+            default: UTF-8
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+            encoding:
+              file:
+                contentType: text/csv
+                headers:
+                  Content-Type:
+                    schema:
+                      type: string
+                      enum: [ text/csv ]
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RawCsvTable"
+  /api/turnover-import/preview:
+    post:
+      tags:
+        - Turnovers
+      summary: Processes a preview to a turnover import
+      operationId: processPreview
+      parameters:
+        - in: query
+          name: format
+          required: true
+          schema:
+            $ref: "#/components/schemas/TurnoverImportFormat"
+        - in: query
+          name: encoding
+          required: false
+          schema:
+            type: string
+            default: UTF-8
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+            encoding:
+              file:
+                contentType: text/csv
+                headers:
+                  Content-Type:
+                    schema:
+                      type: string
+                      enum: [ text/csv ]
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TurnoverPreview"
+  /api/turnover-import:
+    post:
+      tags:
+        - Turnovers
+      summary: Creates a new turnover import
+      operationId: createTurnoverImport
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                patch:
+                  $ref: "#/components/schemas/TurnoverImportPatch"
+            encoding:
+              file:
+                contentType: text/csv
+                headers:
+                  Content-Type:
+                    schema:
+                      type: string
+                      enum: [ text/csv ]
+
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TurnoverImport"
+    get:
+      tags:
+        - Turnovers
+      summary: Get all turnover imports
+      operationId: fetchTurnoverImports
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TurnoverImport"
+  /api/turnover-import/{id}:
+    get:
+      tags:
+        - Turnovers
+      summary: Get a turnover import
+      operationId: fetchTurnoverImport
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: "#/components/schemas/ID"
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TurnoverImport"
+    delete:
+      tags:
+        - Turnovers
+      summary: Deletes a turnover import
+      operationId: deleteTurnoverImport
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: "#/components/schemas/ID"
+      responses:
+        204:
+          description: Successful operation
+    patch:
+      tags:
+        - Turnovers
+      summary: Updates the rows of a turnover import
+      operationId: patchTurnoverImport
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: "#/components/schemas/ID"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TurnoverImportRowsPatch"
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TurnoverImport"
+  /api/turnover-import/rows:
+    patch:
+      tags:
+        - Turnovers
+      summary:
+      operationId: batchPatchTurnoverImports
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TurnoverImportRowsPatch"
+      responses:
+        204:
+          description: Successful operation
+
+  /api/turnover-import/category/{category-id}:
+    get:
+      tags:
+        - Turnovers
+      summary: Get turnovers for a given category
+      operationId: fetchTurnoversForCategory
+      parameters:
+        - in: path
+          name: category-id
+          required: true
+          schema:
+            $ref: "#/components/schemas/ID"
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TurnoverRow"
+  /api/turnover-import/category/{category-id}/report/{date-grouping}:
+    get:
+      tags:
+        - Turnovers
+      summary: Get turnovers report for a given category
+      operationId: fetchTurnoversReportForCategory
+      parameters:
+        - in: path
+          name: category-id
+          required: true
+          schema:
+            $ref: "#/components/schemas/ID"
+        - in: path
+          name: date-grouping
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: recursion-level
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoryTurnoverReport"
+
+  /api/reports/info:
+    get:
+      tags:
+        - Reports
+      summary: Get basic coarse infos
+      description: Get basic coarse infos
+      operationId: fetchCoarseInfos
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BasicCoarseInfo"
+  /api/reports/balance-progression:
+    get:
+      tags:
+        - Reports
+      summary: Get balance progression report
+      description: Get balance progression report
+      operationId: fetchBalanceProgressionReport
+      parameters:
+        - in: query
+          name: begin
+          required: false
+          schema:
+            $ref: "#/components/schemas/Date"
+        - in: query
+          name: end
+          required: false
+          schema:
+            $ref: "#/components/schemas/Date"
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BalanceProgressionReport"
+  /api/reports/monthly-income-expenses:
+    get:
+      tags:
+        - Reports
+      summary: Get monthly income expense report
+      description: Get monthly income expense report
+      operationId: fetchMonthlyIncomeExpenseReport
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MonthlyIncomeExpenseReport"
+  /api/reports/income-expenses-flow:
+    get:
+      tags:
+        - Reports
+      summary: Get income expense flow report
+      description: Get income expense flow report
+      operationId: fetchIncomeExpenseFlowReport
+      parameters:
+        - in: query
+          name: year
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - in: query
+          name: month
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IncomeExpenseFlowReport"
+  /api/reports//income-expenses-flow/sliding-window/{unit}/{count}:
+    get:
+      tags:
+        - Reports
+      summary: Get income expense flow sliding window report
+      description: Get income expense flow sliding window report
+      operationId: fetchIncomeExpenseFlowSlidingWindowReport
+      parameters:
+        - in: path
+          name: unit
+          required: true
+          schema:
+            $ref: "#/components/schemas/ReportTimeUnits"
+        - in: path
+          name: count
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - in: query
+          name: reference-date
+          required: false
+          schema:
+            $ref: "#/components/schemas/Date"
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IncomeExpenseFlowReport"
 
 components:
   schemas:
@@ -381,7 +1013,14 @@ components:
           type: string
 
 
-
+    ReportTimeUnits:
+      type: string
+      enum:
+        - DAYS
+        - WEEKS
+        - MONTHS
+        - YEARS
+        - DECADES
     ID:
       type: string
       format: uuid
@@ -400,7 +1039,6 @@ components:
     Version:
       type: string
       format: uuid
-
 
 #  responses:
 #    SuccessOrderResponse:
