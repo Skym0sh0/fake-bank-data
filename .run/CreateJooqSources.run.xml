@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="CreateJooqSources" type="Application" factoryName="Application" nameIsGenerated="true">
     <option name="MAIN_CLASS_NAME" value="de.sky.common.database.CreateJooqSources" />
-    <module name="regular-income-server.database.test" />
+    <module name="regular-income.database.test" />
     <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="de.sky.common.database.*" />

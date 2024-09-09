@@ -1,7 +1,26 @@
+import org.flywaydb.core.Flyway
+import org.flywaydb.core.api.Location
+import org.jooq.codegen.GenerationTool
+import org.jooq.meta.jaxb.*
+import org.jooq.meta.jaxb.Configuration
+import org.jooq.meta.jaxb.Target
+import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.utility.DockerImageName
+import java.time.Duration
+import java.time.LocalTime
+
 buildscript {
     repositories {
         mavenLocal()
         mavenCentral()
+    }
+
+    dependencies {
+        classpath("org.postgresql:postgresql:42.7.4")
+        classpath("org.testcontainers:postgresql:1.20.1")
+        classpath("org.jooq:jooq-codegen:3.19.11")
+        classpath("org.flywaydb:flyway-core:10.17.2")
+        classpath("org.flywaydb:flyway-database-postgresql:10.17.2")
     }
 }
 
@@ -51,10 +70,73 @@ dependencies {
     implementation group: 'com.univocity', name: 'univocity-parsers', version: '2.9.1'
 }
 
+tasks.register("jooqCodegen") {
+    group = "build"
+
+    inputs.files(layout.projectDirectory.dir("src/main/resources/db/migration"))
+    outputs.dir(file(layout.buildDirectory.dir("generated/sources/jooq")))
+
+    doLast {
+        def container = new PostgreSQLContainer(DockerImageName.parse("postgres@sha256:d13ef786196545cd69aff1945929fc868712196e195bc66581fb1bfe81649eaf"))
+        try {
+            container.start()
+
+            Flyway.configure()
+                    .failOnMissingLocations(true)
+                    .dataSource(container.jdbcUrl, container.username, container.password)
+                    .locations("${Location.FILESYSTEM_PREFIX}${layout.projectDirectory.dir("src/main/resources/db/migration").asFile.path}")
+                    .load()
+                    .migrate()
+
+            def config = new Configuration()
+                    .withJdbc(
+                            new Jdbc()
+                                    .withDriver("org.postgresql.Driver")
+                                    .withUrl(container.jdbcUrl)
+                                    .withUser(container.username)
+                                    .withPassword(container.password)
+                    )
+                    .withGenerator(
+                            new Generator()
+                                    .withDatabase(
+                                            new Database()
+                                                    .withInputSchema("public")
+                                                    .withOutputSchema("regular_income")
+                                                    .withExcludes(".*flyway.*")
+                                    )
+                                    .withGenerate(
+                                            new Generate()
+                                                    .withFluentSetters(true)
+                                                    .withDeprecated(false)
+                                                    .withRelations(true)
+                                    )
+                                    .withTarget(
+                                            new Target()
+                                                    .withPackageName("generated.sky.regular.income")
+                                                    .withDirectory(layout.buildDirectory.dir("generated/sources/jooq").get().asFile.path)
+                                                    .withEncoding("UTF-8")
+                                                    .withClean(true)
+                                    )
+                    )
+
+            new GenerationTool()
+                    .run(config)
+        }
+        finally {
+            container.stop();
+        }
+    }
+}
+
+compileJava.dependsOn("jooqCodegen")
+
 sourceSets {
     main {
         java {
-            srcDir 'database/src/main/java'
+            srcDirs(
+                    'database/src/main/java',
+                    'build/generated/sources/jooq/generated'
+            )
         }
     }
 }

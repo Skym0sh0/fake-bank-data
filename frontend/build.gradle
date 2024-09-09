@@ -1,4 +1,5 @@
 plugins {
+    id "base"
     id "com.github.node-gradle.node" version "7.0.1"
 }
 
@@ -16,6 +17,7 @@ node {
 
 tasks.register("cleanNodeModules", Delete) {
     delete 'node_modules'
+    delete '.gradle'
 }
 clean.dependsOn 'cleanNodeModules'
 
@@ -34,6 +36,8 @@ tasks.register('npmBuild', NpmTask) {
 
     args = ['run', 'build']
 }
+
+assemble.dependsOn 'npmBuild'
 
 tasks.register('npmStartGUI', NpmTask) {
     dependsOn npmInstall
