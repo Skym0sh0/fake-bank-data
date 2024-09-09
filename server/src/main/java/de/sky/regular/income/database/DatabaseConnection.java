@@ -1,4 +1,4 @@
-package de.sky.common.database;
+package de.sky.regular.income.database;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;

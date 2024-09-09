@@ -1,6 +1,6 @@
 package de.sky.regular.income.rest;
 
-import de.sky.common.database.DatabaseConnection;
+import de.sky.regular.income.database.DatabaseConnection;
 import de.sky.regular.income.api.reports.BalanceProgressionReport;
 import de.sky.regular.income.api.reports.BasicCoarseInfo;
 import de.sky.regular.income.api.reports.IncomeExpenseFlowReport;

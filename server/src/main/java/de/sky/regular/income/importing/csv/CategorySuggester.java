@@ -1,9 +1,9 @@
 package de.sky.regular.income.importing.csv;
 
-import de.sky.common.database.DatabaseConnection;
 import de.sky.regular.income.api.Category;
 import de.sky.regular.income.api.turnovers.TurnoverRowPreview;
 import de.sky.regular.income.dao.CategoryDAO;
+import de.sky.regular.income.database.DatabaseConnection;
 import de.sky.regular.income.database.DatabaseSupplier;
 import de.sky.regular.income.importing.csv.parsers.TurnoverRecord;
 import de.sky.regular.income.users.UserProvider;

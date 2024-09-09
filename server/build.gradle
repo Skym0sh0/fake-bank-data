@@ -40,7 +40,6 @@ ext['jooq.version'] = "$jooq_version"
 ext['flyway.version'] = "$flyway_version"
 
 dependencies {
-    implementation project(':database')
     implementation project(':api')
 
     implementation group: 'org.slf4j', name: 'slf4j-api', version: "$slf4j_version"
@@ -57,6 +56,10 @@ dependencies {
     annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor', version: "$springboot_version"
 
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: "$springboot_version"
+
+    implementation group: "org.jooq", name: "jooq", version: jooq_version
+    implementation group: "org.flywaydb", name: "flyway-core", version: flyway_version
+    implementation group: "com.zaxxer", name: "HikariCP", version: "5.1.0"
 
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.14.0'
     implementation group: 'com.google.guava', name: 'guava', version: '33.0.0-jre'

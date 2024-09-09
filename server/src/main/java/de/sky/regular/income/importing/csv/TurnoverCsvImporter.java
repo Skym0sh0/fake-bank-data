@@ -1,7 +1,7 @@
 package de.sky.regular.income.importing.csv;
 
 import com.google.common.base.Stopwatch;
-import de.sky.common.database.DatabaseConnection;
+import de.sky.regular.income.database.DatabaseConnection;
 import de.sky.regular.income.api.Category;
 import de.sky.regular.income.api.category.CategoryTurnoverReport;
 import de.sky.regular.income.api.turnovers.*;

@@ -1,6 +1,6 @@
 package de.sky.regular.income.users;
 
-import de.sky.common.database.DatabaseConnection;
+import de.sky.regular.income.database.DatabaseConnection;
 import de.sky.regular.income.api.auth.User;
 import de.sky.regular.income.api.auth.UserRegistration;
 import de.sky.regular.income.database.DatabaseSupplier;

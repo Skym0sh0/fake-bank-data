@@ -2,7 +2,7 @@ package de.sky.regular.income.backup;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
-import de.sky.common.database.DatabaseConnection;
+import de.sky.regular.income.database.DatabaseConnection;
 import de.sky.regular.income.database.DatabaseSupplier;
 import generated.sky.regular.income.RegularIncome;
 import generated.sky.regular.income.Tables;

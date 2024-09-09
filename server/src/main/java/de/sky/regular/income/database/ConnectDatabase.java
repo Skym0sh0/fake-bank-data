@@ -1,6 +1,5 @@
 package de.sky.regular.income.database;
 
-import de.sky.common.database.DatabaseConnection;
 import org.flywaydb.core.Flyway;
 
 public class ConnectDatabase {

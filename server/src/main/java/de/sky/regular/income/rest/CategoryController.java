@@ -1,6 +1,6 @@
 package de.sky.regular.income.rest;
 
-import de.sky.common.database.DatabaseConnection;
+import de.sky.regular.income.database.DatabaseConnection;
 import de.sky.regular.income.api.Category;
 import de.sky.regular.income.api.CategoryPatch;
 import de.sky.regular.income.dao.CategoryDAO;
