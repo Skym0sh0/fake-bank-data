@@ -1,8 +1,8 @@
 package de.sky.regular.income.rest;
 
-import de.sky.regular.income.api.auth.User;
-import de.sky.regular.income.api.auth.UserLogin;
-import de.sky.regular.income.api.auth.UserRegistration;
+import de.sky.regular.income.api.User;
+import de.sky.regular.income.api.UserLogin;
+import de.sky.regular.income.api.UserRegistration;
 import de.sky.regular.income.users.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

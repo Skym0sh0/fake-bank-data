@@ -3,8 +3,8 @@ package de.sky.regular.income.importing.csv;
 import com.google.common.base.Stopwatch;
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
-import de.sky.regular.income.api.turnovers.RawCsvTable;
-import de.sky.regular.income.api.turnovers.TurnoverImportFormat;
+import de.sky.regular.income.api.RawCsvTable;
+import de.sky.regular.income.api.TurnoverImportFormat;
 import de.sky.regular.income.importing.csv.parsers.TurnoverParser;
 import de.sky.regular.income.importing.csv.parsers.TurnoverRecord;
 import lombok.SneakyThrows;
@@ -54,7 +54,10 @@ public class TurnoverFileParser {
 
         var rows = parser.parseAll(is);
 
-        var maxColumns = rows.stream().mapToInt(s -> s.length).max().orElse(0);
+        var maxColumns = rows.stream()
+                .mapToInt(s -> s.length)
+                .max()
+                .orElse(0);
 
         var processedRows = rows.stream()
                 .map(row -> {
@@ -63,13 +66,14 @@ public class TurnoverFileParser {
 
                     return Arrays.copyOf(row, maxColumns);
                 })
+                .map(Arrays::asList)
                 .toList();
 
-        return new RawCsvTable(
-                rows.size(),
-                maxColumns,
-                processedRows
-        );
+        return RawCsvTable.builder()
+                .rows(rows.size())
+                .columns(maxColumns)
+                .data(processedRows)
+                .build();
     }
 
     @SneakyThrows

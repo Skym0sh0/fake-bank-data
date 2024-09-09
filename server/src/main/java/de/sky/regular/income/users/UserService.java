@@ -1,8 +1,8 @@
 package de.sky.regular.income.users;
 
 import de.sky.regular.income.database.DatabaseConnection;
-import de.sky.regular.income.api.auth.User;
-import de.sky.regular.income.api.auth.UserRegistration;
+import de.sky.regular.income.api.User;
+import de.sky.regular.income.api.UserRegistration;
 import de.sky.regular.income.database.DatabaseSupplier;
 import generated.sky.regular.income.tables.records.UsersRecord;
 import lombok.Builder;
@@ -162,7 +162,12 @@ public class UserService implements UserDetailsService, UserProvider {
     }
 
     private static User mapToUser(UsersRecord rec) {
-        return new User(rec.getId(), rec.getUsername(), rec.getFirstname(), rec.getLastname());
+        return User.builder()
+                .id(rec.getId())
+                .username(rec.getUsername())
+                .firstname(rec.getFirstname())
+                .lastname(rec.getLastname())
+                .build();
     }
 
     private static UserDetails mapToUserDetails(UsersRecord rec) {

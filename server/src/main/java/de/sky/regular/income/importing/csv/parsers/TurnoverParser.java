@@ -1,6 +1,6 @@
 package de.sky.regular.income.importing.csv.parsers;
 
-import de.sky.regular.income.api.turnovers.TurnoverImportFormat;
+import de.sky.regular.income.api.TurnoverImportFormat;
 
 import java.io.Reader;
 import java.util.List;

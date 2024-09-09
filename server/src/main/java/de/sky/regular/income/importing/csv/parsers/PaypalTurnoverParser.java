@@ -5,7 +5,7 @@ import com.univocity.parsers.annotations.Parsed;
 import com.univocity.parsers.common.processor.BeanListProcessor;
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
-import de.sky.regular.income.api.turnovers.TurnoverImportFormat;
+import de.sky.regular.income.api.TurnoverImportFormat;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;

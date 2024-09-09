@@ -29,15 +29,15 @@ public class CategoryDAO {
         rec.setId(UUID.randomUUID());
         rec.setOwnerId(userId);
         rec.setParentCategory(parentId);
-        rec.setName(patch.name.trim());
-        rec.setDescription(Optional.ofNullable(patch.description).map(String::trim).orElse(null));
+        rec.setName(patch.getName().trim());
+        rec.setDescription(Optional.ofNullable(patch.getDescription()).map(String::trim).orElse(null));
         rec.setIsIncome(false);
         rec.setCreatedAt(now);
         rec.setLastUpdatedAt(now);
 
         rec.insert();
 
-        insertBudget(ctx, userId, rec.getId(), patch.budget);
+        insertBudget(ctx, userId, rec.getId(), patch.getBudget());
 
         if (parentId != null) {
             var updated = ctx.update(CATEGORY)
@@ -60,13 +60,13 @@ public class CategoryDAO {
                 .fetchOptional()
                 .orElseThrow(() -> new RuntimeException("Not category found: " + id));
 
-        rec.setName(patch.name.trim());
-        rec.setDescription(Optional.ofNullable(patch.description).map(String::trim).orElse(null));
+        rec.setName(patch.getName().trim());
+        rec.setDescription(Optional.ofNullable(patch.getDescription()).map(String::trim).orElse(null));
         rec.setLastUpdatedAt(ZonedDateTime.now().toOffsetDateTime());
 
         rec.update();
 
-        insertBudget(ctx, userId, id, patch.budget);
+        insertBudget(ctx, userId, id, patch.getBudget());
 
         return fetchById(ctx, userId, id);
     }
@@ -85,8 +85,8 @@ public class CategoryDAO {
                     budget.setCategoryId(categoryId);
                     budget.setId(UUID.randomUUID());
 
-                    budget.setMonthlyBudgetAmountValueCents(b.budgetInCents);
-                    budget.setWarningThresholdFraction(Optional.ofNullable(b.exceedingThreshold).map(BigDecimal::valueOf).orElse(BigDecimal.ZERO));
+                    budget.setMonthlyBudgetAmountValueCents(b.getBudgetInCents());
+                    budget.setWarningThresholdFraction(Optional.ofNullable(b.getExceedingThreshold()).map(BigDecimal::valueOf).orElse(BigDecimal.ZERO));
 
                     return budget;
                 })
@@ -242,7 +242,7 @@ public class CategoryDAO {
 
         c.setName(rec.getName());
         c.setDescription(rec.getDescription());
-        c.setNew(Objects.equals(rec.getCreatedAt(), rec.getLastUpdatedAt()));
+        c.setIsNew(Objects.equals(rec.getCreatedAt(), rec.getLastUpdatedAt()));
 
         if (rec.getHasBudget()) {
             var budget = new CategoryBudget();
@@ -255,8 +255,8 @@ public class CategoryDAO {
 
         c.setUsageCount(rec.getUseCount());
 
-        c.setCreatedAt(rec.getCreatedAt().toZonedDateTime());
-        c.setUpdatedAt(rec.getLastUpdatedAt().toZonedDateTime());
+        c.setCreatedAt(rec.getCreatedAt());
+        c.setUpdatedAt(rec.getLastUpdatedAt());
 
         return c;
     }

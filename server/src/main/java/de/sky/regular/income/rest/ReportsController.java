@@ -1,10 +1,10 @@
 package de.sky.regular.income.rest;
 
 import de.sky.regular.income.database.DatabaseConnection;
-import de.sky.regular.income.api.reports.BalanceProgressionReport;
-import de.sky.regular.income.api.reports.BasicCoarseInfo;
-import de.sky.regular.income.api.reports.IncomeExpenseFlowReport;
-import de.sky.regular.income.api.reports.MonthlyIncomeExpenseReport;
+import de.sky.regular.income.api.BalanceProgressionReport;
+import de.sky.regular.income.api.BasicCoarseInfo;
+import de.sky.regular.income.api.IncomeExpenseFlowReport;
+import de.sky.regular.income.api.MonthlyIncomeExpenseReport;
 import de.sky.regular.income.dao.IncomeExpenseFlowDataReporter;
 import de.sky.regular.income.dao.ReportsDAO;
 import de.sky.regular.income.database.DatabaseSupplier;

@@ -1,10 +1,17 @@
 package de.sky.regular.income.importing.csv;
 
 import com.google.common.base.Stopwatch;
-import de.sky.regular.income.database.DatabaseConnection;
 import de.sky.regular.income.api.Category;
-import de.sky.regular.income.api.category.CategoryTurnoverReport;
-import de.sky.regular.income.api.turnovers.*;
+import de.sky.regular.income.api.CategoryTurnoverReport;
+import de.sky.regular.income.api.CategoryTurnoverReportDatapoint;
+import de.sky.regular.income.api.RawCsvTable;
+import de.sky.regular.income.api.TurnoverImport;
+import de.sky.regular.income.api.TurnoverImportFormat;
+import de.sky.regular.income.api.TurnoverImportPatch;
+import de.sky.regular.income.api.TurnoverImportRowsPatch;
+import de.sky.regular.income.api.TurnoverRow;
+import de.sky.regular.income.api.TurnoverRowPreview;
+import de.sky.regular.income.database.DatabaseConnection;
 import de.sky.regular.income.dao.CategoryDAO;
 import de.sky.regular.income.database.DatabaseSupplier;
 import de.sky.regular.income.importing.csv.parsers.TurnoverRecord;
@@ -70,8 +77,8 @@ public class TurnoverCsvImporter {
             imp.setFileContent(content);
 
             imp.setChecksum(checksum);
-            imp.setTurnoverFileFormat(String.valueOf(patch.format));
-            imp.setFileEncoding(Optional.ofNullable(patch.encoding).orElse("UTF-8"));
+            imp.setTurnoverFileFormat(String.valueOf(patch.getFormat()));
+            imp.setFileEncoding(Optional.ofNullable(patch.getEncoding()).orElse("UTF-8"));
 
             imp.insert();
 
@@ -106,7 +113,7 @@ public class TurnoverCsvImporter {
         });
     }
 
-    public List<TurnoverRow> fetchTurnoversForImport(UUID categoryId) {
+    public List<de.sky.regular.income.api.TurnoverRow> fetchTurnoversForImport(UUID categoryId) {
         return db.transactionWithResult(ctx -> {
             UUID userId = user.getCurrentUser(ctx).getId();
 
@@ -160,7 +167,7 @@ public class TurnoverCsvImporter {
                     .limit(20_000)
                     .fetch()
                     .map(rec -> {
-                        var dp = new CategoryTurnoverReport.ReportDatapoint();
+                        var dp = new CategoryTurnoverReportDatapoint();
                         dp.setCategoryId(/*rec.get(TURNOVER_ROW.CATEGORY_ID)*/ null);
                         dp.setDate(rec.get(groupDate));
                         dp.setIncomeAmountInCents(rec.get(groupIncome));
@@ -235,7 +242,7 @@ public class TurnoverCsvImporter {
         return db.transactionWithResult(ctx -> {
             UUID userId = user.getCurrentUser(ctx).getId();
 
-            var updates = patch.rows.stream()
+            var updates = patch.getRows().stream()
                     .map(r ->
                             ctx.update(TURNOVER_ROW)
                                     .set(TURNOVER_ROW.CATEGORY_ID, r.getCategoryId())
@@ -248,16 +255,16 @@ public class TurnoverCsvImporter {
 
             var updated = Arrays.stream(ctx.batch(updates).execute()).sum();
 
-            if (updated != patch.rows.size())
+            if (updated != patch.getRows().size())
                 throw new RuntimeException("Could not update rows");
 
             var deleted = ctx.deleteFrom(TURNOVER_ROW)
-                    .where(TURNOVER_ROW.ID.in(patch.deleteRowIds))
+                    .where(TURNOVER_ROW.ID.in(patch.getDeleteRowIds()))
                     .and(TURNOVER_ROW.OWNER_ID.eq(userId))
                     .and(TURNOVER_ROW.TURNOVER_FILE.eq(id))
                     .execute();
 
-            if (deleted != patch.deleteRowIds.size())
+            if (deleted != patch.getDeleteRowIds().size())
                 throw new RuntimeException("Could not delete rows");
 
             return fetchTurnoverImport(ctx, userId, id);
@@ -270,7 +277,7 @@ public class TurnoverCsvImporter {
         db.transactionWithoutResult(ctx -> {
             UUID userId = user.getCurrentUser(ctx).getId();
 
-            var updates = patch.rows.stream()
+            var updates = patch.getRows().stream()
                     .map(r ->
                             ctx.update(TURNOVER_ROW)
                                     .set(TURNOVER_ROW.CATEGORY_ID, r.getCategoryId())
@@ -282,7 +289,7 @@ public class TurnoverCsvImporter {
 
             var updated = Arrays.stream(ctx.batch(updates).execute()).sum();
 
-            if (updated != patch.rows.size())
+            if (updated != patch.getRows().size())
                 throw new RuntimeException("Could not update rows");
         });
     }
@@ -326,7 +333,7 @@ public class TurnoverCsvImporter {
                         .parallel()
                         .filter(this::filterInvalidRows)
                         .map(rec -> enrichAndMap(suggester, alreadyExistentRows, rec))
-                        .sorted(Comparator.comparing(TurnoverRow::getDate))
+                        .sorted(Comparator.comparing(TurnoverRowPreview::getDate))
                         .toList();
             } finally {
                 log.info("Previewing file was done in {}", sw.stop());
@@ -390,7 +397,7 @@ public class TurnoverCsvImporter {
 
         return TurnoverImport.builder()
                 .id(rec.getId())
-                .importedAt(rec.getImportedAt().atZoneSameInstant(ZoneId.systemDefault()))
+                .importedAt(rec.getImportedAt().atZoneSameInstant(ZoneId.systemDefault()).toOffsetDateTime())
                 .filename(rec.getFilename())
                 .filesizeBytes(rec.getFileSize())
                 .format(TurnoverImportFormat.valueOf(rec.getTurnoverFileFormat()))

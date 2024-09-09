@@ -1,7 +1,8 @@
 package de.sky.regular.income.importing.csv;
 
 import de.sky.regular.income.api.Category;
-import de.sky.regular.income.api.turnovers.TurnoverRowPreview;
+import de.sky.regular.income.api.CategorySuggestion;
+import de.sky.regular.income.api.TurnoverRowPreview;
 import de.sky.regular.income.dao.CategoryDAO;
 import de.sky.regular.income.database.DatabaseConnection;
 import de.sky.regular.income.database.DatabaseSupplier;
@@ -61,7 +62,7 @@ public class CategorySuggester {
         public void close() {
         }
 
-        public List<TurnoverRowPreview.CategorySuggestion> findSuggestions(TurnoverRecord rec, String similarityChecksum) {
+        public List<CategorySuggestion> findSuggestions(TurnoverRecord rec, String similarityChecksum) {
             var allSuggestions = findSuggestionsBySimilarity(0, similarityChecksum)
                     .unionAll(findSuggestionsByDescription(1, rec.getDescription()))
                     .unionAll(findSuggestionsByRecipient(2, rec.getRecipient()))
@@ -97,14 +98,14 @@ public class CategorySuggester {
                                 .map(TempSuggestion::getOrigin)
                                 .toList();
 
-                        return new TurnoverRowPreview.CategorySuggestion(
-                                categoryId,
-                                (double) frequency / (double) sumOfFrequencies,
-                                frequency,
-                                origins
-                        );
+                        return CategorySuggestion.builder()
+                                .categoryId(categoryId)
+                                .precedence((double) frequency / (double) sumOfFrequencies)
+                                .frequency(frequency)
+                                .origins(origins)
+                                .build();
                     })
-                    .sorted(Comparator.comparing(TurnoverRowPreview.CategorySuggestion::getPrecedence).reversed())
+                    .sorted(Comparator.comparing(CategorySuggestion::getPrecedence).reversed())
                     .limit(5)
                     .toList();
         }

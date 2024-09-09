@@ -1,8 +1,13 @@
 package de.sky.regular.income.rest;
 
 import com.google.common.base.Stopwatch;
-import de.sky.regular.income.api.category.CategoryTurnoverReport;
-import de.sky.regular.income.api.turnovers.*;
+import de.sky.regular.income.api.CategoryTurnoverReport;
+import de.sky.regular.income.api.RawCsvTable;
+import de.sky.regular.income.api.TurnoverImport;
+import de.sky.regular.income.api.TurnoverImportFormat;
+import de.sky.regular.income.api.TurnoverImportPatch;
+import de.sky.regular.income.api.TurnoverImportRowsPatch;
+import de.sky.regular.income.api.TurnoverPreview;
 import de.sky.regular.income.importing.csv.TurnoverCsvImporter;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.DatePart;
@@ -13,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.*;
 
@@ -46,7 +52,7 @@ public class TurnoversController {
     }
 
     @PostMapping("preview")
-    public TurnOverPreview processPreview(@RequestParam("file") MultipartFile file, @RequestParam("format") TurnoverImportFormat format, @RequestParam(value = "encoding", defaultValue = "UTF-8") String encoding) throws Exception {
+    public TurnoverPreview processPreview(@RequestParam("file") MultipartFile file, @RequestParam("format") TurnoverImportFormat format, @RequestParam(value = "encoding", defaultValue = "UTF-8") String encoding) throws Exception {
         log.info("Preview-processing {} file {} with {} bytes...", format, file.getOriginalFilename(), file.getSize());
 
         var sw = Stopwatch.createStarted();
@@ -54,11 +60,11 @@ public class TurnoversController {
         try (var reader = new BufferedReader(new InputStreamReader(file.getInputStream(), Charset.forName(encoding)))) {
             var rows = importer.parseForPreview(format, reader);
 
-            return TurnOverPreview.builder()
+            return TurnoverPreview.builder()
                     .filename(file.getOriginalFilename())
                     .format(format)
                     .encoding(encoding)
-                    .uploadTime(ZonedDateTime.now())
+                    .uploadTime(OffsetDateTime.now())
                     .rows(rows)
                     .build();
         } finally {
@@ -68,7 +74,7 @@ public class TurnoversController {
 
     @PostMapping(consumes = "multipart/form-data")
     public TurnoverImport createTurnoverImport(@RequestPart("file") MultipartFile file, @RequestPart("data") TurnoverImportPatch patch) throws Exception {
-        log.info("Importing {} file {} with {} bytes and {} data rows...", patch.format, file.getOriginalFilename(), file.getSize(), patch.getRows().size());
+        log.info("Importing {} file {} with {} bytes and {} data rows...", patch.getFormat(), file.getOriginalFilename(), file.getSize(), patch.getRows().size());
 
         return importer.createImport(ZonedDateTime.now(), file, patch);
     }
@@ -99,7 +105,7 @@ public class TurnoversController {
     }
 
     @GetMapping("/category/{category-id}")
-    public List<TurnoverRow> fetchTurnoversForCategory(@PathVariable("category-id") UUID categoryId) {
+    public List<de.sky.regular.income.api.TurnoverRow> fetchTurnoversForCategory(@PathVariable("category-id") UUID categoryId) {
         return importer.fetchTurnoversForImport(categoryId);
     }
 

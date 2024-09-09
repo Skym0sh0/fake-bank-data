@@ -1,9 +1,11 @@
 package de.sky.regular.income.dao;
 
+import de.sky.regular.income.api.BalanceDataPoint;
+import de.sky.regular.income.api.BalanceProgressionReport;
+import de.sky.regular.income.api.BasicCoarseInfo;
 import de.sky.regular.income.api.Category;
-import de.sky.regular.income.api.reports.BalanceProgressionReport;
-import de.sky.regular.income.api.reports.BasicCoarseInfo;
-import de.sky.regular.income.api.reports.MonthlyIncomeExpenseReport;
+import de.sky.regular.income.api.MonthlyIncomeExpenseDataPoint;
+import de.sky.regular.income.api.MonthlyIncomeExpenseReport;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.DSLContext;
@@ -44,14 +46,13 @@ public class ReportsDAO {
 
         var maxDepth = findMaxDepth(ctx, userId);
 
-        return new BasicCoarseInfo(
-                userId,
-                rec.get(min(TURNOVER_ROW.DATE)),
-                rec.get(max(TURNOVER_ROW.DATE)),
-                rec.get(countDistinct(TURNOVER_ROW.ID)),
-                rec.get(countDistinct(TURNOVER_ROW.CATEGORY_ID)),
-                maxDepth.orElse(0)
-        );
+        return new BasicCoarseInfo()
+                .userId(userId)
+                .earliestTransaction(rec.get(min(TURNOVER_ROW.DATE)))
+                .latestTransaction(rec.get(max(TURNOVER_ROW.DATE)))
+                .numberOfTransactions(rec.get(countDistinct(TURNOVER_ROW.ID)))
+                .numberOfUsedCategories(rec.get(countDistinct(TURNOVER_ROW.CATEGORY_ID)))
+                .maxDepthOfCategories(maxDepth.orElse(0));
     }
 
     public BalanceProgressionReport doBalanceProgressionReport(DSLContext ctx, UUID userId, LocalDate begin, LocalDate end) {
@@ -65,30 +66,32 @@ public class ReportsDAO {
         var index = rank().over(orderBy(TURNOVER_ROW.DATE)).minus(1).as("index");
         var cumulativeSum = sum(sumPerDay).over(orderBy(TURNOVER_ROW.DATE)).cast(Integer.class).as("cumulativeSum");
 
-        var rprt = new BalanceProgressionReport();
+        var rprt = new BalanceProgressionReport()
+                .data(
+                        ctx.select(
+                                        TURNOVER_ROW.DATE,
+                                        sumPerDayAliased,
+                                        index,
+                                        cumulativeSum
+                                )
+                                .from(TURNOVER_ROW)
+                                .where(TURNOVER_ROW.OWNER_ID.eq(userId))
+                                .and(TURNOVER_ROW.DATE.greaterOrEqual(start))
+                                .and(TURNOVER_ROW.DATE.lessOrEqual(ending))
+                                .groupBy(TURNOVER_ROW.DATE)
+                                .orderBy(TURNOVER_ROW.DATE)
+                                .limit(MAX_NUMBER_RECORDS + 1)
+                                .fetch()
+                                .map(rec -> BalanceDataPoint.builder()
+                                        .index(rec.get(index))
+                                        .date(rec.get(TURNOVER_ROW.DATE))
+                                        .perDayBalanceInCents(rec.get(sumPerDayAliased))
+                                        .balanceInCents(rec.get(cumulativeSum))
+                                        .build()
+                                )
+                );
 
-        rprt.data = ctx.select(
-                        TURNOVER_ROW.DATE,
-                        sumPerDayAliased,
-                        index,
-                        cumulativeSum
-                )
-                .from(TURNOVER_ROW)
-                .where(TURNOVER_ROW.OWNER_ID.eq(userId))
-                .and(TURNOVER_ROW.DATE.greaterOrEqual(start))
-                .and(TURNOVER_ROW.DATE.lessOrEqual(ending))
-                .groupBy(TURNOVER_ROW.DATE)
-                .orderBy(TURNOVER_ROW.DATE)
-                .limit(MAX_NUMBER_RECORDS + 1)
-                .fetch()
-                .map(rec -> new BalanceProgressionReport.DataPoint(
-                        rec.get(index),
-                        rec.get(TURNOVER_ROW.DATE),
-                        rec.get(sumPerDayAliased),
-                        rec.get(cumulativeSum)
-                ));
-
-        if (rprt.data.size() > MAX_NUMBER_RECORDS)
+        if (rprt.getData().size() > MAX_NUMBER_RECORDS)
             log.warn("Between [{}, {}) were more than {} datapoints", begin, end, MAX_NUMBER_RECORDS);
 
         return rprt;
@@ -112,20 +115,18 @@ public class ReportsDAO {
                 .orderBy(month)
                 .limit(MAX_NUMBER_RECORDS + 1)
                 .fetch()
-                .map(rec -> {
-                    var point = new MonthlyIncomeExpenseReport.DataPoint();
-
-                    point.month = rec.get(month);
-                    point.incomeInCents = rec.get(positiveSum).intValue();
-                    point.expenseInCents = -rec.get(negativeSum).intValue();
-
-                    return point;
-                });
+                .map(rec ->
+                        MonthlyIncomeExpenseDataPoint.builder()
+                                .month(rec.get(month))
+                                .incomeInCents(rec.get(positiveSum).intValue())
+                                .expenseInCents(-rec.get(negativeSum).intValue())
+                                .build()
+                );
 
         if (monthData.size() > MAX_NUMBER_RECORDS)
             log.warn("There are too many datapoints: {}", MAX_NUMBER_RECORDS);
 
-        var monthsToAdd = new ArrayList<MonthlyIncomeExpenseReport.DataPoint>();
+        var monthsToAdd = new ArrayList<MonthlyIncomeExpenseDataPoint>();
         for (int i = 1; i < monthData.size(); i++) {
             var previous = monthData.get(i - 1).getMonth();
             var current = monthData.get(i).getMonth();
@@ -134,15 +135,21 @@ public class ReportsDAO {
 
             var range = LongStream.range(1, months)
                     .mapToObj(previous::plusMonths)
-                    .map(m -> new MonthlyIncomeExpenseReport.DataPoint(m, 0, 0))
+                    .map(m ->
+                            MonthlyIncomeExpenseDataPoint.builder()
+                                    .month(m)
+                                    .incomeInCents(0)
+                                    .expenseInCents(0)
+                                    .build()
+                    )
                     .toList();
 
             monthsToAdd.addAll(range);
         }
 
-        return new MonthlyIncomeExpenseReport(
+        return new MonthlyIncomeExpenseReport().data(
                 Stream.concat(monthData.stream(), monthsToAdd.stream())
-                        .sorted(Comparator.comparing(MonthlyIncomeExpenseReport.DataPoint::getMonth))
+                        .sorted(Comparator.comparing(MonthlyIncomeExpenseDataPoint::getMonth))
                         .toList()
         );
     }

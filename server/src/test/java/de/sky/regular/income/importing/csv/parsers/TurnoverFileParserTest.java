@@ -1,6 +1,6 @@
 package de.sky.regular.income.importing.csv.parsers;
 
-import de.sky.regular.income.api.turnovers.RawCsvTable;
+import de.sky.regular.income.api.RawCsvTable;
 import de.sky.regular.income.importing.csv.TurnoverFileParser;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Nested;
@@ -93,7 +93,7 @@ class TurnoverFileParserTest {
             table.getData()
                     .stream()
                     .map(row -> {
-                        return Arrays.stream(row)
+                        return row.stream()
                                 .map(cell -> cell != null ? cell : "")
                                 .map(cell -> StringUtils.abbreviate(cell, length))
                                 .map(cell -> cell + StringUtils.repeat(' ', length))

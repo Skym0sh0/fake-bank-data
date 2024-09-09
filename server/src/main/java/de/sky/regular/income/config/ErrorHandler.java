@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 
 @Slf4j
@@ -21,6 +22,14 @@ public class ErrorHandler {
 
     private ResponseEntity<Problem> create(HttpServletRequest request, HttpStatus status, String message) {
         return ResponseEntity.status(status)
-                .body(new Problem(ZonedDateTime.now(), request.getRequestURI(), status.value(), status.getReasonPhrase(), message));
+                .body(
+                        Problem.builder()
+                                .timestamp(OffsetDateTime.now())
+                                .path(request.getRequestURI())
+                                .status(status.value())
+                                .error(status.getReasonPhrase())
+                                .errorDetails(message)
+                                .build()
+                );
     }
 }

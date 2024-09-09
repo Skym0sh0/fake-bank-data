@@ -1,7 +1,8 @@
 package de.sky.regular.income.dao;
 
 import de.sky.regular.income.api.Category;
-import de.sky.regular.income.api.reports.IncomeExpenseFlowReport;
+import de.sky.regular.income.api.FlowDataPoint;
+import de.sky.regular.income.api.IncomeExpenseFlowReport;
 import lombok.RequiredArgsConstructor;
 import lombok.With;
 import org.jooq.Condition;
@@ -37,23 +38,35 @@ public class IncomeExpenseFlowDataReporter {
         var categories = categoryDao.fetchCategoryTree(ctx, userId);
 
         var negativeSumByCategoryId = fetchSumPerCategoryWhere(ctx, userId, begin, end, TURNOVER_ROW.AMOUNT_VALUE_CENTS.lessThan(0));
-        var negative = createDataPoints(categories, negativeSumByCategoryId, (parent, child, level, amount) -> new IncomeExpenseFlowReport.FlowDataPoint(parent, child, level, amount));
+        var negative = createDataPoints(categories, negativeSumByCategoryId, (parent, child, level, amount) -> FlowDataPoint.builder()
+                .fromCategory(parent)
+                .toCategory(child)
+                .depthLevel(level)
+                .amountInCents(amount)
+                .build()
+        );
 
         var positiveSumByCategoryId = fetchSumPerCategoryWhere(ctx, userId, begin, end, TURNOVER_ROW.AMOUNT_VALUE_CENTS.greaterThan(0));
-        var positive = createDataPoints(categories, positiveSumByCategoryId, (parent, child, level, amount) -> new IncomeExpenseFlowReport.FlowDataPoint(child, parent, level, amount));
+        var positive = createDataPoints(categories, positiveSumByCategoryId, (parent, child, level, amount) -> FlowDataPoint.builder()
+                .fromCategory(child)
+                .toCategory(parent)
+                .depthLevel(level)
+                .amountInCents(amount)
+                .build()
+        );
 
         var allDatapoints = Stream.of(positive, negative)
                 .flatMap(Collection::stream)
                 .toList();
 
-        return new IncomeExpenseFlowReport(
-                begin,
-                end,
-                allDatapoints
-        );
+        return IncomeExpenseFlowReport.builder()
+                .start(begin)
+                .end(end)
+                .flows(allDatapoints)
+                .build();
     }
 
-    private static List<IncomeExpenseFlowReport.FlowDataPoint> createDataPoints(List<Category> categories, Map<UUID, Integer> sumByCategoryId, DataPointCreator creator) {
+    private static List<FlowDataPoint> createDataPoints(List<Category> categories, Map<UUID, Integer> sumByCategoryId, DataPointCreator creator) {
         var costTree = categories.stream()
                 .map(c -> CategoryTreeNode.create(c, 0, sumByCategoryId))
                 .toList();
@@ -88,7 +101,7 @@ public class IncomeExpenseFlowDataReporter {
         return Stream.of(current.withChildren(newChildren));
     }
 
-    private static List<IncomeExpenseFlowReport.FlowDataPoint> transformAndFlat(CategoryTreeNode parent, CategoryTreeNode current, DataPointCreator creator) {
+    private static List<FlowDataPoint> transformAndFlat(CategoryTreeNode parent, CategoryTreeNode current, DataPointCreator creator) {
         var children = current.children()
                 .stream()
                 .map(child -> transformAndFlat(current, child, creator))
@@ -129,7 +142,7 @@ public class IncomeExpenseFlowDataReporter {
     }
 
     private interface DataPointCreator {
-        IncomeExpenseFlowReport.FlowDataPoint apply(String from, String to, int level, int amount);
+        FlowDataPoint apply(String from, String to, int level, int amount);
     }
 
     private static Map<UUID, Integer> fetchSumPerCategoryWhere(DSLContext ctx, UUID userId, LocalDate begin, LocalDate end, Condition condition) {

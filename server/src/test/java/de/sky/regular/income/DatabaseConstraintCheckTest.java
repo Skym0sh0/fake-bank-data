@@ -1,6 +1,6 @@
 package de.sky.regular.income;
 
-import de.sky.regular.income.api.turnovers.TurnoverImportFormat;
+import de.sky.regular.income.api.TurnoverImportFormat;
 import generated.sky.regular.income.tables.TurnoverFileImport;
 import org.jooq.Check;
 import org.junit.jupiter.params.ParameterizedTest;

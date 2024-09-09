@@ -78,6 +78,8 @@ components:
           type: string
     CategoryBudget:
       type: object
+      required:
+        - budgetInCents
       properties:
         budgetInCents:
           $ref: "#/components/schemas/MoneyValue"
@@ -86,6 +88,8 @@ components:
           format: double
     CategoryPatch:
       type: object
+      required:
+        - name
       allOf:
         - $ref: "#/components/schemas/PatchInformation"
         - properties:
@@ -110,6 +114,10 @@ components:
             usageCount:
               type: integer
               format: int64
+            subCategories:
+              type: array
+              items:
+                $ref: "#/components/schemas/Category"
     CategoryTurnoverReport:
       type: object
       properties:
@@ -118,7 +126,7 @@ components:
         datapoints:
           type: array
           items:
-            $ref: "#/components/schemas/ReportDatapoint"
+            $ref: "#/components/schemas/CategoryTurnoverReportDatapoint"
 
     RawCsvTable:
       type: object
@@ -209,13 +217,15 @@ components:
             $ref: "#/components/schemas/TurnoverRowPreview"
     TurnoverRowPreview:
       type: object
-      properties:
-        importable:
-          type: boolean
-        suggestedCategories:
-          type: array
-          items:
-            $ref: "#/components/schemas/TurnoverRowPreview"
+      allOf:
+        - $ref: "#/components/schemas/TurnoverRow"
+        - properties:
+            importable:
+              type: boolean
+            suggestedCategories:
+              type: array
+              items:
+                $ref: "#/components/schemas/CategorySuggestion"
     CategorySuggestion:
       type: object
       required:
@@ -264,7 +274,7 @@ components:
         - NEW_DKB
         - PAYPAL
 
-    ReportDatapoint:
+    CategoryTurnoverReportDatapoint:
       type: object
       properties:
         categoryId:

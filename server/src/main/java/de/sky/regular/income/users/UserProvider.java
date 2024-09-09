@@ -1,6 +1,6 @@
 package de.sky.regular.income.users;
 
-import de.sky.regular.income.api.auth.User;
+import de.sky.regular.income.api.User;
 import org.jooq.DSLContext;
 
 public interface UserProvider {
