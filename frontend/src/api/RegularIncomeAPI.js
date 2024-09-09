@@ -71,25 +71,25 @@ class RegularIncomeAPI {
         return {
             registerUser(user) {
                 return ref.getClient({})
-                    .post("user/register", user)
+                    .post("api/user/register", user)
                     .then(res => denormalizeUser(res.data));
             },
 
             login(username, password) {
                 return ref.getClient(authHeader({username: username, password: password}), true)
-                    .get("auth/login")
+                    .get("api/auth/login")
                     .then(res => denormalizeUser(res.data));
             },
 
             updateUser(id, user) {
                 return ref.getClient()
-                    .patch(`user/${id}/details`, user)
+                    .patch(`api/user/${id}/details`, user)
                     .then(res => denormalizeUser(res.data));
             },
 
             deleteUser(id) {
                 return ref.getClient()
-                    .delete(`user/${id}`);
+                    .delete(`api/user/${id}`);
             },
         }
     }
@@ -99,12 +99,12 @@ class RegularIncomeAPI {
 
         return {
             fetchBasicInfo() {
-                return ref.getClient().get('reports/info')
+                return ref.getClient().get('api/reports/info')
                     .then(res => denormalizeBasicReportInfo(res.data))
             },
 
             fetchBalanceProgressionReport(begin, end) {
-                return ref.getClient().get('reports/balance-progression', {
+                return ref.getClient().get('api/reports/balance-progression', {
                     params: {
                         begin: begin,
                         end: end,
@@ -113,12 +113,12 @@ class RegularIncomeAPI {
             },
 
             fetchIncomeExpenseReport() {
-                return ref.getClient().get('reports/monthly-income-expenses')
+                return ref.getClient().get('api/reports/monthly-income-expenses')
                     .then(res => res.data)
             },
 
             fetchIncomeExpenseFlowReport(year, month) {
-                return ref.getClient().get(`reports/income-expenses-flow`, {
+                return ref.getClient().get(`api/reports/income-expenses-flow`, {
                     params: {
                         "year": year,
                         "month": month,
@@ -127,7 +127,7 @@ class RegularIncomeAPI {
             },
 
             fetchIncomeExpenseFlowRelativeTimeReport(timeunit, units, referenceDate) {
-                return ref.getClient().get(`reports/income-expenses-flow/sliding-window/${timeunit}/${units}`, {
+                return ref.getClient().get(`api/reports/income-expenses-flow/sliding-window/${timeunit}/${units}`, {
                     params: {
                         "reference-date": referenceDate,
                     }
@@ -142,7 +142,7 @@ class RegularIncomeAPI {
         return {
             getSupportedPreviewFormats() {
                 return ref.getClient()
-                    .get("turnover-import/formats")
+                    .get("api/turnover-import/formats")
                     .then(res => res.data)
             },
 
@@ -151,7 +151,7 @@ class RegularIncomeAPI {
                 formData.append('file', file)
 
                 return ref.getClient().post(
-                    `turnover-import/preview/csv`,
+                    `api/turnover-import/preview/csv`,
                     formData,
                     {
                         headers: {
@@ -169,7 +169,7 @@ class RegularIncomeAPI {
                 formData.append('file', file)
 
                 return ref.getClient().post(
-                    `turnover-import/preview`,
+                    `api/turnover-import/preview`,
                     formData,
                     {
                         headers: {
@@ -193,7 +193,7 @@ class RegularIncomeAPI {
                 })], {type: "application/json"}))
 
                 return ref.getClient().post(
-                    'turnover-import',
+                    'api/turnover-import',
                     formData,
                     {
                         headers: {
@@ -204,36 +204,36 @@ class RegularIncomeAPI {
             },
 
             fetchTurnoverImports() {
-                return ref.getClient().get('turnover-import')
+                return ref.getClient().get('api/turnover-import')
                     .then(res => res.data.map(c => denormalizeTurnoverImport(c)))
             },
 
             fetchTurnoverImport(id) {
-                return ref.getClient().get(`turnover-import/${id}`)
+                return ref.getClient().get(`api/turnover-import/${id}`)
                     .then(res => denormalizeTurnoverImport(res.data))
             },
 
             patchTurnovers(id, changes) {
-                return ref.getClient().patch(`turnover-import/${id}`, changes)
+                return ref.getClient().patch(`api/turnover-import/${id}`, changes)
                     .then(res => denormalizeTurnoverImport(res.data))
             },
 
             batchPatchTurnovers(changes) {
-                return ref.getClient().patch(`turnover-import/rows`, {rows: changes})
+                return ref.getClient().patch(`api/turnover-import/rows`, {rows: changes})
                     .then(() => undefined)
             },
 
             deleteTurnoverImport(turnoverImport) {
-                return ref.getClient().delete(`turnover-import/${turnoverImport.id}`)
+                return ref.getClient().delete(`api/turnover-import/${turnoverImport.id}`)
             },
 
             fetchTurnoversForCategory(categoryId) {
-                return ref.getClient().get(`turnover-import/category/${categoryId}`)
+                return ref.getClient().get(`api/turnover-import/category/${categoryId}`)
                     .then(res => res.data.map(c => denormalizeTurnoverRow(c)))
             },
 
             fetchTurnoversReportForCategory(categoryId, dateGrouping, recursion) {
-                return ref.getClient().get(`turnover-import/category/${categoryId}/report/${dateGrouping}`, {
+                return ref.getClient().get(`api/turnover-import/category/${categoryId}/report/${dateGrouping}`, {
                     params: {
                         "recursion-level": recursion ? 1 << 16 : 1
                     }
@@ -252,31 +252,31 @@ class RegularIncomeAPI {
             // },
 
             fetchCategoryTree() {
-                return ref.getClient().get('categories/tree')
+                return ref.getClient().get('api/categories/tree')
                     .then(res => res.data.map(c => denormalizeCategory(c)))
             },
 
             postCategory(category) {
-                return ref.getClient().post('categories', category)
+                return ref.getClient().post('api/categories', category)
                     .then(res => denormalizeCategory(res.data))
             },
 
             postChildCategory(parentId, category) {
-                return ref.getClient().post(`categories/${parentId}/children`, category)
+                return ref.getClient().post(`api/categories/${parentId}/children`, category)
                     .then(res => denormalizeCategory(res.data))
             },
 
             patchCategory(category) {
-                return ref.getClient().patch(`categories/${category.id}`, category)
+                return ref.getClient().patch(`api/categories/${category.id}`, category)
                     .then(res => denormalizeCategory(res.data))
             },
 
             deleteCategory(category) {
-                return ref.getClient().delete(`categories/${category.id}`)
+                return ref.getClient().delete(`api/categories/${category.id}`)
             },
 
             reassignCategory(newParent, child) {
-                return ref.getClient().patch(`categories/${newParent.id}/children/${child.id}`)
+                return ref.getClient().patch(`api/categories/${newParent.id}/children/${child.id}`)
                     .then(res => denormalizeCategory(res.data))
             }
         }

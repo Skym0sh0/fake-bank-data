@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping
 @Slf4j
 @RequiredArgsConstructor
+@RequestMapping("/api")
 public class UserAuthController {
     private final UserService userService;
 
