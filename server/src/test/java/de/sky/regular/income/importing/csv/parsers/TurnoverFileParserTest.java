@@ -10,12 +10,13 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.StringReader;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.InstanceOfAssertFactories.list;
+import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 
 class TurnoverFileParserTest {
     private final TurnoverFileParser parser = new TurnoverFileParser(
@@ -45,10 +46,10 @@ class TurnoverFileParserTest {
                             .as("CSV is: %n%s", csv)
                             .returns(2, RawCsvTable::getRows)
                             .returns(5, RawCsvTable::getColumns)
-                            .extracting(RawCsvTable::getData, as(list(String[].class)))
+                            .extracting(RawCsvTable::getData, as(LIST))
                             .containsExactly(
-                                    new String[]{"a", "b", "c", "d", "e"},
-                                    new String[]{"1", "2", "3", "4", "5"}
+                                    Arrays.asList("a", "b", "c", "d", "e"),
+                                    Arrays.asList("1", "2", "3", "4", "5")
                             );
                 });
     }
@@ -57,12 +58,12 @@ class TurnoverFileParserTest {
     class WithUnregularCsv {
         private final String csv = """
                 x|x
-                                
+                
                 a|b|c|d|e
                 1|2
                 1|2|3|4|5|6|7
-                                
-                                
+                
+                
                 """;
 
         @Test
@@ -73,14 +74,14 @@ class TurnoverFileParserTest {
                     .as("CSV is: %n%s", csv)
                     .returns(4, RawCsvTable::getRows)
                     .returns(7, RawCsvTable::getColumns)
-                    .extracting(RawCsvTable::getData, as(list(String[].class)))
+                    .extracting(RawCsvTable::getData, as(LIST))
                     .containsExactly(
-                            new String[]{"x", "x", null, null, null, null, null},
-                            new String[]{"a", "b", "c", "d", "e", null, null},
-                            new String[]{"1", "2", null, null, null, null, null},
-                            new String[]{"1", "2", "3", "4", "5", "6", "7"}
+                            Arrays.asList("x", "x", null, null, null, null, null),
+                            Arrays.asList("a", "b", "c", "d", "e", null, null),
+                            Arrays.asList("1", "2", null, null, null, null, null),
+                            Arrays.asList("1", "2", "3", "4", "5", "6", "7")
                     )
-                    .doesNotContain(new String[]{});
+                    .doesNotContain(List.of());
         }
 
         @Test
