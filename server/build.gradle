@@ -2,10 +2,9 @@ import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.Location
 import org.jooq.codegen.GenerationTool
 import org.jooq.meta.jaxb.*
-import org.jooq.meta.jaxb.Configuration
-import org.jooq.meta.jaxb.Target
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.utility.DockerImageName
+
 import java.time.Duration
 import java.time.LocalTime
 
@@ -58,7 +57,9 @@ dependencies {
 
     implementation group: "org.jooq", name: "jooq", version: jooq_version
     implementation group: "org.flywaydb", name: "flyway-core", version: flyway_version
+    implementation group: "org.flywaydb", name:"flyway-database-postgresql", version: flyway_version
     implementation group: "com.zaxxer", name: "HikariCP", version: "5.1.0"
+    runtimeOnly group: "org.postgresql", name: "postgresql", version: "42.7.4"
 
     implementation("io.swagger.core.v3:swagger-models:2.2.23")
     implementation("io.swagger.core.v3:swagger-annotations:2.2.23")
