@@ -1,0 +1,439 @@
+openapi: 3.0.3
+info:
+  title: Regular Income
+  description: This is the API for Regular Income
+  version: 1.0.0
+tags:
+  - name: Restaurant
+    description: Everything about Restaurants
+  - name: Order
+    description: Everything about Orders
+
+paths:
+  /api/foo:
+    post:
+      operationId: Foo
+      responses:
+        204:
+          description: nada
+
+components:
+  schemas:
+    CreatedMetaInformation:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/ID"
+        createdAt:
+          $ref: "#/components/schemas/Timestamp"
+    UpdatedMetaInformation:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/CreatedMetaInformation"
+        - properties:
+            updatedAt:
+              $ref: "#/components/schemas/Timestamp"
+    PatchInformation:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/ID"
+    User:
+      type: object
+      required:
+        - id
+        - username
+      properties:
+        id:
+          $ref: "#/components/schemas/ID"
+        username:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+    UserLogin:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    UserRegistration:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+    CategoryBudget:
+      type: object
+      properties:
+        budgetInCents:
+          $ref: "#/components/schemas/MoneyValue"
+        exceedingThreshold:
+          type: number
+          format: double
+    CategoryPatch:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/PatchInformation"
+        - properties:
+            name:
+              type: string
+            description:
+              type: string
+            budget:
+              $ref: "#/components/schemas/CategoryBudget"
+    Category:
+      type: object
+      required:
+        - isNew
+      allOf:
+        - $ref: "#/components/schemas/UpdatedMetaInformation"
+        - $ref: "#/components/schemas/CategoryPatch"
+        - properties:
+            isNew:
+              type: boolean
+            parentId:
+              $ref: "#/components/schemas/ID"
+            usageCount:
+              type: integer
+              format: int64
+    CategoryTurnoverReport:
+      type: object
+      properties:
+        categoryId:
+          $ref: "#/components/schemas/ID"
+        datapoints:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReportDatapoint"
+
+    RawCsvTable:
+      type: object
+      required:
+        - rows
+        - columns
+      properties:
+        rows:
+          type: integer
+          format: int32
+        columns:
+          type: integer
+          format: int32
+        data:
+          type: array
+          items:
+            type: array
+            items:
+              type: string
+
+    TurnoverImport:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/ID"
+        importedAt:
+          $ref: "#/components/schemas/Timestamp"
+        filename:
+          type: string
+        filesizeBytes:
+          $ref: "#/components/schemas/Filesize"
+        format:
+          $ref: "#/components/schemas/TurnoverImportFormat"
+        encoding:
+          type: string
+        firstTurnover:
+          $ref: "#/components/schemas/Date"
+        lastTurnover:
+          $ref: "#/components/schemas/Date"
+        turnovers:
+          type: array
+          items:
+            $ref: "#/components/schemas/TurnoverRow"
+    TurnoverImportPatch:
+      type: object
+      properties:
+        format:
+          $ref: "#/components/schemas/TurnoverImportFormat"
+        encoding:
+          type: string
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/TurnoverRow"
+    TurnoverImportRowsPatch:
+      type: object
+      properties:
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/TurnoverRowPatch"
+        deleteRowIds:
+          type: array
+          uniqueItems: true
+          items:
+            $ref: "#/components/schemas/ID"
+    TurnoverRowPatch:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/ID"
+        categoryId:
+          $ref: "#/components/schemas/ID"
+    TurnoverPreview:
+      type: object
+      properties:
+        filename:
+          type: string
+        format:
+          $ref: "#/components/schemas/TurnoverImportFormat"
+        encoding:
+          type: string
+        uploadTime:
+          $ref: "#/components/schemas/Timestamp"
+        rows:
+          type: array
+          items:
+            $ref: "#/components/schemas/TurnoverRowPreview"
+    TurnoverRowPreview:
+      type: object
+      properties:
+        importable:
+          type: boolean
+        suggestedCategories:
+          type: array
+          items:
+            $ref: "#/components/schemas/TurnoverRowPreview"
+    CategorySuggestion:
+      type: object
+      required:
+        - categoryId
+        - precedence
+        - frequency
+      properties:
+        categoryId:
+          $ref: "#/components/schemas/ID"
+        precedence:
+          type: number
+          format: double
+        frequency:
+          type: integer
+          format: int32
+        origins:
+          type: array
+          items:
+            type: string
+    TurnoverRow:
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/ID"
+        date:
+          $ref: "#/components/schemas/Date"
+        amountInCents:
+          $ref: "#/components/schemas/MoneyValue"
+        categoryId:
+          $ref: "#/components/schemas/ID"
+        checksum:
+          type: string
+        similarityChecksum:
+          type: string
+        description:
+          type: string
+        suggestedCategory:
+          type: string
+        recipient:
+          type: string
+    TurnoverImportFormat:
+      type: string
+      enum:
+        - VR_BANK_CSV
+        - DKB
+        - NEW_DKB
+        - PAYPAL
+
+    ReportDatapoint:
+      type: object
+      properties:
+        categoryId:
+          $ref: "#/components/schemas/ID"
+        date:
+          $ref: "#/components/schemas/Date"
+        incomeAmountInCents:
+          $ref: "#/components/schemas/MoneyValue"
+        expenseAmountInCents:
+          $ref: "#/components/schemas/MoneyValue"
+        expenseBudgetInCents:
+          $ref: "#/components/schemas/MoneyValue"
+        expenseBudgetWarningThresholdInCents:
+          $ref: "#/components/schemas/MoneyValue"
+    BasicCoarseInfo:
+      type: object
+      properties:
+        userId:
+          $ref: "#/components/schemas/ID"
+        earliestTransaction:
+          $ref: "#/components/schemas/Date"
+        latestTransaction:
+          $ref: "#/components/schemas/Date"
+        numberOfTransactions:
+          type: integer
+          format: int32
+        numberOfUsedCategories:
+          type: integer
+          format: int32
+        maxDepthOfCategories:
+          type: integer
+          format: int32
+    BalanceProgressionReport:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/BalanceDataPoint"
+    BalanceDataPoint:
+      type: object
+      properties:
+        index:
+          type: integer
+          format: int32
+        date:
+          $ref: "#/components/schemas/Date"
+        perDayBalanceInCents:
+          $ref: "#/components/schemas/MoneyValue"
+        balanceInCents:
+          $ref: "#/components/schemas/MoneyValue"
+    IncomeExpenseFlowReport:
+      type: object
+      properties:
+        start:
+          $ref: "#/components/schemas/Date"
+        end:
+          $ref: "#/components/schemas/Date"
+        flows:
+          type: array
+          items:
+            $ref: "#/components/schemas/FlowDataPoint"
+    FlowDataPoint:
+      type: object
+      properties:
+        fromCategory:
+          type: string
+        toCategory:
+          type: string
+        depthLevel:
+          type: integer
+          format: int32
+        amountInCents:
+          $ref: "#/components/schemas/MoneyValue"
+    MonthlyIncomeExpenseReport:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/MonthlyIncomeExpenseDataPoint"
+    MonthlyIncomeExpenseDataPoint:
+      type: object
+      properties:
+        month:
+          $ref: "#/components/schemas/Date"
+        incomeInCents:
+          $ref: "#/components/schemas/MoneyValue"
+        expenseInCents:
+          $ref: "#/components/schemas/MoneyValue"
+    Problem:
+      type: object
+      properties:
+        timestamp:
+          $ref: "#/components/schemas/Timestamp"
+        path:
+          type: string
+        status:
+          type: integer
+          format: int32
+        error:
+          type: string
+        errorDetails:
+          type: string
+
+
+
+    ID:
+      type: string
+      format: uuid
+    MoneyValue:
+      type: integer
+      format: int32
+    Filesize:
+      type: integer
+      format: int64
+    Date:
+      type: string
+      format: date
+    Timestamp:
+      type: string
+      format: date-time
+    Version:
+      type: string
+      format: uuid
+
+
+#  responses:
+#    SuccessOrderResponse:
+#      description: Successful operation
+#      headers:
+#        ETag:
+#          schema:
+#            $ref: "#/components/schemas/Version"
+#      content:
+#        application/json:
+#          schema:
+#            $ref: '#/components/schemas/Order'
+#        application/xml:
+#          schema:
+#            $ref: '#/components/schemas/Order'
+#    SuccessRestaurantResponse:
+#      description: Successful operation
+#      headers:
+#        ETag:
+#          schema:
+#            $ref: "#/components/schemas/Version"
+#      content:
+#        application/json:
+#          schema:
+#            $ref: '#/components/schemas/Restaurant'
+#        application/xml:
+#          schema:
+#            $ref: '#/components/schemas/Restaurant'
+#    ClientErrorResponse:
+#      description: Operation failed due to client error
+#      content:
+#        application/json:
+#          schema:
+#            $ref: "#/components/schemas/ErrorObject"
+#        application/xml:
+#          schema:
+#            $ref: "#/components/schemas/ErrorObject"
+#    ServerErrorResponse:
+#      description: Operation failed due to client error
+#      content:
+#        application/json:
+#          schema:
+#            $ref: "#/components/schemas/ErrorObject"
+#        application/xml:
+#          schema:
+#            $ref: "#/components/schemas/ErrorObject"

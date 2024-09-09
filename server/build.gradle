@@ -30,6 +30,7 @@ plugins {
     id 'org.springframework.boot' version "$springboot_version"
     id 'io.spring.dependency-management' version '1.1.6'
     id 'com.google.cloud.tools.jib' version '3.4.3'
+    id "org.openapi.generator" version "7.8.0"
     id "com.gorylenko.gradle-git-properties" version "2.4.2"
 }
 
@@ -61,6 +62,9 @@ dependencies {
     implementation group: "org.flywaydb", name: "flyway-core", version: flyway_version
     implementation group: "com.zaxxer", name: "HikariCP", version: "5.1.0"
 
+    implementation("io.swagger.core.v3:swagger-models:2.2.23")
+    implementation("io.swagger.core.v3:swagger-annotations:2.2.23")
+
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.17.0'
     implementation group: 'com.google.guava', name: 'guava', version: '33.3.0-jre'
 
@@ -71,6 +75,29 @@ dependencies {
 
 //    implementation group: 'org.apache.poi', name: 'poi', version: '5.2.5'
     implementation group: 'com.univocity', name: 'univocity-parsers', version: '2.9.1'
+}
+
+
+gitProperties {
+    extProperty = "git.properties"
+}
+
+tasks.register("prepareGitProperties") {
+    dependsOn("generateGitProperties")
+
+    doFirst {
+        def gitProps = project.ext["git.properties"]?.findAll { key, value ->
+            key instanceof String && value instanceof String
+        } ?: [:]
+
+        gitProps.each { key, value ->
+            project.ext.set(key, value)
+        }
+    }
+}
+
+tasks.named("compileJava") {
+    dependsOn("prepareGitProperties")
 }
 
 tasks.register("jooqCodegen") {
@@ -133,12 +160,49 @@ tasks.register("jooqCodegen") {
 
 compileJava.dependsOn("jooqCodegen")
 
+
+openApiGenerate {
+    generatorName.set("spring")
+    inputSpec.set(layout.projectDirectory.dir("..").dir("spec").file("openapi-spec.yml").asFile.path)
+    outputDir.set(layout.buildDirectory.dir("generated/sources/spec").get().asFile.path)
+    apiPackage.set("de.sky.regular.income.api.api")
+    modelPackage.set("de.sky.regular.income.api")
+    typeMappings.set([
+            "time"    : "LocalTime",
+            "duration": "Duration",
+    ])
+    importMappings.set([
+            "LocalTime": LocalTime.class.name,
+            "Duration" : Duration.class.name
+    ])
+    configOptions.set([
+            "library"                    : "spring-boot",
+            "dateLibrary"                : "java8",
+            "useJakartaEe"               : "true",
+            "generateBuilders"           : "true",
+            "legacyDiscriminatorBehavior": "false",
+            "openApiNullable"            : "false",
+            "delegatePattern"            : "false",
+            "useSpringBoot3"             : "true",
+            "interfaceOnly"              : "true",
+            "skipDefaultInterface"       : "true",
+            "returnSuccessCode"          : "true",
+            "useTags"                    : "true"
+    ])
+}
+
+tasks.named("compileJava") {
+    dependsOn(tasks.openApiGenerate)
+    dependsOn("prepareGitProperties")
+}
+
 sourceSets {
     main {
         java {
             srcDirs(
                     'database/src/main/java',
-                    'build/generated/sources/jooq/generated'
+                    'build/generated/sources/jooq/generated',
+                    'build/generated/sources/spec/src/main'
             )
         }
     }
