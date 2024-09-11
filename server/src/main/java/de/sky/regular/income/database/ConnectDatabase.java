@@ -1,5 +1,6 @@
 package de.sky.regular.income.database;
 
+import generated.sky.regular.income.RegularIncome;
 import org.flywaydb.core.Flyway;
 
 public class ConnectDatabase {
@@ -8,7 +9,7 @@ public class ConnectDatabase {
                 url,
                 user,
                 password,
-                "REGULAR_INCOME",
+                RegularIncome.REGULAR_INCOME.getName(),
                 schema
         );
     }
