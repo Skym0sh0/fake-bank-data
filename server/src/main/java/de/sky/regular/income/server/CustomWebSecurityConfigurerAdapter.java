@@ -33,7 +33,8 @@ public class CustomWebSecurityConfigurerAdapter {
     public SecurityFilterChain filterChain(HttpSecurity http, UserService userService) throws Exception {
         return http
                 .authorizeHttpRequests(authz ->
-                        authz.requestMatchers("/user/register").permitAll()
+                        authz.requestMatchers("/", "/index.html", "/favicon.ico", "/js/**", "/css/**").permitAll()
+                                .requestMatchers("/api/user/register").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .httpBasic(configurer -> {
