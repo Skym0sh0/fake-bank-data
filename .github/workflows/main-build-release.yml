@@ -1,0 +1,75 @@
+name: Build & Release Main
+
+on:
+  push:
+    branches:
+      - main  # Trigger the workflow when there's a push to the main branch
+  workflow_dispatch:  # Allow manual triggering from the GitHub Actions tab
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Set up JDK 22
+        uses: actions/setup-java@v4
+        with:
+          java-version: '22'
+          distribution: 'temurin'
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: '0'
+          fetch-tags: 'true'
+
+      - name: Get release version
+        id: get_release_version
+        uses: paulhatch/semantic-version@v5.4.0
+        with:
+          bump_each_commit: 'false'
+          bump_each_commit_patch_pattern: ''
+          tag_prefix: 'v'
+          major_pattern: 'feat:'
+          minor_pattern: 'fix:'
+          search_commit_body: 'true'
+
+      - name: Info release version
+        run: |
+          latest_release=$(gh release view --json name --jq '.name')
+          echo "Latest release: $latest_release"
+          echo "New Version: $RELEASE_VERSION"
+          echo "New Version Tag: $RELEASE_VERSION_TAG"
+        env:
+          RELEASE_VERSION: ${{ steps.get_release_version.outputs.version }}
+          RELEASE_VERSION_TAG: ${{ steps.get_release_version.outputs.version_tag }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
+      # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@16bf8bc8fe830fa669c3c9f914d3eb147c629707 # v4
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build
+        run: ./gradlew build --info --stacktrace
+
+      - name: Build & Push Image
+        run: |
+          new_version=$RELEASE_VERSION_TAG
+          echo "Releasing Version $new_version"
+          ./gradlew jibBuildTar jib --info --stacktrace
+          gh release create "$new_version" -t "$new_version" -n "Release $new_version"
+          gh release upload "$new_version" "server/build/jib-image.tar"
+          gh release upload "$new_version" "server/build/jib-image.json"
+        env:
+          RELEASE_VERSION: ${{ steps.get_release_version.outputs.version }}
+          RELEASE_VERSION_TAG: ${{ steps.get_release_version.outputs.version_tag }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_HUB_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          DOCKER_REPOSITORY: ${{ secrets.DOCKER_REPOSITORY }}
