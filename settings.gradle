@@ -1,5 +1,4 @@
 rootProject.name = 'regular-income'
 
-include ':api'
 include ':frontend'
 include ':server'
