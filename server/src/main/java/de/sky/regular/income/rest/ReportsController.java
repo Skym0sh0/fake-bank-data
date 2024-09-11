@@ -2,6 +2,7 @@ package de.sky.regular.income.rest;
 
 import de.sky.regular.income.api.BalanceProgressionReport;
 import de.sky.regular.income.api.BasicCoarseInfo;
+import de.sky.regular.income.api.IncomeExpenseFlowReport;
 import de.sky.regular.income.api.MonthlyIncomeExpenseReport;
 import de.sky.regular.income.api.ReportTimeUnits;
 import de.sky.regular.income.dao.IncomeExpenseFlowDataReporter;
@@ -65,7 +66,7 @@ public class ReportsController implements generated.sky.regular.income.api.rest.
     }
 
     @Override
-    public ResponseEntity<de.sky.regular.income.api.IncomeExpenseFlowReport> fetchIncomeExpenseFlowReport(Integer year, Integer month) {
+    public ResponseEntity<IncomeExpenseFlowReport> fetchIncomeExpenseFlowReport(Integer year, Integer month) {
         logger.info("Fetch IncomeExpense Flow Report for year={} and month={}", year, month);
 
         return ResponseEntity.ok(
@@ -88,9 +89,8 @@ public class ReportsController implements generated.sky.regular.income.api.rest.
         );
     }
 
-
     @Override
-    public ResponseEntity<de.sky.regular.income.api.IncomeExpenseFlowReport> fetchIncomeExpenseFlowSlidingWindowReport(ReportTimeUnits iUnit, Integer count, LocalDate referenceDate) {
+    public ResponseEntity<IncomeExpenseFlowReport> fetchIncomeExpenseFlowSlidingWindowReport(ReportTimeUnits iUnit, Integer count, LocalDate referenceDate) {
         var allowed = Set.of(ChronoUnit.DAYS, ChronoUnit.WEEKS, ChronoUnit.MONTHS, ChronoUnit.YEARS, ChronoUnit.DECADES);
 
         var unit = ChronoUnit.valueOf(iUnit.name().toUpperCase());

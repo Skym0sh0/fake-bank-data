@@ -242,7 +242,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Category"
   /api/categories/{parent-id}/children/{child-id}:
-    post:
+    patch:
       tags:
         - Category
       summary: Moves a category to another category as child
@@ -382,7 +382,7 @@ paths:
                 file:
                   type: string
                   format: binary
-                patch:
+                data:
                   $ref: "#/components/schemas/TurnoverImportPatch"
             encoding:
               file:
@@ -474,7 +474,7 @@ paths:
     patch:
       tags:
         - Turnovers
-      summary:
+      summary: Batch Patch Turnover Imports
       operationId: batchPatchTurnoverImports
       requestBody:
         content:
@@ -617,7 +617,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/IncomeExpenseFlowReport"
-  /api/reports//income-expenses-flow/sliding-window/{unit}/{count}:
+  /api/reports/income-expenses-flow/sliding-window/{unit}/{count}:
     get:
       tags:
         - Reports
