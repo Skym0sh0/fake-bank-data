@@ -57,7 +57,7 @@ dependencies {
 
     implementation group: "org.jooq", name: "jooq", version: jooq_version
     implementation group: "org.flywaydb", name: "flyway-core", version: flyway_version
-    implementation group: "org.flywaydb", name:"flyway-database-postgresql", version: flyway_version
+    implementation group: "org.flywaydb", name: "flyway-database-postgresql", version: flyway_version
     implementation group: "com.zaxxer", name: "HikariCP", version: "5.1.0"
     runtimeOnly group: "org.postgresql", name: "postgresql", version: "42.7.4"
 
@@ -159,7 +159,6 @@ tasks.register("jooqCodegen") {
 
 compileJava.dependsOn("jooqCodegen")
 
-
 openApiGenerate {
     generatorName.set("spring")
     inputSpec.set(layout.projectDirectory.dir("..").dir("spec").file("openapi-spec.yml").asFile.path)
@@ -214,27 +213,33 @@ test {
 mainClassName = 'de.sky.regular.income.Server'
 
 jib {
-    container {
-        mainClass = mainClassName
-        ports = ['8080']
-        environment = [
-                JVM_PARAMETERS: '',
-                CMD_ARGS      : '',
-        ]
-
-        creationTime = 'USE_CURRENT_TIMESTAMP'
-    }
     from {
         // linux/arm/v7
         image = 'registry://eclipse-temurin:19-jre-jammy@sha256:167557501026d70f7486b631d26ae00f7551cc1daba1da67f86948ea5bd2aa41'
-//        // linux/amd64
-//        image = 'registry://eclipse-temurin:19-jre-jammy@sha256:41a7ebdfa6b25e05986b77fbbc73820a3b7a6459a505686ba43e56baa83c0c98'
+        //        // linux/amd64
+//      image = 'registry://eclipse-temurin:19-jre-jammy@sha256:41a7ebdfa6b25e05986b77fbbc73820a3b7a6459a505686ba43e56baa83c0c98'
     }
     to {
-        image = "${docker_registry}/regular-income-backend"
-        tags = ['latest'/*, 'dev'*/]
+        image = (System.getenv("DOCKER_REPOSITORY") ?: "default-docker-repository") + "/regular-income"
+        tags = [System.getenv("RELEASE_VERSION") ?: 'latest', 'latest']
+        auth {
+            username = System.getenv("DOCKER_HUB_USERNAME") ?: "default-username"
+            password = System.getenv("DOCKER_HUB_PASSWORD") ?: "default-password"
+        }
     }
-    allowInsecureRegistries = true
+    container {
+        creationTime.set(project.provider { project.ext["git.commit.time"] as String })
+        mainClass = mainClassName
+        ports = ['8080']
+        labels.set(project.provider {
+            [
+                    "git.url"   : project.ext["git.remote.origin.url"] as String,
+                    "git.time"  : project.ext["git.commit.time"] as String,
+                    "git.commit": project.ext["git.commit.id"] as String,
+                    "git.email" : project.ext["git.commit.user.email"] as String
+            ]
+        })
+    }
 }
 
 tasks.register('copyWebApp', Copy) {
