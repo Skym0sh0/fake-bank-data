@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "serve": "set NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service serve",
-    "build": "set NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service build --dest ./build/dist",
-    "lint": "set NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service lint"
+    "serve": "set NODE_OPTIONS=--openssl-legacy-provider && export NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service serve",
+    "build": "set NODE_OPTIONS=--openssl-legacy-provider && export NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service build --dest ./build/dist",
+    "lint": "set NODE_OPTIONS=--openssl-legacy-provider && export NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service lint"
   },
   "dependencies": {
     "@amcharts/amcharts4": "4.10.38",
