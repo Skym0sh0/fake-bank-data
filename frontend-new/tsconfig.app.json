@@ -26,6 +26,6 @@
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
-    "build/generated-ts/api/*.ts"
+    "build/generated-ts/"
   ]
 }

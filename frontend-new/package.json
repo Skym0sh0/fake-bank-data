@@ -14,9 +14,12 @@
     "lodash": "4.17.21",
     "luxon": "3.4.4",
     "uuid": "10.0.0",
-    "vue": "3.4.37"
+    "vite-plugin-vuetify": "2.0.4",
+    "vue": "3.4.37",
+    "vuetify": "3.7.1"
   },
   "devDependencies": {
+    "@mdi/font": "7.4.47",
     "@types/lodash": "4.17.6",
     "@types/luxon": "3.4.2",
     "@types/uuid": "10.0.0",
