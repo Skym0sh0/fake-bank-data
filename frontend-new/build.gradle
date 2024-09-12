@@ -47,10 +47,8 @@ tasks.register('npmStartGUI', NpmTask) {
 }
 
 openApiGenerate {
-    generatorName.set("typescript-axios")
-    inputSpec.set(layout.projectDirectory.dir("..").dir("spec").file("openapi-spec.yml").asFile.path)
-    outputDir.set(layout.buildDirectory.dir("generated-ts/api").get().asFile.path)
-    configOptions.set([
-            "supportsES6": "true"
-    ])
+    generatorName = 'typescript-axios'
+    inputSpec = layout.projectDirectory.dir("..").dir("spec").file("openapi-spec.yml").asFile.path
+    outputDir = layout.buildDirectory.dir("generated-ts/api").get().asFile.path
+    configOptions = ["supportsES6": "true"]
 }
