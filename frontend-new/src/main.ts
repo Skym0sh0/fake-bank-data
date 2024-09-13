@@ -10,6 +10,7 @@ import App from './App.vue'
 import {authenticationKey, errorRefKey} from "./keys.ts";
 import {userReference} from "./auth/Authentication.js";
 import {errorReference} from "./auth/ErrorHandler.ts";
+import {router} from "./router.ts";
 
 const vuetify = createVuetify({
     components,
@@ -20,7 +21,8 @@ const vuetify = createVuetify({
 })
 
 createApp(App)
-    .use(vuetify)
     .provide(authenticationKey, userReference)
     .provide(errorRefKey, errorReference)
+    .use(vuetify)
+    .use(router)
     .mount('#app')

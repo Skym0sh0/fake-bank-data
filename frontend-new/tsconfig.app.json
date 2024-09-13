@@ -20,12 +20,17 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "@api/*": [
+        "./build/generated-ts/api/*"
+      ]
+    }
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
-    "build/generated-ts/"
+    "build/generated-ts/api/"
   ]
 }

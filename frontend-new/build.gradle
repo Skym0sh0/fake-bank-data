@@ -50,5 +50,8 @@ openApiGenerate {
     generatorName = 'typescript-axios'
     inputSpec = layout.projectDirectory.dir("..").dir("spec").file("openapi-spec.yml").asFile.path
     outputDir = layout.buildDirectory.dir("generated-ts/api").get().asFile.path
-    configOptions = ["supportsES6": "true"]
+    configOptions = [
+            "supportsES6"   : "true",
+            "withInterfaces": "true"
+    ]
 }

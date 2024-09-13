@@ -1,6 +1,7 @@
 import {defineConfig} from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vuetify from 'vite-plugin-vuetify'
+import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -8,6 +9,14 @@ export default defineConfig({
         vue(),
         vuetify({autoImport: true})
     ],
+    resolve: {
+        alias: {
+            '@api': path.resolve(__dirname, 'build/generated-ts/api')
+        }
+    },
+    build: {
+        outDir: 'build/dist'
+    },
     server: {
         proxy: {
             '/dev-proxy': {
@@ -19,8 +28,5 @@ export default defineConfig({
             },
         },
         cors: false
-    },
-    build: {
-        outDir: 'build/dist'
     }
 })
