@@ -4,6 +4,7 @@ import LoginPage from "./components/login/LoginPage.vue";
 import {inject} from "vue";
 import {authenticationKey} from "./keys.ts";
 import RegisterPage from "./components/login/RegisterPage.vue";
+import UserDetailsPage from "./components/login/UserDetailsPage.vue";
 
 const routes: RouteRecordRaw[] = [
     {
@@ -20,6 +21,11 @@ const routes: RouteRecordRaw[] = [
         path: '/register',
         name: 'register',
         component: RegisterPage,
+    },
+    {
+        path: '/user-details',
+        name: 'user-details',
+        component: UserDetailsPage,
     },
 ];
 

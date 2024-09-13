@@ -8,8 +8,8 @@ import axios, {AxiosInstance} from "axios";
 const userRef = inject(authenticationKey).value;
 const errorReference = inject(errorRefKey).value;
 
-function authHeader(user: UserLogin) {
-  console.log("auth header", user)
+function authHeader() {
+  const user = userRef?.user;
 
   if (user && user.username && user.password) {
     const authdata = window.btoa(user.username + ":" + user.password)
@@ -24,6 +24,14 @@ const client: AxiosInstance = axios.create({
     correlationId: uuidv4(),
   }
 });
+
+client.interceptors.request.use(request => {
+  request.headers = {
+    ...request.headers,
+    ...authHeader()
+  }
+  return request;
+})
 
 client.interceptors.response.use(response => {
       return response.data

@@ -21,14 +21,14 @@ public class UserAuthController implements generated.sky.regular.income.api.rest
 
     @Override
     public ResponseEntity<User> registerUser(UserRegistration registration) {
-        log.info("Registering user {}...", registration);
+        log.info("Registering user {}...", registration.getUsername());
 
         return ResponseEntity.ok(userService.register(registration));
     }
 
     @Override
     public ResponseEntity<User> updateUser(UUID id, UserRegistration registration) {
-        log.info("Changing user {}...", registration);
+        log.info("Changing user {}...", id);
 
         return ResponseEntity.ok(userService.updateUser(id, registration));
     }

@@ -5,6 +5,7 @@ import {apiRefKey, authenticationKey} from "../../keys.ts";
 import axios from "axios";
 import {useRoute, useRouter} from 'vue-router'
 import {User, UserAuthApi} from "@api"
+import ConfirmationedButton from "../misc/ConfirmationedButton.vue";
 
 const router = useRouter()
 const route = useRoute()
