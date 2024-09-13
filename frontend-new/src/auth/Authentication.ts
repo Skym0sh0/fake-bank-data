@@ -1,4 +1,4 @@
-import {provide, readonly, ref} from "vue";
+import {provide, reactive, readonly, ref, watch} from "vue";
 import {authenticationKey} from "../keys.ts";
 
 const STORAGE_USER_KEY = "user";
@@ -33,11 +33,11 @@ export interface UserType {
     lastname?: string;
 }
 
-const user = ref<UserType | null>(null)
+const userRef = ref<UserType | null>(null)
 
 function setUser(user) {
     storageAccess.store(STORAGE_USER_KEY, JSON.stringify(user))
-    user.value = user;
+    userRef.value = user;
 }
 
 function getUser() {
@@ -47,7 +47,7 @@ function getUser() {
 
 function initUser() {
     const userJson = storageAccess.read(STORAGE_USER_KEY);
-    user.value = JSON.parse(userJson)
+    userRef.value = JSON.parse(userJson)
 }
 
 function login(user, password) {
@@ -56,16 +56,16 @@ function login(user, password) {
 
 function logout() {
     storageAccess.delete(STORAGE_USER_KEY);
-    user.value = null;
+    userRef.value = null;
 
     // location.reload();
 }
 
-export const userReference = ref({
-    user,
+export const userReference = ref(readonly({
+    user: userRef,
     getUser,
     setUser,
     initUser,
     login,
     logout
-})
+}))
