@@ -38,8 +38,6 @@ const errorMessage = ref<string | null>(null);
 const userRef = inject(authenticationKey).value
 const apiAccess = inject(apiRefKey)
 
-// console.log(apiAccess)
-
 function doLogin() {
   if (!username.value || !password.value)
     return;
@@ -50,9 +48,7 @@ function doLogin() {
 
   api.loginUser({username: username.value, password: password.value})
       .then((user: User) => {
-        console.log("logged in", user, route)
         userRef.login(user, password.value)
-
         router.replace({
           path: route.query.returnUrl ?? '/'
         })
