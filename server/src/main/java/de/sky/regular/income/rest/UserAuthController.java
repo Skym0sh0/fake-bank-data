@@ -39,8 +39,7 @@ public class UserAuthController implements generated.sky.regular.income.api.rest
 
         userService.deleteUser(id);
 
-        return ResponseEntity.ok()
-                .build();
+        return ResponseEntity.ok().build();
     }
 
     @Override
@@ -53,7 +52,7 @@ public class UserAuthController implements generated.sky.regular.income.api.rest
 
     @Override
     public ResponseEntity<User> loginUser(UserLogin userLogin) {
-        throw new UnsupportedOperationException("Not implemented");
+        return ResponseEntity.ok(userService.checkLogin(userLogin.getUsername(), userLogin.getPassword()));
     }
 
     @Override
