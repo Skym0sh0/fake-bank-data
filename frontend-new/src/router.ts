@@ -1,10 +1,11 @@
 import {createRouter, createWebHistory, RouteRecordRaw} from 'vue-router'
-import Home from "./components/Home.vue";
-import LoginPage from "./components/login/LoginPage.vue";
 import {inject} from "vue";
 import {authenticationKey} from "./keys.ts";
+import Home from "./components/Home.vue";
+import LoginPage from "./components/login/LoginPage.vue";
 import RegisterPage from "./components/login/RegisterPage.vue";
 import UserDetailsPage from "./components/login/UserDetailsPage.vue";
+import About from "./components/About.vue";
 
 export type Page = {
   link: string;
@@ -93,7 +94,7 @@ const routes: RouterPage[] = [
   {
     path: '/about',
     name: 'about',
-    component: Home,
+    component: About,
     page: {
       title: "Hilfe",
       shortDescription: "Hilfe",
