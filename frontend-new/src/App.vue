@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import {computed, inject, onMounted, ref} from "vue";
+import {computed, inject, ref} from "vue";
 import UserAvatar from "./components/login/UserAvatar.vue";
 import WaitingIndicator from "./components/misc/WaitingIndicator.vue";
 import {authenticationKey} from "./keys.ts";
 import ApiErrorBubble from "./components/misc/ApiErrorBubble.vue";
 import ApiAccess from "./api/ApiAccess.vue";
+import SkyNavigation from "./components/layout/SkyNavigation.vue";
 
 const userRef = inject(authenticationKey)
 
@@ -55,7 +56,7 @@ function toggleDrawer() {
       </v-app-bar>
 
       <v-navigation-drawer v-if="isLoggedIn" app v-model="drawer" dark>
-        <!--      <sky-navigation/>-->
+        <sky-navigation/>
       </v-navigation-drawer>
 
       <v-main app>

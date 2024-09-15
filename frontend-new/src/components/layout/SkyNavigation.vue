@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import {getPages} from "../../utils/pages.ts";
+import {getPages} from "../../router.ts";
+import {computed} from "vue";
 
 const links = computed(() => {
   return getPages();
