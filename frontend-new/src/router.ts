@@ -6,6 +6,7 @@ import LoginPage from "./components/login/LoginPage.vue";
 import RegisterPage from "./components/login/RegisterPage.vue";
 import UserDetailsPage from "./components/login/UserDetailsPage.vue";
 import About from "./components/About.vue";
+import ReportOverview from "./components/reports/simple/ReportOverview.vue";
 
 export type Page = {
   link: string;
@@ -74,7 +75,7 @@ const routes: RouterPage[] = [
   {
     path: '/reports/',
     name: 'reports-overview',
-    component: Home,
+    component: ReportOverview,
     page: {
       title: "Berichte",
       shortDescription: "Einfache Berichte",

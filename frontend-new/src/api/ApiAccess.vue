@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import {inject, provide} from "vue";
-import {apiRefKey, authenticationKey, errorRefKey} from "../keys.ts";
+import {apiRefKey, ApiType, authenticationKey, errorRefKey} from "../keys.ts";
 import {v4 as uuidv4} from "uuid";
-import {Configuration, UserAuthApi, UserLogin} from "@api/index.ts"
+import {Configuration, ReportsApi, UserAuthApi} from "@api/index.ts"
 import axios, {AxiosInstance} from "axios";
 
 const userRef = inject(authenticationKey).value;
@@ -34,25 +34,26 @@ client.interceptors.request.use(request => {
 })
 
 client.interceptors.response.use(response => {
-      return response.data
-    },
-    error => {
-      errorReference.error = error.response.data;
+    return response.data
+  },
+  error => {
+    errorReference.error = error.response.data;
 
-      if (error.response.status === 401 && !error.request?.responseURL?.endsWith("/api/auth/login")) {
-        userRef.logout();
-        location.reload();
-      }
+    if (error.response.status === 401 && !error.request?.responseURL?.endsWith("/api/auth/login")) {
+      userRef.logout();
+      location.reload();
+    }
 
-      return Promise.reject(error.response.data);
-    })
+    return Promise.reject(error.response.data);
+  })
 
 const config: Configuration = new Configuration({
   basePath: "/dev-proxy",
 });
 
-const api = {
+const api: ApiType = {
   authApi: new UserAuthApi(config, "", client),
+  reportsApi: new ReportsApi(config, "", client)
 }
 
 provide(apiRefKey, api);

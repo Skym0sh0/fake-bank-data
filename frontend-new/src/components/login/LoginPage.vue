@@ -2,10 +2,8 @@
 import WaitingIndicator from "../misc/WaitingIndicator.vue";
 import {inject, ref} from "vue";
 import {apiRefKey, authenticationKey} from "../../keys.ts";
-import axios from "axios";
 import {useRoute, useRouter} from 'vue-router'
 import {User, UserAuthApi} from "@api"
-import ConfirmationedButton from "../misc/ConfirmationedButton.vue";
 
 const router = useRouter()
 const route = useRoute()
@@ -48,16 +46,16 @@ function doLogin() {
   const api: UserAuthApi = apiAccess.authApi;
 
   api.loginUser({username: username.value, password: password.value})
-      .then((user: User) => {
-        userRef.login(user, password.value)
-        router.replace({
-          path: route.query.returnUrl ?? '/'
-        })
+    .then((user: User) => {
+      userRef.login(user, password.value)
+      router.replace({
+        path: route.query.returnUrl ?? '/'
       })
-      .catch(e => {
-        errorMessage.value = e;
-      })
-      .finally(() => isLoading.value = false);
+    })
+    .catch(e => {
+      errorMessage.value = e;
+    })
+    .finally(() => isLoading.value = false);
 }
 
 function onRegisterClick() {
