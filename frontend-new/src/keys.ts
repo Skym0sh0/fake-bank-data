@@ -1,11 +1,12 @@
 import type {InjectionKey} from 'vue';
 import {userReference} from "./auth/Authentication.ts";
 import {errorReference} from "./auth/ErrorHandler.ts";
-import {ReportsApi, UserAuthApi} from "@api/index.ts"
+import {CategoryApi, ReportsApi, UserAuthApi} from "@api/index.ts"
 
 export type ApiType = {
   authApi: UserAuthApi;
   reportsApi: ReportsApi;
+  categoriesApi: CategoryApi;
 }
 
 export const authenticationKey = Symbol() as InjectionKey<typeof userReference>

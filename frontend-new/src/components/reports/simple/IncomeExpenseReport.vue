@@ -21,7 +21,6 @@ const isLoading = ref(false)
 const chartRef = ref<XYChart | null>(null)
 const incomeExpenses = ref<MonthlyIncomeExpenseDataPoint[]>([])
 
-
 const getWidth = computed(() => {
   if (!width.value)
     return "100%"

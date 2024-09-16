@@ -8,6 +8,7 @@ import UserDetailsPage from "./components/login/UserDetailsPage.vue";
 import About from "./components/About.vue";
 import ReportOverview from "./components/reports/simple/ReportOverview.vue";
 import TimelyReportOverview from "./components/reports/sankeys/TimelyReportOverview.vue";
+import CategoryOverview from "./components/category/CategoryOverview.vue";
 
 export type Page = {
   link: string;
@@ -66,7 +67,7 @@ const routes: RouterPage[] = [
   {
     path: '/categories/',
     name: 'category-overview',
-    component: Home,
+    component: CategoryOverview,
     page: {
       title: "Kategorien",
       shortDescription: "Kategorien pflegen",
