@@ -35,8 +35,9 @@ function hideAll() {
   openCharts.value = []
 }
 
-onMounted(()=>{
-  showAll()
+onMounted(() => {
+  openCharts.value = charts.value.map(c => c.id)
+      .filter(c => c < 1)
 })
 </script>
 

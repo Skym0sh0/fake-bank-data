@@ -13,11 +13,12 @@ const api: ReportsApi | undefined = inject(apiRefKey)?.reportsApi;
 
 const {height} = defineProps<{ height: number }>();
 
-const target2 = `balance-progression-report-chart-target-div`
-const target = useTemplateRef("balance-progression-report-chart-target-div");
 const width = ref(null)
-const chartRef = ref<XYChart | null>(null)
+
+const target = useTemplateRef("balance-progression-report-chart-target-div");
+
 const isLoading = ref(false)
+const chartRef = ref<XYChart | null>(null)
 const data = ref<BalanceDataPoint[]>([])
 
 const isReportPresent = computed(() => {
@@ -38,17 +39,15 @@ const getHeight = computed(() => {
 function draw() {
   chartRef.value?.dispose()
 
-  if (!target.value) {
-    console.log("before nexttick")
-    nextTick(() => draw())
-    console.log("no element")
-    return;
-  }
-
   if (!isReportPresent.value)
     return;
 
-  const chart: XYChart = am4core.create(target.value.$el, am4charts.XYChart)
+  if (!target.value) {
+    console.error("Target element is not yet present. Is it hidden due to conditional rendering/loading?")
+    return;
+  }
+
+  const chart: XYChart = am4core.create(target.value, am4charts.XYChart)
 
   chart.data = data.value.flatMap(rec => {
     if (!rec.date || rec.balanceInCents === undefined)
@@ -60,15 +59,12 @@ function draw() {
     }];
   })
 
-  console.log("draw", chart.data)
-
   const dateAxis = chart.xAxes.push(new am4charts.DateAxis())
   dateAxis.title.text = "Datum"
   dateAxis.renderer.grid.template.location = 0.5
 
   const valueAxis = chart.yAxes.push(new am4charts.ValueAxis())
   valueAxis.dataFields.value = "value"
-  // valueAxis.dataFields["value"] = "value"
   valueAxis.title.text = "Kontostand"
   valueAxis.numberFormatter.numberFormat = {
     currency: "EUR",
@@ -104,25 +100,25 @@ function draw() {
 
   chart.exporting.menu = new am4core.ExportMenu();
 
-  setInitialZoom(chart, dateAxis)
+  // setInitialZoom(chart, dateAxis)
 
   chartRef.value = chart;
 }
 
 function loadData() {
-  console.log("load data")
   isLoading.value = true
 
   api?.fetchBalanceProgressionReport()
-    .then(res => {
-      data.value = res.data ?? []
+      .then(res => {
+        data.value = res.data ?? []
 
-      // console.log("loaded data", res.data)
+        // must be set here, otherwise the target element is not present
+        isLoading.value = false
 
-      nextTick(() => draw())
-    })
-    .catch(e => console.log(e))
-    .finally(() => isLoading.value = false)
+        nextTick(() => draw())
+      })
+      .catch(e => console.log(e))
+      .finally(() => isLoading.value = false)
 }
 
 onBeforeUnmount(() => {
@@ -130,9 +126,6 @@ onBeforeUnmount(() => {
 })
 
 loadData()
-onMounted(() => {
-  console.log("mounted")
-})
 </script>
 
 <template>
@@ -144,7 +137,3 @@ onMounted(() => {
     </waiter>
   </div>
 </template>
-
-<style scoped>
-
-</style>
