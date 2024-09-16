@@ -3,6 +3,7 @@ import WaitingIndicator from "../misc/WaitingIndicator.vue";
 import {computed, inject, ref, useTemplateRef} from "vue";
 import {Category, CategoryApi, CategoryPatch, ReportsApi} from "@api/api.ts";
 import {apiRefKey} from "../../keys.ts";
+import CategoryList from "./CategoryList.vue";
 
 const api: CategoryApi | undefined = inject(apiRefKey)?.categoriesApi;
 
@@ -12,6 +13,10 @@ type DetailSelectionType = {
   parentId: null;
   entity: null;
   budget: number | null;
+}
+
+export type CategoriesByIdMap = {
+  [id: string]: Category;
 }
 
 const detailForm = useTemplateRef("detail-form");
@@ -25,7 +30,7 @@ const selectedForDetails = ref<DetailSelectionType>({
   entity: null,
 });
 
-const categoriesById = computed(() => {
+const categoriesById = computed<CategoriesByIdMap>(() => {
   return categories.value.reduce((old, cur) => ({...old, [cur.id]: cur}), {})
 })
 
@@ -190,12 +195,12 @@ loadCategories();
       <v-container class="pt-0">
         <v-row class="py-0">
           <v-col class="py-0" :cols="showDetails ? 8 : 12">
-            <!--            <category-list :categories-by-id="categoriesById"-->
-            <!--                           :categories="categories"-->
-            <!--                           @newCategory="addNewCategoryTo"-->
-            <!--                           @deleteCategory="deleteCategory"-->
-            <!--                           @onReassign="reassignCategories"-->
-            <!--                           @edit="openEditView"/>-->
+            <category-list :categories-by-id="categoriesById"
+                           :categories="categories"
+                           @newCategory="addNewCategoryTo"
+                           @deleteCategory="deleteCategory"
+                           @onReassign="reassignCategories"
+                           @edit="openEditView"/>
           </v-col>
 
           <v-col v-if="showDetails" :cols="4">
