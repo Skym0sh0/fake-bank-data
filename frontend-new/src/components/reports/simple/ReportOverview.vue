@@ -1,11 +1,11 @@
 <script setup lang="ts">
 
-import {computed, ref, shallowRef} from "vue";
+import {computed, onMounted, ref, shallowRef} from "vue";
 import type {Component} from "vue";
 import BalanceProgressionReport from "./BalanceProgressionReport.vue";
 
 type ChartTemplate = {
-  id: string;
+  id: number;
   title: string;
   component: Component;
 }
@@ -17,23 +17,27 @@ const charts = shallowRef<ChartTemplate[]>([
     title: 'Kontostand Entwicklung',
     component: BalanceProgressionReport,
   }
-].map((c, idx) => ({...c, id: idx.toString()})))
+].map((c, idx) => ({...c, id: idx})))
 
 const areAllChartsOpen = computed(() => {
   return openCharts.value.length == charts.value.length
 })
+
 const areNoChartsOpen = computed(() => {
   return openCharts.value.length === 0
 })
 
 function showAll() {
-  hideAll()
-  openCharts.value.push(...charts.value.map(c => c.id))
+  openCharts.value = charts.value.map(c => c.id)
 }
 
 function hideAll() {
   openCharts.value = []
 }
+
+onMounted(()=>{
+  showAll()
+})
 </script>
 
 <template>
