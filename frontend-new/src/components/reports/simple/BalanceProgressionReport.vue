@@ -111,14 +111,13 @@ function loadData() {
   api?.fetchBalanceProgressionReport()
       .then(res => {
         data.value = res.data ?? []
-
-        // must be set here, otherwise the target element is not present
-        isLoading.value = false
+      })
+      .catch(e => console.error(e))
+      .finally(() => {
+         isLoading.value = false;
 
         nextTick(() => draw())
       })
-      .catch(e => console.log(e))
-      .finally(() => isLoading.value = false)
 }
 
 onBeforeUnmount(() => {

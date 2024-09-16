@@ -220,12 +220,13 @@ function loadData() {
   api?.fetchMonthlyIncomeExpenseReport()
       .then(res => {
         incomeExpenses.value = res.data ?? [];
-        isLoading.value = false
+      })
+      .catch(e => console.error(e))
+      .finally(() => {
+        isLoading.value = false;
 
         nextTick(() => draw())
       })
-      .catch(e => console.log(e))
-      .finally(() => isLoading.value = false)
 }
 
 onBeforeUnmount(() => {

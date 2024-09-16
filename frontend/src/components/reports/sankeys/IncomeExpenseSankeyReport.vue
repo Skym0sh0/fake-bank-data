@@ -119,28 +119,7 @@ export default {
         isRelativeTimespan() {
             return this.select.mode === RELATIVE
         },
-        helptext() {
-            const prefix = "Alle Ein- und Ausgaben"
-            const levels = `aufgefächert auf bis zu ${this.select.depth} Ebene(n).`;
 
-            if (this.isAbsolutTimespan) {
-                if (this.select.year && this.select.month)
-                    return `${prefix} für ${MonthIndexToName[this.select.month]} ${this.select.year} ${levels}`;
-                if (this.select.year)
-                    return `${prefix} für ${this.select.year} ${levels}`;
-            }
-            if (this.isRelativeTimespan) {
-                return `${prefix} aus ${this.select.units} ${TIMEUNITS[this.select.timeunit]} normiert auf einzelne ${TIMEUNITS[this.select.timeunit]} ${levels}`;
-            }
-
-            return `${prefix} ${levels}`
-        },
-        timespanText() {
-            if (!this.sankeyData)
-                return "";
-
-            return `Von ${this.sankeyData.start} bis ${this.sankeyData.end}`;
-        },
     },
     watch: {
         select: {

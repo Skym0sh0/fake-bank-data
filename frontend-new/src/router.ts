@@ -7,6 +7,7 @@ import RegisterPage from "./components/login/RegisterPage.vue";
 import UserDetailsPage from "./components/login/UserDetailsPage.vue";
 import About from "./components/About.vue";
 import ReportOverview from "./components/reports/simple/ReportOverview.vue";
+import TimelyReportOverview from "./components/reports/sankeys/TimelyReportOverview.vue";
 
 export type Page = {
   link: string;
@@ -85,7 +86,7 @@ const routes: RouterPage[] = [
   {
     path: '/timely-reports/',
     name: 'timely-reports-overview',
-    component: Home,
+    component: TimelyReportOverview,
     page: {
       title: "Zeitreihen Berichte",
       shortDescription: "Berichte über Zeitreihen",
