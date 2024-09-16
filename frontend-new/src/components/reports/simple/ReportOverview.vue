@@ -3,6 +3,7 @@
 import {computed, onMounted, ref, shallowRef} from "vue";
 import type {Component} from "vue";
 import BalanceProgressionReport from "./BalanceProgressionReport.vue";
+import IncomeExpenseReport from "./IncomeExpenseReport.vue";
 
 type ChartTemplate = {
   id: number;
@@ -16,7 +17,11 @@ const charts = shallowRef<ChartTemplate[]>([
   {
     title: 'Kontostand Entwicklung',
     component: BalanceProgressionReport,
-  }
+  },
+  {
+    title: 'Einkommen und Ausgaben',
+    component: IncomeExpenseReport,
+  },
 ].map((c, idx) => ({...c, id: idx})))
 
 const areAllChartsOpen = computed(() => {
