@@ -2,21 +2,22 @@
 import {computed, ref} from "vue";
 import {Category} from "@api/api.ts";
 import {CategoriesByIdMap} from "./CategoryOverview.vue";
+import CategoryTreeList from "./CategoryTreeList.vue";
 
 const {categories, categoriesById} = defineProps<{
   categories: Category[],
   categoriesById: CategoriesByIdMap,
 }>()
 
-const quickfilter = ref("");
+const quickFilter = ref("");
 
-const filteredCategories = computed(() => {
-  if (!quickfilter.value)
-    return categories.value
+const filteredCategories = computed<Category[]>(() => {
+  if (!quickFilter.value)
+    return categories
 
-  const regex = new RegExp(quickfilter.value, "i")
+  const regex = new RegExp(quickFilter.value, "i")
 
-  return categories.value.filter(cat => cat.name.search(regex) >= 0)
+  return categories.filter(cat => cat.name.search(regex) >= 0)
 })
 </script>
 
@@ -28,7 +29,7 @@ const filteredCategories = computed(() => {
     <v-row>
       <v-col>
         <v-text-field id="quick-filter-text-input-field"
-                      v-model="quickfilter"
+                      v-model="quickFilter"
                       type="text"
                       :dense="true"
                       :clearable="true"
@@ -40,12 +41,12 @@ const filteredCategories = computed(() => {
 
     <v-row class="py-0">
       <v-col class="py-0">
-        <!--        <category-tree-list :categories-by-id="categoriesById"-->
-        <!--                            :categories="filteredCategories"-->
-        <!--                            @newCategory="$emit('newCategory', $event)"-->
-        <!--                            @deleteCategory="$emit('deleteCategory', $event)"-->
-        <!--                            @onReassign="$emit('onReassign', $event)"-->
-        <!--                            @edit="$emit('edit', $event)"/>-->
+        <category-tree-list :categories-by-id="categoriesById"
+                            :categories="filteredCategories"
+                            @newCategory="$emit('newCategory', $event)"
+                            @deleteCategory="$emit('deleteCategory', $event)"
+                            @onReassign="$emit('onReassign', $event)"
+                            @edit="$emit('edit', $event)"/>
       </v-col>
     </v-row>
   </v-container>

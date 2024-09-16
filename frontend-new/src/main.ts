@@ -5,7 +5,8 @@ import 'vuetify/styles'
 import {createVuetify} from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
-import { VDateInput } from 'vuetify/labs/VDateInput'
+import {VDateInput} from 'vuetify/labs/VDateInput'
+import {VTreeview} from 'vuetify/labs/VTreeview'
 
 import App from './App.vue'
 import {authenticationKey, errorRefKey} from "./keys.ts";
@@ -14,9 +15,10 @@ import {errorReference} from "./auth/ErrorHandler.ts";
 import {router} from "./router.ts";
 
 const vuetify = createVuetify({
-    components:{
+    components: {
         ...components,
-        VDateInput
+        VDateInput,
+        VTreeview,
     },
     directives,
     icons: {
