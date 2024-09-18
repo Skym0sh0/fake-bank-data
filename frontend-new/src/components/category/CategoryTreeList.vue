@@ -6,6 +6,7 @@ import {formatMonetaryAmount} from "../../utils/moneyUtils.ts";
 import Drag from "../misc/dragndrop/Drag.vue";
 import Drop from "../misc/dragndrop/Drop.vue";
 import * as _ from "lodash";
+import CategoryTreeItemButtons from "./CategoryTreeItemButtons.vue";
 
 const {categories, categoriesById} = defineProps<{
   categories: Category[],
@@ -135,28 +136,28 @@ watch(() => categories, () => clearSelection(), {deep: true})
                 mdi-new-box
               </v-icon>
 
-              <v-tooltip v-if="item.budget" :top="true">
-                <template v-slot:activator="{on, attrs}">
-                  <v-icon color="red"
-                          :small="true"
-                          v-bind="attrs"
-                          v-on="on">
-                    mdi-finance
-                  </v-icon>
-                </template>
+<!--              <v-tooltip v-if="item.budget" :top="true">-->
+<!--                <template v-slot:activator="{on, attrs}">-->
+<!--                  <v-icon color="red"-->
+<!--                          :small="true"-->
+<!--                          v-bind="attrs"-->
+<!--                          v-on="on">-->
+<!--                    mdi-finance-->
+<!--                  </v-icon>-->
+<!--                </template>-->
 
-                Budget: {{ formatMonetaryAmount(item.budget.budget * 100) }} + {{ item.budget.exceedingThresholdPercent }} %
-              </v-tooltip>
+<!--                Budget: {{ formatMonetaryAmount(item.budget.budget * 100) }} + {{ item.budget.exceedingThresholdPercent }} %-->
+<!--              </v-tooltip>-->
             </div>
           </div>
         </drop>
       </template>
 
       <template v-slot:append="{ item }">
-<!--        <category-tree-item-buttons :category="item"-->
-<!--                                    @editCategory="editCategory"-->
-<!--                                    @addNewChildCategory="addNewCategoryTo"-->
-<!--                                    @deleteCategory="deleteCategory"/>-->
+        <category-tree-item-buttons :category="item"
+                                    @editCategory="editCategory"
+                                    @addNewChildCategory="addNewCategoryTo"
+                                    @deleteCategory="deleteCategory"/>
       </template>
     </v-treeview>
 

@@ -2,7 +2,7 @@
 import {inject, provide} from "vue";
 import {apiRefKey, ApiType, authenticationKey, errorRefKey} from "../keys.ts";
 import {v4 as uuidv4} from "uuid";
-import {CategoryApi, Configuration, ReportsApi, UserAuthApi} from "@api/index.ts"
+import {CategoryApi, Configuration, ReportsApi, TurnoversApi, UserAuthApi} from "@api/index.ts"
 import axios, {AxiosInstance} from "axios";
 
 const userRef = inject(authenticationKey).value;
@@ -55,6 +55,7 @@ const api: ApiType = {
   authApi: new UserAuthApi(config, "", client),
   reportsApi: new ReportsApi(config, "", client),
   categoriesApi: new CategoryApi(config, "", client),
+  turnoversApi: new TurnoversApi(config, "", client),
 }
 
 provide(apiRefKey, api);
