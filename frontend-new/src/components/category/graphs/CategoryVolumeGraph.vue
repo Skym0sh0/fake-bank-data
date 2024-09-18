@@ -37,7 +37,6 @@ export type GraphDataPoint = {
 }
 
 const graphData = computed<GraphDataPoint[]>(() => {
-  console.log("computed")
   return referencedRows.value.map(rec => ({
     date: DateTime.fromISO(rec.date).toJSDate(),
     income: rec.incomeAmountInCents / 100.0,

@@ -2,6 +2,7 @@
 import {Category} from "@api/api.ts";
 import {computed} from "vue";
 import CategoryVolumeGraph from "./graphs/CategoryVolumeGraph.vue";
+import CategoryUsageDialog from "./graphs/CategoryUsageDialog.vue";
 
 const {category} = defineProps<{
   category: Category;
@@ -58,38 +59,33 @@ function deleteCategory() {
     <v-divider :vertical="true"/>
 
     <v-btn-group>
-            <category-volume-graph :category="category">
-              <template v-slot:button="{ clickCallback }">
-                <v-btn :icon="true"
-                       :small="true"
-                       color="warning"
-                       @click.stop="clickCallback"
-                       title="Graph">
-                  <v-icon :small="true">
-                    mdi-chart-timeline-variant-shimmer
-                  </v-icon>
-                </v-btn>
-              </template>
-            </category-volume-graph>
+      <category-volume-graph :category="category">
+        <template v-slot:button="{ clickCallback }">
+          <v-btn :icon="true"
+                 :small="true"
+                 color="warning"
+                 @click.stop="clickCallback"
+                 title="Graph">
+            <v-icon :small="true">
+              mdi-chart-timeline-variant-shimmer
+            </v-icon>
+          </v-btn>
+        </template>
+      </category-volume-graph>
 
-      <!--      <category-usage-dialog :category="category">-->
-      <!--        <template v-slot:button="{ clickCallback }">-->
-      <!--          <v-tooltip :top="true">-->
-      <!--            <template v-slot:activator="{ on, attrs }">-->
-      <!--              <v-btn :icon="true"-->
-      <!--                     :small="true"-->
-      <!--                     color="warning"-->
-      <!--                     @click.stop="clickCallback"-->
-      <!--                     v-bind="attrs" v-on="on">-->
-      <!--                <v-icon :small="true">-->
-      <!--                  mdi-format-list-bulleted-->
-      <!--                </v-icon>-->
-      <!--              </v-btn>-->
-      <!--            </template>-->
-      <!--            Zeige benutzte Turnovers-->
-      <!--          </v-tooltip>-->
-      <!--        </template>-->
-      <!--      </category-usage-dialog>-->
+      <category-usage-dialog :category="category">
+        <template v-slot:button="{ clickCallback }">
+          <v-btn :icon="true"
+                 :small="true"
+                 color="primary"
+                 @click.stop="clickCallback"
+                 title="Zeige benutzte Turnovers">
+            <v-icon :small="true">
+              mdi-format-list-bulleted
+            </v-icon>
+          </v-btn>
+        </template>
+      </category-usage-dialog>
 
       <v-tooltip :top="true">
         <template v-slot:activator="{ props }">
