@@ -1,12 +1,19 @@
 <script setup lang="ts">
 import {computed, ref} from "vue";
 import {Category} from "@api/api.ts";
-import {CategoriesByIdMap} from "./CategoryOverview.vue";
-import CategoryTreeList from "./CategoryTreeList.vue";
+import CategoryTreeList, {CategoryReassign, NewCategory} from "./CategoryTreeList.vue";
+import {CategoriesById} from "../misc/categoryHelpers.ts";
 
 const {categories, categoriesById} = defineProps<{
   categories: Category[],
-  categoriesById: CategoriesByIdMap,
+  categoriesById: CategoriesById,
+}>()
+
+const emit = defineEmits<{
+  (e: 'edit', id: string): void;
+  (e: 'newCategory', cat: NewCategory): void;
+  (e: 'deleteCategory', cat: Category): void;
+  (e: 'onReassign', assignment: CategoryReassign): void;
 }>()
 
 const quickFilter = ref("");
@@ -19,6 +26,22 @@ const filteredCategories = computed<Category[]>(() => {
 
   return categories.filter(cat => cat.name.search(regex) >= 0)
 })
+
+function onEdit(id: string) {
+  emit("edit", id)
+}
+
+function onNewCategory(c: NewCategory) {
+  emit("newCategory", c)
+}
+
+function onDeleteCategory(c: Category) {
+  emit("deleteCategory", c)
+}
+
+function onReassign(reassignment: CategoryReassign) {
+  emit("onReassign", reassignment);
+}
 </script>
 
 <template>
@@ -43,10 +66,10 @@ const filteredCategories = computed<Category[]>(() => {
       <v-col class="py-0">
         <category-tree-list :categories-by-id="categoriesById"
                             :categories="filteredCategories"
-                            @newCategory="$emit('newCategory', $event)"
-                            @deleteCategory="$emit('deleteCategory', $event)"
-                            @onReassign="$emit('onReassign', $event)"
-                            @edit="$emit('edit', $event)"/>
+                            @newCategory="onNewCategory"
+                            @deleteCategory="onDeleteCategory"
+                            @onReassign="onReassign"
+                            @edit="onEdit"/>
       </v-col>
     </v-row>
   </v-container>

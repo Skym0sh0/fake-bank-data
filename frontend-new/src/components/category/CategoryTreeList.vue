@@ -1,23 +1,27 @@
 <script setup lang="ts">
 import {Category} from "@api/api.ts";
-import {CategoriesByIdMap} from "./CategoryOverview.vue";
 import {computed, ref, watch} from "vue";
-import {formatMonetaryAmount} from "../../utils/moneyUtils.ts";
 import Drag from "../misc/dragndrop/Drag.vue";
 import Drop from "../misc/dragndrop/Drop.vue";
 import * as _ from "lodash";
 import CategoryTreeItemButtons from "./CategoryTreeItemButtons.vue";
+import {CategoriesById} from "../misc/categoryHelpers.ts";
+import {formatMonetaryAmount} from "../../utils/moneyUtils.ts";
 
 const {categories, categoriesById} = defineProps<{
   categories: Category[],
-  categoriesById: CategoriesByIdMap,
+  categoriesById: CategoriesById,
 }>()
+
+export type NewCategory = { parentId: string };
+
+export type CategoryReassign = { sources: string[]; target: Category };
 
 const emit = defineEmits<{
   (e: 'edit', id: string): void;
-  (e: 'newCategory', cat: { parentId: string }): void;
+  (e: 'newCategory', cat: NewCategory): void;
   (e: 'deleteCategory', cat: Category): void;
-  (e: 'onReassign', assignment: { sources: string[]; target: Category }): void;
+  (e: 'onReassign', assignment: CategoryReassign): void;
 }>()
 
 const selected = ref<string[]>([]);
@@ -27,8 +31,10 @@ const parentCategories = computed(() => {
   return _.sortBy(categories.filter(cat => !cat.parentId), x => x.name.toLowerCase())
 })
 
-const categoriesAsTree = computed(() => {
-  const resolver = cat => {
+type CategoryWithChildren = Category & { children: Category[] };
+
+const categoriesAsTree = computed<CategoryWithChildren[]>(() => {
+  const resolver = (cat: Category): CategoryWithChildren => {
     const children = categories.filter(c => c.parentId === cat.id).map(resolver)
 
     return {
@@ -44,44 +50,40 @@ function clearSelection() {
   selected.value = [];
 }
 
-function clearOpenings() {
-  opened.value = [];
-}
-
-function setOpenRecursively(id) {
+function setOpenRecursively(id: string) {
   const newlyOpened = new Set(opened.value)
 
-  let current = categoriesById[id]
+  let current: Category | undefined = categoriesById[id]
   while (current) {
     newlyOpened.add(current.id)
-    current = categoriesById[current.parentId]
+    current = current.parentId ? categoriesById[current.parentId] : undefined;
   }
 
   opened.value = [...newlyOpened]
 }
 
-function editCategory(id) {
+function editCategory(id: string) {
   if (!opened.value.includes(id))
     opened.value.push(id)
 
   emit("edit", id)
 }
 
-function addNewCategoryTo(id) {
+function addNewCategoryTo(id: string) {
   emit("newCategory", {parentId: id})
   setOpenRecursively(id)
 }
 
-function deleteCategory(id) {
+function deleteCategory(id: string) {
   emit("deleteCategory", categoriesById[id])
 }
 
-function onDragstart(srcItem) {
+function onDragstart(srcItem: any) {
   if (srcItem)
     selected.value.push(srcItem.id)
 }
 
-function onDrop(trgtItem/*, srcItem*/) {
+function onDrop(trgtItem: any /*, srcItem*/) {
   if (selected.value.includes(trgtItem.id))
     return;
 
@@ -136,18 +138,20 @@ watch(() => categories, () => clearSelection(), {deep: true})
                 mdi-new-box
               </v-icon>
 
-<!--              <v-tooltip v-if="item.budget" :top="true">-->
-<!--                <template v-slot:activator="{on, attrs}">-->
-<!--                  <v-icon color="red"-->
-<!--                          :small="true"-->
-<!--                          v-bind="attrs"-->
-<!--                          v-on="on">-->
-<!--                    mdi-finance-->
-<!--                  </v-icon>-->
-<!--                </template>-->
+              <v-tooltip v-if="item.budget" :top="true">
+                <template v-slot:activator="{props}">
+                  <v-icon color="red"
+                          :small="true"
+                          v-bind="props">
+                    mdi-finance
+                  </v-icon>
+                </template>
 
-<!--                Budget: {{ formatMonetaryAmount(item.budget.budget * 100) }} + {{ item.budget.exceedingThresholdPercent }} %-->
-<!--              </v-tooltip>-->
+                Budget:
+                {{ formatMonetaryAmount(item.budget.budgetInCents * 100) }}
+                +
+                {{ item.budget.exceedingThreshold }} %
+              </v-tooltip>
             </div>
           </div>
         </drop>
@@ -161,17 +165,17 @@ watch(() => categories, () => clearSelection(), {deep: true})
       </template>
     </v-treeview>
 
-<!--    <selected-category-info :selectedIds="selected"-->
-<!--                            :categories-by-id="categoriesById"-->
-<!--                            @clear="clearSelection">-->
-<!--      <template v-slot:prepend>-->
-<!--        <drag @dragstart="onDragstart">-->
-<!--          <v-icon class="drag-point">-->
-<!--            mdi-drag-->
-<!--          </v-icon>-->
-<!--        </drag>-->
-<!--      </template>-->
-<!--    </selected-category-info>-->
+    <!--    <selected-category-info :selectedIds="selected"-->
+    <!--                            :categories-by-id="categoriesById"-->
+    <!--                            @clear="clearSelection">-->
+    <!--      <template v-slot:prepend>-->
+    <!--        <drag @dragstart="onDragstart">-->
+    <!--          <v-icon class="drag-point">-->
+    <!--            mdi-drag-->
+    <!--          </v-icon>-->
+    <!--        </drag>-->
+    <!--      </template>-->
+    <!--    </selected-category-info>-->
   </v-card>
 </template>
 

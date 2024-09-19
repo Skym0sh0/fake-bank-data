@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import {Category} from "@api/api.ts";
 import {computed, onMounted, ref, watch} from "vue";
+import {CategoriesById, CategoriesByName, CategoryWithParentNamesChained} from "./categoryHelpers.ts";
 
 const {
   id,
@@ -17,41 +17,45 @@ const {
   value?: string | null;
   disabled?: boolean;
   loading?: boolean;
-  flattedCategories: Category[];
-  categoriesById: { [id: string]: Category };
-  categoriesByName: { [name: string]: Category };
+  flattedCategories: CategoryWithParentNamesChained<string>[];
+  categoriesById: CategoriesById;
+  categoriesByName: CategoriesByName;
   state?: boolean;
   required?: boolean;
 }>();
 
+const emit = defineEmits<{
+  (e: "input", id: string | undefined | null): void;
+  (e: "createCategory", name: string): void;
+}>();
 
 const currentSearch = ref("");
 const isUnknownCategory = ref(false);
 
-const isValidState = computed(() => {
+const isValidState = computed<boolean>(() => {
   return state && !isUnknownCategory.value && !isCurrentSearchInvalid.value;
 })
 
-const isCurrentSearchInvalid = computed(() => {
+const isCurrentSearchInvalid = computed<boolean>(() => {
   return !currentSearch.value || currentSearch.value === "";
 })
 
-const showValidationState = computed(() => {
+const showValidationState = computed<boolean | undefined>(() => {
   if (!required) {
     if (isUnknownCategory.value && currentSearch.value !== '')
       return false;
 
-    return null;
+    return undefined;
   }
 
   return isValidState.value
 })
 
-const isAddableCategory = computed(() => {
+const isAddableCategory = computed<boolean>(() => {
   return !(!isUnknownCategory.value || isCurrentSearchInvalid.value)
 })
 
-function onCategoryInput(newValue) {
+function onCategoryInput(newValue: string) {
   currentSearch.value = newValue;
 
   findOption()
@@ -61,15 +65,15 @@ function findOption() {
   const foundCategory = categoriesByName[currentSearch.value];
   if (foundCategory) {
     isUnknownCategory.value = false;
-    this.$emit('input', foundCategory.id)
+    emit('input', foundCategory.id)
   } else {
     isUnknownCategory.value = true;
-    this.$emit('input', null)
+    emit('input', null)
   }
 }
 
 function onAddCategory() {
-  this.$emit('createCategory', currentSearch.value)
+  emit('createCategory', currentSearch.value)
 }
 
 function initWhenOnlyValueIsSet() {
@@ -78,11 +82,11 @@ function initWhenOnlyValueIsSet() {
     if (foundCategory) {
       currentSearch.value = foundCategory.name;
       isUnknownCategory.value = false;
-      this.$emit('input', foundCategory.id);
+      emit('input', foundCategory.id);
     } else {
       currentSearch.value = "";
       isUnknownCategory.value = true;
-      this.$emit('input', null);
+      emit('input', null);
     }
   }
 }
@@ -100,7 +104,7 @@ watch(() => categoriesByName, () => findOption(), {deep: true})
   <v-text-field :id="`${id}-category-input`"
                 :list="`${id}-category-input-list`"
                 :value="currentSearch"
-                @input="onCategoryInput"
+                @update:modelValue="onCategoryInput"
                 :error="showValidationState"
                 :disabled="disabled || loading"
                 density="compact"
@@ -120,6 +124,7 @@ watch(() => categoriesByName, () => findOption(), {deep: true})
       </v-btn>
     </template>
   </v-text-field>
+
   <datalist :id="`${id}-category-input-list`">
     <option v-for="cat in flattedCategories" :key="cat.id" :value="cat.name">
       {{ cat.parentChain }}

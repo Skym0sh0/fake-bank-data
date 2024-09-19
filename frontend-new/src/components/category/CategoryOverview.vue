@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import WaitingIndicator from "../misc/WaitingIndicator.vue";
 import {computed, inject, ref, useTemplateRef} from "vue";
-import {Category, CategoryApi, CategoryPatch, ReportsApi} from "@api/api.ts";
+import {Category, CategoryApi, CategoryPatch} from "@api/api.ts";
 import {apiRefKey} from "../../keys.ts";
 import CategoryList from "./CategoryList.vue";
+import {CategoriesById, mapCategoriesById} from "../misc/categoryHelpers.ts";
+import {CategoryReassign, NewCategory} from "./CategoryTreeList.vue";
+import * as _ from "lodash";
 
 const api: CategoryApi | undefined = inject(apiRefKey)?.categoriesApi;
 
@@ -15,14 +18,10 @@ type DetailSelectionType = {
   budget: number | null;
 }
 
-export type CategoriesByIdMap = {
-  [id: string]: Category;
-}
-
 const detailForm = useTemplateRef("detail-form");
 
 const isLoading = ref(false);
-const categories = ref([]);
+const categories = ref<Category[]>([]);
 const selectedForDetails = ref<DetailSelectionType>({
   isNew: null,
   isSelected: false,
@@ -30,8 +29,8 @@ const selectedForDetails = ref<DetailSelectionType>({
   entity: null,
 });
 
-const categoriesById = computed<CategoriesByIdMap>(() => {
-  return categories.value.reduce((old, cur) => ({...old, [cur.id]: cur}), {})
+const categoriesById = computed<CategoriesById>(() => {
+  return mapCategoriesById(categories.value)
 })
 
 const showDetails = computed(() => {
@@ -42,20 +41,19 @@ function loadCategories() {
   isLoading.value = true
 
   return api?.getCategoriesAsTree()
-      .then((res: Category[]) => {
-        const flatter = cat => {
-          return [
-            cat,
-            ...(cat.subCategories || []).flatMap(flatter)
-          ];
-        };
+    .then((res: Category[]) => {
+      const flatter = (cat: Category): Category[] => {
+        return [
+          cat,
+          ...(cat.subCategories || []).flatMap(flatter)
+        ];
+      };
 
-        categories.value = res.flatMap(flatter)
-        return categories.value
-      })
-      .finally(() => {
-        isLoading.value = false
-      })
+      categories.value = res.flatMap(flatter)
+    })
+    .finally(() => {
+      isLoading.value = false
+    })
 
 }
 
@@ -73,7 +71,8 @@ function newCategory(parentId: string) {
   }
 }
 
-function addNewCategoryTo(payload) {
+function addNewCategoryTo(payload: NewCategory) {
+  console.log("new cat, payload")
   newCategory(payload.parentId)
 }
 
@@ -81,7 +80,7 @@ function addNewRootCategory() {
   newCategory(null)
 }
 
-function openEditView(id) {
+function openEditView(id: string) {
   if (selectedForDetails.value.entity && selectedForDetails.value.entity.id === id)
     return;
 
@@ -104,19 +103,19 @@ function createNewRootCategory(cat: CategoryPatch) {
 
 function createNewChildCategory(cat) {
   this.doRestCallForCategory(() => {
-        return api?.createCategoryAsChild(cat.parentId, cat);
-      }
+      return api?.createCategoryAsChild(cat.parentId, cat);
+    }
   );
 }
 
 function updateCategory(cat) {
   this.doRestCallForCategory(() => {
     return api?.updateCategory(cat)
-        .then(res => {
-          categories.value = _.filter(categories.value, cur => cur.id !== res.id)
+      .then(res => {
+        categories.value = _.filter(categories.value, cur => cur.id !== res.id)
 
-          return res;
-        })
+        return res;
+      })
   });
 }
 
@@ -124,42 +123,42 @@ function doRestCallForCategory(callback: () => Promise<Category> | undefined) {
   this.isLoading = true
 
   callback()
-      ?.then(res => {
-        this.selectedForDetails.entity = {...res}
-        this.categories.push(res)
-        this.openEditView(res.id)
-      })
-      .finally(() => {
-        this.isLoading = false
-      })
+    ?.then(res => {
+      this.selectedForDetails.entity = {...res}
+      this.categories.push(res)
+      this.openEditView(res.id)
+    })
+    .finally(() => {
+      this.isLoading = false
+    })
 }
 
-function deleteCategory(category) {
+function deleteCategory(category: Category) {
   isLoading.value = true
 
   if (selectedForDetails.value.entity && selectedForDetails.value.entity.id === category.id)
     cancelActiveForm()
 
   api?.deleteCategory(category.id)
-      .then(() => {
-        categories.value = _.filter(categories.value, cur => cur.id !== category.id)
-      })
-      .finally(() => {
-        isLoading.value = false
-      })
+    .then(() => {
+      categories.value = _.filter(categories.value, cur => cur.id !== category.id)
+    })
+    .finally(() => {
+      isLoading.value = false
+    })
 }
 
-function reassignCategories(payload) {
+function reassignCategories(payload: CategoryReassign) {
   isLoading.value = true
 
   Promise.all(
-      payload.sources.map(id => categoriesById.value[id])
-          .map(source => api?.reallocateCategory(payload.target, source))
+    payload.sources.map(id => categoriesById.value[id])
+      .map(source => api?.reallocateCategory(payload.target, source))
   )
-      .then(() => loadCategories())
-      .finally(() => {
-        isLoading.value = false
-      })
+    .then(() => loadCategories())
+    .finally(() => {
+      isLoading.value = false
+    })
 }
 
 loadCategories();
@@ -197,10 +196,10 @@ loadCategories();
           <v-col class="py-0" :cols="showDetails ? 8 : 12">
             <category-list :categories-by-id="categoriesById"
                            :categories="categories"
+                           @edit="openEditView"
                            @newCategory="addNewCategoryTo"
                            @deleteCategory="deleteCategory"
-                           @onReassign="reassignCategories"
-                           @edit="openEditView"/>
+                           @onReassign="reassignCategories"/>
           </v-col>
 
           <v-col v-if="showDetails" :cols="4">

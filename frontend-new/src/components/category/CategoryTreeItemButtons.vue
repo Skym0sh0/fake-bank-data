@@ -18,19 +18,20 @@ const isRootCategory = computed(() => {
   return !category.parentId;
 })
 
-const hasChildren = computed(() => {
-  return category.children && category.children.length > 0;
+const hasChildren = computed<boolean>(() => {
+  // return category.children && category.children.length > 0;
+  return false;
 })
 
-const isUsed = computed(() => {
-  return category.usageCount > 0;
+const isUsed = computed<boolean>(() => {
+  return (category.usageCount ?? 0) > 0;
 })
 
-const isDeletionForbidden = computed(() => {
+const isDeletionForbidden = computed<boolean>(() => {
   return hasChildren.value || (isRootCategory.value && isUsed.value);
 })
 
-const deletionButtonTooltip = computed(() => {
+const deletionButtonTooltip = computed<string>(() => {
   if (!isDeletionForbidden.value) {
     return "Kategorie löschen";
   }
@@ -42,15 +43,18 @@ const deletionButtonTooltip = computed(() => {
 })
 
 function editCategory() {
-  emit('editCategory', category.id);
+  if (category.id)
+    emit('editCategory', category.id);
 }
 
 function addNewCategoryTo() {
-  emit('addNewChildCategory', category.id)
+  if (category.id)
+    emit('addNewChildCategory', category.id)
 }
 
 function deleteCategory() {
-  emit('deleteCategory', category.id)
+  if (category.id)
+    emit('deleteCategory', category.id)
 }
 </script>
 
