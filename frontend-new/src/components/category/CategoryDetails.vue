@@ -6,6 +6,7 @@ import CategoryUsageDialog from "./graphs/CategoryUsageDialog.vue";
 import Breadcrumps from "../misc/Breadcrumps.vue";
 import CategoryInfos from "./CategoryInfos.vue";
 import {VForm} from "vuetify/components";
+import BudgetArea from "./BudgetArea.vue";
 
 const {categoriesById, entity, isNew, isLoading} = defineProps<{
   categoriesById: CategoriesById,
@@ -45,7 +46,7 @@ const allParentCategoryChain = computed(() => {
   return chain.reverse();
 })
 
-const isSaveable = computed(()=>{
+const isSaveable = computed(() => {
   return hasChanged.value && formRef.value?.isValid;
 })
 
@@ -83,15 +84,15 @@ function cancelActiveForm() {
 }
 
 function onNewBudget() {
-  this.$set(this.entity, 'budget', {
-    budget: null,
-    exceedingThresholdPercent: 10,
-  });
+  entity.budget = {
+    budgetInCents: null,
+    exceedingThreshold: null,
+  }
   changeAnything()
 }
 
 function onDeleteBudget() {
-  this.$set(this.entity, 'budget', null);
+  entity.budget = null
   changeAnything()
 }
 
@@ -128,10 +129,10 @@ watch(() => entity, () => changeAnything(), {deep: true})
 
         <v-divider class="my-1"/>
 
-        <!--        <budget-area v-model="entity.budget"-->
-        <!--                     @newBudget="onNewBudget"-->
-        <!--                     @deleteBudget="onDeleteBudget"-->
-        <!--                     @changed="changeAnything"/>-->
+        <budget-area :value="entity.budget"
+                     @newBudget="onNewBudget"
+                     @deleteBudget="onDeleteBudget"
+                     @changed="changeAnything"/>
 
         <v-divider class="my-1"/>
 
