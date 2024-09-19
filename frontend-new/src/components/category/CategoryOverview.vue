@@ -7,15 +7,15 @@ import CategoryList from "./CategoryList.vue";
 import {CategoriesById, mapCategoriesById} from "../misc/categoryHelpers.ts";
 import {CategoryReassign, NewCategory} from "./CategoryTreeList.vue";
 import * as _ from "lodash";
+import CategoryDetails from "./CategoryDetails.vue";
 
 const api: CategoryApi | undefined = inject(apiRefKey)?.categoriesApi;
 
 type DetailSelectionType = {
-  isNew: null;
   isSelected: boolean;
-  parentId: null;
-  entity: null;
-  budget: number | null;
+  isNew: boolean | null;
+  parentId: string | null;
+  entity: Category | null;
 }
 
 const detailForm = useTemplateRef("detail-form");
@@ -57,14 +57,15 @@ function loadCategories() {
 
 }
 
-function newCategory(parentId: string) {
+function newCategory(parentId: string | null | undefined) {
   if (selectedForDetails.value.isSelected)
     detailForm.value?.reset()
 
   selectedForDetails.value.isNew = true
   selectedForDetails.value.isSelected = true
+  selectedForDetails.value.parentId = parentId ?? null
   selectedForDetails.value.entity = {
-    parentId: parentId,
+    parentId: parentId ?? undefined,
     name: "",
     description: "",
     budget: null,
@@ -72,7 +73,6 @@ function newCategory(parentId: string) {
 }
 
 function addNewCategoryTo(payload: NewCategory) {
-  console.log("new cat, payload")
   newCategory(payload.parentId)
 }
 
@@ -81,37 +81,45 @@ function addNewRootCategory() {
 }
 
 function openEditView(id: string) {
-  if (selectedForDetails.value.entity && selectedForDetails.value.entity.id === id)
+  if (selectedForDetails.value.entity && selectedForDetails.value.entity.id === id) {
     return;
+  }
 
   selectedForDetails.value.isNew = false
   selectedForDetails.value.isSelected = true
-  selectedForDetails.value.entity = {...categoriesById[id]}
+  selectedForDetails.value.entity = {...categoriesById.value[id]}
 }
 
 function cancelActiveForm() {
-  selectedForDetails.value.isNew = null
   selectedForDetails.value.isSelected = false
+  selectedForDetails.value.isNew = null
   selectedForDetails.value.entity = null
+  selectedForDetails.value.parentId = null
 }
 
 function createNewRootCategory(cat: CategoryPatch) {
-  this.doRestCallForCategory(() => {
+  doRestCallForCategory(() => {
     return api?.createCategory(cat);
   })
 }
 
-function createNewChildCategory(cat) {
-  this.doRestCallForCategory(() => {
-      return api?.createCategoryAsChild(cat.parentId, cat);
+function createNewChildCategory(cat: CategoryPatch) {
+  if (!selectedForDetails.value.parentId)
+    return;
+
+  doRestCallForCategory(() => {
+      return api?.createCategoryAsChild(selectedForDetails.value.parentId!, cat);
     }
   );
 }
 
-function updateCategory(cat) {
-  this.doRestCallForCategory(() => {
-    return api?.updateCategory(cat)
-      .then(res => {
+function updateCategory(cat: CategoryPatch) {
+  if (!cat.id)
+    return;
+
+  doRestCallForCategory(() => {
+    return api?.updateCategory(cat.id!, cat)
+      .then((res: Category) => {
         categories.value = _.filter(categories.value, cur => cur.id !== res.id)
 
         return res;
@@ -120,16 +128,16 @@ function updateCategory(cat) {
 }
 
 function doRestCallForCategory(callback: () => Promise<Category> | undefined) {
-  this.isLoading = true
+  isLoading.value = true
 
   callback()
     ?.then(res => {
-      this.selectedForDetails.entity = {...res}
-      this.categories.push(res)
-      this.openEditView(res.id)
+      selectedForDetails.value.entity = {...res}
+      categories.value.push(res)
+      openEditView(res.id)
     })
     .finally(() => {
-      this.isLoading = false
+      isLoading.value = false
     })
 }
 
@@ -189,7 +197,6 @@ loadCategories();
       </div>
     </template>
 
-
     <template v-slot:text class="p-2">
       <v-container class="pt-0">
         <v-row class="py-0">
@@ -205,16 +212,17 @@ loadCategories();
           <v-col v-if="showDetails" :cols="4">
             <div class="fixed-position-editor">
               <div class="details-view">
-                <!--                <category-details v-if="selectedForDetails.isSelected"-->
-                <!--                                  ref="detail-form"-->
-                <!--                                  :categories-by-id="categoriesById"-->
-                <!--                                  :entity="selectedForDetails.entity"-->
-                <!--                                  :is-new="selectedForDetails.isNew"-->
-                <!--                                  :is-loading="isLoading"-->
-                <!--                                  @createAsChild="createNewChildCategory"-->
-                <!--                                  @createAsRoot="createNewRootCategory"-->
-                <!--                                  @update="updateCategory"-->
-                <!--                                  @close="cancelActiveForm"/>-->
+                <category-details
+                  v-if="selectedForDetails.isSelected && selectedForDetails.entity && selectedForDetails.isNew !== null"
+                  ref="detail-form"
+                  :categories-by-id="categoriesById"
+                  :entity="selectedForDetails.entity"
+                  :is-new="selectedForDetails.isNew"
+                  :is-loading="isLoading"
+                  @createAsChild="createNewChildCategory"
+                  @createAsRoot="createNewRootCategory"
+                  @update="updateCategory"
+                  @close="cancelActiveForm"/>
               </div>
             </div>
           </v-col>
