@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-const {transferData} = defineProps<{ transferData: any }>();
+const {transferData} = defineProps<{ transferData?: any }>();
 
 const emit = defineEmits<{
   (e: "dragstart"): void;

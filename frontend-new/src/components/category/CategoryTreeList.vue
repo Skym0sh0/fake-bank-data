@@ -7,6 +7,7 @@ import * as _ from "lodash";
 import CategoryTreeItemButtons from "./CategoryTreeItemButtons.vue";
 import {CategoriesById} from "../misc/categoryHelpers.ts";
 import {formatMonetaryAmount} from "../../utils/moneyUtils.ts";
+import SelectedCategoryInfo from "./SelectedCategoryInfo.vue";
 
 const {categories, categoriesById} = defineProps<{
   categories: Category[],
@@ -165,17 +166,17 @@ watch(() => categories, () => clearSelection(), {deep: true})
       </template>
     </v-treeview>
 
-    <!--    <selected-category-info :selectedIds="selected"-->
-    <!--                            :categories-by-id="categoriesById"-->
-    <!--                            @clear="clearSelection">-->
-    <!--      <template v-slot:prepend>-->
-    <!--        <drag @dragstart="onDragstart">-->
-    <!--          <v-icon class="drag-point">-->
-    <!--            mdi-drag-->
-    <!--          </v-icon>-->
-    <!--        </drag>-->
-    <!--      </template>-->
-    <!--    </selected-category-info>-->
+    <selected-category-info :selectedIds="selected"
+                            :categories-by-id="categoriesById"
+                            @clear="clearSelection">
+      <template v-slot:prepend>
+        <drag @dragstart="onDragstart">
+          <v-icon class="drag-point">
+            mdi-drag
+          </v-icon>
+        </drag>
+      </template>
+    </selected-category-info>
   </v-card>
 </template>
 
