@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import Waiter from "../../misc/Waiter.vue";
 import {BalanceDataPoint, ReportsApi} from "@api/index.ts"
-import {computed, inject, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef} from "vue";
+import {computed, inject, nextTick, onUnmounted, ref, useTemplateRef} from "vue";
 import {apiRefKey} from "../../../keys.ts";
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
 import {XYChart} from "@amcharts/amcharts4/charts";
-import {setInitialZoom} from "../../../utils/ZoomUtils.ts";
 import {DateTime} from "luxon";
 
 const api: ReportsApi | undefined = inject(apiRefKey)?.reportsApi;
@@ -15,7 +14,7 @@ const {height} = defineProps<{ height: number }>();
 
 const width = ref(null)
 
-const target = useTemplateRef("balance-progression-report-chart-target-div");
+const target = useTemplateRef<HTMLDivElement>("balance-progression-report-chart-target-div");
 
 const isLoading = ref(false)
 const chartRef = ref<XYChart | null>(null)
@@ -46,6 +45,8 @@ function draw() {
     console.error("Target element is not yet present. Is it hidden due to conditional rendering/loading?")
     return;
   }
+
+  console.log("now draw")
 
   const chart: XYChart = am4core.create(target.value, am4charts.XYChart)
 
@@ -109,18 +110,19 @@ function loadData() {
   isLoading.value = true
 
   api?.fetchBalanceProgressionReport()
-      .then(res => {
-        data.value = res.data ?? []
-      })
-      .catch(e => console.error(e))
-      .finally(() => {
-         isLoading.value = false;
+    .then(res => {
+      data.value = res.data ?? []
+    })
+    .catch(e => console.error(e))
+    .finally(() => {
+      isLoading.value = false;
 
-        nextTick(() => draw())
-      })
+      nextTick(() => draw())
+    })
 }
 
-onBeforeUnmount(() => {
+onUnmounted(() => {
+  console.log("unmount and kill")
   chartRef.value?.dispose()
 })
 

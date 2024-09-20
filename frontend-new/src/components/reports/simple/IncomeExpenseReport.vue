@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import Waiter from "../../misc/Waiter.vue";
-
 import {computed, inject, nextTick, onBeforeUnmount, ref, useTemplateRef} from "vue";
 import {MonthlyIncomeExpenseDataPoint, ReportsApi} from "@api/api.ts";
 import * as am4core from "@amcharts/amcharts4/core";
@@ -15,7 +14,7 @@ const {height} = defineProps<{ height: number }>();
 
 const width = ref(null)
 
-const target = useTemplateRef("income-expense-report-chart-target-div");
+const target = useTemplateRef<HTMLDivElement>("income-expense-report-chart-target-div");
 
 const isLoading = ref(false)
 const chartRef = ref<XYChart | null>(null)
@@ -64,7 +63,7 @@ const isReportPresent = computed(() => {
 });
 
 function findTooNegativeDifferenceRanges(chart: XYChart, axis: DateAxis) {
-  const findStartTime = (i, current) => {
+  const findStartTime = (i: number, current: DataPoint) => {
     if (i < 1)
       return current.month
 
@@ -82,8 +81,8 @@ function findTooNegativeDifferenceRanges(chart: XYChart, axis: DateAxis) {
     }
 
     const intersection = am4core.math.getLineIntersection(
-        {x: previousPoint.x, y: previousPoint.y1}, {x: currentPoint.x, y: currentPoint.y1},
-        {x: previousPoint.x, y: previousPoint.y2}, {x: currentPoint.x, y: currentPoint.y2},
+      {x: previousPoint.x, y: previousPoint.y1}, {x: currentPoint.x, y: currentPoint.y1},
+      {x: previousPoint.x, y: previousPoint.y2}, {x: currentPoint.x, y: currentPoint.y2},
     )
 
     return new Date(Math.round(intersection.x))
@@ -91,7 +90,11 @@ function findTooNegativeDifferenceRanges(chart: XYChart, axis: DateAxis) {
 
   const ranges = []
 
-  let tooHighExpensesRange = null
+  type ExpensesRange = {
+    begin?: Date | null;
+    end?: Date | null;
+  };
+  let tooHighExpensesRange: ExpensesRange | null = null
   for (let i = 0; i < chart.data.length; i++) {
     const current = chart.data[i]
 
@@ -126,7 +129,7 @@ function findTooNegativeDifferenceRanges(chart: XYChart, axis: DateAxis) {
 function draw() {
   chartRef.value?.dispose()
 
-  if (!isReportPresent.value)
+  if (!isReportPresent.value || !target.value)
     return;
 
   const chart = am4core.create(target.value, am4charts.XYChart)
@@ -197,16 +200,16 @@ function draw() {
   chart.exporting.menu = new am4core.ExportMenu();
 
   findTooNegativeDifferenceRanges(chart, dateAxis)
-      .forEach(range => {
-        const seriesRange = dateAxis.createSeriesRange(expenseSeries)
+    .forEach(range => {
+      const seriesRange = dateAxis.createSeriesRange(expenseSeries)
 
-        seriesRange.date = range.begin
-        seriesRange.endDate = range.end
+      seriesRange.date = range.begin
+      seriesRange.endDate = range.end
 
-        // seriesRange.contents.stroke = am4core.color("#FF0000")
-        seriesRange.contents.fill = expenseSeries.stroke
-        seriesRange.contents.fillOpacity = 0.8
-      })
+      // seriesRange.contents.stroke = am4core.color("#FF0000")
+      seriesRange.contents.fill = expenseSeries.stroke
+      seriesRange.contents.fillOpacity = 0.8
+    })
 
   // setInitialZoom(chart, dateAxis)
 
@@ -217,15 +220,15 @@ function loadData() {
   isLoading.value = true;
 
   api?.fetchMonthlyIncomeExpenseReport()
-      .then(res => {
-        incomeExpenses.value = res.data ?? [];
-      })
-      .catch(e => console.error(e))
-      .finally(() => {
-        isLoading.value = false;
+    .then(res => {
+      incomeExpenses.value = res.data ?? [];
+    })
+    .catch(e => console.error(e))
+    .finally(() => {
+      isLoading.value = false;
 
-        nextTick(() => draw())
-      })
+      nextTick(() => draw())
+    })
 }
 
 onBeforeUnmount(() => {

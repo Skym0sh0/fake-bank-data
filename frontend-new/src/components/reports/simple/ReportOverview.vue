@@ -12,7 +12,7 @@ type ChartTemplate = {
 }
 
 const chartHeight = ref(800)
-const openCharts = ref<string[]>([])
+const openCharts = ref<number[]>([])
 const charts = shallowRef<ChartTemplate[]>([
   {
     title: 'Kontostand Entwicklung',
