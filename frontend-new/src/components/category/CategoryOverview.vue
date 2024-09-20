@@ -161,7 +161,7 @@ function reassignCategories(payload: CategoryReassign) {
 
   Promise.all(
     payload.sources.map(id => categoriesById.value[id])
-      .map(source => api?.reallocateCategory(payload.target, source))
+      .map(source => api?.reallocateCategory(payload.target.id, source.id))
   )
     .then(() => loadCategories())
     .finally(() => {

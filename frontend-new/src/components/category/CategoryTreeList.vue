@@ -32,7 +32,7 @@ const parentCategories = computed(() => {
   return _.sortBy(categories.filter(cat => !cat.parentId), x => x.name.toLowerCase())
 })
 
-type CategoryWithChildren = Category & { children: Category[] };
+type CategoryWithChildren = Category & { children?: Category[] };
 
 const categoriesAsTree = computed<CategoryWithChildren[]>(() => {
   const resolver = (cat: Category): CategoryWithChildren => {
@@ -40,7 +40,9 @@ const categoriesAsTree = computed<CategoryWithChildren[]>(() => {
 
     return {
       ...cat,
-      children: _.sortBy(children, x => x.name.toLowerCase()),
+      children:
+        children.length === 0 ? undefined :
+          _.sortBy(children, x => x.name.toLowerCase()),
     }
   }
 
@@ -79,12 +81,12 @@ function deleteCategory(id: string) {
   emit("deleteCategory", categoriesById[id])
 }
 
-function onDragstart(srcItem: any) {
+function onDragstart(srcItem?: Category) {
   if (srcItem)
     selected.value.push(srcItem.id)
 }
 
-function onDrop(trgtItem: any /*, srcItem*/) {
+function onDrop(trgtItem: Category /*, srcItem*/) {
   if (selected.value.includes(trgtItem.id))
     return;
 
@@ -103,20 +105,21 @@ watch(() => categories, () => clearSelection(), {deep: true})
 <template>
   <v-card>
     <v-treeview :items="categoriesAsTree"
-                :active.sync="selected"
-                :open.sync="opened"
-                :activatable="true"
-                :multiple-active="true"
-                :selectable="false"
-                :hoverable="true"
-                :dense="true"
+                item-value="id"
                 :return-object="false"
-                :transition="true"
-                :rounded="false">
+                :selectable="false"
+                density="compact"
+                :rounded="false"
+
+                :activatable="true"
+                v-model:activated="selected"
+                active-strategy="independent"
+
+                v-model:opened="opened">
 
       <template v-slot:prepend="{ item }">
-        <drop @drop="onDrop(item, ...arguments)">
-          <drag :transfer-data="item" @dragstart="onDragstart">
+        <drop @drop="onDrop(item)">
+          <drag :transfer-data="item" @onDragStart="onDragstart">
             <v-icon class="drag-point">
               mdi-drag
             </v-icon>
@@ -125,10 +128,10 @@ watch(() => categories, () => clearSelection(), {deep: true})
       </template>
 
       <template v-slot:title="{ item }">
-        <drop @drop="onDrop(item, ...arguments)">
+        <drop @drop="onDrop(item)">
           <div class="d-flex justify-content-between">
-            <v-badge :content="item.children.length"
-                     :value="item.children.length"
+            <v-badge :content="item.children?.length ?? 0"
+                     :value="item.children?.length ?? 0"
                      color="accent"
                      :inline="true">
               {{ item.name }}
@@ -170,7 +173,7 @@ watch(() => categories, () => clearSelection(), {deep: true})
                             :categories-by-id="categoriesById"
                             @clear="clearSelection">
       <template v-slot:prepend>
-        <drag @dragstart="onDragstart">
+        <drag>
           <v-icon class="drag-point">
             mdi-drag
           </v-icon>
