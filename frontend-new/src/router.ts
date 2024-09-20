@@ -9,6 +9,7 @@ import About from "./components/About.vue";
 import ReportOverview from "./components/reports/simple/ReportOverview.vue";
 import TimelyReportOverview from "./components/reports/sankeys/TimelyReportOverview.vue";
 import CategoryOverview from "./components/category/CategoryOverview.vue";
+import TurnoverOverview from "./components/turnovers/TurnoverOverview.vue";
 
 export type Page = {
   link: string;
@@ -51,7 +52,7 @@ const routes: RouterPage[] = [
   {
     path: '/turnovers/',
     name: 'turnover-overview',
-    component: Home,
+    component: TurnoverOverview,
     page: {
       title: "Umsätze",
       shortDescription: "Umsätze eintragen",
