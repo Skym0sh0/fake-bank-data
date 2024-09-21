@@ -4,6 +4,7 @@ import {TurnoverImport, TurnoversApi} from "@api/api.ts";
 import {apiRefKey} from "../../keys.ts";
 import TurnoversList from "./TurnoversList.vue";
 import WaitingIndicator from "../misc/WaitingIndicator.vue";
+import TurnoverImporting from "./importing/TurnoverImporting.vue";
 
 const api: TurnoversApi | undefined = inject(apiRefKey)?.turnoversApi;
 
@@ -44,7 +45,7 @@ onMounted(() => {
     <waiting-indicator :is-loading="isLoading"/>
 
     <v-card-title>
-      <div class="d-flex justify-content-between align-items-center">
+      <div class="d-flex justify-space-between align-items-center">
         <h4>
           Überblick Umsätze
         </h4>
@@ -54,7 +55,7 @@ onMounted(() => {
             Neuladen
           </v-btn>
 
-          <!--          <turnover-importing @uploadSucceeded="uploadSuccess"/>-->
+          <turnover-importing :is-loading="isLoading" @uploadSucceeded="uploadSuccess"/>
         </v-btn-group>
       </div>
     </v-card-title>
