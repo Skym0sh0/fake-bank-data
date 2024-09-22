@@ -15,6 +15,7 @@ import WaitingIndicator from "../../misc/WaitingIndicator.vue";
 import useVuelidate from "@vuelidate/core";
 import {required} from '@vuelidate/validators'
 import RawCsvFileTable from "./RawCsvFileTable.vue";
+import TurnoverPreviewTable from "./TurnoverPreviewTable.vue";
 
 function getBankFormatName(frmt: TurnoverImportFormat): string {
   const BANK_FORMAT_NAMES = {
@@ -32,8 +33,7 @@ type SupportedFileType = {
   title: string;
 };
 
-
-type PreviewRowWithOriginalState = TurnoverRowPreview & { originalImportable?: boolean };
+export type PreviewRowWithOriginalState = TurnoverRowPreview & { originalImportable?: boolean };
 
 const api: TurnoversApi | undefined = inject(apiRefKey)?.turnoversApi;
 const categoriesApi: CategoryApi | undefined = inject(apiRefKey)?.categoriesApi;
@@ -173,6 +173,8 @@ function onCreateCategory({categoryName, callback}: { categoryName: string; call
 }
 
 function reset() {
+  isDialogOpen.value = false;
+
   categories.value = null;
   // this.selectedFileType = null;
   // this.selectedFileEncoding = "UTF-8";
@@ -192,6 +194,11 @@ function checkToHide(e) {
   if (mustNotBeClosed) {
     e.preventDefault()
   }
+}
+
+function openDialog() {
+  reset();
+  isDialogOpen.value = true
 }
 
 onMounted(() => {
@@ -216,10 +223,12 @@ onMounted(() => {
 
 <template>
   <v-btn color="primary"
-         @click="isDialogOpen = true">
+         @click="openDialog">
     CSV Import
 
-    <v-dialog v-model="isDialogOpen">
+    <v-dialog v-model="isDialogOpen"
+              :persistent="!!fileSelection"
+              @update:model-value="reset">
       <v-card>
         <v-card-title>
           Importiere CSV Datei
@@ -276,15 +285,16 @@ onMounted(() => {
           <div v-else>
             <v-card v-if="isReadilyLoaded" id="preview-card"
                     body-class="p-2">
-              <v-card-title class="d-flex justify-content-between py-2" id="preview-card-header">
+              <v-card-title class="d-flex justify-space-between py-2" id="preview-card-header">
                 <h6>{{ parsedPreview.filename }}</h6>
                 <h6>{{ parsedPreview.format }}</h6>
               </v-card-title>
 
               <v-card-text id="preview-card-body" class="p-2">
-                <!--                <turnover-preview-table v-model="previewedData"-->
-                <!--                                        :categories="categories"-->
-                <!--                                        @onCreateCategory="onCreateCategory"/>-->
+                <turnover-preview-table v-if="previewedData && categories"
+                                        v-model:value="previewedData"
+                                        :categories="categories"
+                                        @onCreateCategory="onCreateCategory"/>
               </v-card-text>
             </v-card>
           </div>
