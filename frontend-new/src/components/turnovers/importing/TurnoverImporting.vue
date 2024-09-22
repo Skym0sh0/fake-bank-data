@@ -223,6 +223,7 @@ onMounted(() => {
 
 <template>
   <v-btn color="primary"
+         :disabled="isLoading"
          @click="openDialog">
     CSV Import
 

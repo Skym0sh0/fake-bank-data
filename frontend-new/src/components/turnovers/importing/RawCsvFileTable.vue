@@ -19,15 +19,10 @@ const dataRows = computed(() => {
 
   return parsedData.value.data.map(row => {
     return row.map(cell => {
-      const maxLength = 24;
-      const trailer = "...";
-
       if (!cell)
         return null;
 
-      return _.truncate(cell, {
-        length: 24,
-      })
+      return _.truncate(cell, {length: 24})
     })
   })
 });
