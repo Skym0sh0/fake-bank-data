@@ -16,6 +16,7 @@ import CategoryInput from "../../misc/CategoryInput.vue";
 import {DateTime} from "luxon";
 import * as _ from "lodash";
 import {useTheme} from "vuetify";
+import CategorySuggestion, {CategorySelectionType} from "./CategorySuggestion.vue";
 
 const {value, categories} = defineProps<{
   value: PreviewRowWithOriginalState[];
@@ -115,7 +116,7 @@ function rowProps({item}: { item?: PreviewRowWithOriginalState }) {
   return props;
 }
 
-function onSelectCategory(select: any) {
+function onSelectCategory(select: CategorySelectionType) {
   value.filter(row => row.checksum === select.checksum)
     .forEach(row => row.categoryId = select.categoryId)
 }
@@ -303,12 +304,11 @@ const fields = computed<ReadonlyDataTableHeader[]>(() => {
     </template>
 
     <template v-slot:item.suggestedCategories="row">
-      <!--            <category-suggestion :checksum="row.item.checksum"-->
-      <!--                                 :suggestions="row.item.suggestedCategories || []"-->
-      <!--                                 :categories-by-id="categoriesById"-->
-      <!--                                 :disabled="!row.item.importable"-->
-      <!--                                 @select="onSelectCategory"/>-->
-      suggested {{ row.index }}
+      <category-suggestion :checksum="row.item.checksum"
+                           :suggestions="row.item.suggestedCategories || []"
+                           :categories-by-id="categoriesById"
+                           :disabled="!row.item.importable"
+                           @select="onSelectCategory"/>
     </template>
 
     <template v-slot:item.suggestedCategory="row" v-if="hasSuggestions">
@@ -331,13 +331,3 @@ const fields = computed<ReadonlyDataTableHeader[]>(() => {
     </template>
   </v-data-table>
 </template>
-
-<style scoped>
-.excluded-import-rows {
-  background-color: yellow;
-}
-
-.error-import-rows {
-  background-color: red;
-}
-</style>
