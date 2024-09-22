@@ -8,7 +8,6 @@ import {User, UserAuthApi} from "@api"
 const router = useRouter()
 const route = useRoute()
 
-
 const nameRules = [
   value => {
     if (!value)

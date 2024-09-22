@@ -4,6 +4,9 @@ import {computed} from "vue";
 import type {VDataTable} from "vuetify/components";
 import ConfirmationedButton from "../misc/ConfirmationedButton.vue";
 import {DateTime} from "luxon";
+import {useRouter} from "vue-router";
+
+const router = useRouter()
 
 const {imports, isLoading} = defineProps<{
   imports: TurnoverImport[];
@@ -29,13 +32,11 @@ function formatDate(d?: string) {
 }
 
 function onOpen(item: TurnoverImport) {
-  // this.$router.push({name: "turnovers-detail", params: {id: item.id}});
-  console.log("open", item)
+   router.push({name: "turnovers-detail", params: {id: item.id}});
 }
 
 function onDelete(item: TurnoverImport) {
-  // emit("onDelete", item);
-  console.log("delete", item)
+   emit("onDelete", item);
 }
 
 const sortedList = computed(() => {

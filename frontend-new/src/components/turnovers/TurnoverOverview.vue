@@ -23,6 +23,9 @@ function onDelete(fileImport: TurnoverImport) {
   isLoading.value = true;
 
   api?.deleteTurnoverImport(fileImport.id)
+    .then(() => {
+      turnoverImports.value = turnoverImports.value.filter(i => i.id !== fileImport.id)
+    })
     .then(() => loadImports())
     .finally(() => isLoading.value = false)
 }

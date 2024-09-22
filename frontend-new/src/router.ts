@@ -10,6 +10,7 @@ import ReportOverview from "./components/reports/simple/ReportOverview.vue";
 import TimelyReportOverview from "./components/reports/sankeys/TimelyReportOverview.vue";
 import CategoryOverview from "./components/category/CategoryOverview.vue";
 import TurnoverOverview from "./components/turnovers/TurnoverOverview.vue";
+import TurnoversDetail from "./components/turnovers/detail/TurnoversDetail.vue";
 
 export type Page = {
   link: string;
@@ -63,7 +64,7 @@ const routes: RouterPage[] = [
     path: '/turnovers/:id',
     name: "turnovers-detail",
     props: true,
-    component: Home,
+    component: TurnoversDetail,
   },
   {
     path: '/categories/',
