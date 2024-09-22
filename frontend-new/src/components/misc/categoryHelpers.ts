@@ -1,7 +1,10 @@
 import {Category} from "@api/api.ts";
 import * as _ from "lodash";
 
-export type CategoriesById = { [id: string]: Category };
+export type LookupById<T> = { [id: string]: T };
+export type LookupByName<T> = { [name: string]: T };
+
+export type CategoriesById = LookupById<Category>;
 
 export function mapCategoriesById(categories?: Category[]): CategoriesById {
   return (categories ?? []).reduce((old, cur) => {
@@ -11,7 +14,7 @@ export function mapCategoriesById(categories?: Category[]): CategoriesById {
   }, {})
 }
 
-export type CategoriesByName = { [name: string]: Category };
+export type CategoriesByName = LookupByName<Category>;
 
 export function mapCategoriesByName(categories: Category[]): CategoriesByName {
   return (categories ?? []).reduce((old, cur) => ({...old, [cur.name]: cur}), {})

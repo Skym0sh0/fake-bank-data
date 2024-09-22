@@ -44,7 +44,7 @@ const color = computed(() => {
 });
 
 function onClick() {
-  const defer = (work) => {
+  const defer = (work: () => void) => {
     isLoading.value = true;
     setTimeout(() => {
       work()
@@ -63,6 +63,12 @@ function onClick() {
   }
 
   emit("click")
+  reset()
+}
+
+function reset() {
+  actionRequested.value = false;
+  actionConfirmed.value = false;
 }
 </script>
 
