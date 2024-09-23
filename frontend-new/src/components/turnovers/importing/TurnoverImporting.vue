@@ -279,6 +279,7 @@ onMounted(() => {
                 <v-col :sm="2" :md="1">
                   <v-btn @click="onStartPreview"
                          color="primary"
+                         :loading="isUploading"
                          :disabled="v$.$invalid"
                          prepend-icon="mdi-file-eye"
                          text="Vorschau"
@@ -286,9 +287,10 @@ onMounted(() => {
                 </v-col>
               </v-row>
 
-              <v-row v-if="fileSelection">
-                <raw-csv-file-table :file="fileSelection"
+              <v-row>
+                <raw-csv-file-table :file="fileSelection ?? undefined"
                                     :encoding="selectedFileEncoding"
+                                    :is-loading="isUploading"
                                     @isLoading="onIsLoading"/>
               </v-row>
             </v-container>
