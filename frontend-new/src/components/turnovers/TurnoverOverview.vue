@@ -54,7 +54,7 @@ onMounted(() => {
         </h4>
 
         <v-btn-group>
-          <v-btn color="secondary" @click="onReload" :disabled="isLoading">
+          <v-btn color="secondary" @click="onReload" :disabled="isLoading" :loading="isLoading">
             Neuladen
           </v-btn>
 

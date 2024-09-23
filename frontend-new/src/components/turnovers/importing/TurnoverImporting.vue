@@ -222,25 +222,35 @@ onMounted(() => {
 </script>
 
 <template>
-  <v-btn color="primary"
-         :disabled="isLoading"
-         @click="openDialog">
-    CSV Import
+  <v-dialog v-model="isDialogOpen"
+            :persistent="true"
+            @update:model-value="reset">
+    <template v-slot:activator>
+      <v-btn color="primary"
+             :disabled="isLoading"
+             :loading="isLoading"
+             @click="openDialog"
+             variant="elevated"
+             text="CSV Import"
+             prepend-icon="mdi-earth"/>
+    </template>
 
-    <v-dialog v-model="isDialogOpen"
-              :persistent="!!fileSelection"
-              @update:model-value="reset">
+    <template v-slot:default>
       <v-card>
-        <v-card-title>
-          Importiere CSV Datei
+        <v-card-title class="d-flex justify-space-between align-center">
+          <span>Importiere CSV Datei</span>
+
+          <v-btn @click="reset"
+                 variant="plain"
+                 icon="mdi-close"/>
         </v-card-title>
 
         <v-card-text>
           <waiting-indicator :is-loading="isUploading"/>
 
           <div v-if="!parsedPreview">
-            <v-container :fluid="true" class="p-3">
-              <v-row>
+            <v-container>
+              <v-row align="center">
                 <v-col :sm="6" :md="7">
                   <v-file-input id="general-file-import-file"
                                 v-model="fileSelection"
@@ -269,9 +279,10 @@ onMounted(() => {
                 <v-col :sm="2" :md="1">
                   <v-btn @click="onStartPreview"
                          color="primary"
-                         :disabled="v$.$invalid">
-                    Vorschau
-                  </v-btn>
+                         :disabled="v$.$invalid"
+                         prepend-icon="mdi-file-eye"
+                         text="Vorschau"
+                  />
                 </v-col>
               </v-row>
 
@@ -345,8 +356,8 @@ onMounted(() => {
           </div>
         </v-card-actions>
       </v-card>
-    </v-dialog>
-  </v-btn>
+    </template>
+  </v-dialog>
 </template>
 
 <style scoped>
