@@ -8,7 +8,7 @@ const links = computed(() => {
 </script>
 
 <template>
-  <v-list nav dense>
+  <v-list :nav="true">
     <v-list-item>
       <v-list-item-title>
         Topics
@@ -20,15 +20,19 @@ const links = computed(() => {
 
     <v-divider/>
 
-    <v-list-item v-for="(link, idx) in links" :key="idx" link :to="link.link">
-      <v-list-item-action>
-        <v-icon>
-          {{ link.icon }}
-        </v-icon>
-      </v-list-item-action>
+    <v-list-item v-for="link in links"
+                 :key="link.link"
+                 :to="link.link">
+      <template v-slot:prepend>
+        <v-icon :icon="link.icon" color="primary"/>
+      </template>
+
       <v-list-item-title>
         {{ link.title }}
       </v-list-item-title>
+      <v-list-item-subtitle>
+        {{ link.link }}
+      </v-list-item-subtitle>
     </v-list-item>
 
     <v-divider/>

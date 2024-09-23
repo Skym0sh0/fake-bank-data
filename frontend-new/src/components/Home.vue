@@ -1,35 +1,38 @@
 <script setup lang="ts">
 import {getPages} from "../router.ts";
 import {computed} from "vue";
+import {useTheme} from "vuetify";
+
+const theme = useTheme().current.value;
 
 const links = computed(() => {
-  return getPages().filter(p => !p.isStartPage);
+  return getPages().filter(p => !p.isStartPage)
 })
 </script>
 
 <template>
-  <div class="d-flex flex-wrap justify-content-start align-items-baseline align-content-center flex-grow-1"
+  <div class="d-flex flex-wrap justify-start align-baseline align-center"
        style="column-gap: 1em; row-gap: 2em">
+
     <template v-for="(link) in links">
-      <v-card no-body
-              :link="true"
-              :to="link.link"
+      <v-card :to="link.link"
               width="16em"
-              height="8em"
               elevation="8">
-        <v-card-title>
-          <router-link :to="link.link">
-            {{ link.title }}
-          </router-link>
+        <v-card-title :style="{color: theme.colors.info}">
+          {{ link.title }}
         </v-card-title>
 
-        <v-card-text>
-          <div class="d-flex justify-content-between align-items-baseline">
-            <p class="card-text">
-              {{ link.shortDescription }}
-            </p>
+        <v-card-subtitle>
+          {{ link.title }}
+        </v-card-subtitle>
 
-            <v-icon :x-large="true">
+        <v-card-text>
+          <div class="d-flex justify-space-between align-baseline">
+            <span>
+              {{ link.shortDescription }}
+            </span>
+
+            <v-icon size="x-large" :color="theme.colors.info">
               {{ link.icon }}
             </v-icon>
           </div>

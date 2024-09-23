@@ -35,7 +35,7 @@ function toggleDrawer() {
 <template>
   <ApiAccess>
     <v-app id="app">
-      <v-app-bar app color="primary" dark>
+      <v-app-bar app color="primary">
         <v-app-bar-nav-icon v-if="isLoggedIn" @click.stop="toggleDrawer"/>
 
         <v-toolbar-title class="mr-12 align-center title">
@@ -59,12 +59,12 @@ function toggleDrawer() {
         </div>
       </v-app-bar>
 
-      <v-navigation-drawer v-if="isLoggedIn" app v-model="drawer" dark>
+      <v-navigation-drawer v-if="isLoggedIn" app v-model="drawer" elevation="8">
         <sky-navigation/>
       </v-navigation-drawer>
 
       <v-main app>
-        <v-container fluid>
+        <v-container style="width: 75vw">
           <router-view/>
         </v-container>
 
