@@ -24,7 +24,7 @@ const avatar = computed(() => {
 </script>
 
 <template>
-  <div class="d-flex justify-content-between align-items-center" style="gap: 0.5em">
+  <div class="d-flex justify-space-between align-center" style="gap: 0.5em">
     <v-avatar color="warning" size="32">
       {{ avatar }}
     </v-avatar>
@@ -35,15 +35,11 @@ const avatar = computed(() => {
       {{ username }}
     </span>
 
-    <v-divider/>
-
-    <v-btn :icon="true"
+    <v-btn
            :link="true"
-           :small="true"
+           size="small"
+           icon="mdi-dots-vertical"
            to="/user-details">
-      <v-icon>
-        mdi-dots-vertical
-      </v-icon>
     </v-btn>
   </div>
 </template>

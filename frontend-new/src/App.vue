@@ -7,6 +7,8 @@ import ApiErrorBubble from "./components/misc/ApiErrorBubble.vue";
 import ApiAccess from "./api/ApiAccess.vue";
 import SkyNavigation from "./components/layout/SkyNavigation.vue";
 
+import RegularIncomeIcon from './assets/regular-income.svg'
+
 const userRef = inject(authenticationKey)
 
 userRef.value.initUser()
@@ -37,16 +39,18 @@ function toggleDrawer() {
         <v-app-bar-nav-icon v-if="isLoggedIn" @click.stop="toggleDrawer"/>
 
         <v-toolbar-title class="mr-12 align-center title">
-          <v-icon class="mx-4" color="warning">
-            mdi-currency-eur
-          </v-icon>
+          <div class="d-flex flex-row justify-start align-center">
+            <div>
+              <RegularIncomeIcon :width="48" :height="48"/>
+            </div>
 
-          Regular Income
+            <span>Regular Income</span>
+          </div>
         </v-toolbar-title>
 
         <v-spacer/>
 
-        <div v-if="isLoggedIn" class="d-flex justify-content-between align-items-center" style="gap: 1em">
+        <div v-if="isLoggedIn" class="d-flex justify-space-between align-center" style="gap: 1em">
           <user-avatar/>
 
           <v-btn @click="doLogout" light color="dark">
@@ -73,18 +77,4 @@ function toggleDrawer() {
 </template>
 
 <style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
 </style>
