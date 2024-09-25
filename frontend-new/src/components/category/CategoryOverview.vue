@@ -176,31 +176,24 @@ loadCategories();
   <v-card class="px-5">
     <waiting-indicator :is-loading="isLoading"/>
 
-    <template v-slot:title class="p-2">
+    <v-card-title class="p-2">
       <div class="w-100 d-flex justify-space-between align-center">
-        <h5>Kategorien</h5>
+        <h4>Kategorien</h4>
 
-        <v-btn-toggle :dense="true">
-          <v-btn @click="loadCategories"
-                 :loading="isLoading"
-                 color="accent"
-                 :small="true">
-            Neuladen
-          </v-btn>
-          <v-btn @click="addNewRootCategory"
-                 :loading="isLoading"
-                 color="primary"
-                 :small="true">
-            Neue Kategorie
-          </v-btn>
-        </v-btn-toggle>
+        <v-btn @click="addNewRootCategory"
+               :loading="isLoading"
+               :disabled="selectedForDetails.isSelected"
+               prepend-icon="mdi-plus-box-outline"
+               color="primary">
+          Neue Kategorie
+        </v-btn>
       </div>
-    </template>
+    </v-card-title>
 
-    <template v-slot:text class="p-2">
-      <v-container class="pt-0">
-        <v-row class="py-0">
-          <v-col class="py-0" :cols="showDetails ? 8 : 12">
+    <v-card-text>
+      <v-container>
+        <v-row>
+          <v-col :cols="showDetails ? 8 : 12">
             <category-list :categories-by-id="categoriesById"
                            :categories="categories"
                            @edit="openEditView"
@@ -228,7 +221,7 @@ loadCategories();
           </v-col>
         </v-row>
       </v-container>
-    </template>
+    </v-card-text>
   </v-card>
 </template>
 

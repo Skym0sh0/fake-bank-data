@@ -59,84 +59,74 @@ function deleteCategory() {
 </script>
 
 <template>
-  <div>
-    <v-divider :vertical="true"/>
-
-    <v-btn-group>
+  <div class="ml-1 d-flex ga-1">
+    <v-btn-group size="small"
+                 density="compact">
       <category-volume-graph :category="category">
         <template v-slot:button="{ clickCallback }">
-          <v-btn :icon="true"
-                 :small="true"
-                 color="warning"
-                 @click.stop="clickCallback"
-                 title="Graph">
-            <v-icon :small="true">
-              mdi-chart-timeline-variant-shimmer
-            </v-icon>
-          </v-btn>
+          <v-tooltip location="top">
+            <template v-slot:activator="{ props }">
+              <v-btn icon="mdi-chart-timeline-variant-shimmer"
+
+                     color="warning"
+                     @click.stop="clickCallback"
+                     v-bind="props"/>
+            </template>
+
+            Zeige Graph
+          </v-tooltip>
         </template>
       </category-volume-graph>
 
       <category-usage-dialog :category="category">
         <template v-slot:button="{ clickCallback }">
-          <v-btn :icon="true"
-                 :small="true"
-                 color="primary"
-                 @click.stop="clickCallback"
-                 title="Zeige benutzte Turnovers">
-            <v-icon :small="true">
-              mdi-format-list-bulleted
-            </v-icon>
-          </v-btn>
+          <v-tooltip location="top">
+            <template v-slot:activator="{ props }">
+              <v-btn icon="mdi-format-list-bulleted"
+                     color="primary"
+                     @click.stop="clickCallback"
+                     v-bind="props"/>
+            </template>
+
+            Zeige benutzte Turnovers
+          </v-tooltip>
         </template>
       </category-usage-dialog>
+    </v-btn-group>
 
-      <v-tooltip :top="true">
+    <v-btn-group size="small"
+                 density="compact">
+      <v-tooltip location="top">
         <template v-slot:activator="{ props }">
-          <div v-bind="props">
-            <v-btn :icon="true"
-                   :small="true"
-                   color="success"
-                   @click.stop="editCategory">
-              <v-icon :small="true">
-                mdi-playlist-edit
-              </v-icon>
-            </v-btn>
-          </div>
+          <v-btn icon="mdi-playlist-edit"
+                 color="success"
+                 @click.stop="editCategory"
+                 v-bind="props"/>
         </template>
+
         Kategorie editieren
       </v-tooltip>
 
-      <v-tooltip :top="true">
+      <v-tooltip location="top">
         <template v-slot:activator="{ props }">
-          <div v-bind="props">
-            <v-btn :icon="true"
-                   :small="true"
-                   color="purple"
-                   @click.stop="addNewCategoryTo">
-              <v-icon :small="true">
-                mdi-playlist-plus
-              </v-icon>
-            </v-btn>
-          </div>
+          <v-btn icon="mdi-playlist-plus"
+                 color="purple"
+                 @click.stop="addNewCategoryTo"
+                 v-bind="props"/>
         </template>
+
         Erstelle neue Unterkategorie
       </v-tooltip>
 
-      <v-tooltip :top="true">
+      <v-tooltip location="top">
         <template v-slot:activator="{ props }">
-          <div v-bind="props">
-            <v-btn :icon="true"
-                   :small="true"
-                   color="error"
-                   @click.stop="deleteCategory"
-                   :disabled="isDeletionForbidden">
-              <v-icon :small="true">
-                mdi-trash-can-outline
-              </v-icon>
-            </v-btn>
-          </div>
+          <v-btn icon="mdi-trash-can-outline"
+                 color="error"
+                 @click.stop="deleteCategory"
+                 :disabled="isDeletionForbidden"
+                 v-bind="props"/>
         </template>
+
         {{ deletionButtonTooltip }}
       </v-tooltip>
     </v-btn-group>

@@ -101,18 +101,18 @@ watch(() => entity, () => changeAnything(), {deep: true})
 
 <template>
   <v-card class="position-sticky">
-    <v-card-title class="justify-content-between">
+    <v-card-title class="d-flex justify-space-between">
       <span>Kategorie Details</span>
 
       <category-usage-dialog v-if="entity && entity.id" :category="entity"/>
     </v-card-title>
 
-    <v-card-subtitle class="py-0">
+    <v-card-subtitle class="d-flex justify-start">
       <breadcrumps :items="allParentCategoryChain"/>
     </v-card-subtitle>
 
     <v-card-text>
-      <v-form ref="details-form">
+      <v-form ref="details-form" class="d-flex flex-column ga-2">
         <v-text-field v-model="entity.name"
                       label="Name"
                       placeholder="Name"
@@ -127,18 +127,18 @@ watch(() => entity, () => changeAnything(), {deep: true})
                     :auto-grow="true"
                     @input="changeAnything"/>
 
-        <v-divider class="my-1"/>
+        <v-divider/>
 
         <budget-area :value="entity.budget"
                      @newBudget="onNewBudget"
                      @deleteBudget="onDeleteBudget"
                      @changed="changeAnything"/>
 
-        <v-divider class="my-1"/>
+        <v-divider/>
 
         <category-infos :entity="entity"/>
 
-        <div class="d-flex justify-content-end mt-2">
+        <div class="d-flex justify-end mt-2">
           <v-btn-group>
             <v-btn @click="cancelActiveForm"
                    :loading="isLoading"

@@ -57,10 +57,10 @@ function loadData() {
   referencedRows.value = [];
 
   api?.fetchTurnoversReportForCategory(category.id, grouping.value, includeSubcategories.value ? 1 << 16 : 1)
-      .then((res: CategoryTurnoverReport) => {
-        referencedRows.value = res.datapoints ?? []
-      })
-      .finally(() => isLoading.value = false)
+    .then((res: CategoryTurnoverReport) => {
+      referencedRows.value = res.datapoints ?? []
+    })
+    .finally(() => isLoading.value = false)
 }
 
 
@@ -70,56 +70,54 @@ watch(() => grouping.value, () => loadData())
 </script>
 
 <template>
-  <div>
-    <slot name="button" :clickCallback="onOpenModal">
-      <v-btn id="usage-count"
-             variant="text"
-             :pill="true"
-             size="sm"
-             @click="onOpenModal"
-             :title="`Diese Kategorie wird in ${category.usageCount} Transaktionen benutzt.`">
-        {{ category.usageCount }}
-      </v-btn>
-    </slot>
+  <slot name="button" :clickCallback="onOpenModal">
+    <v-btn id="usage-count"
+           variant="text"
+           :pill="true"
+           size="small"
+           @click="onOpenModal"
+           :title="`Diese Kategorie wird in ${category.usageCount} Transaktionen benutzt.`">
+      {{ category.usageCount }}
+    </v-btn>
+  </slot>
 
-    <v-dialog ref="modal-turnovers-graph"
-              v-model="isOpen"
-              :max-width="1200"
-              :max-height="800"
-              transition="dialog-top-transition">
-      <v-card>
-        <v-card-title>
-          Turnovers Graph für Kategorie {{ category.name }}
-        </v-card-title>
+  <v-dialog ref="modal-turnovers-graph"
+            v-model="isOpen"
+            :max-width="1200"
+            :max-height="800"
+            transition="dialog-top-transition">
+    <v-card>
+      <v-card-title>
+        Turnovers Graph für Kategorie {{ category.name }}
+      </v-card-title>
 
-        <v-card-text>
-          <v-container :fluid="true" class="mw-100 p-0">
-            <v-row>
-              <v-col>
-                <waiter :is-loading="isLoading">
-                  <category-graph v-if="graphData.length > 0" :data="graphData"/>
-                  <div v-else>
-                    Keine Daten vorhanden
-                  </div>
-                </waiter>
-              </v-col>
-            </v-row>
+      <v-card-text>
+        <v-container :fluid="true" class="mw-100 p-0">
+          <v-row>
+            <v-col>
+              <waiter :is-loading="isLoading">
+                <category-graph v-if="graphData.length > 0" :data="graphData"/>
+                <div v-else>
+                  Keine Daten vorhanden
+                </div>
+              </waiter>
+            </v-col>
+          </v-row>
 
-            <v-row class="d-flex justify-content-center">
-              <v-col :cols="2">
-                <v-select v-model="grouping"
-                          :items="groupingKeys"
-                          label="Zeitraum Gruppierung"/>
-              </v-col>
+          <v-row class="d-flex justify-content-center">
+            <v-col :cols="2">
+              <v-select v-model="grouping"
+                        :items="groupingKeys"
+                        label="Zeitraum Gruppierung"/>
+            </v-col>
 
-              <v-col :cols="2">
-                <v-checkbox v-model="includeSubcategories"
-                            label="mit Unterkategorien"/>
-              </v-col>
-            </v-row>
-          </v-container>
-        </v-card-text>
-      </v-card>
-    </v-dialog>
-  </div>
+            <v-col :cols="2">
+              <v-checkbox v-model="includeSubcategories"
+                          label="mit Unterkategorien"/>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-card-text>
+    </v-card>
+  </v-dialog>
 </template>

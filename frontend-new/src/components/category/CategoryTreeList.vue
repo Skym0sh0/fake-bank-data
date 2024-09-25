@@ -103,84 +103,82 @@ watch(() => categories, () => clearSelection(), {deep: true})
 </script>
 
 <template>
-  <v-card>
-    <v-treeview :items="categoriesAsTree"
-                item-value="id"
-                :return-object="false"
-                :selectable="false"
-                density="compact"
-                :rounded="false"
+  <v-treeview :items="categoriesAsTree"
+              item-value="id"
+              :return-object="false"
+              :selectable="false"
+              density="compact"
+              :rounded="false"
 
-                :activatable="true"
-                v-model:activated="selected"
-                active-strategy="independent"
+              :activatable="true"
+              v-model:activated="selected"
+              active-strategy="independent"
 
-                v-model:opened="opened">
+              v-model:opened="opened">
 
-      <template v-slot:prepend="{ item }">
-        <drop @drop="onDrop(item)">
-          <drag :transfer-data="item" @onDragStart="onDragstart">
-            <v-icon class="drag-point">
-              mdi-drag
-            </v-icon>
-          </drag>
-        </drop>
-      </template>
-
-      <template v-slot:title="{ item }">
-        <drop @drop="onDrop(item)">
-          <div class="d-flex justify-content-between">
-            <v-badge :content="item.children?.length ?? 0"
-                     :value="item.children?.length ?? 0"
-                     color="accent"
-                     :inline="true">
-              {{ item.name }}
-            </v-badge>
-
-            <div class="d-flex" style="gap: 0.25em">
-              <v-icon v-if="item.isNew" color="success">
-                mdi-new-box
-              </v-icon>
-
-              <v-tooltip v-if="item.budget" :top="true">
-                <template v-slot:activator="{props}">
-                  <v-icon color="red"
-                          :small="true"
-                          v-bind="props">
-                    mdi-finance
-                  </v-icon>
-                </template>
-
-                Budget:
-                {{ formatMonetaryAmount(item.budget.budgetInCents * 100) }}
-                +
-                {{ item.budget.exceedingThreshold }} %
-              </v-tooltip>
-            </div>
-          </div>
-        </drop>
-      </template>
-
-      <template v-slot:append="{ item }">
-        <category-tree-item-buttons :category="item"
-                                    @editCategory="editCategory"
-                                    @addNewChildCategory="addNewCategoryTo"
-                                    @deleteCategory="deleteCategory"/>
-      </template>
-    </v-treeview>
-
-    <selected-category-info :selectedIds="selected"
-                            :categories-by-id="categoriesById"
-                            @clear="clearSelection">
-      <template v-slot:prepend>
-        <drag>
+    <template v-slot:prepend="{ item }">
+      <drop @drop="onDrop(item)">
+        <drag :transfer-data="item" @onDragStart="onDragstart">
           <v-icon class="drag-point">
             mdi-drag
           </v-icon>
         </drag>
-      </template>
-    </selected-category-info>
-  </v-card>
+      </drop>
+    </template>
+
+    <template v-slot:title="{ item }">
+      <drop @drop="onDrop(item)">
+        <div class="d-flex justify-space-between">
+          <v-badge :content="item.children?.length ?? 0"
+                   :value="item.children?.length ?? 0"
+                   color="accent"
+                   :inline="true">
+            {{ item.name }}
+          </v-badge>
+
+          <div class="d-flex justify-space-between ga-0">
+            <v-icon v-if="item.isNew" color="success" title="Neu erstellt">
+              mdi-new-box
+            </v-icon>
+
+            <v-tooltip v-if="item.budget" location="top">
+              <template v-slot:activator="{ props }">
+                <v-icon color="red"
+                        :small="true"
+                        v-bind="props">
+                  mdi-finance
+                </v-icon>
+              </template>
+
+              Budget:
+              {{ formatMonetaryAmount(item.budget.budgetInCents * 100) }}
+              +
+              {{ item.budget.exceedingThreshold }} %
+            </v-tooltip>
+          </div>
+        </div>
+      </drop>
+    </template>
+
+    <template v-slot:append="{ item }">
+      <category-tree-item-buttons :category="item"
+                                  @editCategory="editCategory"
+                                  @addNewChildCategory="addNewCategoryTo"
+                                  @deleteCategory="deleteCategory"/>
+    </template>
+  </v-treeview>
+
+  <selected-category-info :selectedIds="selected"
+                          :categories-by-id="categoriesById"
+                          @clear="clearSelection">
+    <template v-slot:prepend>
+      <drag>
+        <v-icon class="drag-point">
+          mdi-drag
+        </v-icon>
+      </drag>
+    </template>
+  </selected-category-info>
 </template>
 
 <style scoped>

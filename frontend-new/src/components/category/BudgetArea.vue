@@ -12,8 +12,8 @@ const emit = defineEmits<{
   (e: "changed"): void;
 }>();
 
-const budgetInEuro = ref((value?.budgetInCents ?? 0) / 100);
-const thresholdInPercent = ref((value?.exceedingThreshold ?? 0.1) * 100);
+const budgetInEuro = ref<number>((value?.budgetInCents ?? 0) / 100);
+const thresholdInPercent = ref<number>((value?.exceedingThreshold ?? 0.1) * 100);
 
 watch(() => budgetInEuro.value, () => {
   if (value) {
@@ -30,8 +30,8 @@ const isBudgetAbsent = computed(() => {
   return value === null || value === undefined || !value;
 })
 
-const budget = computed(() => {
-  return budgetInEuro.value;
+const budget = computed<number>(() => {
+  return Number.parseInt(budgetInEuro.value.toString());
 })
 
 const budgetFormatted = computed(() => {
@@ -39,7 +39,7 @@ const budgetFormatted = computed(() => {
 })
 
 const exceedingThreshold = computed(() => {
-  return thresholdInPercent.value/100.0;
+  return thresholdInPercent.value / 100.0;
 })
 
 const budgetThresholdFraction = computed(() => {
@@ -66,9 +66,6 @@ const fractionMessage = computed(() => {
 })
 
 const rangeMessage = computed(() => {
-  if (!budget.value)
-    return null
-
   return `Bereich ${thresholdRangeFormatted.value[0]} - ${thresholdRangeFormatted.value[1]}`;
 })
 
@@ -104,7 +101,7 @@ function formatMonetary(value: number) {
 
 <template>
   <div>
-    <div class="d-flex justify-content-between align-items-center p-1">
+    <div class="d-flex justify-space-between align-center p-1">
       <div>
         <v-icon :small="true" color="red">
           mdi-finance
@@ -113,18 +110,17 @@ function formatMonetary(value: number) {
         Ausgaben Budget
       </div>
 
-      <v-btn size="small"
-             :icon="true"
-             @click="onHeaderClick">
-        <v-icon>
-          {{ isBudgetAbsent ? 'mdi-plus' : 'mdi-minus' }}
-        </v-icon>
-      </v-btn>
+      <v-btn size="x-small"
+             :icon="isBudgetAbsent ? 'mdi-plus' : 'mdi-minus'"
+             @click="onHeaderClick"
+             variant="flat"
+             color="primary"
+      />
     </div>
 
     <div v-if="!isBudgetAbsent">
       <v-text-field label="Monatliches Budget"
-                    suffix="€"
+                    prefix="€"
                     type="number"
                     placeholder="1000"
                     v-model="budgetInEuro"
@@ -137,7 +133,6 @@ function formatMonetary(value: number) {
       <v-slider :min="0" :max="50"
                 :step="5"
                 color="orange"
-                :disabled="!budget"
                 :thumb-label="true"
                 v-model="thresholdInPercent"
                 @input="changeAnything"

@@ -45,32 +45,27 @@ function onReassign(reassignment: CategoryReassign) {
 </script>
 
 <template>
-  <v-container class="px-0">
-    <!--        <global-events @keydown.17.prevent="reallocationEnabled = true"-->
-    <!--                       @keyup.17.prevent="reallocationEnabled = false"/>-->
+  <v-row>
+    <v-col>
+      <v-text-field id="quick-filter-text-input-field"
+                    v-model="quickFilter"
+                    type="text"
+                    :clearable="true"
+                    label="Filter"
+                    hint="Suche Kategorie (auch Regex möglich)"
+                    prepend-inner-icon="mdi-filter-variant"
+                    suffix="Regex"/>
+    </v-col>
+  </v-row>
 
-    <v-row>
-      <v-col>
-        <v-text-field id="quick-filter-text-input-field"
-                      v-model="quickFilter"
-                      type="text"
-                      :dense="true"
-                      :clearable="true"
-                      label="Filter"
-                      hint="Suche Kategorie (auch Regex möglich)"
-                      suffix="Regex"/>
-      </v-col>
-    </v-row>
-
-    <v-row class="py-0">
-      <v-col class="py-0">
-        <category-tree-list :categories-by-id="categoriesById"
-                            :categories="filteredCategories"
-                            @newCategory="onNewCategory"
-                            @deleteCategory="onDeleteCategory"
-                            @onReassign="onReassign"
-                            @edit="onEdit"/>
-      </v-col>
-    </v-row>
-  </v-container>
+  <v-row>
+    <v-col>
+      <category-tree-list :categories-by-id="categoriesById"
+                          :categories="filteredCategories"
+                          @newCategory="onNewCategory"
+                          @deleteCategory="onDeleteCategory"
+                          @onReassign="onReassign"
+                          @edit="onEdit"/>
+    </v-col>
+  </v-row>
 </template>

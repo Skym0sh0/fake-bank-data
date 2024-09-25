@@ -2,7 +2,6 @@
 import {Category, CategoryPatch, TurnoverImportRowsPatch, TurnoverRow, TurnoverRowPatch} from "@api/api.ts";
 import {computed, inject, ref} from "vue";
 import {apiRefKey, ApiType} from "../../../keys.ts";
-import Waiter from "../../misc/Waiter.vue";
 import TableCellMonetary from "../../misc/TableCellMonetary.vue";
 import TableCellDescription from "../../misc/TableCellDescription.vue";
 import CategoryInput from "../../misc/CategoryInput.vue";
@@ -127,8 +126,10 @@ function save() {
 function loadData() {
   isLoading.value = true;
 
-  Promise.all([loadCategories(), loadReferencedRows()])
-    .finally(() => isLoading.value = false)
+  setTimeout(() => {
+    Promise.all([loadCategories(), loadReferencedRows()])
+      .finally(() => isLoading.value = false)
+  }, 500)
 }
 
 function loadCategories() {
@@ -139,7 +140,7 @@ function loadCategories() {
 }
 
 function loadReferencedRows() {
-  referencedRows.value = null;
+  referencedRows.value = [];
 
   return api.turnoversApi.fetchTurnoversForCategory(category.id)
     .then((rows: TurnoverRow[]) => {
@@ -194,160 +195,85 @@ const columns = computed<ReadonlyDataTableHeader[]>(() => {
 </script>
 
 <template>
-  <div>
-    <slot name="button" :clickCallback="onOpenModal">
-      <v-btn id="usage-count"
-             variant="text"
-             color="primary"
-             :pill="true"
-             size="sm"
-             @click="onOpenModal"
-             :title="`Diese Kategorie wird in ${category.usageCount} Transaktionen benutzt.`">
-        {{ category.usageCount }}
-      </v-btn>
-    </slot>
+  <slot name="button" :clickCallback="onOpenModal">
+    <v-btn id="usage-count"
+           variant="outlined"
+           color="primary"
+           :pill="true"
+           size="small"
+           :disabled="!category.usageCount"
+           @click="onOpenModal"
+           :title="`Diese Kategorie wird in ${category.usageCount} Transaktionen benutzt.`">
+      {{ category.usageCount }}
+    </v-btn>
+  </slot>
 
-    <v-dialog v-model="isModalOpen">
-      <v-card>
-        <v-card-title>
-          Turnovers mit Kategorie {{ category.name }}
-        </v-card-title>
+  <v-dialog v-model="isModalOpen">
+    <v-card>
+      <v-card-title>
+        Turnovers mit Kategorie {{ category.name }}
+      </v-card-title>
 
+      <v-card-text>
+        <v-data-table style="max-height: 75vh"
+                      :fixed-header="true"
+                      :items="items"
+                      :headers="columns"
+                      :loading="isLoading"
+                      density="compact"
+                      :hover="true"
+                      :items-per-page="-1"
+                      :hide-default-footer="true">
 
-        <v-card-text>
-          <waiter :is-loading="isLoading">
-            <v-data-table :items="items"
-                          :headers="columns"
-                          density="compact"
-                          :hover="true"
-                          :hide-default-footer="true">
+          <template v-slot:item.amountInCents="{value}">
+            <table-cell-monetary :value="value" class="float-right"/>
+          </template>
 
-              <template v-slot:item.amountInCents="{value}">
-                <table-cell-monetary :value="value" class="float-right"/>
-              </template>
+          <template v-slot:item.description="{index, value}">
+            <table-cell-description :index="index" :value="value"/>
+          </template>
 
-              <template v-slot:item.description="{index, value}">
-                <table-cell-description :index="index" :value="value"/>
-              </template>
+          <template v-slot:item.newCategory="row" v-if="isEditing">
+            <category-input :id="`${row.item.id}`"
+                            :value="row.item.categoryId"
+                            :loading="row.item.id === currentLoadingRowId"
+                            :flatted-categories="flattedCategories"
+                            :categories-by-id="categoriesById"
+                            :categories-by-name="categoriesByName"
+                            @input="newCategoryId => onChangeCategory(row.item.id, newCategoryId)"
+                            @createCategory="name => onCreateCategory(row.item.id, name)"/>
+          </template>
+        </v-data-table>
+      </v-card-text>
 
-              <template v-slot:item.newCategory="row" v-if="isEditing">
-                <!--                {{ row }}-->
-                <!--                v-model="row.item.categoryId"-->
-                <category-input :id="`${row.item.id}`"
-                                :value="row.item.categoryId"
-                                :loading="row.item.id === currentLoadingRowId"
-                                :flatted-categories="flattedCategories"
-                                :categories-by-id="categoriesById"
-                                :categories-by-name="categoriesByName"
-                                @input="newCategoryId => onChangeCategory(row.item.id, newCategoryId)"
-                                @createCategory="name => onCreateCategory(row.item.id, name)"/>
-              </template>
+      <v-card-actions>
+        <div class="w-100 d-flex justify-end ga-1">
+          <v-btn v-if="!isEditing"
+                 @click="isEditing = true"
+                 color="secondary">
+            Bearbeiten
+          </v-btn>
 
-            </v-data-table>
-          </waiter>
-        </v-card-text>
+          <v-btn v-if="isEditing"
+                 @click="reset"
+                 color="warning">
+            Abbrechen
+          </v-btn>
 
-        <v-card-actions>
-          <div class="w-100 d-flex justify-space-between">
-            <v-btn-group>
-              <v-btn v-if="!isEditing"
-                     @click="isEditing = true">
-                Bearbeiten
-              </v-btn>
-            </v-btn-group>
+          <v-btn v-if="isEditing"
+                 @click="save"
+                 :disabled="!changedTurnovers.length || !!currentLoadingRowId"
+                 color="success">
+            Speichern
+          </v-btn>
 
-            <v-btn-group>
-              <v-btn v-if="isEditing"
-                     @click="reset">
-                Abbrechen
-              </v-btn>
-
-              <v-btn v-if="isEditing"
-                     @click="save"
-                     :disabled="!changedTurnovers.length || !!currentLoadingRowId">
-                Speichern
-              </v-btn>
-
-              <v-btn v-if="!isEditing"
-                     @click="reset">
-                Ok
-              </v-btn>
-            </v-btn-group>
-          </div>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <!--    <b-modal ref="modal-turnovers"-->
-    <!--             :scrollable="true"-->
-    <!--             :centered="true"-->
-    <!--             :title="`Turnovers mit Kategorie ${category.name}`"-->
-    <!--             @hidden="reset"-->
-    <!--             @hide="checkToHide">-->
-    <!--      <template v-slot:modal-footer>-->
-    <!--        <div class="w-100 d-flex justify-content-between">-->
-    <!--          <b-btn-group>-->
-    <!--            <b-button v-if="!isEditing"-->
-    <!--                      @click="isEditing = true"-->
-    <!--                      variant="danger">-->
-    <!--              Bearbeiten-->
-    <!--            </b-button>-->
-    <!--          </b-btn-group>-->
-
-    <!--          <b-btn-group>-->
-    <!--            <b-button v-if="isEditing"-->
-    <!--                      @click="reset"-->
-    <!--                      variant="danger">-->
-    <!--              Abbrechen-->
-    <!--            </b-button>-->
-
-    <!--            <b-button v-if="isEditing"-->
-    <!--                      @click="save"-->
-    <!--                      :disabled="!changedTurnovers.length || !!currentLoadingRowId"-->
-    <!--                      variant="primary">-->
-    <!--              Speichern-->
-    <!--            </b-button>-->
-
-    <!--            <b-button v-if="!isEditing"-->
-    <!--                      @click="reset"-->
-    <!--                      variant="primary">-->
-    <!--              Ok-->
-    <!--            </b-button>-->
-    <!--          </b-btn-group>-->
-    <!--        </div>-->
-    <!--      </template>-->
-
-    <!--      <waiter :is-loading="isLoading">-->
-    <!--        <b-table :striped="true"-->
-    <!--                 :hover="true"-->
-    <!--                 :responsive="true"-->
-    <!--                 :small="true"-->
-    <!--                 :bordered="false"-->
-    <!--                 :items="items"-->
-    <!--                 :fields="columns">-->
-    <!--          <template v-slot:cell(amountInCents)="row">-->
-    <!--            <table-cell-monetary :value="row.item.amountInCents" class="float-right"/>-->
-    <!--          </template>-->
-
-    <!--          <template v-slot:cell(description)="row">-->
-    <!--            <table-cell-description :index="row.index" :value="row.item.description"/>-->
-    <!--          </template>-->
-
-    <!--          <template v-slot:cell(newCategory)="row">-->
-    <!--            <category-input :id="`${row.item.id}`"-->
-    <!--                            v-model="row.item.categoryId"-->
-    <!--                            :loading="row.item.id === currentLoadingRowId"-->
-    <!--                            :flatted-categories="flattedCategories"-->
-    <!--                            :categories-by-id="categoriesById"-->
-    <!--                            :categories-by-name="categoriesByName"-->
-    <!--                            @createCategory="name => onCreateCategory(row.item.id, name)"/>-->
-    <!--          </template>-->
-    <!--        </b-table>-->
-    <!--      </waiter>-->
-    <!--    </b-modal>-->
-  </div>
+          <v-btn v-if="!isEditing"
+                 @click="reset"
+                 color="primary">
+            Ok
+          </v-btn>
+        </div>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
-
-<style scoped>
-
-</style>
