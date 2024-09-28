@@ -753,6 +753,9 @@ components:
                 $ref: "#/components/schemas/Category"
     CategoryTurnoverReport:
       type: object
+      required:
+        - categoryId
+        - datapoints
       properties:
         categoryId:
           $ref: "#/components/schemas/ID"
@@ -766,6 +769,7 @@ components:
       required:
         - rows
         - columns
+        - data
       properties:
         rows:
           type: integer
@@ -784,6 +788,12 @@ components:
       type: object
       required:
         - id
+        - importedAt
+        - filename
+        - filesizeBytes
+        - format
+        - encoding
+        - turnovers
       properties:
         id:
           $ref: "#/components/schemas/ID"
@@ -829,6 +839,9 @@ components:
             $ref: "#/components/schemas/ID"
     TurnoverRowPatch:
       type: object
+      required:
+        - id
+        - categoryId
       properties:
         id:
           $ref: "#/components/schemas/ID"
@@ -836,6 +849,12 @@ components:
           $ref: "#/components/schemas/ID"
     TurnoverPreview:
       type: object
+      required:
+        - filename
+        - format
+        - encoding
+        - uploadTime
+        - rows
       properties:
         filename:
           type: string
@@ -851,6 +870,8 @@ components:
             $ref: "#/components/schemas/TurnoverRowPreview"
     TurnoverRowPreview:
       type: object
+      required:
+        - importable
       allOf:
         - $ref: "#/components/schemas/TurnoverRow"
         - properties:
@@ -883,6 +904,9 @@ components:
       type: object
       required:
         - id
+        - date
+        - amountInCents
+        - checksum
       properties:
         id:
           $ref: "#/components/schemas/ID"
@@ -912,6 +936,9 @@ components:
 
     CategoryTurnoverReportDatapoint:
       type: object
+      required:
+        - categoryId
+        - date
       properties:
         categoryId:
           $ref: "#/components/schemas/ID"
@@ -927,6 +954,11 @@ components:
           $ref: "#/components/schemas/MoneyValue"
     BasicCoarseInfo:
       type: object
+      required:
+        - userId
+        - maxDepthOfCategories
+        - numberOfTransactions
+        - numberOfUsedCategories
       properties:
         userId:
           $ref: "#/components/schemas/ID"
@@ -945,6 +977,8 @@ components:
           format: int32
     BalanceProgressionReport:
       type: object
+      required:
+        - data
       properties:
         data:
           type: array
@@ -952,6 +986,11 @@ components:
             $ref: "#/components/schemas/BalanceDataPoint"
     BalanceDataPoint:
       type: object
+      required:
+        - date
+        - index
+        - balanceInCents
+        - perDayBalanceInCents
       properties:
         index:
           type: integer
@@ -964,6 +1003,10 @@ components:
           $ref: "#/components/schemas/MoneyValue"
     IncomeExpenseFlowReport:
       type: object
+      required:
+        - start
+        - end
+        - flows
       properties:
         start:
           $ref: "#/components/schemas/Date"
@@ -975,6 +1018,11 @@ components:
             $ref: "#/components/schemas/FlowDataPoint"
     FlowDataPoint:
       type: object
+      required:
+        - amountInCents
+        - depthLevel
+        - fromCategory
+        - toCategory
       properties:
         fromCategory:
           type: string
@@ -987,6 +1035,8 @@ components:
           $ref: "#/components/schemas/MoneyValue"
     MonthlyIncomeExpenseReport:
       type: object
+      required:
+        - data
       properties:
         data:
           type: array
@@ -994,6 +1044,10 @@ components:
             $ref: "#/components/schemas/MonthlyIncomeExpenseDataPoint"
     MonthlyIncomeExpenseDataPoint:
       type: object
+      required:
+        - month
+        - expenseInCents
+        - incomeInCents
       properties:
         month:
           $ref: "#/components/schemas/Date"
@@ -1015,7 +1069,6 @@ components:
           type: string
         errorDetails:
           type: string
-
 
     ReportTimeUnits:
       type: string
