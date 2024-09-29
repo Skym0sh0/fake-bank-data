@@ -5,21 +5,21 @@ import {authenticationKey} from "../../keys.ts";
 
 const userRef = inject(authenticationKey)
 
-const username: string = computed(() => {
-  const fullname = [userRef.value.user?.firstname ?? '', userRef.value.user?.lastname ?? ''].join(" ").trim()
+const username = computed<string>(() => {
+  const fullname = [userRef?.value.user?.firstname ?? '', userRef?.value.user?.lastname ?? ''].join(" ").trim()
   if (fullname)
     return fullname
 
-  return userRef.value.user?.username ?? '';
+  return userRef?.value.user?.username ?? '';
 })
 
 const avatar = computed(() => {
   return username.value.split(/\s+/)
-      .filter(word => word.length > 0)
-      .map(word => word.substring(0, 1))
-      .filter((letter, idx) => idx < 2)
-      .join("")
-      .toUpperCase();
+    .filter(word => word.length > 0)
+    .map(word => word.substring(0, 1))
+    .filter((_, idx) => idx < 2)
+    .join("")
+    .toUpperCase();
 })
 </script>
 
@@ -36,10 +36,10 @@ const avatar = computed(() => {
     </span>
 
     <v-btn
-           :link="true"
-           size="small"
-           icon="mdi-dots-vertical"
-           to="/user-details">
+      :link="true"
+      size="small"
+      icon="mdi-dots-vertical"
+      to="/user-details">
     </v-btn>
   </div>
 </template>

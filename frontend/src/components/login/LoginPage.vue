@@ -3,20 +3,20 @@ import WaitingIndicator from "../misc/WaitingIndicator.vue";
 import {inject, ref} from "vue";
 import {apiRefKey, authenticationKey} from "../../keys.ts";
 import {useRoute, useRouter} from 'vue-router'
-import {User, UserAuthApi} from "@api"
+import {User, UserAuthApi} from "@api/api.ts"
 
 const router = useRouter()
 const route = useRoute()
 
 const nameRules = [
-  value => {
+  (value: string) => {
     if (!value)
       return "Username ist nötig"
     return true;
   }
 ];
 const passwordRules = [
-  value => {
+  (value: string) => {
     if (!value)
       return "Password ist nötig"
     return true;
@@ -33,7 +33,7 @@ const passwordVisible = ref(false);
 
 const errorMessage = ref<string | null>(null);
 
-const userRef = inject(authenticationKey).value
+const userRef = inject(authenticationKey)?.value
 const apiAccess = inject(apiRefKey)
 
 function doLogin() {
@@ -42,13 +42,15 @@ function doLogin() {
 
   isLoading.value = true;
 
-  const api: UserAuthApi = apiAccess.authApi;
+  const api: UserAuthApi|undefined = apiAccess?.authApi;
 
-  api.loginUser({username: username.value, password: password.value})
+  api?.loginUser({username: username.value, password: password.value})
     .then((user: User) => {
-      userRef.login(user, password.value)
+      userRef?.login(user, password.value)
+
       router.replace({
-        path: route.query.returnUrl ?? '/'
+        // path: route.query['returnUrl'] ?? '/'
+        path: route.params['returnUrl'][0] ?? '/'
       })
     })
     .catch(e => {

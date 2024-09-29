@@ -4,6 +4,7 @@ import {inject, onMounted, ref, useTemplateRef} from "vue";
 import {useRouter} from "vue-router";
 import {apiRefKey} from "../../keys.ts";
 import {UserAuthApi} from "@api/api.ts";
+import {VForm} from "vuetify/components";
 
 const username = ref('')
 const password = ref('')
@@ -14,23 +15,23 @@ const valid = ref(false)
 const passwordVisible = ref(false)
 
 const usernameRules = ref([
-  value => !value ? "Required" : true,
-  value => value.length < 3 ? "Minimal length is 3" : true,
-  value => value.search(/\s+/) >= 0 ? "Must not contain spaces" : true,
+  (value:string) => !value ? "Required" : true,
+  (value:string) => value.length < 3 ? "Minimal length is 3" : true,
+  (value:string) => value.search(/\s+/) >= 0 ? "Must not contain spaces" : true,
 ])
 
 const passwordRules = ref([
-  value => !value ? "Required" : true,
-  value => value.length < 3 ? "Minimal length is 3" : true,
-  value => value !== passwordRepeat.value ? "Must match password repeat" : true
+  (value:string) => !value ? "Required" : true,
+  (value:string) => value.length < 3 ? "Minimal length is 3" : true,
+  (value:string) => value !== passwordRepeat.value ? "Must match password repeat" : true
 ])
 
 const passwordRepeatRules = ref([
-  value => value !== password.value ? "Must match password" : true
+  (value:string) => value !== password.value ? "Must match password" : true
 ])
 
 const apiRef = inject(apiRefKey)
-const input = useTemplateRef('registration-form')
+const input = useTemplateRef<VForm>('registration-form')
 const router = useRouter();
 
 function abort() {
@@ -43,19 +44,19 @@ function onRegister() {
 
   isLoading.value = true
 
-  const api: UserAuthApi = apiRef.authApi;
+  const api: UserAuthApi|undefined = apiRef?.authApi;
 
-  api.registerUser({username: username.value, password: password.value})
+  api?.registerUser({username: username.value, password: password.value})
       .then(() => router.push({name: 'login'}))
       .finally(() => isLoading.value = false)
 }
 
 function validate() {
-  input.value.validate()
+  input.value?.validate()
 }
 
 onMounted(() => {
-  input.value.validate()
+  input.value?.validate()
 })
 </script>
 

@@ -4,6 +4,7 @@ import ConfirmationedButton from "../misc/ConfirmationedButton.vue";
 import {inject, onMounted, ref, useTemplateRef} from "vue";
 import {User, UserAuthApi} from "@api/api.ts";
 import {apiRefKey, authenticationKey} from "../../keys.ts";
+import {VForm} from "vuetify/components";
 
 const isLoading = ref(false)
 const valid = ref(false)
@@ -13,51 +14,57 @@ const lastname = ref('')
 
 const username = ref('')
 const usernameRules = ref([
-  value => !value ? "Required" : true,
-  value => value.length < 3 ? "Minimal length is 3" : true,
-  value => value.search(/\s+/) >= 0 ? "Must not contain spaces" : true,
+  (value: string) => !value ? "Required" : true,
+  (value: string) => value.length < 3 ? "Minimal length is 3" : true,
+  (value: string) => value.search(/\s+/) >= 0 ? "Must not contain spaces" : true,
 ])
 
 const password = ref('')
 const passwordRepeat = ref('')
 const passwordVisible = ref(false)
 const passwordRules = ref([
-  value => !value ? "Required" : true,
-  value => value.length < 3 ? "Minimal length is 3" : true,
-  value => value !== passwordRepeat.value ? "Must match password repeat" : true
+  (value: string) => !value ? "Required" : true,
+  (value: string) => value.length < 3 ? "Minimal length is 3" : true,
+  (value: string) => value !== passwordRepeat.value ? "Must match password repeat" : true
 ])
 const passwordRepeatRules = ref([
-  value => value !== password.value ? "Must match password" : true
+  (value: string) => value !== password.value ? "Must match password" : true
 ])
 
-const apiRef: UserAuthApi = inject(apiRefKey).authApi
-const userService = inject(authenticationKey).value
-const formRef = useTemplateRef('user-details-form')
+const apiRef: UserAuthApi | undefined = inject(apiRefKey)?.authApi
+const userService = inject(authenticationKey)?.value
+const formRef = useTemplateRef<VForm>('user-details-form')
 
 function onDelete() {
+  if (!userService?.user?.id)
+    return;
+
   isLoading.value = true
 
-  apiRef.deleteUser(userService.user.id)
-      .then(() => reload())
-      .finally(() => isLoading.value = false)
+  apiRef?.deleteUser(userService.user.id)
+    .then(() => reload())
+    .finally(() => isLoading.value = false)
 }
 
 function onSave() {
+  if (!userService?.user?.id)
+    return;
+
   isLoading.value = true
 
-  apiRef.updateUser(userService.user.id, {
+  apiRef?.updateUser(userService.user.id, {
     firstname: firstname.value,
     lastname: lastname.value,
     username: username.value,
     password: password.value,
   })
-      .then((user: User) => userService.login(user, password.value))
-      .finally(() => isLoading.value = false)
+    .then((user: User) => userService?.login(user, password.value))
+    .finally(() => isLoading.value = false)
 }
 
 function reload() {
   setTimeout(() => {
-    userService.logout()
+    userService?.logout()
     location.reload()
 
     setTimeout(() => isLoading.value = false, 500)
@@ -65,17 +72,17 @@ function reload() {
 }
 
 function validate() {
-  formRef.value.validate();
+  formRef.value?.validate();
 }
 
 onMounted(() => {
-  username.value = userService.user.username;
+  username.value = userService?.user?.username ?? '';
 
-  password.value = userService.user.password;
-  passwordRepeat.value = userService.user.password;
+  password.value = userService?.user?.password ?? '';
+  passwordRepeat.value = userService?.user?.password ?? '';
 
-  firstname.value = userService.user.firstname;
-  lastname.value = userService.user.lastname;
+  firstname.value = userService?.user?.firstname ?? '';
+  lastname.value = userService?.user?.lastname ?? '';
 })
 
 </script>

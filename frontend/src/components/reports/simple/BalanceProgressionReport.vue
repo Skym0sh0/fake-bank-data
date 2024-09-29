@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Waiter from "../../misc/Waiter.vue";
-import {BalanceDataPoint, ReportsApi} from "@api/index.ts"
+import {BalanceDataPoint, BalanceProgressionReport, ReportsApi} from "@api/index.ts"
 import {computed, inject, nextTick, onMounted, onUnmounted, ref, useTemplateRef} from "vue";
 import {apiRefKey} from "../../../keys.ts";
 import * as am4core from "@amcharts/amcharts4/core";
@@ -67,7 +67,7 @@ function draw() {
   dateAxis.renderer.grid.template.location = 0.5
 
   const valueAxis = chart.yAxes.push(new am4charts.ValueAxis())
-  valueAxis.dataFields.value = "value"
+  valueAxis.dataFields.data = "value"
   valueAxis.title.text = "Kontostand"
   valueAxis.numberFormatter.numberFormat = {
     currency: "EUR",
@@ -113,7 +113,7 @@ function loadData() {
   isLoading.value = true
 
   api?.fetchBalanceProgressionReport()
-    .then(res => {
+    .then((res: BalanceProgressionReport) => {
       data.value = res.data ?? []
     })
     .catch(e => console.error(e))

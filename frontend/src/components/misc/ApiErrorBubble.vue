@@ -6,10 +6,10 @@ import {errorRefKey} from "../../keys.ts";
 const errorRef = inject(errorRefKey);
 
 const hasError = computed(() => {
-  return !!errorRef.value.lastError;
+  return !!errorRef?.value.lastError;
 })
 const timestamp = computed(() => {
-  if (!hasError.value)
+  if (!hasError.value || !errorRef?.value.lastError?.timestamp)
     return null;
 
   return DateTime.fromISO(errorRef.value.lastError.timestamp)
@@ -20,32 +20,32 @@ const status = computed(() => {
   if (!hasError.value)
     return null;
 
-  return errorRef.value.lastError.status
+  return errorRef?.value.lastError?.status
 })
 
 const target = computed(() => {
   if (!hasError.value)
     return null;
 
-  return errorRef.value.lastError.path
+  return errorRef?.value.lastError?.path
 })
 
 const error = computed(() => {
   if (!hasError.value)
     return null;
 
-  return errorRef.value.lastError.error
+  return errorRef?.value.lastError?.error
 })
 
 const details = computed(() => {
   if (!hasError.value)
     return null;
 
-  return errorRef.value.lastError.errorDetails
+  return errorRef?.value.lastError?.errorDetails
 })
 
 function resetError() {
-  errorRef.value.resetError();
+  errorRef?.value.resetError();
 }
 </script>
 
@@ -54,7 +54,7 @@ function resetError() {
               :multi-line="true"
               color="red"
               :timeout="-1">
-    <template v-slot:action>
+    <template v-slot:actions>
       <v-btn
           variant="text"
           @click="resetError">

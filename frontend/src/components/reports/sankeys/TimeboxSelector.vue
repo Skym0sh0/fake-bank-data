@@ -16,7 +16,6 @@ const emit = defineEmits<{
   (e: "input"): void;
 }>()
 
-
 const earliestDate = computed(() => {
   return earliest.toFormat("YYYY-MM-DD");
 })

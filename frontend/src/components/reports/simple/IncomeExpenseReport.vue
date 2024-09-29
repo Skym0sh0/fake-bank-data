@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Waiter from "../../misc/Waiter.vue";
 import {computed, inject, nextTick, onMounted, onUnmounted, ref, useTemplateRef} from "vue";
-import {MonthlyIncomeExpenseDataPoint, ReportsApi} from "@api/api.ts";
+import {MonthlyIncomeExpenseDataPoint, MonthlyIncomeExpenseReport, ReportsApi} from "@api/api.ts";
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
 import {DateAxis, XYChart} from "@amcharts/amcharts4/charts";
@@ -62,8 +62,13 @@ const isReportPresent = computed(() => {
   return processedData.value.length > 0;
 });
 
-function findTooNegativeDifferenceRanges(chart: XYChart, axis: DateAxis) {
-  const findStartTime = (i: number, current: DataPoint) => {
+type ExpensesRange = {
+  begin?: Date | null;
+  end?: Date | null;
+};
+
+function findTooNegativeDifferenceRanges(chart: XYChart, axis: DateAxis): ExpensesRange[] {
+  const findStartTime = (i: number, current: DataPoint): Date => {
     if (i < 1)
       return current.month
 
@@ -88,12 +93,8 @@ function findTooNegativeDifferenceRanges(chart: XYChart, axis: DateAxis) {
     return new Date(Math.round(intersection.x))
   }
 
-  const ranges = []
+  const ranges: ExpensesRange[] = []
 
-  type ExpensesRange = {
-    begin?: Date | null;
-    end?: Date | null;
-  };
   let tooHighExpensesRange: ExpensesRange | null = null
   for (let i = 0; i < chart.data.length; i++) {
     const current = chart.data[i]
@@ -102,7 +103,10 @@ function findTooNegativeDifferenceRanges(chart: XYChart, axis: DateAxis) {
 
     if (current.isAlerting) {
       if (!tooHighExpensesRange) {
-        tooHighExpensesRange = {begin: new Date(startTime), end: null}
+        tooHighExpensesRange = {
+          begin: new Date(startTime),
+          end: null
+        }
       }
     } else {
       if (tooHighExpensesRange) {
@@ -145,7 +149,7 @@ function draw() {
 
   const valueAxis = chart.yAxes.push(new am4charts.ValueAxis())
   valueAxis.title.text = "Einkommen und Ausgaben"
-  valueAxis.dataFields = "value"
+  valueAxis.dataFields.data = "value"
   valueAxis.numberFormatter.numberFormat = {
     currency: "EUR",
     style: "currency",
@@ -154,7 +158,7 @@ function draw() {
   }
   valueAxis.numberFormatter.intlLocales = "de-DE"
   valueAxis.cursorTooltipEnabled = false
-  valueAxis.tooltip.disabled = true
+  // valueAxis.tooltip.disabled = true
 
   const incomeSeries = chart.series.push(new am4charts.LineSeries())
   incomeSeries.name = "Einkommen pro Monat"
@@ -204,8 +208,8 @@ function draw() {
     .forEach(range => {
       const seriesRange = dateAxis.createSeriesRange(expenseSeries)
 
-      seriesRange.date = range.begin
-      seriesRange.endDate = range.end
+      seriesRange.date = range.begin!
+      seriesRange.endDate = range.end!
 
       // seriesRange.contents.stroke = am4core.color("#FF0000")
       seriesRange.contents.fill = expenseSeries.stroke
@@ -221,7 +225,7 @@ function loadData() {
   isLoading.value = true;
 
   api?.fetchMonthlyIncomeExpenseReport()
-    .then(res => {
+    .then((res: MonthlyIncomeExpenseReport) => {
       incomeExpenses.value = res.data ?? [];
     })
     .catch(e => console.error(e))
