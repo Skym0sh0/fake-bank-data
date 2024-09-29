@@ -1,176 +1,167 @@
-<template>
-    <v-form ref="user-details-form" @submit.prevent="onSave" v-model="valid">
-        <v-card>
-            <v-card-title>
-                Benutzer Details
-            </v-card-title>
+<script setup lang="ts">
+import WaitingIndicator from "../misc/WaitingIndicator.vue";
+import ConfirmationedButton from "../misc/ConfirmationedButton.vue";
+import {inject, onMounted, ref, useTemplateRef} from "vue";
+import {User, UserAuthApi} from "@api/api.ts";
+import {apiRefKey, authenticationKey} from "../../keys.ts";
 
-            <v-card-text>
-                <div>
-                    <v-text-field v-model="firstname"
-                                  type="text"
-                                  label="Vorname"
-                                  prepend-inner-icon="mdi-text-account"/>
-                    <v-text-field v-model="lastname"
-                                  type="text"
-                                  label="Nachname"
-                                  prepend-inner-icon="mdi-text-account"/>
-                </div>
+const isLoading = ref(false)
+const valid = ref(false)
 
-                <v-divider/>
+const firstname = ref('')
+const lastname = ref('')
 
-                <div>
-                    <v-text-field v-model="username"
-                                  type="text"
-                                  label="Username"
-                                  prepend-inner-icon="mdi-account-outline"
-                                  :rules="usernameRules"
-                                  @input="validate"
-                                  required/>
-                </div>
+const username = ref('')
+const usernameRules = ref([
+  value => !value ? "Required" : true,
+  value => value.length < 3 ? "Minimal length is 3" : true,
+  value => value.search(/\s+/) >= 0 ? "Must not contain spaces" : true,
+])
 
-                <v-divider/>
+const password = ref('')
+const passwordRepeat = ref('')
+const passwordVisible = ref(false)
+const passwordRules = ref([
+  value => !value ? "Required" : true,
+  value => value.length < 3 ? "Minimal length is 3" : true,
+  value => value !== passwordRepeat.value ? "Must match password repeat" : true
+])
+const passwordRepeatRules = ref([
+  value => value !== password.value ? "Must match password" : true
+])
 
-                <div>
-                    <v-text-field v-model="password"
-                                  label="Passwort"
-                                  :rules="passwordRules"
-                                  prepend-inner-icon="mdi-lock-outline"
-                                  :type="passwordVisible ? 'text' : 'password'"
-                                  autocomplete="on"
-                                  @input="validate">
-                        <template v-slot:append>
-                            <v-btn icon @click="passwordVisible = !passwordVisible" small>
-                                <v-icon>
-                                    {{ passwordVisible ? 'mdi-eye-off' : 'mdi-eye' }}
-                                </v-icon>
-                            </v-btn>
-                        </template>
-                    </v-text-field>
-                    <v-text-field v-model="passwordRepeat"
-                                  label="Passwort wiederholen"
-                                  :rules="passwordRepeatRules"
-                                  prepend-inner-icon="mdi-lock-outline"
-                                  :type="passwordVisible ? 'text' : 'password'"
-                                  autocomplete="on"
-                                  @input="validate">
-                        <template v-slot:append>
-                            <v-btn icon @click="passwordVisible = !passwordVisible" small>
-                                <v-icon>
-                                    {{ passwordVisible ? 'mdi-eye-off' : 'mdi-eye' }}
-                                </v-icon>
-                            </v-btn>
-                        </template>
-                    </v-text-field>
-                </div>
-            </v-card-text>
+const apiRef: UserAuthApi = inject(apiRefKey).authApi
+const userService = inject(authenticationKey).value
+const formRef = useTemplateRef('user-details-form')
 
-            <waiting-indicator :is-loading="isLoading"/>
+function onDelete() {
+  isLoading.value = true
 
-            <v-card-actions class="d-flex justify-content-center">
-                <confirmationed-button @click="onDelete"
-                                       default-caption="Account Löschen?"
-                                       request-caption="Account wirklich löschen?"
-                                       confirmed-caption="Jetzt Löschen !"/>
-
-                <v-btn type="submit"
-                       color="primary"
-                       :disabled="!valid"
-                       :loading="isLoading">
-                    Speichern & Neu einloggen
-                </v-btn>
-            </v-card-actions>
-        </v-card>
-    </v-form>
-</template>
-
-<script>
-import ConfirmationedButton from "@/components/misc/ConfirmationedButton.vue";
-import {userService} from "@/auth/auth-header";
-import WaitingIndicator from "@/components/misc/WaitingIndicator.vue";
-import {api} from "@/api/RegularIncomeAPI";
-
-export default {
-    name: "UserDetailsPage",
-    components: {
-        WaitingIndicator,
-        ConfirmationedButton
-    },
-    data() {
-        return {
-            isLoading: false,
-            valid: false,
-
-            firstname: '',
-            lastname: '',
-
-            username: '',
-            usernameRules: [
-                value => !value ? "Required" : true,
-                value => value.length < 3 ? "Minimal length is 3" : true,
-                value => value.search(/\s+/) >= 0 ? "Must not contain spaces" : true,
-            ],
-
-            password: '',
-            passwordRepeat: '',
-            passwordVisible: false,
-            passwordRules: [
-                value => !value ? "Required" : true,
-                value => value.length < 3 ? "Minimal length is 3" : true,
-                value => value !== this.passwordRepeat ? "Must match password repeat" : true
-            ],
-            passwordRepeatRules: [
-                value => value !== this.password ? "Must match password" : true
-            ],
-        }
-    },
-    methods: {
-        onDelete() {
-            this.isLoading = true;
-
-            api.getAuth()
-                .deleteUser(userService.userReference.user.id)
-                .then(() => this.reload())
-                .finally(() => this.isLoading = false)
-        },
-        onSave() {
-            this.isLoading = true
-
-            api.getAuth()
-                .updateUser(userService.userReference.user.id, {
-                    firstname: this.firstname,
-                    lastname: this.lastname,
-                    username: this.username,
-                    password: this.password
-                })
-                // .then(() => this.reload())
-                .then(user => userService.login(user, this.password))
-                .finally(() => this.isLoading = false)
-        },
-        reload() {
-            setTimeout(() => {
-                userService.logout();
-                location.reload();
-
-                setTimeout(() => this.isLoading = false, 500)
-            }, 1000)
-        },
-        validate() {
-            this.$refs['user-details-form'].validate()
-        },
-    },
-    created() {
-        this.username = userService.userReference.user.username
-
-        this.password = userService.userReference.user.password
-        this.passwordRepeat = userService.userReference.user.password
-
-        this.firstname = userService.userReference.user.firstname
-        this.lastname = userService.userReference.user.lastname
-    },
+  apiRef.deleteUser(userService.user.id)
+      .then(() => reload())
+      .finally(() => isLoading.value = false)
 }
+
+function onSave() {
+  isLoading.value = true
+
+  apiRef.updateUser(userService.user.id, {
+    firstname: firstname.value,
+    lastname: lastname.value,
+    username: username.value,
+    password: password.value,
+  })
+      .then((user: User) => userService.login(user, password.value))
+      .finally(() => isLoading.value = false)
+}
+
+function reload() {
+  setTimeout(() => {
+    userService.logout()
+    location.reload()
+
+    setTimeout(() => isLoading.value = false, 500)
+  }, 1000)
+}
+
+function validate() {
+  formRef.value.validate();
+}
+
+onMounted(() => {
+  username.value = userService.user.username;
+
+  password.value = userService.user.password;
+  passwordRepeat.value = userService.user.password;
+
+  firstname.value = userService.user.firstname;
+  lastname.value = userService.user.lastname;
+})
+
 </script>
 
-<style scoped>
+<template>
+  <v-form ref="user-details-form" @submit.prevent="onSave" v-model="valid">
+    <v-card>
+      <v-card-title>
+        Benutzer Details
+      </v-card-title>
 
-</style>
+      <v-card-text>
+        <div>
+          <v-text-field v-model="firstname"
+                        type="text"
+                        label="Vorname"
+                        prepend-inner-icon="mdi-text-account"/>
+          <v-text-field v-model="lastname"
+                        type="text"
+                        label="Nachname"
+                        prepend-inner-icon="mdi-text-account"/>
+        </div>
+
+        <v-divider/>
+
+        <div>
+          <v-text-field v-model="username"
+                        type="text"
+                        label="Username"
+                        prepend-inner-icon="mdi-account-outline"
+                        :rules="usernameRules"
+                        @input="validate"
+                        required/>
+        </div>
+
+        <v-divider/>
+
+        <div>
+          <v-text-field v-model="password"
+                        label="Passwort"
+                        :rules="passwordRules"
+                        prepend-inner-icon="mdi-lock-outline"
+                        :type="passwordVisible ? 'text' : 'password'"
+                        autocomplete="on"
+                        @input="validate">
+            <template v-slot:append>
+              <v-btn icon @click="passwordVisible = !passwordVisible" small>
+                <v-icon>
+                  {{ passwordVisible ? 'mdi-eye-off' : 'mdi-eye' }}
+                </v-icon>
+              </v-btn>
+            </template>
+          </v-text-field>
+          <v-text-field v-model="passwordRepeat"
+                        label="Passwort wiederholen"
+                        :rules="passwordRepeatRules"
+                        prepend-inner-icon="mdi-lock-outline"
+                        :type="passwordVisible ? 'text' : 'password'"
+                        autocomplete="on"
+                        @input="validate">
+            <template v-slot:append>
+              <v-btn icon @click="passwordVisible = !passwordVisible" small>
+                <v-icon>
+                  {{ passwordVisible ? 'mdi-eye-off' : 'mdi-eye' }}
+                </v-icon>
+              </v-btn>
+            </template>
+          </v-text-field>
+        </div>
+      </v-card-text>
+
+      <waiting-indicator :is-loading="isLoading"/>
+
+      <v-card-actions class="d-flex justify-content-center">
+        <confirmationed-button @click="onDelete"
+                               default-caption="Account Löschen?"
+                               request-caption="Account wirklich löschen?"
+                               confirmed-caption="Jetzt Löschen !"/>
+
+        <v-btn type="submit"
+               color="primary"
+               :disabled="!valid"
+               :loading="isLoading">
+          Speichern & Neu einloggen
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-form>
+</template>

@@ -1,5 +1,5 @@
 rootProject.name = 'regular-income'
 
+include ':frontend-old'
 include ':frontend'
-include ':frontend-new'
 include ':server'

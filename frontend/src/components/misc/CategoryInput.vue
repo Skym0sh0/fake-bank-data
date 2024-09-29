@@ -1,156 +1,155 @@
-<template>
-    <b-input-group>
-        <b-form-input :id="`${id}-category-input`"
-                      :list="`${id}-category-input-list`"
-                      @input="onCategoryInput"
-                      :value="currentSearch"
-                      :state="showValidationState"
-                      :disabled="disabled || loading"
-                      autocomplete="off"
-                      size="sm"
-                      type="text">
-        </b-form-input>
-        <b-input-group-append>
-            <b-button size="sm"
-                      @click="onAddCategory"
-                      :variant="isAddableCategory ? 'primary' : 'secondary'"
-                      :disabled="!isAddableCategory || loading">
-                <b-icon :icon="!loading ? 'plus-circle' : 'hourglas-split'" font-scale="1"/>
-            </b-button>
-        </b-input-group-append>
+<script setup lang="ts">
+import {computed, onMounted, ref, watch} from "vue";
+import {CategoriesById, CategoriesByName, CategoryWithParentNamesChained} from "./categoryHelpers.ts";
 
-        <datalist :id="`${id}-category-input-list`">
-            <option v-for="cat in flattedCategories" :key="cat.id" :value="cat.name">
-                {{ cat.parentChain }}
-            </option>
-        </datalist>
-    </b-input-group>
-</template>
+const {
+  id,
+  value,
+  disabled = false,
+  loading = false,
+  flattedCategories,
+  categoriesById,
+  categoriesByName,
+  state = true,
+  required = true
+} = defineProps<{
+  id: string;
+  value?: string | null;
+  disabled?: boolean;
+  loading?: boolean;
+  flattedCategories: CategoryWithParentNamesChained<string>[];
+  categoriesById: CategoriesById;
+  categoriesByName: CategoriesByName;
+  state?: boolean;
+  required?: boolean;
+}>();
 
-<script>
-import {validationMixin} from 'vuelidate'
-import {required} from 'vuelidate/dist/validators.min'
+const emit = defineEmits<{
+  (e: "input", id: string | undefined | null): void;
+  (e: "createCategory", name: string): void;
+}>();
 
-export default {
-    name: "CategoryInput",
-    components: {},
-    props: {
-        id: {
-            required: true,
-            type: String,
-        },
-        value: {
-            // required: true,
-            type: String,
-        },
-        disabled: {
-            type: Boolean,
-            default: false,
-        },
-        loading: {
-            type: Boolean,
-            default: false,
-        },
-        flattedCategories: {
-            required: true,
-            type: Array,
-        },
-        categoriesById: {
-            required: true,
-            type: Object,
-        },
-        categoriesByName: {
-            required: true,
-            type: Object,
-        },
-        state: {
-            type: Boolean,
-            default: true,
-        },
-        required: {
-            type: Boolean,
-            default: true,
-        },
-    },
-    data() {
-        return {
-            currentSearch: '',
-            isUnknownCategory: false,
-        };
-    },
-    validations: {
-        currentSearch: {
-            required
-        }
-    },
-    computed: {
-        isValidState() {
-            return this.state && !this.isUnknownCategory && !this.$v.currentSearch.$invalid;
-        },
-        showValidationState() {
-            if (!this.required) {
-                if (this.isUnknownCategory && this.currentSearch !== '')
-                    return false;
+const currentSearch = ref("");
+const isUnknownCategory = ref(false);
 
-                return null;
-            }
+const isValidState = computed<boolean>(() => {
+  return state && !isUnknownCategory.value && !isCurrentSearchInvalid.value;
+})
 
-            return this.isValidState
-        },
-        isAddableCategory() {
-            return !(!this.isUnknownCategory || this.$v.currentSearch.$invalid)
-        },
-    },
-    watch: {
-        value(/*newValue, oldValue*/) {
-            this.initWhenOnlyValueIsSet()
-        },
-        categoriesByName(/*newOptions, oldOptions*/) {
-            this.findOption()
-        },
-    },
-    methods: {
-        onCategoryInput(newValue) {
-            this.currentSearch = newValue;
+const isCurrentSearchInvalid = computed<boolean>(() => {
+  return !currentSearch.value || currentSearch.value === "";
+})
 
-            this.findOption()
-        },
-        findOption() {
-            const foundCategory = this.categoriesByName[this.currentSearch];
-            if (foundCategory) {
-                this.isUnknownCategory = false;
-                this.$emit('input', foundCategory.id)
-            } else {
-                this.isUnknownCategory = true;
-                this.$emit('input', null)
-            }
-        },
-        onAddCategory() {
-            this.$emit('createCategory', this.currentSearch)
-        },
-        initWhenOnlyValueIsSet() {
-            if (this.value) {
-                const foundCategory = this.categoriesById[this.value];
-                if (foundCategory) {
-                    this.currentSearch = foundCategory.name;
-                    this.isUnknownCategory = false;
-                    this.$emit('input', foundCategory.id);
-                } else {
-                    this.currentSearch = "";
-                    this.isUnknownCategory = true;
-                    this.$emit('input', null);
-                }
-            }
-        },
-    },
-    mounted() {
-        this.initWhenOnlyValueIsSet()
-    },
-    mixins: [
-        validationMixin,
-    ],
+const isValidationTrue = computed<boolean | undefined>(() => {
+  if (!required) {
+    if (isUnknownCategory.value && currentSearch.value !== '')
+      return false;
+
+    return undefined;
+  }
+
+  return isValidState.value
+})
+
+const isAddableCategory = computed<boolean>(() => {
+  return !(!isUnknownCategory.value || isCurrentSearchInvalid.value)
+})
+
+const isDisabled = computed(() => {
+  return disabled || loading
+})
+
+function onCategoryInput(newValue: string) {
+  currentSearch.value = newValue;
+
+  findOption()
 }
+
+function findOption() {
+  const foundCategory = categoriesByName[currentSearch.value];
+  if (foundCategory) {
+    isUnknownCategory.value = false;
+    emit('input', foundCategory.id)
+  } else {
+    isUnknownCategory.value = true;
+    emit('input', null)
+  }
+}
+
+function onAddCategory() {
+  emit('createCategory', currentSearch.value)
+}
+
+function initWhenOnlyValueIsSet() {
+  if (value) {
+    const foundCategory = categoriesById[value];
+    if (foundCategory) {
+      currentSearch.value = foundCategory.name;
+      isUnknownCategory.value = false;
+      emit('input', foundCategory.id);
+    } else {
+      currentSearch.value = "";
+      isUnknownCategory.value = true;
+      emit('input', null);
+    }
+  }
+}
+
+onMounted(() => {
+  initWhenOnlyValueIsSet();
+})
+
+watch(() => value, () => initWhenOnlyValueIsSet(), {deep: true})
+watch(() => categoriesByName, () => findOption(), {deep: true})
+
 </script>
 
-<style scoped>
-</style>
+<template>
+  <v-text-field :id="`${id}-category-input`"
+                :list="`${id}-category-input-list`"
+                :value="currentSearch"
+                @update:modelValue="onCategoryInput"
+                :error="!isValidationTrue"
+                :disabled="isDisabled"
+                density="compact"
+                type="text"
+                autocomplete="off"
+                :hide-details="true">
+
+    <template v-slot:append-inner>
+      <v-icon color="success" v-if="isValidationTrue">
+        mdi-check
+      </v-icon>
+
+      <v-tooltip v-if="!isValidationTrue">
+        <template v-slot:activator="{ props }">
+          <v-icon color="error" v-bind="props">
+            mdi-alert-circle
+          </v-icon>
+        </template>
+
+        Unbekannte Kategorie "{{ currentSearch }}"
+      </v-tooltip>
+
+      <v-btn v-if="!isDisabled"
+             @click="onAddCategory"
+             :disabled="!isAddableCategory || loading"
+             :icon="loading ? 'mdi-timer-sand' : 'mdi-plus'"
+             title="Erstelle diese Kategorie neu"
+             color="primary"
+             size="small"
+             variant="flat"
+             density="compact"/>
+    </template>
+
+    <template v-slot:append>
+
+    </template>
+  </v-text-field>
+
+  <datalist :id="`${id}-category-input-list`">
+    <option v-for="cat in flattedCategories" :key="cat.id" :value="cat.name">
+      {{ cat.parentChain }}
+    </option>
+  </datalist>
+</template>

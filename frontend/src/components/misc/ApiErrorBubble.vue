@@ -1,80 +1,78 @@
-<template>
-    <v-snackbar :value="hasError"
-                :multi-line="true"
-                color="red"
-                :timeout="-1">
-        <template v-slot:action>
-            <v-btn
-                variant="text"
-                @click="resetError">
-                Close
-            </v-btn>
-        </template>
+<script setup lang="ts">
+import {DateTime} from "luxon";
+import {computed, inject} from "vue";
+import {errorRefKey} from "../../keys.ts";
 
-        <template v-slot:default>
-            <h5> {{ error }} - {{ status }} </h5>
-            <h6> {{ target }}</h6>
+const errorRef = inject(errorRefKey);
 
-            <div>
-                {{ details }}
-            </div>
+const hasError = computed(() => {
+  return !!errorRef.value.lastError;
+})
+const timestamp = computed(() => {
+  if (!hasError.value)
+    return null;
 
-            <div style="font-size: 0.675em">
-                {{ timestamp }}
-            </div>
-        </template>
-    </v-snackbar>
-</template>
+  return DateTime.fromISO(errorRef.value.lastError.timestamp)
+      .toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS)
+})
 
+const status = computed(() => {
+  if (!hasError.value)
+    return null;
 
-<script>
-import moment from "moment";
+  return errorRef.value.lastError.status
+})
 
-export default {
-    name: "ApiErrorBubble",
-    computed: {
-        hasError() {
-            return !!this.$root.errorRef.lastError
-        },
-        timestamp() {
-            if (!this.hasError)
-                return null;
+const target = computed(() => {
+  if (!hasError.value)
+    return null;
 
-            return moment(this.$root.errorRef.lastError.timestamp).format("YYYY-MM-DD HH:mm:ss.SSS");
-        },
-        status() {
-            if (!this.hasError)
-                return null;
+  return errorRef.value.lastError.path
+})
 
-            return this.$root.errorRef.lastError.status;
-        },
-        target() {
-            if (!this.hasError)
-                return null;
+const error = computed(() => {
+  if (!hasError.value)
+    return null;
 
-            return this.$root.errorRef.lastError.path;
-        },
-        error() {
-            if (!this.hasError)
-                return null;
+  return errorRef.value.lastError.error
+})
 
-            return this.$root.errorRef.lastError.error;
-        },
-        details() {
-            if (!this.hasError)
-                return null;
+const details = computed(() => {
+  if (!hasError.value)
+    return null;
 
-            return this.$root.errorRef.lastError.errorDetails;
-        },
-    },
-    methods: {
-        resetError() {
-            this.$root.errorRef.lastError = null
-        },
-    },
+  return errorRef.value.lastError.errorDetails
+})
+
+function resetError() {
+  errorRef.value.resetError();
 }
 </script>
 
-<style scoped>
+<template>
+  <v-snackbar :value="hasError"
+              :multi-line="true"
+              color="red"
+              :timeout="-1">
+    <template v-slot:action>
+      <v-btn
+          variant="text"
+          @click="resetError">
+        Close
+      </v-btn>
+    </template>
 
-</style>
+    <template v-slot:default>
+      <h5> {{ error }} - {{ status }} </h5>
+      <h6> {{ target }}</h6>
+
+      <div>
+        {{ details }}
+      </div>
+
+      <div style="font-size: 0.675em">
+        {{ timestamp }}
+      </div>
+    </template>
+  </v-snackbar>
+</template>

@@ -1,96 +1,82 @@
-<template>
-    <v-btn :color="color"
-           @click="onClick"
-           :loading="isLoading"
-           v-bind="$attrs">
-        {{ caption }}
-    </v-btn>
-</template>
+<script setup lang="ts">
+import {computed, ref} from "vue";
 
-<script>
+type Props = {
+  defaultCaption: string;
+  requestCaption: string;
+  confirmedCaption: string;
+  defaultColor?: string;
+  waitTimeMs?: number;
+}
 
-export default {
-    name: "ConfirmationedButton",
-    props: {
-        defaultColor: {
-            type: String,
-            default() {
-                return "info";
-            },
-        },
-        defaultCaption: {
-            type: String,
-            required: true,
-        },
-        requestCaption: {
-            type: String,
-            required: true,
-        },
-        confirmedCaption: {
-            type: String,
-            required: true,
-        },
-        waitTimeMs: {
-            type: Number,
-            default() {
-                return 1500
-            },
-        }
-    },
-    data() {
-        return {
-            isLoading: false,
+const {
+  defaultCaption,
+  requestCaption,
+  confirmedCaption,
+  defaultColor = 'info',
+  waitTimeMs = 1500
+} = defineProps<Props>()
 
-            actionRequested: false,
-            actionConfirmed: false,
-        }
-    },
-    methods: {
-        onClick() {
-            const defer = (work) => {
-                this.isLoading = true;
-                setTimeout(() => {
-                    work()
-                    this.isLoading = false;
-                }, this.waitTimeMs)
-            };
+const emit = defineEmits(['click'])
 
-            if (!this.actionRequested) {
-                defer(() => this.actionRequested = true)
-                return;
-            }
+const isLoading = ref(false);
+const actionRequested = ref(false);
+const actionConfirmed = ref(false);
 
-            if (!this.actionConfirmed) {
-                defer(() => this.actionConfirmed = true)
-                return;
-            }
+const caption = computed(() => {
+  if (!actionRequested.value)
+    return defaultCaption
 
-            this.$emit("click")
-        },
-    },
-    computed: {
-        caption() {
-            if (!this.actionRequested)
-                return this.defaultCaption
+  if (!actionConfirmed.value)
+    return requestCaption
 
-            if (!this.actionConfirmed)
-                return this.requestCaption
+  return confirmedCaption
+});
 
-            return this.confirmedCaption
-        },
-        color() {
-            if (!this.actionRequested)
-                return this.defaultColor;
+const color = computed(() => {
+  if (!actionRequested.value)
+    return defaultColor;
 
-            if (!this.actionConfirmed)
-                return "warning"
+  if (!actionConfirmed.value)
+    return "warning"
 
-            return "error";
-        },
-    },
+  return "error";
+});
+
+function onClick() {
+  const defer = (work: () => void) => {
+    isLoading.value = true;
+    setTimeout(() => {
+      work()
+      isLoading.value = false;
+    }, waitTimeMs)
+  };
+
+  if (!actionRequested.value) {
+    defer(() => actionRequested.value = true)
+    return;
+  }
+
+  if (!actionConfirmed.value) {
+    defer(() => actionConfirmed.value = true)
+    return;
+  }
+
+  emit("click")
+  reset()
+}
+
+function reset() {
+  actionRequested.value = false;
+  actionConfirmed.value = false;
 }
 </script>
 
-<style scoped>
-
-</style>
+<template>
+  <v-btn :color="color"
+         @click="onClick"
+         :loading="isLoading"
+         v-bind="$attrs">
+    {{ caption }}
+  </v-btn>
+</template>

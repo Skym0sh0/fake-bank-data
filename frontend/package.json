@@ -1,65 +1,40 @@
 {
-  "name": "regular-income-gui",
-  "version": "1.0.0",
+  "name": "regular-income",
   "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "serve": "set NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service serve",
-    "build": "set NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service build --dest ./build/dist",
-    "lint": "set NODE_OPTIONS=--openssl-legacy-provider && vue-cli-service lint"
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@amcharts/amcharts4": "4.10.38",
-    "@amcharts/amcharts4-geodata": "4.1.28",
-    "@riophae/vue-treeselect": "0.4.0",
-    "axios": "0.19.0",
-    "bootstrap": "4.6.2",
-    "bootstrap-vue": "2.23.1",
-    "core-js": "3.6.2",
+    "@amcharts/amcharts4": "4.10.39",
+    "@vuelidate/core": "2.0.3",
+    "@vuelidate/validators": "2.0.4",
+    "axios": "1.7.2",
     "lodash": "4.17.21",
-    "moment": "2.30.1",
-    "npm": "6.13.4",
-    "uuid": "3.3.3",
-    "vue": "2.6.14",
-    "vue-drag-drop": "1.1.4",
-    "vue-global-events": "1.1.2",
-    "vue-router": "3.1.3",
-    "vuelidate": "0.7.4",
-    "vuetify": "2.7.1"
+    "luxon": "3.4.4",
+    "uuid": "10.0.0",
+    "vite-plugin-vuetify": "2.0.4",
+    "vue": "3.5.4",
+    "vue-router": "4.4.5",
+    "vuetify": "3.7.1"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "4.1.2",
-    "@vue/cli-plugin-eslint": "4.1.2",
-    "@vue/cli-service": "4.1.2",
-    "babel-eslint": "10.0.3",
-    "eslint": "6.8.0",
-    "eslint-plugin-vue": "6.1.2",
-    "sass": "1.24.2",
-    "sass-loader": "8.0.0",
-    "vue-cli-plugin-vuetify": "2.0.3",
-    "vue-template-compiler": "2.6.14",
-    "vuetify-loader": "1.4.3"
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/essential",
-      "eslint:recommended"
-    ],
-    "rules": {},
-    "parserOptions": {
-      "parser": "babel-eslint"
-    }
-  },
-  "postcss": {
-    "plugins": {
-      "autoprefixer": {}
-    }
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions"
-  ]
+    "@mdi/font": "7.4.47",
+    "@types/lodash": "4.17.7",
+    "@types/luxon": "3.4.2",
+    "@types/uuid": "10.0.0",
+    "@typescript-eslint/eslint-plugin": "7.13.1",
+    "@typescript-eslint/parser": "7.13.1",
+    "@vitejs/plugin-vue": "5.1.2",
+    "eslint": "8.57.0",
+    "eslint-plugin-vue": "9.28.0",
+    "typescript": "5.5.3",
+    "vite": "5.4.1",
+    "vite-svg-loader": "5.1.0",
+    "vue-tsc": "2.0.29"
+  }
 }

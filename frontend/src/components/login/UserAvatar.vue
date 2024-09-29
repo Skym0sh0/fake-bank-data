@@ -1,50 +1,48 @@
-<template>
-    <div class="d-flex justify-content-between align-items-center" style="gap: 0.5em">
-        <v-avatar color="warning" size="32">
-            {{ avatar }}
-        </v-avatar>
+<script setup lang="ts">
 
-        <v-spacer/>
+import {computed, inject} from "vue";
+import {authenticationKey} from "../../keys.ts";
 
-        <span>
-            {{ username }}
-        </span>
+const userRef = inject(authenticationKey)
 
-        <v-divider/>
+const username: string = computed(() => {
+  const fullname = [userRef.value.user?.firstname ?? '', userRef.value.user?.lastname ?? ''].join(" ").trim()
+  if (fullname)
+    return fullname
 
-        <v-btn :icon="true"
-               :link="true"
-               :small="true"
-               to="/user-details">
-            <v-icon>
-                mdi-dots-vertical
-            </v-icon>
-        </v-btn>
-    </div>
-</template>
+  return userRef.value.user?.username ?? '';
+})
 
-<script>
-export default {
-    name: "UserAvatar",
-    computed: {
-        username() {
-            const fullname = [this.$root.userRef.user.firstname, this.$root.userRef.user.lastname].join(" ");
-            if (fullname)
-                return fullname;
-
-            return this.$root.userRef.user.username;
-        },
-        avatar() {
-            return this.username.split(/\s+/)
-                .filter(word => word.length > 0)
-                .map(word => word.substring(0, 1))
-                .filter((letter, idx) => idx < 2)
-                .join("")
-                .toUpperCase();
-        },
-    },
-}
+const avatar = computed(() => {
+  return username.value.split(/\s+/)
+      .filter(word => word.length > 0)
+      .map(word => word.substring(0, 1))
+      .filter((letter, idx) => idx < 2)
+      .join("")
+      .toUpperCase();
+})
 </script>
+
+<template>
+  <div class="d-flex justify-space-between align-center" style="gap: 0.5em">
+    <v-avatar color="warning" size="32">
+      {{ avatar }}
+    </v-avatar>
+
+    <v-spacer/>
+
+    <span>
+      {{ username }}
+    </span>
+
+    <v-btn
+           :link="true"
+           size="small"
+           icon="mdi-dots-vertical"
+           to="/user-details">
+    </v-btn>
+  </div>
+</template>
 
 <style scoped>
 

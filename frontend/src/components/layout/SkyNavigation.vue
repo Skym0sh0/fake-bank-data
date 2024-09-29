@@ -1,48 +1,40 @@
-<template>
-    <v-list nav dense>
-        <v-list-item>
-            <v-list-item-content>
-                <v-list-item-title>
-                    Topics
-                </v-list-item-title>
-                <v-list-item-subtitle>
-                    Table of Content
-                </v-list-item-subtitle>
-            </v-list-item-content>
-        </v-list-item>
+<script setup lang="ts">
+import {getPages} from "../../router.ts";
+import {computed} from "vue";
 
-        <v-divider/>
-
-        <v-list-item v-for="(link, idx) in links" :key="idx" link :to="link.link">
-            <v-list-item-action>
-                <v-icon>
-                    {{ link.icon }}
-                </v-icon>
-            </v-list-item-action>
-            <v-list-item-content>
-                <v-list-item-title>
-                    {{ link.title }}
-                </v-list-item-title>
-            </v-list-item-content>
-        </v-list-item>
-
-        <v-divider/>
-    </v-list>
-</template>
-
-<script>
-import getPages from "@/util/pages";
-
-export default {
-    name: "SkyNavigation",
-    computed: {
-        links() {
-            return getPages();
-        }
-    },
-}
+const links = computed(() => {
+  return getPages();
+})
 </script>
 
-<style scoped>
+<template>
+  <v-list :nav="true">
+    <v-list-item>
+      <v-list-item-title>
+        Topics
+      </v-list-item-title>
+      <v-list-item-subtitle>
+        Table of Content
+      </v-list-item-subtitle>
+    </v-list-item>
 
-</style>
+    <v-divider/>
+
+    <v-list-item v-for="link in links"
+                 :key="link.link"
+                 :to="link.link">
+      <template v-slot:prepend>
+        <v-icon :icon="link.icon" color="primary"/>
+      </template>
+
+      <v-list-item-title>
+        {{ link.title }}
+      </v-list-item-title>
+      <v-list-item-subtitle>
+        {{ link.shortDescription }}
+      </v-list-item-subtitle>
+    </v-list-item>
+
+    <v-divider/>
+  </v-list>
+</template>

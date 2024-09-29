@@ -1,38 +1,27 @@
-<template>
-    <ul class="theme--light px-0" :style="{fontSize: size}">
-        <template v-for="item in items">
-            <li :key="`${item}-divider`" class="breadcrump-divider px-1">
-                {{ divider }}
-            </li>
-            <li :key="item" style="display: inline">
-                {{ item }}
-            </li>
-        </template>
-    </ul>
-</template>
+<script setup lang="ts">
 
-<script>
-export default {
-    name: "Breadcrumps",
-    props: {
-        items: {
-            type: Array,
-            required: true,
-        },
-        divider: {
-            type: String,
-            default: "/",
-        },
-        size: {
-            type: String,
-            default: "10px",
-        },
-    },
-}
+const {items, divider = "/", size = "10px"} = defineProps<{
+  items: string[];
+  divider?: string;
+  size?: string;
+}>()
 </script>
+
+<template>
+  <ul class="theme--light px-0" :style="{fontSize: size}">
+    <template v-for="item in items" :key="item">
+      <li class="breadcrump-divider px-1">
+        {{ divider }}
+      </li>
+      <li style="display: inline">
+        {{ item }}
+      </li>
+    </template>
+  </ul>
+</template>
 
 <style scoped>
 .breadcrump-divider {
-    display: inline;
+  display: inline;
 }
 </style>
