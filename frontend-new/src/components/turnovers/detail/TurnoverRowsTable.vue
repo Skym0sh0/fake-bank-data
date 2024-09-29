@@ -104,7 +104,13 @@ const columns = computed<ReadonlyDataTableHeader[]>(() => {
                 density="compact">
 
     <template v-slot:item.id="{ value }">
-      {{ (touchedRowsIdsById[value] || deletedRowsIdsById[value]) ? '*' : ' ' }}
+      <v-icon v-if="deletedRowsIdsById[value]">
+        mdi-delete-variant
+      </v-icon>
+
+      <v-icon v-else-if="touchedRowsIdsById[value]">
+        mdi-delta
+      </v-icon>
     </template>
 
     <template v-slot:item.date="{ value }">

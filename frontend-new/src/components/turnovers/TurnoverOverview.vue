@@ -53,13 +53,17 @@ onMounted(() => {
           Überblick Umsätze
         </h4>
 
-        <v-btn-group>
-          <v-btn color="secondary" @click="onReload" :disabled="isLoading" :loading="isLoading">
+        <div class="d-flex justify-space-between align-center ga-1">
+          <v-btn size="small"
+                 color="secondary"
+                 @click="onReload"
+                 :disabled="isLoading"
+                 :loading="isLoading">
             Neuladen
           </v-btn>
 
           <turnover-importing :is-loading="isLoading" @uploadSucceeded="uploadSuccess"/>
-        </v-btn-group>
+        </div>
       </div>
     </v-card-title>
 

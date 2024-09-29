@@ -78,7 +78,7 @@ const isValidToSave = computed(() => {
 function reload() {
   isLoading.value = true
 
-  Promise.all([loadImport(), loadCategories()])
+  Promise.all([loadCategories(), loadImport()])
     .finally(() => isLoading.value = false)
 }
 
@@ -188,8 +188,8 @@ onMounted(() => {
       </v-card-subtitle>
 
       <v-card-text>
-        <turnover-rows-table v-if="categories"
-                             :rows="turnoverImport?.turnovers ?? []"
+        <turnover-rows-table v-if="categories.length > 0 && turnoverImport"
+                             :rows="turnoverImport.turnovers"
                              :touchedRowsIdsById="currentRowCategoryChangesById"
                              :deletedRowsIdsById="currentDeletedRowsById"
                              :categories="categories"

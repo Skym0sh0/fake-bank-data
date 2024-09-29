@@ -249,7 +249,8 @@ onMounted(() => {
             :persistent="true"
             @update:model-value="reset">
     <template v-slot:activator>
-      <v-btn color="primary"
+      <v-btn size="small"
+             color="primary"
              :disabled="isLoading"
              :loading="isLoading"
              @click="openDialog"

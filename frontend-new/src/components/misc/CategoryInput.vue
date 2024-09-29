@@ -116,16 +116,34 @@ watch(() => categoriesByName, () => findOption(), {deep: true})
                 autocomplete="off"
                 :hide-details="true">
 
-    <template v-slot:append-inner v-if="!isDisabled">
-      <v-btn @click="onAddCategory"
+    <template v-slot:append-inner>
+      <v-icon color="success" v-if="isValidationTrue">
+        mdi-check
+      </v-icon>
+
+      <v-tooltip v-if="!isValidationTrue">
+        <template v-slot:activator="{ props }">
+          <v-icon color="error" v-bind="props">
+            mdi-alert-circle
+          </v-icon>
+        </template>
+
+        Unbekannte Kategorie "{{ currentSearch }}"
+      </v-tooltip>
+
+      <v-btn v-if="!isDisabled"
+             @click="onAddCategory"
              :disabled="!isAddableCategory || loading"
-             :icon="loading ? 'mdi-timer-sand' : 'mdi-plus-circle'"
+             :icon="loading ? 'mdi-timer-sand' : 'mdi-plus'"
              title="Erstelle diese Kategorie neu"
              color="primary"
-             size="x-small"
-             variant="text"
-             density="compact"
-      />
+             size="small"
+             variant="flat"
+             density="compact"/>
+    </template>
+
+    <template v-slot:append>
+
     </template>
   </v-text-field>
 

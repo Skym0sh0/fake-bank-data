@@ -79,7 +79,8 @@ const fields = computed<ReadonlyDataTableHeader[]>((): ReadonlyDataTableHeader[]
     },
     {
       key: "actions",
-      title: ""
+      title: "",
+      width: "12em",
     }
   ];
 })
@@ -92,10 +93,10 @@ const fields = computed<ReadonlyDataTableHeader[]>((): ReadonlyDataTableHeader[]
                   :headers="fields"
                   :hide-default-footer="true">
       <template v-slot:item.actions="{item}">
-        <div class="action-buttons">
+        <div class="d-flex justify-end align-center ga-1">
           <v-btn color="primary"
                  :disabled="isLoading"
-                 :small="true"
+                 size="x-small"
                  @click="() => onOpen(item)">
             Öffnen
           </v-btn>
@@ -106,7 +107,7 @@ const fields = computed<ReadonlyDataTableHeader[]>((): ReadonlyDataTableHeader[]
                                  request-caption="Löschen??"
                                  confirmed-caption="Löschen!!!"
                                  default-color="secondary"
-                                 :small="true"/>
+                                 size="x-small"/>
         </div>
       </template>
     </v-data-table>
