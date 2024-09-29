@@ -31,7 +31,7 @@ const links = computed(() => {
         {{ link.title }}
       </v-list-item-title>
       <v-list-item-subtitle>
-        {{ link.link }}
+        {{ link.shortDescription }}
       </v-list-item-subtitle>
     </v-list-item>
 
