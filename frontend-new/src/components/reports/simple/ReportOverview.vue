@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
-import {computed, onMounted, ref, shallowRef} from "vue";
 import type {Component} from "vue";
+import {computed, onMounted, ref} from "vue";
 import BalanceProgressionReport from "./BalanceProgressionReport.vue";
 import IncomeExpenseReport from "./IncomeExpenseReport.vue";
 
@@ -13,16 +13,19 @@ type ChartTemplate = {
 
 const chartHeight = ref(800)
 const openCharts = ref<number[]>([])
-const charts = shallowRef<ChartTemplate[]>([
-  {
-    title: 'Kontostand Entwicklung',
-    component: BalanceProgressionReport,
-  },
-  {
-    title: 'Einkommen und Ausgaben',
-    component: IncomeExpenseReport,
-  },
-].map((c, idx) => ({...c, id: idx})))
+
+const charts = computed<ChartTemplate[]>(() => {
+  return [
+    {
+      title: 'Kontostand Entwicklung',
+      component: BalanceProgressionReport,
+    },
+    {
+      title: 'Einkommen und Ausgaben',
+      component: IncomeExpenseReport,
+    },
+  ].map((c, idx) => ({...c, id: idx}))
+})
 
 const areAllChartsOpen = computed(() => {
   return openCharts.value.length == charts.value.length
@@ -42,7 +45,7 @@ function hideAll() {
 
 onMounted(() => {
   openCharts.value = charts.value.map(c => c.id)
-      .filter(c => c < 1)
+    .filter(c => c < 1)
 })
 </script>
 

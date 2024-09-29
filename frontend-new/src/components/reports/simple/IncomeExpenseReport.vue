@@ -189,9 +189,9 @@ function draw() {
   expenseBullet.circle.radius = 3
 
   // Due to a bug (???) in am4 creating a XYCursor yields masses of errors on disposing the component
-  chart.cursor = new am4charts.XYCursor();
-  chart.cursor.xAxis = dateAxis
-  chart.cursor.behavior = "zoomXY"
+  // chart.cursor = new am4charts.XYCursor();
+  // chart.cursor.xAxis = dateAxis
+  // chart.cursor.behavior = "zoomXY"
 
   chart.scrollbarX = new am4core.Scrollbar()
   chart.scrollbarY = new am4core.Scrollbar()
@@ -233,8 +233,8 @@ function loadData() {
 }
 
 onUnmounted(() => {
-  chartRef.value?.cursor.dispose()
   chartRef.value?.dispose()
+  chartRef.value = null
 })
 
 onMounted(() => {
