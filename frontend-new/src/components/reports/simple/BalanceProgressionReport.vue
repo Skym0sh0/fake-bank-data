@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Waiter from "../../misc/Waiter.vue";
 import {BalanceDataPoint, ReportsApi} from "@api/index.ts"
-import {computed, inject, nextTick, onUnmounted, ref, useTemplateRef} from "vue";
+import {computed, inject, nextTick, onMounted, onUnmounted, ref, useTemplateRef} from "vue";
 import {apiRefKey} from "../../../keys.ts";
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
@@ -35,6 +35,18 @@ const getHeight = computed(() => {
   return `${height}px`;
 });
 
+const preparedData = computed(() => {
+  return data.value.flatMap(rec => {
+    if (!rec.date || rec.balanceInCents === undefined)
+      return [];
+
+    return [{
+      date: DateTime.fromISO(rec.date).toJSDate(),
+      value: rec.balanceInCents / 100.0,
+    }];
+  })
+})
+
 function draw() {
   chartRef.value?.dispose()
 
@@ -46,19 +58,9 @@ function draw() {
     return;
   }
 
-  console.log("now draw")
-
   const chart: XYChart = am4core.create(target.value, am4charts.XYChart)
 
-  chart.data = data.value.flatMap(rec => {
-    if (!rec.date || rec.balanceInCents === undefined)
-      return [];
-
-    return [{
-      date: DateTime.fromISO(rec.date).toJSDate(),
-      value: rec.balanceInCents / 100.0,
-    }];
-  })
+  chart.data = preparedData.value
 
   const dateAxis = chart.xAxes.push(new am4charts.DateAxis())
   dateAxis.title.text = "Datum"
@@ -90,8 +92,9 @@ function draw() {
   series.minBulletDistance = 10
   series.bullets.push(new am4charts.CircleBullet()).circle.radius = 2
 
-  chart.cursor = new am4charts.XYCursor();
-  chart.cursor.behavior = "zoomXY"
+  // Due to a bug (???) in am4 creating a XYCursor yields masses of errors on disposing the component
+  // chart.cursor = new am4charts.XYCursor();
+  // chart.cursor.behavior = "zoomXY"
 
   chart.scrollbarX = new am4core.Scrollbar()
   chart.scrollbarY = new am4core.Scrollbar()
@@ -122,11 +125,12 @@ function loadData() {
 }
 
 onUnmounted(() => {
-  console.log("unmount and kill")
   chartRef.value?.dispose()
 })
 
-loadData()
+onMounted(() => {
+  loadData()
+})
 </script>
 
 <template>

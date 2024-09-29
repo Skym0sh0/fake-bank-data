@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Waiter from "../../misc/Waiter.vue";
-import {computed, inject, nextTick, onBeforeUnmount, ref, useTemplateRef} from "vue";
+import {computed, inject, nextTick, onMounted, onUnmounted, ref, useTemplateRef} from "vue";
 import {MonthlyIncomeExpenseDataPoint, ReportsApi} from "@api/api.ts";
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
@@ -188,6 +188,7 @@ function draw() {
   const expenseBullet = expenseSeries.bullets.push(new am4charts.CircleBullet())
   expenseBullet.circle.radius = 3
 
+  // Due to a bug (???) in am4 creating a XYCursor yields masses of errors on disposing the component
   chart.cursor = new am4charts.XYCursor();
   chart.cursor.xAxis = dateAxis
   chart.cursor.behavior = "zoomXY"
@@ -231,11 +232,14 @@ function loadData() {
     })
 }
 
-onBeforeUnmount(() => {
+onUnmounted(() => {
+  chartRef.value?.cursor.dispose()
   chartRef.value?.dispose()
 })
 
-loadData()
+onMounted(() => {
+  loadData()
+})
 </script>
 
 <template>
