@@ -31,9 +31,7 @@ import am4themes_animated from "@amcharts/amcharts4/themes/animated";
 import {api} from "@/api/RegularIncomeAPI";
 import Waiter from "@/components/misc/Waiter.vue";
 import _ from "lodash";
-import {MonthIndexToName} from "@/util/months";
 import {ABSOLUTE, RELATIVE} from "@/util/association";
-import {TIMEUNITS} from "@/util/timeunits";
 
 am4core.useTheme(am4themes_animated);
 
