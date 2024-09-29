@@ -183,7 +183,7 @@ const fields = computed<ReadonlyDataTableHeader[]>(() => {
 </script>
 
 <template>
-  <v-data-table height="50vh"
+  <v-data-table height="60vh"
                 :fixedHeader="true"
                 :items="value"
                 :headers="fields"

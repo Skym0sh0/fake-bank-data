@@ -219,16 +219,6 @@ function reset() {
   // this.$refs["file-upload-modal"].hide();
 }
 
-function checkToHide(e) {
-  const mustNotBeClosed = isUploading.value || (parsedPreview.value && !(
-    e.trigger === null // abort button was pressed
-    || e.trigger === 'headerclose' // X Button in header was pressed
-  ));
-  if (mustNotBeClosed) {
-    e.preventDefault()
-  }
-}
-
 function openDialog() {
   reset();
   isDialogOpen.value = true
@@ -278,7 +268,7 @@ onMounted(() => {
                  icon="mdi-close"/>
         </v-card-title>
 
-        <v-card-text>
+        <v-card-text class="py-0">
           <waiting-indicator :is-loading="isUploading"/>
 
           <div v-if="!parsedPreview">
@@ -332,8 +322,7 @@ onMounted(() => {
           <div v-else>
             <v-card v-if="isReadilyLoaded"
                     id="preview-card"
-                    :elevation="8"
-                    body-class="p-2">
+                    :elevation="2">
               <v-card-title class="d-flex justify-space-between align-center py-2" id="preview-card-header">
                 <h6>{{ parsedPreview.filename }}</h6>
                 <h6>{{ parsedPreview.format }}</h6>
@@ -345,7 +334,7 @@ onMounted(() => {
                             :hide-details="true"/>
               </v-card-title>
 
-              <v-card-text id="preview-card-body" class="p-2">
+              <v-card-text id="preview-card-body">
                 <turnover-preview-table v-if="previewedData && categories"
                                         v-model:value="previewedData"
                                         :show-already-imported-row="filterShowImportedRows"
