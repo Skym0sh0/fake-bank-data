@@ -96,8 +96,9 @@ function draw() {
     bullets.circle.stroke = col
   }
 
-  chart.cursor = new am4charts.XYCursor();
-  chart.cursor.behavior = "zoomXY"
+  // Due to a bug (???) in am4 creating a XYCursor yields masses of errors on disposing the component
+  // chart.cursor = new am4charts.XYCursor();
+  // chart.cursor.behavior = "zoomXY"
 
   chart.scrollbarX = new am4core.Scrollbar()
   chart.scrollbarY = new am4core.Scrollbar()

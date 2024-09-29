@@ -52,12 +52,14 @@ const columns = computed<ReadonlyDataTableHeader[]>(() => {
     {
       key: "id",
       title: "",
+      width: '1em',
     },
     {
       key: "date",
       title: "Datum",
       value: it => it.date,
       sortable: true,
+      width: '10em',
     },
     {
       key: "recipient",
@@ -70,11 +72,13 @@ const columns = computed<ReadonlyDataTableHeader[]>(() => {
       title: "Summe",
       value: it => it.amountInCents,
       sortable: true,
+      width: '8em',
     },
     {
       key: "categoryId",
       title: "Kategorie",
       value: it => it.categoryId,
+      width: '24em',
     },
     {
       key: "description",
@@ -84,7 +88,8 @@ const columns = computed<ReadonlyDataTableHeader[]>(() => {
     },
     {
       key: "actions",
-      title: "Actions"
+      title: "Actions",
+      width: '1em',
     }
   ];
 })
@@ -130,24 +135,18 @@ const columns = computed<ReadonlyDataTableHeader[]>(() => {
 
     <template v-slot:item.actions="row">
       <v-btn v-if="!deletedRowsIdsById[row.item.id]"
-             :small="true"
-             :icon="true"
+             size="small"
+             icon="mdi-trash-can-outline"
              color="error"
-             @click="emit('deleteTurnover', row.item)">
-        <v-icon small>
-          mdi-trash-can-outline
-        </v-icon>
-      </v-btn>
+             variant="text"
+             @click="emit('deleteTurnover', row.item)"/>
 
       <v-btn v-if="deletedRowsIdsById[row.item.id]"
-             :small="true"
-             :icon="true"
+             size="small"
+             icon="mdi-undo"
              color="info"
-             @click="$emit('undoDeleteTurnover', row.item)">
-        <v-icon small>
-          mdi-undo
-        </v-icon>
-      </v-btn>
+             variant="text"
+             @click="$emit('undoDeleteTurnover', row.item)"/>
     </template>
   </v-data-table>
 </template>

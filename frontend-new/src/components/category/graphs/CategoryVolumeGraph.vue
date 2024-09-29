@@ -16,10 +16,8 @@ const isOpen = ref(false)
 
 const isLoading = ref(false)
 const referencedRows = ref<CategoryTurnoverReportDatapoint[]>([])
-const grouping = ref("DAY")
-const includeSubcategories = ref(false)
-
-const modalDialog = useTemplateRef("modal-turnovers-graph");
+const grouping = ref("MONTH")
+const includeSubcategories = ref(true)
 
 const groupingKeys = computed(() => {
   return [

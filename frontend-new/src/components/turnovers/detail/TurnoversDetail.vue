@@ -176,7 +176,7 @@ onMounted(() => {
       </v-card-title>
 
       <v-card-subtitle>
-        <div class="d-flex justify-content-between">
+        <div class="d-flex justify-space-between">
           <span>
             {{ turnoverImport.format }}: "{{ turnoverImport.filename }}" ({{ turnoverImport.encoding }})
           </span>
@@ -198,7 +198,7 @@ onMounted(() => {
                              @undoDeleteTurnover="onUndoDeleteTurnover"/>
       </v-card-text>
 
-      <v-card-actions class="d-flex justify-content-between">
+      <v-card-actions class="d-flex justify-space-between">
         <confirmationed-button @click="onReset"
                                default-caption="Verwerfen"
                                request-caption="Verwerfen??"

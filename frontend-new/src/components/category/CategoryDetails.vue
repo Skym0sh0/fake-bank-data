@@ -20,6 +20,7 @@ const emit = defineEmits<{
   (e: "createAsRoot", patch: CategoryPatch): void;
   (e: "update", patch: CategoryPatch): void;
   (e: "close"): void;
+  (e: "refresh"): void;
 }>();
 
 defineExpose({
@@ -104,7 +105,9 @@ watch(() => entity, () => changeAnything(), {deep: true})
     <v-card-title class="d-flex justify-space-between">
       <span>Kategorie Details</span>
 
-      <category-usage-dialog v-if="entity && entity.id" :category="entity"/>
+      <category-usage-dialog v-if="entity && entity.id"
+                             :category="entity"
+                             @refresh="emit('refresh')"/>
     </v-card-title>
 
     <v-card-subtitle class="d-flex justify-start">

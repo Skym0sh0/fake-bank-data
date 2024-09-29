@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import WaitingIndicator from "../misc/WaitingIndicator.vue";
-import {computed, inject, ref, useTemplateRef} from "vue";
+import {computed, inject, onMounted, ref, useTemplateRef} from "vue";
 import {Category, CategoryApi, CategoryPatch} from "@api/api.ts";
 import {apiRefKey} from "../../keys.ts";
 import CategoryList from "./CategoryList.vue";
@@ -54,7 +54,6 @@ function loadCategories() {
     .finally(() => {
       isLoading.value = false
     })
-
 }
 
 function newCategory(parentId: string | null | undefined) {
@@ -136,6 +135,7 @@ function doRestCallForCategory(callback: () => Promise<Category> | undefined) {
       categories.value.push(res)
       openEditView(res.id)
     })
+    .then(() => refresh())
     .finally(() => {
       isLoading.value = false
     })
@@ -150,6 +150,7 @@ function deleteCategory(category: Category) {
   api?.deleteCategory(category.id)
     .then(() => {
       categories.value = _.filter(categories.value, cur => cur.id !== category.id)
+      refresh()
     })
     .finally(() => {
       isLoading.value = false
@@ -163,13 +164,19 @@ function reassignCategories(payload: CategoryReassign) {
     payload.sources.map(id => categoriesById.value[id])
       .map(source => api?.reallocateCategory(payload.target.id, source.id))
   )
-    .then(() => loadCategories())
+    .then(() => refresh())
     .finally(() => {
       isLoading.value = false
     })
 }
 
-loadCategories();
+function refresh() {
+  loadCategories()
+}
+
+onMounted(() => {
+  loadCategories();
+})
 </script>
 
 <template>
@@ -215,7 +222,8 @@ loadCategories();
                   @createAsChild="createNewChildCategory"
                   @createAsRoot="createNewRootCategory"
                   @update="updateCategory"
-                  @close="cancelActiveForm"/>
+                  @close="cancelActiveForm"
+                  @refresh="refresh"/>
               </div>
             </div>
           </v-col>

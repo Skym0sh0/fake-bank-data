@@ -29,7 +29,9 @@ const shortValue = computed(() => {
 <template>
   <v-tooltip>
     <template v-slot:activator="{ props }">
-      <div :id="`value-element-${index}`" v-bind="props" class="text-caption"
+      <div :id="`value-element-${index}`"
+           v-bind="props"
+           class="text-caption d-flex justify-start"
            :style="{width: `${Math.round(1.2 * maxLength)}ex`}">
         <code>
           {{ shortValue }}

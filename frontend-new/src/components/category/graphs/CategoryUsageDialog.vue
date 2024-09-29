@@ -16,6 +16,10 @@ const {category} = defineProps<{
   category: Category;
 }>();
 
+const emit = defineEmits<{
+  (e: 'refresh'): void;
+}>();
+
 const isModalOpen = ref(false)
 
 const isEditing = ref(false)
@@ -70,17 +74,6 @@ function reset() {
   isModalOpen.value = false
 }
 
-function checkToHide(e) {
-  const mustNotBeClosed = changedTurnovers.value.length || (
-    isEditing.value && !(
-      e.trigger === null // abort button was pressed
-      || e.trigger === 'headerclose' // X Button in header was pressed
-    ));
-  if (mustNotBeClosed) {
-    e.preventDefault()
-  }
-}
-
 function onChangeCategory(turnoverId: string | undefined, newCategoryId: string | null | undefined) {
   referencedRows.value = items.value.map((to: TurnoverRow): TurnoverRow => {
     if (turnoverId !== to.id)
@@ -119,6 +112,7 @@ function save() {
     rows: changedTurnovers.value,
   };
   api?.turnoversApi.batchPatchTurnoverImports(patch)
+    .then(() => emit("refresh"))
     .then(() => reset())
     .finally(() => isLoading.value = false)
 }
