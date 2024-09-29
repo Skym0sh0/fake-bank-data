@@ -40,7 +40,7 @@ const isCurrentSearchInvalid = computed<boolean>(() => {
   return !currentSearch.value || currentSearch.value === "";
 })
 
-const showValidationState = computed<boolean | undefined>(() => {
+const isValidationTrue = computed<boolean | undefined>(() => {
   if (!required) {
     if (isUnknownCategory.value && currentSearch.value !== '')
       return false;
@@ -53,6 +53,10 @@ const showValidationState = computed<boolean | undefined>(() => {
 
 const isAddableCategory = computed<boolean>(() => {
   return !(!isUnknownCategory.value || isCurrentSearchInvalid.value)
+})
+
+const isDisabled = computed(() => {
+  return disabled || loading
 })
 
 function onCategoryInput(newValue: string) {
@@ -105,23 +109,23 @@ watch(() => categoriesByName, () => findOption(), {deep: true})
                 :list="`${id}-category-input-list`"
                 :value="currentSearch"
                 @update:modelValue="onCategoryInput"
-                :error="showValidationState"
-                :disabled="disabled || loading"
+                :error="!isValidationTrue"
+                :disabled="isDisabled"
                 density="compact"
                 type="text"
-                autocomplete="off">
+                autocomplete="off"
+                :hide-details="true">
 
-    <template v-slot:append>
+    <template v-slot:append-inner v-if="!isDisabled">
       <v-btn @click="onAddCategory"
-             :icon="true"
-             :disabled="!isAddableCategory || loading">
-        <v-icon :small="true" v-if="loading">
-          mdi-timer-sand
-        </v-icon>
-        <v-icon :small="true" v-else>
-          mdi-plus-circle
-        </v-icon>
-      </v-btn>
+             :disabled="!isAddableCategory || loading"
+             :icon="loading ? 'mdi-timer-sand' : 'mdi-plus-circle'"
+             title="Erstelle diese Kategorie neu"
+             color="primary"
+             size="x-small"
+             variant="text"
+             density="compact"
+      />
     </template>
   </v-text-field>
 
@@ -130,31 +134,4 @@ watch(() => categoriesByName, () => findOption(), {deep: true})
       {{ cat.parentChain }}
     </option>
   </datalist>
-
-  <!--  <b-input-group>-->
-  <!--    <b-form-input :id="`${id}-category-input`"-->
-  <!--                  :list="`${id}-category-input-list`"-->
-  <!--                  @input="onCategoryInput"-->
-  <!--                  :value="currentSearch"-->
-  <!--                  :state="showValidationState"-->
-  <!--                  :disabled="disabled || loading"-->
-  <!--                  autocomplete="off"-->
-  <!--                  size="sm"-->
-  <!--                  type="text">-->
-  <!--    </b-form-input>-->
-  <!--    <b-input-group-append>-->
-  <!--      <b-button size="sm"-->
-  <!--                @click="onAddCategory"-->
-  <!--                :variant="isAddableCategory ? 'primary' : 'secondary'"-->
-  <!--                :disabled="!isAddableCategory || loading">-->
-  <!--        <b-icon :icon="!loading ? 'plus-circle' : 'hourglas-split'" font-scale="1"/>-->
-  <!--      </b-button>-->
-  <!--    </b-input-group-append>-->
-
-  <!--    <datalist :id="`${id}-category-input-list`">-->
-  <!--      <option v-for="cat in flattedCategories" :key="cat.id" :value="cat.name">-->
-  <!--        {{ cat.parentChain }}-->
-  <!--      </option>-->
-  <!--    </datalist>-->
-  <!--  </b-input-group>-->
 </template>

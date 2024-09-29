@@ -377,6 +377,7 @@ public class TurnoverCsvImporter {
         String similarityChecksum = checksummer.computeSimilarityChecksum(rec);
 
         return TurnoverRowPreview.builder()
+                .id(UUID.randomUUID())
                 .date(rec.getDate())
                 .amountInCents(rec.getAmountInCents())
                 .description(rec.getDescription())

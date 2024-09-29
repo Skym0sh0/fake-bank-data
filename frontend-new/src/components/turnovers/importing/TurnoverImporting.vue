@@ -16,6 +16,7 @@ import useVuelidate from "@vuelidate/core";
 import {required} from '@vuelidate/validators'
 import RawCsvFileTable from "./RawCsvFileTable.vue";
 import TurnoverPreviewTable from "./TurnoverPreviewTable.vue";
+import Histogram, {HistogramValueType} from "./Histogram.vue";
 
 function getBankFormatName(frmt: TurnoverImportFormat): string {
   const BANK_FORMAT_NAMES = {
@@ -33,7 +34,7 @@ type SupportedFileType = {
   title: string;
 };
 
-export type PreviewRowWithOriginalState = TurnoverRowPreview & { originalImportable?: boolean };
+export type PreviewRowWithOriginalState = TurnoverRowPreview & { originalImportable?: boolean; index: number; };
 
 const api: TurnoversApi | undefined = inject(apiRefKey)?.turnoversApi;
 const categoriesApi: CategoryApi | undefined = inject(apiRefKey)?.categoriesApi;
@@ -71,6 +72,7 @@ const v$ = useVuelidate({
 const parsedPreview = ref<TurnoverPreview | null>(null);
 const previewedData = ref<PreviewRowWithOriginalState[] | null>(null);
 const errorMessage = ref<string | null>(null);
+const filterShowImportedRows = ref<boolean>(false);
 
 const isImportImpossible = computed(() => {
   const isDataValid = (previewedData.value || []).every(row => {
@@ -97,6 +99,36 @@ const rowsTodo = computed(() => {
 
 const isReadilyLoaded = computed(() => {
   return fileSelection.value && previewedData.value && categories.value
+})
+
+const importablesHistogram = computed<HistogramValueType[]>(() => {
+  return [
+    {
+      label: 'Importierbare Zeilen',
+      value: importableRows.value.length,
+      color: 'success'
+    },
+    {
+      label: 'Nicht importierbare Zeilen',
+      value: rawRows.value.length - importableRows.value.length,
+      color: 'info'
+    }
+  ]
+})
+
+const progressHistogram = computed<HistogramValueType[]>(() => {
+  return [
+    {
+      label: 'Schon fertig bearbeitete Zeilen',
+      value: importableRows.value.length - rowsTodo.value.length,
+      color: 'success'
+    },
+    {
+      label: 'Noch zu bearbeitende Zeilen',
+      value: rowsTodo.value.length,
+      color: 'error'
+    }
+  ]
 })
 
 function loadCategories() {
@@ -126,8 +158,9 @@ function doPreviewRequest() {
       parsedPreview.value = preview;
 
       previewedData.value = (parsedPreview.value.rows || [])
-        .map((row: TurnoverRowPreview) => ({
+        .map((row: TurnoverRowPreview, index: number) => ({
           ...row,
+          index: index,
           originalImportable: row.importable
         }))
     })
@@ -297,16 +330,25 @@ onMounted(() => {
           </div>
 
           <div v-else>
-            <v-card v-if="isReadilyLoaded" id="preview-card"
+            <v-card v-if="isReadilyLoaded"
+                    id="preview-card"
+                    :elevation="8"
                     body-class="p-2">
-              <v-card-title class="d-flex justify-space-between py-2" id="preview-card-header">
+              <v-card-title class="d-flex justify-space-between align-center py-2" id="preview-card-header">
                 <h6>{{ parsedPreview.filename }}</h6>
                 <h6>{{ parsedPreview.format }}</h6>
+
+                <v-checkbox v-model="filterShowImportedRows"
+                            color="primary"
+                            label="Zeige schon importierte Zeilen"
+                            density="compact"
+                            :hide-details="true"/>
               </v-card-title>
 
               <v-card-text id="preview-card-body" class="p-2">
                 <turnover-preview-table v-if="previewedData && categories"
                                         v-model:value="previewedData"
+                                        :show-already-imported-row="filterShowImportedRows"
                                         :categories="categories"
                                         @onCreateCategory="onCreateCategory"/>
               </v-card-text>
@@ -314,47 +356,33 @@ onMounted(() => {
           </div>
         </v-card-text>
 
-        <v-card-actions>
-          <div v-if="parsedPreview" class="w-100" style="display: flex;">
-            <v-container class="p-0">
-              <v-row>
-                <v-col class="p-0 px-2">
-                  <h6>Importierbar</h6>
-                  <v-progress-linear :max="rawRows.length"
-                                     :show-value="true"
-                                     :buffer-value="rawRows.length - importableRows.length"
-                                     :model-value="importableRows.length"
-                  >
-                    <!--                    <b-progress-bar :value="importableRows.length" variant="success"/>-->
-                    <!--                    <b-progress-bar :value="rawRows.length - importableRows.length" variant="secondary"/>-->
-                  </v-progress-linear>
-                </v-col>
+        <v-card-actions v-if="parsedPreview" class="w-100 d-flex justify-space-between">
+          <v-container :fluid="true">
+            <v-row>
+              <v-col>
+                <Histogram text="Importierbar" :values="importablesHistogram"/>
+              </v-col>
 
-                <v-col class="p-0 px-2">
-                  <h6>Kategorisiert</h6>
-                  <v-progress-linear :max="importableRows.length"
-                                     :show-value="true"
-                                     :buffer-value="rowsTodo.length"
-                                     :model-value="importableRows.length - rowsTodo.length">
-                    <!--                    <b-progress-bar :value="importableRows.length - rowsTodo.length" variant="success"/>-->
-                    <!--                    <b-progress-bar :value="rowsTodo.length" variant="danger"/>-->
-                  </v-progress-linear>
-                </v-col>
-              </v-row>
-            </v-container>
+              <v-col class="p-0 px-2">
+                <Histogram text="Kategorisiert" :values="progressHistogram"/>
+              </v-col>
 
-            <div class="m-auto">
-              <v-btn class="mr-1"
-                     color="secondary"
-                     @click="reset">
-                Abbrechen
-              </v-btn>
-              <v-btn color="primary"
-                     @click="doImportRequest"
-                     :disabled="isImportImpossible">
-                Importieren
-              </v-btn>
-            </div>
+              <v-col cols="6"/>
+            </v-row>
+          </v-container>
+
+          <div class="d-flex justify-space-between align-center ga-1">
+            <v-btn color="secondary"
+                   variant="outlined"
+                   @click="reset">
+              Abbrechen
+            </v-btn>
+            <v-btn color="primary"
+                   variant="outlined"
+                   @click="doImportRequest"
+                   :disabled="isImportImpossible">
+              Importieren
+            </v-btn>
           </div>
         </v-card-actions>
       </v-card>

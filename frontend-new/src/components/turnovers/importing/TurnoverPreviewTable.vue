@@ -15,12 +15,12 @@ import TableCellMonetary from "../../misc/TableCellMonetary.vue";
 import CategoryInput from "../../misc/CategoryInput.vue";
 import {DateTime} from "luxon";
 import * as _ from "lodash";
-import {useTheme} from "vuetify";
 import CategorySuggestion, {CategorySelectionType} from "./CategorySuggestion.vue";
 
-const {value, categories} = defineProps<{
+const {value, categories, showAlreadyImportedRow} = defineProps<{
   value: PreviewRowWithOriginalState[];
   categories: Category[];
+  showAlreadyImportedRow?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -28,7 +28,6 @@ const emit = defineEmits<{
 }>();
 
 const searchString = ref("some-dummy-value-to-activate-table-filtering");
-const showOnlyImportables = ref(true);
 const showOnlyMissingCategories = ref(false);
 
 const flattedCategories = computed(() => {
@@ -47,10 +46,6 @@ const hasSuggestions = computed<boolean>(() => {
   return value.some(r => !!r.suggestedCategory);
 });
 
-const hasImportables = computed<boolean>(() => {
-  return value.some(r => !!r.originalImportable)
-});
-
 enum MarkType {
   All,
   None,
@@ -60,7 +55,7 @@ enum MarkType {
 const allRowsAreMarkedAsImportable = computed<MarkType>(() => {
   const onlyImportables = value.filter(it => it.originalImportable);
 
-  const groups = _.groupBy(onlyImportables, it => !!it.importable)
+  const groups = _.groupBy(onlyImportables, it => it.importable)
 
   const trueGroup = groups['true'] ?? []
   const falseGroup = groups['false'] ?? []
@@ -74,7 +69,7 @@ const allRowsAreMarkedAsImportable = computed<MarkType>(() => {
 })
 
 function doFilter(row: PreviewRowWithOriginalState): boolean {
-  const importable = showOnlyImportables.value ? !!row.originalImportable : true
+  const importable = !showAlreadyImportedRow ? !!row.originalImportable : true
   const missingCategory = showOnlyMissingCategories.value ? !row.categoryId : true;
 
   return importable && missingCategory;
@@ -85,35 +80,6 @@ function onSelectImportable(newValue: boolean) {
     if (row.originalImportable)
       row.importable = newValue;
   })
-}
-
-function rowClass(item: PreviewRowWithOriginalState, type: any) {
-  if (!item || type !== 'row')
-    return;
-
-  if (!item.importable)
-    return 'table-secondary'
-
-  if (!item.categoryId)
-    return 'table-danger';
-
-  return undefined;
-}
-
-const {current: theme} = useTheme();
-
-function rowProps({item}: { item?: PreviewRowWithOriginalState }) {
-  if (!item || !item.originalImportable)
-    return undefined;
-
-  const props: any = {style: {}};
-
-  if (!item.importable)
-    props.style['background-color'] = theme.value.colors.warning;
-  else if (!item.categoryId)
-    props.style['background-color'] = theme.value.colors.error;
-
-  return props;
 }
 
 function onSelectCategory(select: CategorySelectionType) {
@@ -152,145 +118,113 @@ type ReadonlyDataTableHeader = UnwrapReadonlyArray<ReadonlyHeaders>;
 const fields = computed<ReadonlyDataTableHeader[]>(() => {
   const columns: ReadonlyDataTableHeader[] = [
     {
-      key: 'checksum',
-      title: '#',
-      sortable: false,
-    }];
-
-  if (hasImportables.value)
-    columns.push(
-      {
-        key: "originalImportable",
-        title: "X",
-        value: it => it.originalImportable,
-        sortable: false,
-      });
-
-  columns.push(...[
-    {
       key: "importable",
       title: "?",
       value: it => it.importable,
       sortable: false,
+      width: '3ex',
+      minWidth: '40px',
+    },
+    {
+      key: 'index',
+      title: '#',
+      value: it => it.index,
+      sortable: true,
     },
     {
       key: "date",
       title: "Date",
       value: it => it.date,
       sortable: true,
+      width: '10em',
     },
     {
       key: "recipient",
       title: "Empfänger",
       value: it => it.recipient,
       sortable: true,
+      // width: '20em',
     },
     {
       key: "amount",
       title: "Betrag",
       value: it => it.amountInCents,
       sortable: true,
+      width: '8em',
     },
     {
       key: "categoryId",
       title: "Kategorie",
       value: it => it.categoryId,
       sortable: true,
+      width: '24em',
     },
     {
       key: "suggestedCategories",
       title: "Vorschläge",
-    }]);
+      width: '20em',
+    },
+    {
+      key: "Description",
+      title: 'Beschreibung',
+      value: it => it.description,
+    }
+  ];
 
   if (hasSuggestions.value)
-    columns.push({
+    columns.splice(-2, 0, {
       key: "suggestedCategory",
       title: "Bank Vorschlag",
       sortable: true,
-    });
-
-  columns.push(...[
-    {
-      key: "Description",
-      value: it => it.description,
-    }
-  ]);
+    })
 
   return columns;
 })
 </script>
 
 <template>
-  <v-data-table :items="value"
+  <v-data-table height="50vh"
+                :fixedHeader="true"
+                :items="value"
                 :headers="fields"
                 :search="searchString"
-                :custom-filter="(_1, _2, row?: any) => doFilter(row.columns)"
+                :custom-filter="(_1, _2, row: any) => doFilter(row.raw)"
                 :items-per-page="-1"
                 :hide-default-footer="true"
                 :hover="true"
-                :row-props="rowProps"
                 density="compact">
-
-    <template v-slot:header.originalImportable>
-      <div class="d-flex justify-content-start align-items-center">
-        <v-btn :icon="true"
-               :x-small="!showOnlyImportables"
-               @click.stop="showOnlyImportables = !showOnlyImportables">
-          <v-icon color="success">
-            {{ showOnlyImportables ? 'mdi-filter-check' : 'mdi-filter' }}
-          </v-icon>
-        </v-btn>
-      </div>
-    </template>
 
     <template v-slot:header.importable>
       <v-checkbox :model-value="allRowsAreMarkedAsImportable === MarkType.All"
                   :indeterminate="allRowsAreMarkedAsImportable === MarkType.Some ? true : undefined"
-                  @update:modelValue="(x: any) => onSelectImportable(!!x)"/>
-    </template>
-
-    <template v-slot:header.categoryId="{column}">
-      <div class="d-flex justify-content-between align-items-end">
-        {{ column.title }}
-
-        <v-btn :icon="true"
-               :x-small="true"
-               @click="showOnlyMissingCategories = !showOnlyMissingCategories">
-          <v-icon>
-            {{ showOnlyMissingCategories ? 'mdi-filter-check' : 'mdi-filter' }}
-          </v-icon>
-        </v-btn>
-      </div>
-    </template>
-
-    <template v-slot:item.checksum="row">
-      {{ row.index + 1 }}
-    </template>
-
-    <template v-slot:item.originalImportable="{ value }">
-      {{ value ? '' : 'X' }}
+                  @update:modelValue="(x: any) => onSelectImportable(!!x)"
+                  density="compact"
+                  color="info"
+                  :hide-details="true"/>
     </template>
 
     <template v-slot:item.importable="row">
       <v-checkbox v-model="row.item.importable"
                   :disabled="!row.item.originalImportable"
-                  density="compact"/>
+                  :indeterminate="!row.item.originalImportable"
+                  title="Zeile wird importiert."
+                  density="compact"
+                  color="info"
+                  :hide-details="true"/>
     </template>
 
-    <template v-slot:item.date="{ value }">
-      {{ DateTime.fromISO(value).toLocaleString(DateTime.DATE_MED) }}
-    </template>
+    <template v-slot:header.categoryId="{column}">
+      <div class="d-flex justify-space-between align-center">
+        <span>{{ column.title }}</span>
 
-    <template v-slot:item.recipient="{index, value}">
-      <table-cell-description :index="index"
-                              :value="value"
-                              :max-length="32"/>
+        <v-btn :icon="showOnlyMissingCategories ? 'mdi-filter-check' : 'mdi-filter'"
+               size="small"
+               @click="showOnlyMissingCategories = !showOnlyMissingCategories"
+               color="light"
+               variant="flat"
+               title="Filtert Zeilen mit schon befüllten Kategorien weg."/>
+      </div>
     </template>
-
-    <template v-slot:item.amount="{ value }">
-      <table-cell-monetary :value="value" class="float-right"/>
-    </template>
-
     <template v-slot:item.categoryId="row">
       <category-input :id="`csv-category-input-${row.index}`"
                       :value="row.item.categoryId"
@@ -303,11 +237,32 @@ const fields = computed<ReadonlyDataTableHeader[]>(() => {
                       :disabled="!row.item.importable"/>
     </template>
 
+    <template v-slot:item.index="row">
+      {{ row.index + 1 }}
+    </template>
+
+    <template v-slot:item.date="{ value }">
+      <div class="float-right">
+        {{ DateTime.fromISO(value).toLocaleString(DateTime.DATE_MED) }}
+      </div>
+    </template>
+
+    <template v-slot:item.recipient="{index, value}">
+      <table-cell-description :index="index"
+                              :value="value"
+                              :max-length="32"/>
+    </template>
+
+    <template v-slot:item.amount="{ value }">
+      <table-cell-monetary :value="value" class="float-right"/>
+    </template>
+
     <template v-slot:item.suggestedCategories="row">
       <category-suggestion :checksum="row.item.checksum"
                            :suggestions="row.item.suggestedCategories || []"
                            :categories-by-id="categoriesById"
                            :disabled="!row.item.importable"
+                           :selected-category-id="row.item.categoryId"
                            @select="onSelectCategory"/>
     </template>
 
@@ -327,7 +282,7 @@ const fields = computed<ReadonlyDataTableHeader[]>(() => {
     </template>
 
     <template v-slot:item.Description="{index, value}">
-      <table-cell-description :index="index" :value="value"/>
+      <table-cell-description :index="index" :value="value" :max-length="48"/>
     </template>
   </v-data-table>
 </template>
