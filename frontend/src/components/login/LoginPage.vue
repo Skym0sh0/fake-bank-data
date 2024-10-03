@@ -4,6 +4,7 @@ import {inject, ref} from "vue";
 import {apiRefKey, authenticationKey} from "../../keys.ts";
 import {useRoute, useRouter} from 'vue-router'
 import {UserAuthApi} from "@api/api.ts"
+import ShowPasswordButton from "./ShowPasswordButton.vue";
 
 const router = useRouter()
 const route = useRoute()
@@ -34,27 +35,31 @@ const passwordVisible = ref(false);
 const errorMessage = ref<string | null>(null);
 
 const userRef = inject(authenticationKey)?.value
-const apiAccess = inject(apiRefKey)
+const apiAccess: UserAuthApi | undefined = inject(apiRefKey)?.authApi
 
 function doLogin() {
   if (!username.value || !password.value)
     return;
 
+  if (!apiAccess)
+    return;
+
   isLoading.value = true;
 
-  const api: UserAuthApi | undefined = apiAccess?.authApi;
-
-  api?.loginUser({username: username.value, password: password.value})
+  apiAccess.loginUser({username: username.value, password: password.value})
     .then(res => {
       userRef?.login(res.data, password.value)
 
+      console.log(route)
+
       router.replace({
-        // path: route.query['returnUrl'] ?? '/'
-        path: route.params['returnUrl'][0] ?? '/'
+        path: route.query['returnUrl'] ?? '/'
+        // path: route.params['returnUrl'][0] ?? '/'
       })
     })
     .catch(e => {
-      errorMessage.value = e;
+      console.error(e)
+      errorMessage.value = e.error;
     })
     .finally(() => isLoading.value = false);
 }
@@ -65,20 +70,20 @@ function onRegisterClick() {
 </script>
 
 <template>
-  <v-form v-model="valid" @submit.prevent="doLogin">
-    <div style="height: 90vh" class="w-100 d-flex justify-content-center align-items-center">
-      <v-card min-width="25%" max-width="80%" elevation="10">
+  <div class="w-100 d-flex justify-center align-center">
+    <v-form v-model="valid" @submit.prevent="doLogin">
+      <v-card width="300px" elevation="10">
         <v-card-title>
           Anmelden
         </v-card-title>
 
         <v-card-subtitle v-if="errorMessage"
                          @click="errorMessage = null"
-                         style="font-size: small"
-                         class="bg-warning transition-ease-in-out d-flex justify-content-center align-items-center">
-                    <span>
-                        {{ errorMessage }}
-                    </span>
+                         style="font-size: small; max-width: 100%; max-height: 300px"
+                         class=" transition-ease-in-out d-flex justify-center align-center">
+          <div class=" bg-warning text-wrap overflow-auto w-100" style="max-height: 300px">
+            {{ errorMessage }}
+          </div>
         </v-card-subtitle>
 
         <v-card-text>
@@ -95,20 +100,17 @@ function onRegisterClick() {
                         :rules="passwordRules"
                         prepend-inner-icon="mdi-lock-outline"
                         required>
-            <template v-slot:append>
-              <v-btn icon @click="passwordVisible = !passwordVisible" small>
-                <v-icon>
-                  {{ passwordVisible ? 'mdi-eye-off' : 'mdi-eye' }}
-                </v-icon>
-              </v-btn>
+            <template v-slot:append-inner>
+              <ShowPasswordButton :visible="passwordVisible"
+                                  @click="passwordVisible = !passwordVisible"/>
             </template>
           </v-text-field>
 
-          <v-card-actions class="w-100 d-flex justify-content-between">
-            <v-btn @click="onRegisterClick" color="warning">
+          <v-card-actions class="w-100 d-flex justify-space-between align-center">
+            <v-btn @click="onRegisterClick" color="warning" variant="tonal">
               Registrieren
             </v-btn>
-            <v-btn :disabled="!valid" color="success" type="submit">
+            <v-btn :disabled="!valid" color="success" variant="tonal" type="submit">
               Einloggen
             </v-btn>
           </v-card-actions>
@@ -116,6 +118,6 @@ function onRegisterClick() {
       </v-card>
 
       <waiting-indicator :is-loading="isLoading"/>
-    </div>
-  </v-form>
+    </v-form>
+  </div>
 </template>

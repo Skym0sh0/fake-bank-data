@@ -5,6 +5,7 @@ import {inject, onMounted, ref, useTemplateRef} from "vue";
 import {UserAuthApi} from "@api/api.ts";
 import {apiRefKey, authenticationKey} from "../../keys.ts";
 import {VForm} from "vuetify/components";
+import ShowPasswordButton from "./ShowPasswordButton.vue";
 
 const isLoading = ref(false)
 const valid = ref(false)
@@ -88,8 +89,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <v-form ref="user-details-form" @submit.prevent="onSave" v-model="valid">
-    <v-card>
+  <v-form ref="user-details-form" @submit.prevent="onSave" v-model="valid" class="d-flex justify-center align-center">
+    <v-card width="50vw">
       <v-card-title>
         Benutzer Details
       </v-card-title>
@@ -128,12 +129,9 @@ onMounted(() => {
                         :type="passwordVisible ? 'text' : 'password'"
                         autocomplete="on"
                         @input="validate">
-            <template v-slot:append>
-              <v-btn icon @click="passwordVisible = !passwordVisible" small>
-                <v-icon>
-                  {{ passwordVisible ? 'mdi-eye-off' : 'mdi-eye' }}
-                </v-icon>
-              </v-btn>
+            <template v-slot:append-inner>
+              <show-password-button :visible="passwordVisible"
+                                    @click="passwordVisible = !passwordVisible"/>
             </template>
           </v-text-field>
           <v-text-field v-model="passwordRepeat"
@@ -143,12 +141,9 @@ onMounted(() => {
                         :type="passwordVisible ? 'text' : 'password'"
                         autocomplete="on"
                         @input="validate">
-            <template v-slot:append>
-              <v-btn icon @click="passwordVisible = !passwordVisible" small>
-                <v-icon>
-                  {{ passwordVisible ? 'mdi-eye-off' : 'mdi-eye' }}
-                </v-icon>
-              </v-btn>
+            <template v-slot:append-inner>
+              <show-password-button :visible="passwordVisible"
+                                    @click="passwordVisible = !passwordVisible"/>
             </template>
           </v-text-field>
         </div>
@@ -156,7 +151,7 @@ onMounted(() => {
 
       <waiting-indicator :is-loading="isLoading"/>
 
-      <v-card-actions class="d-flex justify-content-center">
+      <v-card-actions class="d-flex justify-center">
         <confirmationed-button @click="onDelete"
                                default-caption="Account Löschen?"
                                request-caption="Account wirklich löschen?"

@@ -5,6 +5,7 @@ import {useRouter} from "vue-router";
 import {apiRefKey} from "../../keys.ts";
 import {UserAuthApi} from "@api/api.ts";
 import {VForm} from "vuetify/components";
+import ShowPasswordButton from "./ShowPasswordButton.vue";
 
 const username = ref('')
 const password = ref('')
@@ -15,19 +16,19 @@ const valid = ref(false)
 const passwordVisible = ref(false)
 
 const usernameRules = ref([
-  (value:string) => !value ? "Required" : true,
-  (value:string) => value.length < 3 ? "Minimal length is 3" : true,
-  (value:string) => value.search(/\s+/) >= 0 ? "Must not contain spaces" : true,
+  (value: string) => !value ? "Required" : true,
+  (value: string) => value.length < 3 ? "Minimal length is 3" : true,
+  (value: string) => value.search(/\s+/) >= 0 ? "Must not contain spaces" : true,
 ])
 
 const passwordRules = ref([
-  (value:string) => !value ? "Required" : true,
-  (value:string) => value.length < 3 ? "Minimal length is 3" : true,
-  (value:string) => value !== passwordRepeat.value ? "Must match password repeat" : true
+  (value: string) => !value ? "Required" : true,
+  (value: string) => value.length < 3 ? "Minimal length is 3" : true,
+  (value: string) => value !== passwordRepeat.value ? "Must match password repeat" : true
 ])
 
 const passwordRepeatRules = ref([
-  (value:string) => value !== password.value ? "Must match password" : true
+  (value: string) => value !== password.value ? "Must match password" : true
 ])
 
 const apiRef = inject(apiRefKey)
@@ -44,11 +45,11 @@ function onRegister() {
 
   isLoading.value = true
 
-  const api: UserAuthApi|undefined = apiRef?.authApi;
+  const api: UserAuthApi | undefined = apiRef?.authApi;
 
   api?.registerUser({username: username.value, password: password.value})
-      .then(() => router.push({name: 'login'}))
-      .finally(() => isLoading.value = false)
+    .then(() => router.push({name: 'login'}))
+    .finally(() => isLoading.value = false)
 }
 
 function validate() {
@@ -61,9 +62,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <v-form ref="registration-form" @submit.prevent="onRegister" v-model="valid">
-    <div style="height: 90vh" class="w-100 d-flex justify-content-center align-items-center">
-      <v-card min-width="25%" max-width="80%" elevation="10">
+  <div class="w-100 d-flex justify-center align-center">
+    <v-form ref="registration-form" @submit.prevent="onRegister" v-model="valid">
+      <v-card width="300px" elevation="10">
         <v-card-title>
           Registering
         </v-card-title>
@@ -84,12 +85,9 @@ onMounted(() => {
                         prepend-inner-icon="mdi-lock-outline"
                         :type="passwordVisible ? 'text' : 'password'"
                         @input="validate">
-            <template v-slot:append>
-              <v-btn icon @click="passwordVisible = !passwordVisible" small>
-                <v-icon>
-                  {{ passwordVisible ? 'mdi-eye-off' : 'mdi-eye' }}
-                </v-icon>
-              </v-btn>
+            <template v-slot:append-inner>
+              <ShowPasswordButton :visible="passwordVisible"
+                                  @click="passwordVisible = !passwordVisible"/>
             </template>
           </v-text-field>
           <v-text-field v-model="passwordRepeat"
@@ -98,28 +96,25 @@ onMounted(() => {
                         prepend-inner-icon="mdi-lock-outline"
                         :type="passwordVisible ? 'text' : 'password'"
                         @input="validate">
-            <template v-slot:append>
-              <v-btn icon @click="passwordVisible = !passwordVisible" small>
-                <v-icon>
-                  {{ passwordVisible ? 'mdi-eye-off' : 'mdi-eye' }}
-                </v-icon>
-              </v-btn>
+            <template v-slot:append-inner>
+              <ShowPasswordButton :visible="passwordVisible"
+                                  @click="passwordVisible = !passwordVisible"/>
             </template>
           </v-text-field>
         </v-card-text>
 
-        <v-card-actions class="d-flex justify-content-center">
-          <v-btn @click="abort" color="warning">
+        <v-card-actions class="d-flex justify-center align-center">
+          <v-btn @click="abort" color="warning" variant="tonal">
             Abbrechen
           </v-btn>
 
-          <v-btn type="submit" color="primary" :disabled="!valid">
+          <v-btn type="submit" color="primary" variant="tonal" :disabled="!valid">
             Registrieren
           </v-btn>
         </v-card-actions>
       </v-card>
-    </div>
+    </v-form>
 
     <waiting-indicator :is-loading="isLoading"/>
-  </v-form>
+  </div>
 </template>
