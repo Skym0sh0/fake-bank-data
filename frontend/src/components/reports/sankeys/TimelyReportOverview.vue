@@ -35,20 +35,20 @@ function loadBasicInfo() {
   isLoading.value = true
 
   api?.fetchCoarseInfos()
-      .then((res: BasicCoarseInfo) => {
-        basicInfo.value = {
-          earliest: DateTime.fromISO(res.earliestTransaction) ?? now,
-          latest: DateTime.fromISO(res.latestTransaction) ?? now,
-          maxDepth: res.maxDepthOfCategories ?? 0,
-          numberOfTransactions: res.numberOfTransactions ?? 0,
-          numberOfUsedCategories: res.numberOfUsedCategories ?? 0,
-        };
+    .then((res: BasicCoarseInfo) => {
+      basicInfo.value = {
+        earliest: res.earliestTransaction ? DateTime.fromISO(res.earliestTransaction) : now,
+        latest: res.latestTransaction ? DateTime.fromISO(res.latestTransaction) : now,
+        maxDepth: res.maxDepthOfCategories ?? 0,
+        numberOfTransactions: res.numberOfTransactions ?? 0,
+        numberOfUsedCategories: res.numberOfUsedCategories ?? 0,
+      };
 
-        select.value.depth = Math.min(2, basicInfo.value.maxDepth)
-        select.value.year = basicInfo.value.latest.year
-        select.value.month = null
-      })
-      .finally(() => isLoading.value = false)
+      select.value.depth = Math.min(2, basicInfo.value.maxDepth)
+      select.value.year = basicInfo.value.latest.year
+      select.value.month = undefined
+    })
+    .finally(() => isLoading.value = false)
 }
 
 loadBasicInfo()
@@ -62,7 +62,7 @@ loadBasicInfo()
 
     <template v-slot:subtitle v-if="isDataQueryable">
       <v-row>
-        <v-col class="py-1 d-flex justify-space-around align-center">
+        <v-col v-if="basicInfo" class="py-1 d-flex justify-space-around align-center">
           <div>
             Transaktionen: {{ basicInfo.numberOfTransactions }}
           </div>

@@ -26,6 +26,7 @@
     "@mdi/font": "7.4.47",
     "@types/lodash": "4.17.7",
     "@types/luxon": "3.4.2",
+    "@types/node": "22.7.4",
     "@types/uuid": "10.0.0",
     "@typescript-eslint/eslint-plugin": "7.13.1",
     "@typescript-eslint/parser": "7.13.1",

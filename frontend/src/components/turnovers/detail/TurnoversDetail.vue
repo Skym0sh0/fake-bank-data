@@ -155,10 +155,15 @@ function extractTurnoverRowsWithCategories(turnoverImport?: TurnoverImport): Tur
   if (!turnoverImport || !turnoverImport.turnovers)
     return [];
 
-  return turnoverImport.turnovers.map((row: TurnoverRow): TurnoverRowPatch => ({
-    id: row.id,
-    categoryId: row.categoryId,
-  }))
+  return turnoverImport.turnovers.flatMap((row: TurnoverRow): TurnoverRowPatch[] => {
+    if (!row.categoryId)
+      return [];
+
+    return [{
+      id: row.id,
+      categoryId: row.categoryId,
+    }];
+  })
 }
 
 onMounted(() => {

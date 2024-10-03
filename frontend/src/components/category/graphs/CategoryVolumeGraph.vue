@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {Category, CategoryTurnoverReport, CategoryTurnoverReportDatapoint, TurnoversApi} from "@api/api.ts";
-import {computed, inject, ref, useTemplateRef, watch} from "vue";
+import {computed, inject, ref, watch} from "vue";
 import {apiRefKey} from "../../../keys.ts";
 import {DateTime} from "luxon";
 import Waiter from "../../misc/Waiter.vue";
@@ -37,9 +37,9 @@ export type GraphDataPoint = {
 const graphData = computed<GraphDataPoint[]>(() => {
   return referencedRows.value.map(rec => ({
     date: DateTime.fromISO(rec.date).toJSDate(),
-    income: rec.incomeAmountInCents / 100.0,
-    expense: rec.expenseAmountInCents / 100.0,
-    budget: -rec.expenseBudgetInCents / 100.0,
+    income: (rec.incomeAmountInCents ?? 0) / 100.0,
+    expense: (rec.expenseAmountInCents ?? 0) / 100.0,
+    budget: -(rec.expenseBudgetInCents ?? 0) / 100.0,
   }))
 })
 

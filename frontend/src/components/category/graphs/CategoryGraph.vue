@@ -11,7 +11,7 @@ const {data} = defineProps<{
   data: GraphDataPoint[];
 }>();
 
-const target = useTemplateRef("category-graph")
+const target = useTemplateRef<HTMLDivElement>("category-graph")
 
 const chartRef = ref<XYChart | null>(null);
 
@@ -21,6 +21,9 @@ const processedData = computed(() => {
 
 function draw() {
   reset()
+
+  if (!target.value)
+    return;
 
   const chart = am4core.create(target.value, am4charts.XYChart)
 

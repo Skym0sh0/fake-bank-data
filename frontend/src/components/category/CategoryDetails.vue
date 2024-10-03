@@ -86,14 +86,14 @@ function cancelActiveForm() {
 
 function onNewBudget() {
   entity.budget = {
-    budgetInCents: null,
-    exceedingThreshold: null,
+    budgetInCents: 100000,
+    exceedingThreshold: undefined,
   }
   changeAnything()
 }
 
 function onDeleteBudget() {
-  entity.budget = null
+  entity.budget = undefined
   changeAnything()
 }
 

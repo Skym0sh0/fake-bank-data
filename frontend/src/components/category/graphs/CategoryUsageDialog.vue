@@ -10,8 +10,6 @@ import type {VDataTable} from "vuetify/components";
 
 const api: ApiType | undefined = inject(apiRefKey);
 
-type TurnoverIdWithCategoryId = Pick<TurnoverRow, 'id' | 'categoryId'>;
-
 const {category} = defineProps<{
   category: Category;
 }>();
@@ -25,7 +23,7 @@ const isModalOpen = ref(false)
 const isEditing = ref(false)
 const isLoading = ref(false)
 const referencedRows = ref<TurnoverRow[]>([])
-const originalValues = ref<TurnoverIdWithCategoryId[] | null>(null)
+const originalValues = ref<TurnoverRowPatch[] | null>(null)
 const allCategories = ref<Category[] | null>(null)
 const currentLoadingRowId = ref<string | null>(null)
 
@@ -51,11 +49,12 @@ const categoriesByName = computed(() => {
 })
 
 const changedTurnovers = computed<TurnoverRowPatch[]>(() => {
-  const all: TurnoverIdWithCategoryId[] = items.value.map(rowToChangeObject)
+  const all: TurnoverRowPatch[] = items.value.flatMap(rowToChangeObject)
+
   return all.filter(
     row => !(originalValues.value || [])
       .find(orig => orig.id === row.id && orig.categoryId === row.categoryId)
-  )
+  );
 })
 
 function onOpenModal() {
@@ -100,7 +99,10 @@ function onCreateCategory(id: string, categoryName: string) {
           row.categoryId = res.id;
       })
 
-      allCategories.value.push(res)
+      if (allCategories.value)
+        allCategories.value.push(res)
+      else
+        allCategories.value = [res]
     })
     .finally(() => currentLoadingRowId.value = null)
 }
@@ -136,18 +138,21 @@ function loadCategories() {
 function loadReferencedRows() {
   referencedRows.value = [];
 
-  return api.turnoversApi.fetchTurnoversForCategory(category.id)
+  return api?.turnoversApi.fetchTurnoversForCategory(category.id)
     .then((rows: TurnoverRow[]) => {
       referencedRows.value = rows
-      originalValues.value = rows.map(rowToChangeObject)
+      originalValues.value = rows.flatMap(rowToChangeObject)
     })
 }
 
-function rowToChangeObject(row: TurnoverRow): TurnoverIdWithCategoryId {
-  return {
+function rowToChangeObject(row: TurnoverRow): TurnoverRowPatch[] {
+  if (!row.categoryId)
+    return [];
+
+  return [{
     id: row.id,
     categoryId: row.categoryId,
-  }
+  }]
 }
 
 const columns = computed<ReadonlyDataTableHeader[]>(() => {

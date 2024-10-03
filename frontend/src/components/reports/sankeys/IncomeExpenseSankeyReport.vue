@@ -19,7 +19,7 @@ const {select, height} = defineProps<{
 
 const width = ref<number | null>(null);
 
-const target = useTemplateRef("sankey-report-chart-target-div");
+const target = useTemplateRef<HTMLDivElement>("sankey-report-chart-target-div");
 
 const chartRef = ref<SankeyDiagram | null>(null);
 const isLoading = ref(false);
@@ -30,7 +30,7 @@ const incomeExpensesSankey = computed<FlowDataPoint[]>(() => {
     return [];
 
   return (sankeyData.value.flows || [])
-      .filter(dp => dp.depthLevel < (select.depth ?? 0));
+    .filter(dp => dp.depthLevel < (select.depth ?? 0));
 })
 
 const rootCategories = computed(() => {
@@ -56,7 +56,7 @@ type SankeyDataPoint = {
 
 const processedData = computed<SankeyDataPoint[]>(() => {
   const totalIncome = incomeExpensesSankey.value.filter(dp => dp.fromCategory && !dp.toCategory)
-      .reduce((prev, cur) => prev + cur.amountInCents, 0);
+    .reduce((prev, cur) => prev + cur.amountInCents, 0);
 
   const connectionIncomeExpense = {
     from: rootCategories.value.income,
@@ -68,8 +68,8 @@ const processedData = computed<SankeyDataPoint[]>(() => {
     connectionIncomeExpense,
     ...incomeExpensesSankey.value.map(dp => {
       return {
-        from: dp.fromCategory || rootCategories.expense,
-        to: dp.toCategory || rootCategories.income,
+        from: dp.fromCategory || rootCategories.value.expense,
+        to: dp.toCategory || rootCategories.value.income,
         amount: Math.abs(dp.amountInCents) / 100.0,
       };
     })
@@ -177,7 +177,7 @@ function loadData() {
       if (!select.timeunit || select.units <= 0)
         return undefined;
 
-      return api?.fetchIncomeExpenseFlowSlidingWindowReport(select.timeunit, select.units, select.referenceDate.toISODate())
+      return api?.fetchIncomeExpenseFlowSlidingWindowReport(select.timeunit, select.units, select.referenceDate.toISODate() ?? undefined)
     }
 
     throw new Error("Unknown Timespan type: " + select.mode);
@@ -186,15 +186,15 @@ function loadData() {
   isLoading.value = true
 
   doApiCall?.()
-      ?.then((res: IncomeExpenseFlowReport) => {
-        sankeyData.value = res;
-      })
-      ?.catch(e => console.error(e))
-      ?.finally(() => {
-        isLoading.value = false
+    ?.then((res: IncomeExpenseFlowReport) => {
+      sankeyData.value = res;
+    })
+    ?.catch(e => console.error(e))
+    ?.finally(() => {
+      isLoading.value = false
 
-        nextTick(() => draw())
-      })
+      nextTick(() => draw())
+    })
 }
 
 function reload() {

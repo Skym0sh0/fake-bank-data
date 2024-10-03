@@ -18,7 +18,7 @@ type DetailSelectionType = {
   entity: Category | null;
 }
 
-const detailForm = useTemplateRef("detail-form");
+const detailForm = useTemplateRef<typeof CategoryDetails>("detail-form");
 
 const isLoading = ref(false);
 const categories = ref<Category[]>([]);
@@ -67,7 +67,9 @@ function newCategory(parentId: string | null | undefined) {
     parentId: parentId ?? undefined,
     name: "",
     description: "",
-    budget: null,
+    budget: undefined,
+    isNew: true,
+    id: 'new-id'
   }
 }
 

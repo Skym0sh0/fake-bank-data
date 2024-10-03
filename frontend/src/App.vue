@@ -11,19 +11,19 @@ import RegularIncomeIcon from './assets/regular-income.svg'
 
 const userRef = inject(authenticationKey)
 
-userRef.value.initUser()
+userRef?.value?.initUser()
 
 const drawer = ref(true)
 const isLoggingOut = ref(false)
 
 const isLoggedIn = computed(() => {
-  return !!userRef.value.user;
+  return !!userRef?.value.user;
 })
 
 function doLogout() {
   isLoggingOut.value = true
 
-  userRef.value.logout();
+  userRef?.value.logout();
   location.reload();
 }
 

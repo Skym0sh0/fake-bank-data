@@ -12,10 +12,6 @@ const {value, earliest, latest, maxDepth} = defineProps<{
   maxDepth: number;
 }>()
 
-const emit = defineEmits<{
-  (e: "input"): void;
-}>()
-
 const earliestDate = computed(() => {
   return earliest.toFormat("YYYY-MM-DD");
 })
@@ -24,12 +20,13 @@ const latestDate = computed(() => {
   return /*latest*/ DateTime.now().toFormat("YYYY-MM-DD");
 })
 
-const associations = computed<string[]>(() => {
-  return Object.keys(AssociationsType)
-      .map(k => ({
-        value: AssociationsType[k],
-        title: AssociationsType[k],
-      }))
+
+const associations = computed<{ value: string; title: string; }[]>(() => {
+  return Object.entries(AssociationsType)
+    .map(([_, value]) => ({
+      value: value,
+      title: value,
+    }))
 })
 
 const isAbsolute = computed(() => {
@@ -41,17 +38,17 @@ const isRelative = computed(() => {
 })
 
 const timeunits = computed(() => {
-  return Object.keys(ReportTimeUnits)
-      .map(key => ({
-        value: ReportTimeUnits[key],
-        title: key,
-      }))
+  return Object.entries(ReportTimeUnits)
+    .map(([key, value]) => ({
+      value: value,
+      title: key,
+    }))
 })
 
 const depths = computed(() => {
   return Array(maxDepth)
-      .fill(null)
-      .map((x, idx) => idx + 1);
+    .fill(null)
+    .map((_, idx) => idx + 1);
 })
 
 const years = computed(() => {
@@ -59,22 +56,22 @@ const years = computed(() => {
   const late = latest.year;
 
   return Array(late - earl + 1)
-      .fill(null)
-      .map((x, idx) => earl + idx)
-      .reverse();
+    .fill(null)
+    .map((_, idx) => earl + idx)
+    .reverse();
 })
 
 const months = computed(() => {
   return Array(12)
-      .fill(null)
-      .map((_, idx) => idx + 1)
-      .map(m => ({
-        value: m,
-        title: DateTime.now()
-            .setLocale("DE")
-            .set({month: m})
-            .toFormat("LLLL")
-      }))
+    .fill(null)
+    .map((_, idx) => idx + 1)
+    .map(m => ({
+      value: m,
+      title: DateTime.now()
+        .setLocale("DE")
+        .set({month: m})
+        .toFormat("LLLL")
+    }))
 })
 
 const yearRules = computed(() => {
@@ -82,45 +79,45 @@ const yearRules = computed(() => {
   const late = latest.year;
 
   return [
-    v => (v === null || (earl <= v && v <= late)) || `Jahr muss zwischen ${earl} und ${late} liegen`
+    (v: number | null) => (v === null || (earl <= v && v <= late)) || `Jahr muss zwischen ${earl} und ${late} liegen`
   ];
 })
 
 const monthRules = computed(() => {
   return [
-    v => (v === null || (0 < v && v <= 12)) || "Monat muss zwischen 1 und 12 liegen"
+    (v: number | null) => (v === null || (0 < v && v <= 12)) || "Monat muss zwischen 1 und 12 liegen"
   ];
 })
 
 const depthRules = computed(() => {
   return [
-    v => !!v || "Tiefe ist nötig",
-    v => (v && v > 0) || "Tiefe muss positiv sein",
-    v => (v && v <= maxDepth) || `Tiefe muss kleiner oder gleich ${maxDepth} sein`,
+    (v?: number | null) => !!v || "Tiefe ist nötig",
+    (v?: number | null) => (v && v > 0) || "Tiefe muss positiv sein",
+    (v?: number | null) => (v && v <= maxDepth) || `Tiefe muss kleiner oder gleich ${maxDepth} sein`,
   ];
 })
 
 const unitsRules = computed(() => {
   return [
-    v => !!v || "Muss vorhanden sein",
-    v => v > 0 || "Muss positiv sein",
+    (v?: number | null) => !!v || "Muss vorhanden sein",
+    (v?: number | null) => (v ?? 0) > 0 || "Muss positiv sein",
   ];
 })
 
 function decreaseYear() {
-  value.year = Math.max(earliest.year, value.year - 1)
+  value.year = Math.max(earliest.year, (value.year ?? 0) - 1)
 }
 
 function increaseYear() {
-  value.year = Math.min(value.year + 1, latest.year)
+  value.year = Math.min((value.year ?? 0) + 1, latest.year)
 }
 
 function decreaseMonth() {
-  value.month = 1 + (value.month - 1 - 1 + months.value.length) % months.value.length
+  value.month = 1 + ((value.month ?? 0) - 1 - 1 + months.value.length) % months.value.length
 }
 
 function increaseMonth() {
-  value.month = 1 + (value.month - 1 + 1 + months.value.length) % months.value.length
+  value.month = 1 + ((value.month ?? 0) - 1 + 1 + months.value.length) % months.value.length
 }
 </script>
 
@@ -214,9 +211,8 @@ function increaseMonth() {
         <div class="w-100">
           <v-date-input label="Referenzdatum"
                         placeholder="Referenzdatum"
-                        :value="value.referenceDate.toJSDate()"
-                        @update:modelValue="val => value.referenceDate = DateTime.fromJSDate(val)"
-                        :prepend-icon="null"
+                        :model-value="value.referenceDate.toJSDate()"
+                        @update:modelValue="val => value.referenceDate = DateTime.fromJSDate(new Date(val))"
                         :first-day-of-week="1"
                         :min="earliestDate"
                         :max="latestDate"/>
