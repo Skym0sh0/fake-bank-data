@@ -84,17 +84,17 @@ function reload() {
 
 function loadImport() {
   return api?.fetchTurnoverImport(id)
-    .then((res: TurnoverImport) => {
-      turnoverImport.value = res
+    .then(res => {
+      turnoverImport.value = res.data
       deleteRowsWithIds.value = []
-      initialTurnoverRowsCategories.value = extractTurnoverRowsWithCategories(res)
+      initialTurnoverRowsCategories.value = extractTurnoverRowsWithCategories(res.data)
     })
 }
 
 function loadCategories() {
   return categoryApi?.getCategoriesAsTree()
-    .then((res: Category[]) => {
-      categories.value = res
+    .then(res => {
+      categories.value = res.data
     })
 }
 

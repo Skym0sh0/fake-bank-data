@@ -9,6 +9,7 @@ import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
 import {SankeyDiagram} from "@amcharts/amcharts4/charts";
 import {apiRefKey} from "../../../keys.ts";
+import {AxiosResponse} from "axios";
 
 const api: ReportsApi | undefined = inject(apiRefKey)?.reportsApi;
 
@@ -169,7 +170,7 @@ function loadData() {
   if (select.depth < 0)
     return;
 
-  const doApiCall: () => Promise<IncomeExpenseFlowReport> | undefined = () => {
+  const doApiCall: () => Promise<AxiosResponse<IncomeExpenseFlowReport>> | undefined = () => {
     if (isAbsolutTimespan.value)
       return api?.fetchIncomeExpenseFlowReport(select.year, select.month)
 
@@ -186,8 +187,8 @@ function loadData() {
   isLoading.value = true
 
   doApiCall?.()
-    ?.then((res: IncomeExpenseFlowReport) => {
-      sankeyData.value = res;
+    ?.then(res => {
+      sankeyData.value = res.data;
     })
     ?.catch(e => console.error(e))
     ?.finally(() => {

@@ -2,7 +2,7 @@
 import WaitingIndicator from "../misc/WaitingIndicator.vue";
 import ConfirmationedButton from "../misc/ConfirmationedButton.vue";
 import {inject, onMounted, ref, useTemplateRef} from "vue";
-import {User, UserAuthApi} from "@api/api.ts";
+import {UserAuthApi} from "@api/api.ts";
 import {apiRefKey, authenticationKey} from "../../keys.ts";
 import {VForm} from "vuetify/components";
 
@@ -58,7 +58,7 @@ function onSave() {
     username: username.value,
     password: password.value,
   })
-    .then((user: User) => userService?.login(user, password.value))
+    .then(res => userService?.login(res.data, password.value))
     .finally(() => isLoading.value = false)
 }
 

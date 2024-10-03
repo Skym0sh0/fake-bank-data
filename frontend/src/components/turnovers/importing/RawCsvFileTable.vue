@@ -41,8 +41,8 @@ function triggerParsing() {
   emit("isLoading", true)
 
   api?.processCsvPreview(file, encoding)
-    .then((data: RawCsvTable) => {
-      parsedData.value = data;
+    .then(data => {
+      parsedData.value = data.data;
     })
     .finally(() => emit("isLoading", false))
 }

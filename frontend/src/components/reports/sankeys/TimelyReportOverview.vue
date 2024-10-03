@@ -35,7 +35,9 @@ function loadBasicInfo() {
   isLoading.value = true
 
   api?.fetchCoarseInfos()
-    .then((res: BasicCoarseInfo) => {
+    .then(resp => {
+      const res: BasicCoarseInfo = resp.data;
+
       basicInfo.value = {
         earliest: res.earliestTransaction ? DateTime.fromISO(res.earliestTransaction) : now,
         latest: res.latestTransaction ? DateTime.fromISO(res.latestTransaction) : now,

@@ -93,16 +93,16 @@ function onCreateCategory(id: string, categoryName: string) {
   currentLoadingRowId.value = id
 
   api?.categoriesApi.createCategory(normalized)
-    .then((res: Category) => {
+    .then(res => {
       referencedRows.value.forEach(row => {
         if (row.id === id)
-          row.categoryId = res.id;
+          row.categoryId = res.data.id;
       })
 
       if (allCategories.value)
-        allCategories.value.push(res)
+        allCategories.value.push(res.data)
       else
-        allCategories.value = [res]
+        allCategories.value = [res.data]
     })
     .finally(() => currentLoadingRowId.value = null)
 }
@@ -132,16 +132,16 @@ function loadCategories() {
   allCategories.value = null
 
   return api?.categoriesApi.getCategoriesAsTree()
-    .then((cats: Category[]) => allCategories.value = cats)
+    .then(res => allCategories.value = res.data)
 }
 
 function loadReferencedRows() {
   referencedRows.value = [];
 
   return api?.turnoversApi.fetchTurnoversForCategory(category.id)
-    .then((rows: TurnoverRow[]) => {
-      referencedRows.value = rows
-      originalValues.value = rows.flatMap(rowToChangeObject)
+    .then(res => {
+      referencedRows.value = res.data
+      originalValues.value = res.data.flatMap(rowToChangeObject)
     })
 }
 

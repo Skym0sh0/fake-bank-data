@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Waiter from "../../misc/Waiter.vue";
-import {BalanceDataPoint, BalanceProgressionReport, ReportsApi} from "@api/index.ts"
+import {BalanceDataPoint, ReportsApi} from "@api/index.ts"
 import {computed, inject, nextTick, onMounted, onUnmounted, ref, useTemplateRef} from "vue";
 import {apiRefKey} from "../../../keys.ts";
 import * as am4core from "@amcharts/amcharts4/core";
@@ -113,8 +113,8 @@ function loadData() {
   isLoading.value = true
 
   api?.fetchBalanceProgressionReport()
-    .then((res: BalanceProgressionReport) => {
-      data.value = res.data ?? []
+    .then(res => {
+      data.value = res.data.data ?? []
     })
     .catch(e => console.error(e))
     .finally(() => {

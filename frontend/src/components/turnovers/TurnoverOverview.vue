@@ -5,6 +5,7 @@ import {apiRefKey} from "../../keys.ts";
 import TurnoversList from "./TurnoversList.vue";
 import WaitingIndicator from "../misc/WaitingIndicator.vue";
 import TurnoverImporting from "./importing/TurnoverImporting.vue";
+import type {AxiosResponse} from "axios";
 
 const api: TurnoversApi | undefined = inject(apiRefKey)?.turnoversApi;
 
@@ -12,17 +13,23 @@ const isLoading = ref<boolean>(false);
 const turnoverImports = ref<TurnoverImport[]>([]);
 
 function loadImports() {
+  if (!api)
+    return;
+
   isLoading.value = true;
 
-  api?.fetchTurnoverImports()
-    .then((imports: TurnoverImport[]) => turnoverImports.value = imports)
+  api.fetchTurnoverImports()
+    .then((res: AxiosResponse<TurnoverImport[]>) => turnoverImports.value = res.data)
     .finally(() => isLoading.value = false)
 }
 
 function onDelete(fileImport: TurnoverImport) {
+  if (!api)
+    return;
+
   isLoading.value = true;
 
-  api?.deleteTurnoverImport(fileImport.id)
+  api.deleteTurnoverImport(fileImport.id)
     .then(() => {
       turnoverImports.value = turnoverImports.value.filter(i => i.id !== fileImport.id)
     })

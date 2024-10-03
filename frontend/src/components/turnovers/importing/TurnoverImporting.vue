@@ -132,9 +132,10 @@ const progressHistogram = computed<HistogramValueType[]>(() => {
 })
 
 function loadCategories() {
+
   return categoriesApi?.getCategoriesAsTree()
-    .then((res: Category[]) => {
-      categories.value = res;
+    .then(res => {
+      categories.value = res.data;
     })
 }
 
@@ -154,8 +155,8 @@ function onStartPreview() {
 
 function doPreviewRequest() {
   return api?.processPreview(selectedFileType.value!, fileSelection.value!, selectedFileEncoding.value)
-    .then((preview: TurnoverPreview) => {
-      parsedPreview.value = preview;
+    .then(preview => {
+      parsedPreview.value = preview.data;
 
       previewedData.value = (parsedPreview.value.rows || [])
         .map((row: TurnoverRowPreview, index: number) => ({
@@ -228,13 +229,13 @@ onMounted(() => {
   isUploading.value = true;
 
   api?.getSupportedFormats()
-    .then((formats: TurnoverImportFormat[]) => {
+    .then(res => {
       supportedFileTypes.value = [
         {
           value: null,
           title: "Dateiformat wählen",
         },
-        ...formats.map(f => ({
+        ...res.data.map(f => ({
           value: f,
           title: getBankFormatName(f)
         }))

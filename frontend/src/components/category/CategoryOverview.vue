@@ -8,6 +8,7 @@ import {CategoriesById, mapCategoriesById} from "../misc/categoryHelpers.ts";
 import {CategoryReassign, NewCategory} from "./CategoryTreeList.vue";
 import * as _ from "lodash";
 import CategoryDetails from "./CategoryDetails.vue";
+import {AxiosResponse} from "axios";
 
 const api: CategoryApi | undefined = inject(apiRefKey)?.categoriesApi;
 
@@ -41,7 +42,7 @@ function loadCategories() {
   isLoading.value = true
 
   return api?.getCategoriesAsTree()
-    .then((res: Category[]) => {
+    .then(res => {
       const flatter = (cat: Category): Category[] => {
         return [
           cat,
@@ -49,7 +50,7 @@ function loadCategories() {
         ];
       };
 
-      categories.value = res.flatMap(flatter)
+      categories.value = res.data.flatMap(flatter)
     })
     .finally(() => {
       isLoading.value = false
@@ -120,22 +121,22 @@ function updateCategory(cat: CategoryPatch) {
 
   doRestCallForCategory(() => {
     return api?.updateCategory(cat.id!, cat)
-      .then((res: Category) => {
-        categories.value = _.filter(categories.value, cur => cur.id !== res.id)
+      .then(res => {
+        categories.value = _.filter(categories.value, cur => cur.id !== res.data.id)
 
         return res;
       })
   });
 }
 
-function doRestCallForCategory(callback: () => Promise<Category> | undefined) {
+function doRestCallForCategory(callback: () => Promise<AxiosResponse<Category>> | undefined) {
   isLoading.value = true
 
   callback()
     ?.then(res => {
-      selectedForDetails.value.entity = {...res}
-      categories.value.push(res)
-      openEditView(res.id)
+      selectedForDetails.value.entity = {...res.data}
+      categories.value.push(res.data)
+      openEditView(res.data.id)
     })
     .then(() => refresh())
     .finally(() => {

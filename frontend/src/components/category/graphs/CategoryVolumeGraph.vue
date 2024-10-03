@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {Category, CategoryTurnoverReport, CategoryTurnoverReportDatapoint, TurnoversApi} from "@api/api.ts";
+import {Category, CategoryTurnoverReportDatapoint, TurnoversApi} from "@api/api.ts";
 import {computed, inject, ref, watch} from "vue";
 import {apiRefKey} from "../../../keys.ts";
 import {DateTime} from "luxon";
@@ -55,8 +55,8 @@ function loadData() {
   referencedRows.value = [];
 
   api?.fetchTurnoversReportForCategory(category.id, grouping.value, includeSubcategories.value ? 1 << 16 : 1)
-    .then((res: CategoryTurnoverReport) => {
-      referencedRows.value = res.datapoints ?? []
+    .then(res => {
+      referencedRows.value = res.data.datapoints ?? []
     })
     .finally(() => isLoading.value = false)
 }

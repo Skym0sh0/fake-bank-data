@@ -3,7 +3,7 @@ import WaitingIndicator from "../misc/WaitingIndicator.vue";
 import {inject, ref} from "vue";
 import {apiRefKey, authenticationKey} from "../../keys.ts";
 import {useRoute, useRouter} from 'vue-router'
-import {User, UserAuthApi} from "@api/api.ts"
+import {UserAuthApi} from "@api/api.ts"
 
 const router = useRouter()
 const route = useRoute()
@@ -42,11 +42,11 @@ function doLogin() {
 
   isLoading.value = true;
 
-  const api: UserAuthApi|undefined = apiAccess?.authApi;
+  const api: UserAuthApi | undefined = apiAccess?.authApi;
 
   api?.loginUser({username: username.value, password: password.value})
-    .then((user: User) => {
-      userRef?.login(user, password.value)
+    .then(res => {
+      userRef?.login(res.data, password.value)
 
       router.replace({
         // path: route.query['returnUrl'] ?? '/'

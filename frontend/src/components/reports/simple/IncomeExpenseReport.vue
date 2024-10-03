@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Waiter from "../../misc/Waiter.vue";
 import {computed, inject, nextTick, onMounted, onUnmounted, ref, useTemplateRef} from "vue";
-import {MonthlyIncomeExpenseDataPoint, MonthlyIncomeExpenseReport, ReportsApi} from "@api/api.ts";
+import {MonthlyIncomeExpenseDataPoint, ReportsApi} from "@api/api.ts";
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
 import {DateAxis, XYChart} from "@amcharts/amcharts4/charts";
@@ -222,11 +222,14 @@ function draw() {
 }
 
 function loadData() {
+  if (!api)
+    return;
+
   isLoading.value = true;
 
-  api?.fetchMonthlyIncomeExpenseReport()
-    .then((res: MonthlyIncomeExpenseReport) => {
-      incomeExpenses.value = res.data ?? [];
+  api.fetchMonthlyIncomeExpenseReport()
+    .then(res => {
+      incomeExpenses.value = res.data.data ?? [];
     })
     .catch(e => console.error(e))
     .finally(() => {
