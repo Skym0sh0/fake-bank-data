@@ -67,7 +67,6 @@ function deleteCategory() {
           <v-tooltip location="top">
             <template v-slot:activator="{ props }">
               <v-btn icon="mdi-chart-timeline-variant-shimmer"
-
                      color="warning"
                      @click.stop="clickCallback"
                      v-bind="props"/>

@@ -117,7 +117,11 @@ watch(() => categories, () => clearSelection(), {deep: true})
               v-model:opened="opened">
 
     <template v-slot:prepend="{ item }">
-      <drop @drop="onDrop(item)">
+      <drop @drop="onDrop(item)" class="d-flex justify-center align-center">
+
+        <!-- For visual alignment of the tree nodes -->
+        <div v-if="!item.children?.length" style="width: 28px; height: 28px"/>
+
         <drag :transfer-data="item" @onDragStart="onDragstart">
           <v-icon class="drag-point">
             mdi-drag
@@ -129,14 +133,33 @@ watch(() => categories, () => clearSelection(), {deep: true})
     <template v-slot:title="{ item }">
       <drop @drop="onDrop(item)">
         <div class="d-flex justify-space-between">
-          <v-badge :content="item.children?.length ?? 0"
-                   :value="item.children?.length ?? 0"
-                   color="accent"
-                   :inline="true">
+          <div>
             {{ item.name }}
-          </v-badge>
 
-          <div class="d-flex justify-space-between ga-0">
+            <v-tooltip v-if="item.children && item.children.length" location="top">
+              <template v-slot:activator="{ props }">
+                <v-badge :content="item.children.length"
+                         color="info"
+                         :inline="true"
+                         v-bind="props"/>
+              </template>
+
+              Hat {{ item.children.length }} Unterkategorien.
+            </v-tooltip>
+
+            <v-tooltip v-if="item.usageCount" location="top">
+              <template v-slot:activator="{ props }">
+                <v-badge :content="item.usageCount ?? 0"
+                         color="success"
+                         :inline="true"
+                         v-bind="props"/>
+              </template>
+
+              Wird in {{ item.usageCount }} Umsätzen benutzt.
+            </v-tooltip>
+          </div>
+
+          <div class="d-flex justify-space-between align-center ga-0">
             <v-icon v-if="item.isNew" color="success" title="Neu erstellt">
               mdi-new-box
             </v-icon>

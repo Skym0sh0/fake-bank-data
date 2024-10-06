@@ -66,6 +66,7 @@ function saveActiveForm() {
         const normalized: CategoryPatch = entity
 
         if (isNew) {
+          normalized.id = undefined;
           if (isChild.value) {
             emit("createAsChild", normalized)
           } else {
