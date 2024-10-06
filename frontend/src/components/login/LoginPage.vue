@@ -50,12 +50,9 @@ function doLogin() {
     .then(res => {
       userRef?.login(res.data, password.value)
 
-      console.log(route)
+      const path: string = route.query['returnUrl']?.toString() ?? '/';
 
-      router.replace({
-        path: route.query['returnUrl'] ?? '/'
-        // path: route.params['returnUrl'][0] ?? '/'
-      })
+      router.replace({path: path})
     })
     .catch(e => {
       console.error(e)
