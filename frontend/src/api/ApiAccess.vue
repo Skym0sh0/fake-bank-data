@@ -8,7 +8,6 @@ import axios, {AxiosInstance} from "axios";
 const userRef = inject(authenticationKey)?.value;
 const errorReference = inject(errorRefKey)?.value;
 
-
 const client: AxiosInstance = axios.create({
   headers: {
     correlationId: uuidv4(),
@@ -42,7 +41,7 @@ client.interceptors.response.use(response => {
   })
 
 const config: Configuration = new Configuration({
-  basePath: "/dev-proxy",
+  basePath: import.meta.env.VITE_BACKEND_BASE_PATH,
 });
 
 const api: ApiType = {
