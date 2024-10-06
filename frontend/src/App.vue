@@ -20,6 +20,10 @@ const isLoggedIn = computed(() => {
   return !!userRef?.value.user;
 })
 
+const isDevMode = computed(() => {
+  return import.meta.env.DEV;
+})
+
 function doLogout() {
   isLoggingOut.value = true
 
@@ -38,13 +42,19 @@ function toggleDrawer() {
       <v-app-bar app color="primary">
         <v-app-bar-nav-icon v-if="isLoggedIn" @click.stop="toggleDrawer"/>
 
-        <v-toolbar-title class="mr-12 align-center title">
+        <v-toolbar-title>
           <div class="d-flex flex-row justify-start align-center">
             <div>
               <RegularIncomeIcon :width="48" :height="48"/>
             </div>
 
-            <span>Regular Income</span>
+            <div class="d-flex ga-1">
+              <span>Regular Income</span>
+
+              <span v-if="isDevMode" class="text-yellow text-caption" style="rotate: -45deg">
+                DEV
+              </span>
+            </div>
           </div>
         </v-toolbar-title>
 
