@@ -6,10 +6,8 @@ import Drop from "../misc/dragndrop/Drop.vue";
 import * as _ from "lodash";
 import CategoryTreeItemButtons from "./CategoryTreeItemButtons.vue";
 import {CategoriesById} from "../misc/categoryHelpers.ts";
-import {formatMonetaryAmount} from "../../utils/moneyUtils.ts";
 import SelectedCategoryInfo from "./SelectedCategoryInfo.vue";
 import BudgetBadge from "./misc/BudgetBadge.vue";
-import ChildrenBadge from "./misc/ChildrenBadge.vue";
 import SubCategoriesBadge from "./misc/SubCategoriesBadge.vue";
 
 const {categories, categoriesById} = defineProps<{
@@ -138,7 +136,7 @@ watch(() => categories, () => clearSelection(), {deep: true})
         <div class="d-flex justify-space-between">
           <div>
             {{ item.name }}
-            
+
             <sub-categories-badge :category="item"/>
           </div>
 
