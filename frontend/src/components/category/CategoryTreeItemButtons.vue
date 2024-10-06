@@ -59,7 +59,7 @@ function deleteCategory() {
 </script>
 
 <template>
-  <div class="ml-1 d-flex ga-1">
+  <div class="ml-1 d-flex ga-2">
     <v-btn-group size="small"
                  density="compact">
       <category-volume-graph :category="category">
@@ -87,7 +87,7 @@ function deleteCategory() {
                      v-bind="props"/>
             </template>
 
-            Zeige benutzte Turnovers
+            Zeige {{ category.usageCount }} benutzte Turnovers
           </v-tooltip>
         </template>
       </category-usage-dialog>

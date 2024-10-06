@@ -8,6 +8,9 @@ import CategoryTreeItemButtons from "./CategoryTreeItemButtons.vue";
 import {CategoriesById} from "../misc/categoryHelpers.ts";
 import {formatMonetaryAmount} from "../../utils/moneyUtils.ts";
 import SelectedCategoryInfo from "./SelectedCategoryInfo.vue";
+import BudgetBadge from "./misc/BudgetBadge.vue";
+import ChildrenBadge from "./misc/ChildrenBadge.vue";
+import SubCategoriesBadge from "./misc/SubCategoriesBadge.vue";
 
 const {categories, categoriesById} = defineProps<{
   categories: Category[],
@@ -135,28 +138,8 @@ watch(() => categories, () => clearSelection(), {deep: true})
         <div class="d-flex justify-space-between">
           <div>
             {{ item.name }}
-
-            <v-tooltip v-if="item.children && item.children.length" location="top">
-              <template v-slot:activator="{ props }">
-                <v-badge :content="item.children.length"
-                         color="info"
-                         :inline="true"
-                         v-bind="props"/>
-              </template>
-
-              Hat {{ item.children.length }} Unterkategorien.
-            </v-tooltip>
-
-            <v-tooltip v-if="item.usageCount" location="top">
-              <template v-slot:activator="{ props }">
-                <v-badge :content="item.usageCount ?? 0"
-                         color="success"
-                         :inline="true"
-                         v-bind="props"/>
-              </template>
-
-              Wird in {{ item.usageCount }} Umsätzen benutzt.
-            </v-tooltip>
+            
+            <sub-categories-badge :category="item"/>
           </div>
 
           <div class="d-flex justify-space-between align-center ga-0">
@@ -164,20 +147,7 @@ watch(() => categories, () => clearSelection(), {deep: true})
               mdi-new-box
             </v-icon>
 
-            <v-tooltip v-if="item.budget" location="top">
-              <template v-slot:activator="{ props }">
-                <v-icon color="red"
-                        :small="true"
-                        v-bind="props">
-                  mdi-finance
-                </v-icon>
-              </template>
-
-              Budget:
-              {{ formatMonetaryAmount(item.budget.budgetInCents * 100) }}
-              +
-              {{ item.budget.exceedingThreshold }} %
-            </v-tooltip>
+            <budget-badge v-if="item.budget" :budget="item.budget"/>
           </div>
         </div>
       </drop>
