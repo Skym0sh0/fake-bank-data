@@ -1,102 +1,80 @@
-<template>
-    <b-container v-if="parsedData"
-                 :fluid="true"
-                 style="font-size: 0.75em; line-height: 1"
-                 class="mb-2">
-        <b-row :no-gutters="true">
-            <b-col>
-                <b-table-lite :striped="true"
-                              :sticky-header="true"
-                              :hover="true"
-                              :small="true"
-                              :responsive="true"
-                              :bordered="true"
-                              :items="dataRows"
-                              style="min-height: 60vh; margin: 0"/>
-            </b-col>
-        </b-row>
+<script setup lang="ts">
+import {computed, inject, onMounted, ref, watch} from "vue";
+import {RawCsvTable, TurnoversApi} from "@api/api.ts";
+import {apiRefKey} from "../../../keys.ts";
+import * as _ from "lodash";
 
-        <b-row :no-gutters="true" class="mt-1">
-            <b-col>Bytes: {{ file.size }}</b-col>
-            <b-col>Zeilen: {{ parsedData.rows }}</b-col>
-            <b-col>Spalten: {{ parsedData.columns }}</b-col>
-        </b-row>
-    </b-container>
-</template>
+const api: TurnoversApi | undefined = inject(apiRefKey)?.turnoversApi;
 
-<script>
+const {file, encoding} = defineProps<{
+  file?: File;
+  encoding?: string;
+  isLoading?: boolean;
+}>();
 
-import {api} from "@/api/RegularIncomeAPI";
+const emit = defineEmits<{
+  (e: 'isLoading', loading: boolean): void;
+}>();
 
-export default {
-    name: "RawCsvFileTable",
-    props: {
-        file: {
-            type: File,
-            required: true,
-        },
-        encoding: {
-            type: String,
-            required: false,
-        },
-    },
-    data() {
-        return {
-            parsedData: null,
-        };
-    },
-    methods: {
-        triggerParsing() {
-            this.parsedData = null;
+const parsedData = ref<RawCsvTable | null>(null);
 
-            if (!this.file)
-                return;
+const dataRows = computed(() => {
+  if (!parsedData.value)
+    return [];
 
-            this.$emit("isLoading", true)
-            api.getTurnovers()
-                .rawCsvTablePreview(this.file, this.encoding)
-                .then(data => {
-                    return this.parsedData = data;
-                })
-                .finally(() => this.$emit("isLoading", false))
-        },
-    },
-    computed: {
-        dataRows() {
-            if (!this.parsedData)
-                return [];
+  return (parsedData.value?.data ?? []).map(row => {
+    return row.map(cell => {
+      if (!cell)
+        return null;
 
-            return this.parsedData.data.map(row => {
-                return row.map(cell => {
-                    const maxLength = 24;
-                    const trailer = "...";
+      return _.truncate(cell, {length: 24})
+    })
+  })
+});
 
-                    if (!cell)
-                        return null;
+function triggerParsing() {
+  parsedData.value = null;
 
-                    if (cell.length > maxLength)
-                        return cell.substring(0, maxLength - trailer.length) + trailer;
+  if (!file)
+    return;
 
-                    return cell.substring(0, maxLength);
-                })
-            })
-        },
-    },
-    watch: {
-        file() {
-            this.triggerParsing();
-        },
-        encoding() {
-            this.triggerParsing();
-        },
-    },
-    mounted() {
-        this.triggerParsing();
-    },
+  emit("isLoading", true)
+
+  api?.processCsvPreview(file, encoding)
+    .then(data => {
+      parsedData.value = data.data;
+    })
+    .finally(() => emit("isLoading", false))
 }
+
+watch(() => file, () => triggerParsing())
+watch(() => encoding, () => triggerParsing())
+
+onMounted(() => {
+  triggerParsing();
+})
 </script>
 
+<template>
+  <v-container :fluid="true"
 
-<style scoped>
+               class="mb-2 border">
+    <v-row :no-gutters="true">
+      <v-col>
+        <v-data-table :items="dataRows"
+                      :loading="isLoading"
+                      density="compact"
+                      :items-per-page="-1"
+                      :hide-default-footer="true"
+                      height="50vh"
+        />
+      </v-col>
+    </v-row>
 
-</style>
+    <v-row class="mt-1" style="font-size: 0.75em; line-height: 1">
+      <v-col>Bytes: {{ file?.size }}</v-col>
+      <v-col>Zeilen: {{ parsedData?.rows }}</v-col>
+      <v-col>Spalten: {{ parsedData?.columns }}</v-col>
+    </v-row>
+  </v-container>
+</template>

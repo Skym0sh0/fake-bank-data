@@ -1,28 +1,20 @@
-<template>
-    <div class="w-100 h-100">
-        <div v-if="isLoading"
-             class="d-flex justify-content-center align-items-center p-3 w-100 h-100"
-             style="background-color: rgb(0,0,0, 0.1)">
-            <b-spinner label="Loading ..." variant="primary" v-bind="$attrs"/>
-        </div>
-        <template v-else>
-            <slot/>
-        </template>
-    </div>
-</template>
-
-<script>
-export default {
-    name: "Waiter",
-    props: {
-        isLoading: {
-            type: Boolean,
-            required: true,
-        }
-    },
-}
+<script setup lang="ts">
+const {isLoading} = defineProps<{ isLoading: boolean }>();
 </script>
 
-<style scoped>
-
-</style>
+<template>
+  <div class="w-100 h-100">
+    <div v-if="isLoading"
+         class="d-flex justify-content-center align-items-center p-3 w-100 h-100"
+         style="background-color: rgb(0, 0, 0, 0.1)">
+      <v-progress-circular :indeterminate="true"
+                           :size="64"
+                           color="primary">
+        Loading ...
+      </v-progress-circular>
+    </div>
+    <template v-else>
+      <slot/>
+    </template>
+  </div>
+</template>

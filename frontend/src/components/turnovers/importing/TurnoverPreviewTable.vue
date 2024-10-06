@@ -1,264 +1,288 @@
-<template>
-    <b-table :striped="true"
-             :hover="true"
-             :bordered="true"
-             :items="value"
-             :fields="fields"
-             :responsive="true"
-             primary-key="checksum"
-             :filter="filters"
-             :filter-function="doFilter"
-             :small="true"
-             :foot-clone="value.length > 25"
-             :tbody-tr-class="rowClass">
-
-        <template v-slot:head(originalImportable)>
-            <div class="d-flex justify-content-start align-items-center">
-                <v-btn :icon="true"
-                       :x-small="!filters.onlyImportables"
-                       @click="filters.onlyImportables = !filters.onlyImportables">
-                    <v-icon color="success">
-                        {{ filters.onlyImportables ? 'mdi-filter-check' : 'mdi-filter' }}
-                    </v-icon>
-                </v-btn>
-            </div>
-        </template>
-
-        <template v-slot:head(importable)>
-            <b-checkbox @input="onSelectImportable" :checked="true"/>
-        </template>
-        <template v-slot:head(categoryId)="item">
-            <div class="d-flex justify-content-between align-items-end">
-                {{ item.label }}
-
-                <v-btn :icon="true"
-                       :x-small="true"
-                       @click="filters.onlyMissingCategories = !filters.onlyMissingCategories">
-                    <v-icon>
-                        {{ filters.onlyMissingCategories ? 'mdi-filter-check' : 'mdi-filter' }}
-                    </v-icon>
-                </v-btn>
-            </div>
-        </template>
-
-        <template v-slot:cell(checksum)="row">
-            {{ row.index + 1 }}
-        </template>
-
-        <template v-slot:cell(importable)="row">
-            <b-checkbox v-model="row.item.importable"
-                        :disabled="!row.item.originalImportable"/>
-        </template>
-
-        <template v-slot:cell(amount)="row">
-            <table-cell-monetary :value="row.item.amountInCents" class="float-right"/>
-        </template>
-
-        <template v-slot:cell(categoryId)="row">
-            <category-input :id="`csv-category-input-${row.index}`"
-                            v-model="row.item.categoryId"
-                            @createCategory="onCreateCategory"
-                            :flatted-categories="flattedCategories"
-                            :categories-by-id="categoriesById"
-                            :categories-by-name="categoriesByName"
-                            :required="row.item.importable"
-                            :disabled="!row.item.importable"/>
-        </template>
-
-        <template v-slot:cell(suggestedCategories)="row">
-            <category-suggestion :checksum="row.item.checksum"
-                                 :suggestions="row.item.suggestedCategories || []"
-                                 :categories-by-id="categoriesById"
-                                 :disabled="!row.item.importable"
-                                 @select="onSelectCategory"/>
-        </template>
-
-        <template v-slot:cell(suggestedCategory)="row">
-            <b-button v-if="row.item.suggestedCategory && !categoriesByName[row.item.suggestedCategory]"
-                      size="sm"
-                      @click="onCreateSuggestedCategory(row.item.suggestedCategory)"
-                      :disabled="!row.item.importable"
-                      class="p-0"
-                      variant="info">
-                <b-icon icon="plus" font-scale="1"/>
-            </b-button>
-
-            {{ row.item.suggestedCategory }}
-        </template>
-
-        <template v-slot:cell(Description)="row">
-            <table-cell-description :index="row.index" :value="row.item.description"/>
-        </template>
-    </b-table>
-</template>
-
-<script>
-import TableCellDescription from "@/components/turnovers/table/TableCellDescription.vue";
-import TableCellMonetary from "@/components/turnovers/table/TableCellMonetary.vue";
-import CategoryInput from "@/components/misc/CategoryInput.vue";
+<script setup lang="ts">
+import {Category} from "@api/api.ts";
+import {computed, ref} from "vue";
 import {
-    flatCategoryTreeWithParentChain,
-    mapCategoriesById,
-    mapCategoriesByName
-} from "@/components/turnovers/category-helpers";
-import CategorySuggestion from "@/components/turnovers/table/CategorySuggestion.vue";
+  CategoriesById,
+  CategoriesByName,
+  flatCategoryTreeWithParentChain,
+  mapCategoriesById,
+  mapCategoriesByName
+} from "../../misc/categoryHelpers.ts";
+import {PreviewRowWithOriginalState} from "./TurnoverImporting.vue";
+import type {VDataTable} from "vuetify/components";
+import TableCellDescription from "../../misc/TableCellDescription.vue";
+import TableCellMonetary from "../../misc/TableCellMonetary.vue";
+import CategoryInput from "../../misc/CategoryInput.vue";
+import {DateTime} from "luxon";
+import * as _ from "lodash";
+import CategorySuggestion, {CategorySelectionType} from "./CategorySuggestion.vue";
 
-export default {
-    name: "TurnoverPreviewTable",
-    components: {
-        CategorySuggestion,
-        CategoryInput,
-        TableCellMonetary,
-        TableCellDescription,
-    },
-    props: {
-        value: {
-            required: true,
-            type: Array,
-        },
-        categories: {
-            type: Array,
-            required: true,
-        },
-    },
-    data() {
-        return {
-            filters: {
-                onlyMissingCategories: false,
-                onlyImportables: true,
-            },
-        }
-    },
-    computed: {
-        fields() {
-            const hasSuggestions = this.value.some(r => !!r.suggestedCategory)
-            const hasImportables = this.value.some(r => !!r.originalImportable)
+const {value, categories, showAlreadyImportedRow} = defineProps<{
+  value: PreviewRowWithOriginalState[];
+  categories: Category[];
+  showAlreadyImportedRow?: boolean;
+}>();
 
-            return [
-                {
-                    key: 'checksum',
-                    label: '#',
-                },
-                hasImportables ?
-                    {
-                        key: "originalImportable",
-                        label: "X",
-                        sortable: true,
-                        formatter: (importable) => {
-                            return importable ? '' : 'X';
-                        }
-                    }
-                    : undefined,
-                {
-                    key: "importable",
-                    label: "?",
-                    sortable: true,
-                },
-                {
-                    key: "date",
-                    label: "Date",
-                    sortable: true,
-                },
-                {
-                    key: "recipient",
-                    label: "Empfänger",
-                    sortable: true,
-                },
-                {
-                    key: "amount",
-                    label: "Money",
-                    sortable: true,
-                },
-                {
-                    key: "categoryId",
-                    label: "Kategorie",
-                    sortable: true,
-                    sortByFormatted: true,
-                    formatter: (id) => {
-                        const cat = this.categoriesById[id]
-                        if (!cat)
-                            return id;
-                        return cat.name;
-                    },
-                },
-                {
-                    key: "suggestedCategories",
-                    label: "Vorschläge",
-                },
-                hasSuggestions ? {
-                    key: "suggestedCategory",
-                    label: "Bank Vorschlag",
-                    sortable: true,
-                } : undefined,
-                {
-                    key: "Description"
-                }
-            ];
-        },
-        flattedCategories() {
-            return flatCategoryTreeWithParentChain(this.categories, parents => parents.join(" > "));
-        },
-        categoriesByName() {
-            return mapCategoriesByName(this.flattedCategories)
-        },
-        categoriesById() {
-            return mapCategoriesById(this.flattedCategories)
-        },
-    },
-    methods: {
-        rowClass(item, type) {
-            if (!item || type !== 'row')
-                return;
+const emit = defineEmits<{
+  (e: 'onCreateCategory', item: { categoryName: string; callback?: () => void; }): void;
+}>();
 
-            if (!item.importable)
-                return 'table-secondary'
+const searchString = ref("some-dummy-value-to-activate-table-filtering");
+const showOnlyMissingCategories = ref(false);
 
-            if (!item.categoryId)
-                return 'table-danger';
+const flattedCategories = computed(() => {
+  return flatCategoryTreeWithParentChain(categories, parents => parents.join(" > "));
+})
 
-            return undefined;
-        },
-        doFilter(row, filterProp) {
-            const importable = filterProp.onlyImportables ? row.originalImportable : true
-            const missingCategory = filterProp.onlyMissingCategories ? !row.categoryId : true;
+const categoriesByName = computed<CategoriesByName>(() => {
+  return mapCategoriesByName(flattedCategories.value)
+})
 
-            return importable && missingCategory;
-        },
-        onSelectCategory(select) {
-            this.value.filter(row => row.checksum === select.checksum)
-                .forEach(row => row.categoryId = select.categoryId)
-        },
-        onCreateCategory(categoryName) {
-            this.$emit("onCreateCategory", {
-                categoryName: categoryName,
-                callback: undefined
-            })
-        },
-        onCreateSuggestedCategory(categoryName) {
-            this.$emit("onCreateCategory", {
-                categoryName: categoryName,
-                callback: () => {
-                    const newlyCreatedCategory = this.categories.find(cat => cat.name === categoryName)
-                    if (!newlyCreatedCategory)
-                        return;
+const categoriesById = computed<CategoriesById>(() => {
+  return mapCategoriesById(flattedCategories.value)
+})
 
-                    this.value.forEach(row => {
-                        if (row.suggestedCategory === categoryName && !row.categoryId)
-                            row.categoryId = newlyCreatedCategory.id;
-                    })
-                }
-            })
-        },
-        onSelectImportable(newValue) {
-            this.value.forEach(row => {
-                if (row.originalImportable)
-                    row.importable = newValue;
-            })
-        },
-    },
+const hasSuggestions = computed<boolean>(() => {
+  return value.some(r => !!r.suggestedCategory);
+});
+
+enum MarkType {
+  All,
+  None,
+  Some
 }
+
+const allRowsAreMarkedAsImportable = computed<MarkType>(() => {
+  const onlyImportables = value.filter(it => it.originalImportable);
+
+  const groups = _.groupBy(onlyImportables, it => it.importable)
+
+  const trueGroup = groups['true'] ?? []
+  const falseGroup = groups['false'] ?? []
+
+  if (trueGroup.length === onlyImportables.length)
+    return MarkType.All;
+  if (falseGroup.length === onlyImportables.length)
+    return MarkType.None;
+
+  return MarkType.Some;
+})
+
+function doFilter(row: PreviewRowWithOriginalState): boolean {
+  const importable = !showAlreadyImportedRow ? !!row.originalImportable : true
+  const missingCategory = showOnlyMissingCategories.value ? !row.categoryId : true;
+
+  return importable && missingCategory;
+}
+
+function onSelectImportable(newValue: boolean) {
+  value.forEach(row => {
+    if (row.originalImportable)
+      row.importable = newValue;
+  })
+}
+
+function onSelectCategory(select: CategorySelectionType) {
+  value.filter(row => row.checksum === select.checksum)
+    .forEach(row => row.categoryId = select.categoryId)
+}
+
+function onCreateCategory(categoryName: string) {
+  emit("onCreateCategory", {
+    categoryName: categoryName,
+    callback: undefined
+  })
+}
+
+function onCreateSuggestedCategory(categoryName: string) {
+  emit("onCreateCategory", {
+    categoryName: categoryName,
+    callback: () => {
+      const newlyCreatedCategory = categories.find(cat => cat.name === categoryName)
+      if (!newlyCreatedCategory)
+        return;
+
+      value.forEach(row => {
+        if (row.suggestedCategory === categoryName && !row.categoryId)
+          row.categoryId = newlyCreatedCategory.id;
+      })
+    }
+  })
+}
+
+// see https://stackoverflow.com/a/75993081
+type ReadonlyHeaders = VDataTable['$props']['headers']
+type UnwrapReadonlyArray<A> = A extends Readonly<Array<infer I>> ? I : never;
+type ReadonlyDataTableHeader = UnwrapReadonlyArray<ReadonlyHeaders>;
+
+const fields = computed<ReadonlyDataTableHeader[]>(() => {
+  const columns: ReadonlyDataTableHeader[] = [
+    {
+      key: "importable",
+      title: "?",
+      value: it => it.importable,
+      sortable: false,
+      width: '3ex',
+      minWidth: '40px',
+    },
+    {
+      key: 'index',
+      title: '#',
+      value: it => it.index,
+      sortable: true,
+    },
+    {
+      key: "date",
+      title: "Date",
+      value: it => it.date,
+      sortable: true,
+      width: '10em',
+    },
+    {
+      key: "recipient",
+      title: "Empfänger",
+      value: it => it.recipient,
+      sortable: true,
+      // width: '20em',
+    },
+    {
+      key: "amount",
+      title: "Betrag",
+      value: it => it.amountInCents,
+      sortable: true,
+      width: '8em',
+    },
+    {
+      key: "categoryId",
+      title: "Kategorie",
+      value: it => it.categoryId,
+      sortable: true,
+      width: '24em',
+    },
+    {
+      key: "suggestedCategories",
+      title: "Vorschläge",
+      width: '20em',
+    },
+    {
+      key: "Description",
+      title: 'Beschreibung',
+      value: it => it.description,
+    }
+  ];
+
+  if (hasSuggestions.value)
+    columns.splice(-2, 0, {
+      key: "suggestedCategory",
+      title: "Bank Vorschlag",
+      sortable: true,
+    })
+
+  return columns;
+})
 </script>
 
-<style scoped>
+<template>
+  <v-data-table height="60vh"
+                :fixedHeader="true"
+                :items="value"
+                :headers="fields"
+                :search="searchString"
+                :custom-filter="(_1, _2, row: any) => doFilter(row.raw)"
+                :items-per-page="-1"
+                :hide-default-footer="true"
+                :hover="true"
+                density="compact">
 
-</style>
+    <template v-slot:header.importable>
+      <v-checkbox :model-value="allRowsAreMarkedAsImportable === MarkType.All"
+                  :indeterminate="allRowsAreMarkedAsImportable === MarkType.Some ? true : undefined"
+                  @update:modelValue="(x: any) => onSelectImportable(!!x)"
+                  density="compact"
+                  color="info"
+                  :hide-details="true"/>
+    </template>
+
+    <template v-slot:item.importable="row">
+      <v-checkbox v-model="row.item.importable"
+                  :disabled="!row.item.originalImportable"
+                  :indeterminate="!row.item.originalImportable"
+                  title="Zeile wird importiert."
+                  density="compact"
+                  color="info"
+                  :hide-details="true"/>
+    </template>
+
+    <template v-slot:header.categoryId="{column}">
+      <div class="d-flex justify-space-between align-center">
+        <span>{{ column.title }}</span>
+
+        <v-btn :icon="showOnlyMissingCategories ? 'mdi-filter-check' : 'mdi-filter'"
+               size="small"
+               @click="showOnlyMissingCategories = !showOnlyMissingCategories"
+               color="light"
+               variant="flat"
+               title="Filtert Zeilen mit schon befüllten Kategorien weg."/>
+      </div>
+    </template>
+    <template v-slot:item.categoryId="row">
+      <category-input :id="`csv-category-input-${row.index}`"
+                      :value="row.item.categoryId"
+                      @input="newId => row.item.categoryId = newId ?? undefined"
+                      @createCategory="onCreateCategory"
+                      :flatted-categories="flattedCategories"
+                      :categories-by-id="categoriesById"
+                      :categories-by-name="categoriesByName"
+                      :required="row.item.importable"
+                      :disabled="!row.item.importable"/>
+    </template>
+
+    <template v-slot:item.index="row">
+      {{ row.index + 1 }}
+    </template>
+
+    <template v-slot:item.date="{ value }">
+      <div class="float-right">
+        {{ DateTime.fromISO(value).toLocaleString(DateTime.DATE_MED) }}
+      </div>
+    </template>
+
+    <template v-slot:item.recipient="{index, value}">
+      <table-cell-description :index="index"
+                              :value="value"
+                              :max-length="32"/>
+    </template>
+
+    <template v-slot:item.amount="{ value }">
+      <table-cell-monetary :value="value" class="float-right"/>
+    </template>
+
+    <template v-slot:item.suggestedCategories="row">
+      <category-suggestion :checksum="row.item.checksum"
+                           :suggestions="row.item.suggestedCategories || []"
+                           :categories-by-id="categoriesById"
+                           :disabled="!row.item.importable"
+                           :selected-category-id="row.item.categoryId"
+                           @select="onSelectCategory"/>
+    </template>
+
+    <template v-slot:item.suggestedCategory="row" v-if="hasSuggestions">
+      <v-btn v-if="row.item.suggestedCategory && !categoriesByName[row.item.suggestedCategory]"
+             @click="onCreateSuggestedCategory(row.item.suggestedCategory)"
+             :disabled="!row.item.importable"
+             class="p-0"
+             color="info"
+             :icon="true">
+        <v-icon>
+          mdi-plus-circle
+        </v-icon>
+      </v-btn>
+
+      {{ row.item.suggestedCategory }}
+    </template>
+
+    <template v-slot:item.Description="{index, value}">
+      <table-cell-description :index="index" :value="value" :max-length="48"/>
+    </template>
+  </v-data-table>
+</template>

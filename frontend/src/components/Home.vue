@@ -1,46 +1,43 @@
-<template>
-    <div class="d-flex flex-wrap justify-content-start align-items-baseline align-content-center flex-grow-1"
-         style="column-gap: 1em; row-gap: 2em">
-        <template v-for="(link, idx) in links">
-            <v-card no-body :key="idx"
-                    :link="true"
-                    :to="link.link"
-                    width="16em"
-                    height="8em"
-                    elevation="8">
-                <v-card-title>
-                    <router-link :to="link.link">
-                        {{ link.title }}
-                    </router-link>
-                </v-card-title>
+<script setup lang="ts">
+import {getPages} from "../router.ts";
+import {computed} from "vue";
+import {useTheme} from "vuetify";
 
-                <v-card-text>
-                    <div class="d-flex justify-content-between align-items-baseline">
-                        <p class="card-text">
-                            {{ link.shortDescription }}
-                        </p>
+const theme = useTheme().current.value;
 
-                        <v-icon :x-large="true">
-                            {{ link.icon }}
-                        </v-icon>
-                    </div>
-                </v-card-text>
-            </v-card>
-        </template>
-    </div>
-</template>
-
-<script>
-import getPages from "@/util/pages";
-
-export default {
-    name: 'home',
-    components: {},
-    methods: {},
-    computed: {
-        links() {
-            return getPages().filter(p => !p.isStartPage);
-        }
-    },
-}
+const links = computed(() => {
+  return getPages().filter(p => !p.isStartPage)
+})
 </script>
+
+<template>
+  <div class="d-flex flex-wrap justify-start align-baseline align-center"
+       style="column-gap: 1em; row-gap: 2em">
+
+    <template v-for="(link) in links">
+      <v-card :to="link.link"
+              width="16em"
+              elevation="8">
+        <v-card-title :style="{color: theme.colors.info}">
+          {{ link.title }}
+        </v-card-title>
+
+        <v-card-subtitle>
+          {{ link.title }}
+        </v-card-subtitle>
+
+        <v-card-text>
+          <div class="d-flex justify-space-between align-baseline">
+            <span>
+              {{ link.shortDescription }}
+            </span>
+
+            <v-icon size="x-large" :color="theme.colors.info">
+              {{ link.icon }}
+            </v-icon>
+          </div>
+        </v-card-text>
+      </v-card>
+    </template>
+  </div>
+</template>

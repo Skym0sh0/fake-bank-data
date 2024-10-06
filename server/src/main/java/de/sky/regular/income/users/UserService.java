@@ -1,8 +1,8 @@
 package de.sky.regular.income.users;
 
-import de.sky.regular.income.database.DatabaseConnection;
 import de.sky.regular.income.api.User;
 import de.sky.regular.income.api.UserRegistration;
+import de.sky.regular.income.database.DatabaseConnection;
 import de.sky.regular.income.database.DatabaseSupplier;
 import generated.sky.regular.income.tables.records.UsersRecord;
 import lombok.Builder;
@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -64,6 +65,15 @@ public class UserService implements UserDetailsService, UserProvider {
 
     public User checkLogin(String username) {
         return db.transactionWithResult(ctx -> checkLogin(ctx, username));
+    }
+
+    public User checkLogin(String username, String password) {
+        var user = loadUserByUsername(username);
+
+        if (!passwordEncoder.matches(password, user.getPassword()))
+            throw new BadCredentialsException("Wrong credentials");
+
+        return checkLogin(username);
     }
 
     public User register(UserRegistration reg) {

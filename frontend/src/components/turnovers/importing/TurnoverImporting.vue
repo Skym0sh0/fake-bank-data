@@ -1,327 +1,386 @@
-<template>
-    <b-btn id="statement-overview-import-new-statement"
-           variant="info"
-           v-b-modal="'file-upload-modal'">
-        CSV Import
+<script setup lang="ts">
+import {computed, inject, onMounted, ref} from "vue";
+import {
+  Category,
+  CategoryApi,
+  CategoryPatch,
+  TurnoverImportFormat,
+  TurnoverImportPatch,
+  TurnoverPreview,
+  TurnoverRowPreview,
+  TurnoversApi
+} from "@api/api.ts";
+import {apiRefKey} from "../../../keys.ts";
+import WaitingIndicator from "../../misc/WaitingIndicator.vue";
+import useVuelidate from "@vuelidate/core";
+import {required} from '@vuelidate/validators'
+import RawCsvFileTable from "./RawCsvFileTable.vue";
+import TurnoverPreviewTable from "./TurnoverPreviewTable.vue";
+import Histogram, {HistogramValueType} from "./Histogram.vue";
 
-        <b-modal id="file-upload-modal"
-                 ref="file-upload-modal"
-                 title="Importiere CSV Datei"
-                 :centered="true"
-                 :scrollable="true"
-                 header-bg-variant="warning"
-                 footer-bg-variant="light"
-                 @hidden="reset"
-                 @hide="checkToHide"
-                 body-class="p-0">
-            <template v-slot:modal-footer>
-                <div v-if="parsedPreview" class="w-100" style="display: flex;">
-                    <b-container class="p-0">
-                        <b-row>
-                            <b-col class="p-0 px-2">
-                                <h6>Importierbar</h6>
-                                <b-progress :max="rawRows.length" :show-value="true">
-                                    <b-progress-bar :value="importableRows.length" variant="success"/>
-                                    <b-progress-bar :value="rawRows.length - importableRows.length"
-                                                    variant="secondary"/>
-                                </b-progress>
-                            </b-col>
+function getBankFormatName(frmt: TurnoverImportFormat): string {
+  const BANK_FORMAT_NAMES = {
+    "VR_BANK_CSV": "CSV VR-Bank",
+    "DKB": "CSV DKB",
+    "NEW_DKB": "CSV DKB (neue GUI)",
+    "PAYPAL": "CSV PayPal"
+  };
 
-                            <b-col class="p-0 px-2">
-                                <h6>Kategorisiert</h6>
-                                <b-progress :max="importableRows.length" :show-value="true">
-                                    <b-progress-bar :value="importableRows.length - rowsTodo.length" variant="success"/>
-                                    <b-progress-bar :value="rowsTodo.length" variant="danger"/>
-                                </b-progress>
-                            </b-col>
-                        </b-row>
-                    </b-container>
-
-                    <div class="m-auto">
-                        <b-button class="mr-1"
-                                  variant="secondary"
-                                  @click="reset">
-                            Abbrechen
-                        </b-button>
-                        <b-button variant="primary"
-                                  @click="doImportRequest"
-                                  :disabled="isImportImpossible">
-                            Importieren
-                        </b-button>
-                    </div>
-                </div>
-
-                <b-alert :show="!!errorMessage" variant="danger" :dismissible.camel="true">
-                    {{ errorMessage }}
-                </b-alert>
-            </template>
-
-            <waiting-indicator :is-loading="isUploading"/>
-
-            <div v-if="!parsedPreview">
-                <b-container :fluid="true" class="p-3">
-                    <b-row>
-                        <b-col :sm="6" :md="7">
-                            <b-form-file id="general-file-import-file"
-                                         v-model="fileSelection"
-                                         :disabled="isUploading"
-                                         :multiple="false"
-                                         :state="!$v.fileSelection.$invalid"
-                                         placeholder="Datei auswählen..."
-                                         browse-text="Durchsuchen"
-                                         drop-placeholder="Datei hier hinziehen zum importieren"
-                                         accept=".csv"/>
-                        </b-col>
-
-                        <b-col :sm="2" :md="2">
-                            <b-form-select v-model="selectedFileType"
-                                           :options="supportedFileTypes"
-                                           :state="!$v.selectedFileType.$invalid"/>
-                        </b-col>
-
-                        <b-col :sm="2" :md="2">
-                            <b-form-select v-model="selectedFileEncoding"
-                                           :options="supportedFileEncodings"
-                                           :state="!$v.selectedFileEncoding.$invalid"/>
-                        </b-col>
-
-                        <b-col :sm="2" :md="1">
-                            <b-btn @click="onStartPreview"
-                                   :disabled="$v.$invalid"
-                                   variant="primary">
-                                Vorschau
-                            </b-btn>
-                        </b-col>
-                    </b-row>
-
-                    <b-row v-if="fileSelection">
-                        <raw-csv-file-table :file="fileSelection"
-                                            :encoding="selectedFileEncoding"
-                                            @isLoading="onIsLoading"/>
-                    </b-row>
-                </b-container>
-            </div>
-
-            <template v-else>
-                <b-card v-if="isReadilyLoaded" id="preview-card"
-                        body-class="p-2">
-                    <b-card-header class="d-flex justify-content-between py-2" id="preview-card-header">
-                        <h6>{{ parsedPreview.filename }}</h6>
-                        <h6>{{ parsedPreview.format }}</h6>
-                    </b-card-header>
-
-                    <b-card-body id="preview-card-body" class="p-2">
-                        <turnover-preview-table v-model="previewedData"
-                                                :categories="categories"
-                                                @onCreateCategory="onCreateCategory"/>
-                    </b-card-body>
-                </b-card>
-            </template>
-        </b-modal>
-    </b-btn>
-</template>
-
-<script>
-import {required} from 'vuelidate/dist/validators.min'
-import {api} from "@/api/RegularIncomeAPI";
-import TurnoverPreviewTable from "@/components/turnovers/importing/TurnoverPreviewTable.vue";
-import WaitingIndicator from "@/components/misc/WaitingIndicator.vue";
-import {normalizeCategory} from "@/util/Normalizer";
-import RawCsvFileTable from "@/components/turnovers/importing/RawCsvFileTable.vue";
-
-function getBankFormatName(frmt) {
-    const BANK_FORMAT_NAMES = {
-        "VR_BANK_CSV": "CSV VR-Bank",
-        "DKB": "CSV DKB",
-        "NEW_DKB": "CSV DKB (neue GUI)",
-        "PAYPAL": "CSV PayPal"
-    };
-
-    return BANK_FORMAT_NAMES[frmt] || frmt;
+  return BANK_FORMAT_NAMES[frmt] || frmt;
 }
 
-export default {
-    name: "TurnoverImporting",
-    components: {
-        RawCsvFileTable,
-        WaitingIndicator,
-        TurnoverPreviewTable
+type SupportedFileType = {
+  value: TurnoverImportFormat | null;
+  title: string;
+};
+
+export type PreviewRowWithOriginalState = TurnoverRowPreview & { originalImportable?: boolean; index: number; };
+
+const api: TurnoversApi | undefined = inject(apiRefKey)?.turnoversApi;
+const categoriesApi: CategoryApi | undefined = inject(apiRefKey)?.categoriesApi;
+
+const {isLoading} = defineProps<{
+  isLoading?: boolean;
+}>();
+
+const emit = defineEmits<{
+  (e: 'uploadSucceeded'): void;
+}>();
+
+const isDialogOpen = ref<boolean>(false);
+
+const isUploading = ref<boolean>(false);
+const categories = ref<Category[] | null>(null);
+
+const supportedFileTypes = ref<SupportedFileType[]>([]);
+const supportedFileEncodings = ref(["UTF-8", "Windows-1250", "UTF-16", "UTF-32"]);
+
+const selectedFileType = ref<TurnoverImportFormat | null>(null);
+const selectedFileEncoding = ref<string>(supportedFileEncodings.value[0]/*"UTF-8"*/);
+const fileSelection = ref<File | null>(null);
+
+const v$ = useVuelidate({
+  selectedFileType: {required},
+  selectedFileEncoding: {required},
+  fileSelection: {required},
+}, {
+  selectedFileType,
+  selectedFileEncoding,
+  fileSelection
+});
+
+const parsedPreview = ref<TurnoverPreview | null>(null);
+const previewedData = ref<PreviewRowWithOriginalState[] | null>(null);
+const errorMessage = ref<string | null>(null);
+const filterShowImportedRows = ref<boolean>(false);
+
+const isImportImpossible = computed(() => {
+  const isDataValid = (previewedData.value || []).every(row => {
+    if (!row.importable)
+      return true;
+
+    return !!row.categoryId;
+  });
+
+  return /*this.$v.$invalid ||*/ !isDataValid || isUploading.value || importableRows.value.length <= 0;
+})
+
+const rawRows = computed(() => {
+  return (previewedData.value || []);
+})
+
+const importableRows = computed(() => {
+  return rawRows.value.filter(r => r.importable);
+})
+
+const rowsTodo = computed(() => {
+  return importableRows.value.filter(r => !r.categoryId);
+})
+
+const isReadilyLoaded = computed(() => {
+  return fileSelection.value && previewedData.value && categories.value
+})
+
+const importablesHistogram = computed<HistogramValueType[]>(() => {
+  return [
+    {
+      label: 'Importierbare Zeilen',
+      value: importableRows.value.length,
+      color: 'success'
     },
-    data() {
-        return {
-            isUploading: false,
-            categories: null,
-
-            supportedFileTypes: [],
-            supportedFileEncodings: ["UTF-8", "Windows-1250", "UTF-16", "UTF-32"],
-
-            selectedFileType: null,
-            selectedFileEncoding: "UTF-8",
-            fileSelection: null,
-
-            parsedPreview: null,
-            previewedData: null,
-            errorMessage: null
-        };
-    },
-    validations: {
-        selectedFileType: {
-            required,
-        },
-        selectedFileEncoding: {
-            required,
-        },
-        fileSelection: {
-            required,
-        },
-    },
-    computed: {
-        isImportImpossible() {
-            const isDataValid = (this.previewedData || []).every(row => {
-                if (!row.importable)
-                    return true;
-
-                return !!row.categoryId;
-            });
-
-            return this.$v.$invalid || !isDataValid || this.isUploading || this.importableRows.length <= 0;
-        },
-        rawRows() {
-            return (this.previewedData || []);
-        },
-        importableRows() {
-            return this.rawRows.filter(r => r.importable);
-        },
-        rowsTodo() {
-            return this.importableRows.filter(r => !r.categoryId);
-        },
-        isReadilyLoaded() {
-            return this.fileSelection && this.previewedData && this.categories
-        },
-    },
-    methods: {
-        loadCategories() {
-            return api.getCategories()
-                .fetchCategoryTree()
-                .then(res => {
-                    this.categories = res
-                })
-        },
-        onIsLoading(isLoading) {
-            this.isUploading = isLoading
-        },
-        onStartPreview() {
-            this.isUploading = true;
-
-            Promise.all([this.loadCategories(), this.doPreviewRequest()])
-                .catch(e => {
-                    this.errorMessage = e.response.data;
-                })
-                .finally(() => this.isUploading = false)
-        },
-        doPreviewRequest() {
-            return api.getTurnovers()
-                .previewTurnoverImport(this.selectedFileType, this.fileSelection, this.selectedFileEncoding)
-                .then(preview => {
-                    this.parsedPreview = preview;
-                    this.previewedData = (this.parsedPreview.rows || [])
-                        .map(row => ({
-                            ...row,
-                            originalImportable: row.importable
-                        }));
-                })
-        },
-        doImportRequest() {
-            if (this.$v.$invalid)
-                return;
-
-            this.isUploading = true;
-
-            api.getTurnovers()
-                .createTurnoverImport(this.fileSelection, this.selectedFileType, this.selectedFileEncoding, this.importableRows)
-                .then(() => {
-                    this.$emit("uploadSucceeded")
-                    this.$refs["file-upload-modal"].hide();
-                    this.reset();
-                })
-                .catch(e => {
-                    this.errorMessage = e.response.data.message;
-                })
-                .finally(() => {
-                    this.isUploading = false;
-                })
-        },
-        onCreateCategory({categoryName, callback}) {
-            const normalized = normalizeCategory({
-                name: categoryName,
-            });
-
-            this.isUploading = true;
-
-            return api.getCategories()
-                .postCategory(normalized)
-                .then(() => this.loadCategories())
-                .then(() => {
-                    if (callback) {
-                        callback()
-                    }
-                })
-                .finally(() => this.isUploading = false)
-        },
-        reset() {
-            this.categories = null;
-            // this.selectedFileType = null;
-            // this.selectedFileEncoding = "UTF-8";
-            this.fileSelection = null;
-            this.parsedPreview = null;
-            this.previewedData = null;
-            this.errorMessage = null;
-            this.isUploading = false;
-            this.$refs["file-upload-modal"].hide();
-        },
-        checkToHide(e) {
-            const mustNotBeClosed = this.isUploading || (this.parsedPreview && !(
-                e.trigger === null // abort button was pressed
-                || e.trigger === 'headerclose' // X Button in header was pressed
-            ));
-            if (mustNotBeClosed) {
-                e.preventDefault()
-            }
-        },
-    },
-    mounted() {
-        this.isUploading = true;
-
-        api.getTurnovers()
-            .getSupportedPreviewFormats()
-            .then(res => {
-                this.supportedFileTypes = [
-                    {
-                        value: null,
-                        text: "Dateiformat wählen",
-                    },
-                    ...res.map(b => ({
-                        value: b,
-                        text: getBankFormatName(b)
-                    }))];
-            })
-            .finally(() => this.isUploading = false)
+    {
+      label: 'Nicht importierbare Zeilen',
+      value: rawRows.value.length - importableRows.value.length,
+      color: 'info'
     }
+  ]
+})
+
+const progressHistogram = computed<HistogramValueType[]>(() => {
+  return [
+    {
+      label: 'Schon fertig bearbeitete Zeilen',
+      value: importableRows.value.length - rowsTodo.value.length,
+      color: 'success'
+    },
+    {
+      label: 'Noch zu bearbeitende Zeilen',
+      value: rowsTodo.value.length,
+      color: 'error'
+    }
+  ]
+})
+
+function loadCategories() {
+
+  return categoriesApi?.getCategoriesAsTree()
+    .then(res => {
+      categories.value = res.data;
+    })
 }
+
+function onIsLoading(isLoading: boolean) {
+  isUploading.value = isLoading
+}
+
+function onStartPreview() {
+  isUploading.value = true;
+
+  Promise.all([loadCategories(), doPreviewRequest()])
+    .catch(e => {
+      errorMessage.value = e.response.data;
+    })
+    .finally(() => isUploading.value = false)
+}
+
+function doPreviewRequest() {
+  return api?.processPreview(selectedFileType.value!, fileSelection.value!, selectedFileEncoding.value)
+    .then(preview => {
+      parsedPreview.value = preview.data;
+
+      previewedData.value = (parsedPreview.value.rows || [])
+        .map((row: TurnoverRowPreview, index: number) => ({
+          ...row,
+          index: index,
+          originalImportable: row.importable
+        }))
+    })
+}
+
+function doImportRequest() {
+  if (v$.value.$invalid)
+    return;
+
+  isUploading.value = true;
+
+  const patch: TurnoverImportPatch = {
+    encoding: selectedFileEncoding.value,
+    format: selectedFileType.value!,
+    rows: importableRows.value,
+  }
+
+  api?.createTurnoverImport(fileSelection.value!, patch)
+    .then(() => {
+      emit("uploadSucceeded")
+      // this.$refs["file-upload-modal"].hide();
+      reset();
+    })
+    .catch(e => {
+      errorMessage.value = e.response.data.message;
+    })
+    .finally(() => isUploading.value = false)
+}
+
+function onCreateCategory({categoryName, callback}: { categoryName: string; callback?: () => void; }) {
+  const normalized: CategoryPatch = {
+    name: categoryName,
+  };
+
+  isUploading.value = true;
+
+  return categoriesApi?.createCategory(normalized)
+    .then(() => loadCategories())
+    .then(() => {
+      callback?.()
+    })
+    .finally(() => isUploading.value = false)
+}
+
+function reset() {
+  isDialogOpen.value = false;
+
+  categories.value = null;
+  // this.selectedFileType = null;
+  // this.selectedFileEncoding = "UTF-8";
+  fileSelection.value = null;
+  parsedPreview.value = null;
+  previewedData.value = null;
+  errorMessage.value = null;
+  isUploading.value = false;
+  // this.$refs["file-upload-modal"].hide();
+}
+
+function openDialog() {
+  reset();
+  isDialogOpen.value = true
+}
+
+onMounted(() => {
+  isUploading.value = true;
+
+  api?.getSupportedFormats()
+    .then(res => {
+      supportedFileTypes.value = [
+        {
+          value: null,
+          title: "Dateiformat wählen",
+        },
+        ...res.data.map(f => ({
+          value: f,
+          title: getBankFormatName(f)
+        }))
+      ];
+    })
+    .finally(() => isUploading.value = false)
+})
 </script>
 
-<style>
-@media (min-width: 800px) {
-    .modal-md {
-        max-width: 80% !important;
-        /*width: 90% !important;*/
-    }
-}
+<template>
+  <v-dialog v-model="isDialogOpen"
+            :persistent="true"
+            @update:model-value="reset">
+    <template v-slot:activator>
+      <v-btn size="small"
+             color="primary"
+             :disabled="isLoading"
+             :loading="isLoading"
+             @click="openDialog"
+             variant="elevated"
+             text="CSV Import"
+             prepend-icon="mdi-earth"/>
+    </template>
 
-@media (min-width: 576px) {
-    .modal-dialog {
-        max-width: 80% !important;
-        width: 80% !important;
-    }
-}
+    <template v-slot:default>
+      <v-card>
+        <v-card-title class="d-flex justify-space-between align-center">
+          <span>Importiere CSV Datei</span>
+
+          <v-btn @click="reset"
+                 variant="plain"
+                 icon="mdi-close"/>
+        </v-card-title>
+
+        <v-card-text class="py-0">
+          <waiting-indicator :is-loading="isUploading"/>
+
+          <div v-if="!parsedPreview">
+            <v-container>
+              <v-row align="center">
+                <v-col :sm="6" :md="7">
+                  <v-file-input id="general-file-import-file"
+                                v-model="fileSelection"
+                                :disabled="isUploading"
+                                :multiple="false"
+                                accept="text/csv"
+                                :show-size="1024"
+                                :counter="true"
+                                label="Import CSV Datei"
+                                :error="v$.fileSelection.$invalid"
+                  />
+                </v-col>
+
+                <v-col :sm="2" :md="2">
+                  <v-select v-model="selectedFileType"
+                            :items="supportedFileTypes"
+                            :error="v$.selectedFileType.$invalid"/>
+                </v-col>
+
+                <v-col :sm="2" :md="2">
+                  <v-select v-model="selectedFileEncoding"
+                            :items="supportedFileEncodings"
+                            :error="v$.selectedFileEncoding.$invalid"/>
+                </v-col>
+
+                <v-col :sm="2" :md="1">
+                  <v-btn @click="onStartPreview"
+                         color="primary"
+                         :loading="isUploading"
+                         :disabled="v$.$invalid"
+                         prepend-icon="mdi-file-eye"
+                         text="Vorschau"
+                  />
+                </v-col>
+              </v-row>
+
+              <v-row>
+                <raw-csv-file-table :file="fileSelection ?? undefined"
+                                    :encoding="selectedFileEncoding"
+                                    :is-loading="isUploading"
+                                    @isLoading="onIsLoading"/>
+              </v-row>
+            </v-container>
+          </div>
+
+          <div v-else>
+            <v-card v-if="isReadilyLoaded"
+                    id="preview-card"
+                    :elevation="2">
+              <v-card-title class="d-flex justify-space-between align-center py-2" id="preview-card-header">
+                <h6>{{ parsedPreview.filename }}</h6>
+                <h6>{{ parsedPreview.format }}</h6>
+
+                <v-checkbox v-model="filterShowImportedRows"
+                            color="primary"
+                            label="Zeige schon importierte Zeilen"
+                            density="compact"
+                            :hide-details="true"/>
+              </v-card-title>
+
+              <v-card-text id="preview-card-body">
+                <turnover-preview-table v-if="previewedData && categories"
+                                        v-model:value="previewedData"
+                                        :show-already-imported-row="filterShowImportedRows"
+                                        :categories="categories"
+                                        @onCreateCategory="onCreateCategory"/>
+              </v-card-text>
+            </v-card>
+          </div>
+        </v-card-text>
+
+        <v-card-actions v-if="parsedPreview" class="w-100 d-flex justify-space-between">
+          <v-container :fluid="true">
+            <v-row>
+              <v-col>
+                <Histogram text="Importierbar" :values="importablesHistogram"/>
+              </v-col>
+
+              <v-col class="p-0 px-2">
+                <Histogram text="Kategorisiert" :values="progressHistogram"/>
+              </v-col>
+
+              <v-col cols="6"/>
+            </v-row>
+          </v-container>
+
+          <div class="d-flex justify-space-between align-center ga-1">
+            <v-btn color="secondary"
+                   variant="outlined"
+                   @click="reset">
+              Abbrechen
+            </v-btn>
+            <v-btn color="primary"
+                   variant="outlined"
+                   @click="doImportRequest"
+                   :disabled="isImportImpossible">
+              Importieren
+            </v-btn>
+          </div>
+        </v-card-actions>
+      </v-card>
+    </template>
+  </v-dialog>
+</template>
+
+<style scoped>
+
 </style>

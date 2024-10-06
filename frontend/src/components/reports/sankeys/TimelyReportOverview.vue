@@ -1,108 +1,100 @@
-<template>
-    <v-card>
-        <v-card-title>
-            Timely Reports
-        </v-card-title>
+<script setup lang="ts">
+import WaitingIndicator from "../../misc/WaitingIndicator.vue";
+import {computed, inject, ref} from "vue";
+import {DateTime} from "luxon";
+import {BasicCoarseInfo, ReportsApi, ReportTimeUnits} from "@api/api.ts";
+import {apiRefKey} from "../../../keys.ts";
+import TimeboxSelector from "./TimeboxSelector.vue";
+import {AssociationsType, BasicInfo, SelectType} from "./types.ts";
+import IncomeExpenseSankeyReport from "./IncomeExpenseSankeyReport.vue";
 
-        <v-card-subtitle v-if="isDataQueryable">
-            <v-row>
-                <v-col class="py-0 d-flex justify-content-around align-items-center">
-                    <div>
-                        Transaktionen: {{ basicInfo.numberOfTransactions }}
-                    </div>
-                    <div>
-                        Kategorien: {{ basicInfo.numberOfUsedCategories }}
-                    </div>
-                </v-col>
-            </v-row>
+const api: ReportsApi | undefined = inject(apiRefKey)?.reportsApi;
 
-            <v-row>
-                <v-col class="py-0">
-                    <timebox-selector v-if="basicInfo"
-                                      v-model="select"
-                                      :earliest="basicInfo.earliest"
-                                      :latest="basicInfo.latest"
-                                      :max-depth="basicInfo.maxDepth"
-                    />
-                </v-col>
-            </v-row>
-        </v-card-subtitle>
+const now = DateTime.now();
 
-        <v-card-text>
-            <income-expense-sankey-report v-if="isDataQueryable"
-                                          :height="800"
-                                          :select="select"/>
+const isLoading = ref(false);
+const basicInfo = ref<BasicInfo | null>(null);
 
-            <div v-if="!isDataQueryable">
-                No data present
-            </div>
-        </v-card-text>
+const select = ref<SelectType>({
+  mode: AssociationsType.Relative,
+  depth: 2,
 
-        <waiting-indicator :is-loading="isLoading"/>
-    </v-card>
-</template>
+  year: now.year,
+  month: now.month,
 
-<script>
-import {api} from "@/api/RegularIncomeAPI";
-import IncomeExpenseSankeyReport from "@/components/reports/sankeys/IncomeExpenseSankeyReport.vue";
-import TimeboxSelector from "@/components/reports/sankeys/TimeboxSelector.vue";
-import WaitingIndicator from "@/components/misc/WaitingIndicator.vue";
-import moment from "moment";
-import {ASSOCIATIONS} from "@/util/association";
+  referenceDate: now,
+  timeunit: ReportTimeUnits.Months,
+  units: 6,
+});
 
-export default {
-    name: "TimelyReportOverview",
-    components: {WaitingIndicator, TimeboxSelector, IncomeExpenseSankeyReport},
-    data() {
-        return {
-            isLoading: false,
-            basicInfo: null,
-            select: {
-                mode: ASSOCIATIONS[0],
-                depth: 2,
+const isDataQueryable = computed(() => {
+  return !!basicInfo.value && basicInfo.value.numberOfTransactions > 0 && !!basicInfo.value.earliest && !!basicInfo.value.latest;
+})
 
-                year: moment().year(),
-                month: moment().month(),
+function loadBasicInfo() {
+  isLoading.value = true
 
-                referenceDate: moment().format("YYYY-MM-DD"),
-                timeunit: "MONTHS",
-                units: 6,
-            },
-        }
-    },
-    methods: {
-        loadBasicInfo() {
-            this.isLoading = true
+  api?.fetchCoarseInfos()
+    .then(resp => {
+      const res: BasicCoarseInfo = resp.data;
 
-            api.getReports().fetchBasicInfo()
-                .then(res => {
-                    this.basicInfo = {
-                        earliest: moment(res.earliestTransaction),
-                        latest: moment(res.latestTransaction),
-                        maxDepth: Number(res.maxDepthOfCategories),
-                        numberOfTransactions: res.numberOfTransactions,
-                        numberOfUsedCategories: res.numberOfUsedCategories,
-                    };
+      basicInfo.value = {
+        earliest: res.earliestTransaction ? DateTime.fromISO(res.earliestTransaction) : now,
+        latest: res.latestTransaction ? DateTime.fromISO(res.latestTransaction) : now,
+        maxDepth: res.maxDepthOfCategories ?? 0,
+        numberOfTransactions: res.numberOfTransactions ?? 0,
+        numberOfUsedCategories: res.numberOfUsedCategories ?? 0,
+      };
 
-                    this.select.depth = Math.min(2, this.basicInfo.maxDepth)
-                    this.select.year = this.basicInfo.latest.year()
-                    this.select.month = null
-                })
-                .finally(() => this.isLoading = false)
-        },
-    },
-    computed: {
-        isDataQueryable() {
-            return !!this.basicInfo && this.basicInfo.numberOfTransactions > 0 && !!this.basicInfo.earliest && !!this.basicInfo.latest;
-        },
-    },
-    mounted() {
-        this.loadBasicInfo()
-    }
+      select.value.depth = Math.min(2, basicInfo.value.maxDepth)
+      select.value.year = basicInfo.value.latest.year
+      select.value.month = undefined
+    })
+    .finally(() => isLoading.value = false)
 }
+
+loadBasicInfo()
 </script>
 
+<template>
+  <v-card>
+    <template v-slot:title>
+      Timely Reports
+    </template>
 
-<style scoped>
+    <template v-slot:subtitle v-if="isDataQueryable">
+      <v-row>
+        <v-col v-if="basicInfo" class="py-1 d-flex justify-space-around align-center">
+          <div>
+            Transaktionen: {{ basicInfo.numberOfTransactions }}
+          </div>
+          <div>
+            Kategorien: {{ basicInfo.numberOfUsedCategories }}
+          </div>
+        </v-col>
+      </v-row>
 
-</style>
+      <v-row>
+        <v-col class="py-0">
+          <timebox-selector v-if="basicInfo"
+                            :value="select"
+                            :earliest="basicInfo.earliest"
+                            :latest="basicInfo.latest"
+                            :max-depth="basicInfo.maxDepth"/>
+        </v-col>
+      </v-row>
+    </template>
+
+    <template v-slot:text>
+      <income-expense-sankey-report v-if="isDataQueryable"
+                                    :height="800"
+                                    :select="select"/>
+
+      <div v-if="!isDataQueryable">
+        No data present
+      </div>
+    </template>
+
+    <waiting-indicator :is-loading="isLoading"/>
+  </v-card>
+</template>

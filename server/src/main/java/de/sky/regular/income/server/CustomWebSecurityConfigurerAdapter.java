@@ -34,6 +34,7 @@ public class CustomWebSecurityConfigurerAdapter {
         return http
                 .authorizeHttpRequests(authz ->
                         authz.requestMatchers("/", "/index.html", "/favicon.ico", "/js/**", "/css/**").permitAll()
+                                .requestMatchers("/api/auth/login").permitAll()
                                 .requestMatchers("/api/user/register").permitAll()
                                 .anyRequest().authenticated()
                 )
