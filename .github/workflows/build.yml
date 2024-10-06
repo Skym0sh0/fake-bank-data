@@ -19,6 +19,31 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: '0'
+          fetch-tags: 'true'
+
+      - name: Get release version
+        id: get_release_version
+        uses: paulhatch/semantic-version@v5.4.0
+        with:
+          bump_each_commit: 'false'
+          bump_each_commit_patch_pattern: ''
+          tag_prefix: 'v'
+          major_pattern: 'feat:'
+          minor_pattern: 'fix:'
+          search_commit_body: 'true'
+
+      - name: Info release version
+        run: |
+          latest_release=$(gh release view --json name --jq '.name')
+          echo "Latest release: $latest_release"
+          echo "New Version: $RELEASE_VERSION"
+          echo "New Version Tag: $RELEASE_VERSION_TAG"
+        env:
+          RELEASE_VERSION: ${{ steps.get_release_version.outputs.version }}
+          RELEASE_VERSION_TAG: ${{ steps.get_release_version.outputs.version_tag }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
       # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
