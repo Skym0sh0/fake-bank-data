@@ -32,11 +32,11 @@ function formatDate(d?: string) {
 }
 
 function onOpen(item: TurnoverImport) {
-   router.push({name: "turnovers-detail", params: {id: item.id}});
+  router.push({name: "turnovers-detail", params: {id: item.id}});
 }
 
 function onDelete(item: TurnoverImport) {
-   emit("onDelete", item);
+  emit("onDelete", item);
 }
 
 const sortedList = computed(() => {
@@ -91,7 +91,8 @@ const fields = computed<ReadonlyDataTableHeader[]>((): ReadonlyDataTableHeader[]
     <v-data-table :loading="isLoading"
                   :items="sortedList"
                   :headers="fields"
-                  :hide-default-footer="true">
+                  :hide-default-footer="true"
+                  :items-per-page="-1">
       <template v-slot:item.actions="{item}">
         <div class="d-flex justify-end align-center ga-1">
           <v-btn color="primary"
