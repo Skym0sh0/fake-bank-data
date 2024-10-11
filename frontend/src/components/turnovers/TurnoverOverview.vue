@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import {inject, onMounted, ref} from "vue";
 import {TurnoverImport, TurnoversApi} from "@api/api.ts";
-import {apiRefKey} from "../../keys.ts";
+import {apiRefKey, errorRefKey} from "../../keys.ts";
 import TurnoversList from "./TurnoversList.vue";
 import WaitingIndicator from "../misc/WaitingIndicator.vue";
 import TurnoverImporting from "./importing/TurnoverImporting.vue";
 import type {AxiosResponse} from "axios";
 
 const api: TurnoversApi | undefined = inject(apiRefKey)?.turnoversApi;
+const errorReference = inject(errorRefKey)?.value;
+
 
 const isLoading = ref<boolean>(false);
 const turnoverImports = ref<TurnoverImport[]>([]);
@@ -20,6 +22,9 @@ function loadImports() {
 
   api.fetchTurnoverImports()
     .then((res: AxiosResponse<TurnoverImport[]>) => turnoverImports.value = res.data)
+    .catch(e => {
+      errorReference?.setError(e);
+    })
     .finally(() => isLoading.value = false)
 }
 

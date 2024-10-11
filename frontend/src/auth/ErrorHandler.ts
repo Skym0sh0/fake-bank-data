@@ -1,18 +1,19 @@
 import {ref} from "vue";
 import {Problem} from "@api/api.ts";
 
-const lastError = ref<Problem | null>(null)
+const lastError = ref<Problem | undefined>(undefined)
 
 function resetError() {
-  lastError.value = null;
+  lastError.value = undefined;
 }
 
 function setError(e: Problem) {
+  console.log("new error", e)
   lastError.value = e
 }
 
 export const errorReference = ref({
-  setError,
   lastError,
+  setError,
   resetError
 })
