@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {computed, inject, ref, watch} from "vue";
+import {computed, inject, nextTick, ref, watch} from "vue";
 import {notifierRefKey} from "../../keys.ts";
 import {NotificationEvent} from "../../auth/ErrorHandler.ts";
 
@@ -18,7 +18,10 @@ function reset() {
 
 watch(
   () => notifierRef?.lastNotification,
-  () => {
+  async () => {
+    notification.value = undefined
+
+    await nextTick()
     notification.value = notifierRef?.lastNotification;
   }
 )
