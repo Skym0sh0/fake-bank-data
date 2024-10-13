@@ -10,7 +10,7 @@ import {
   TurnoverRowPreview,
   TurnoversApi
 } from "@api/api.ts";
-import {apiRefKey} from "../../../keys.ts";
+import {apiRefKey, notifierRefKey} from "../../../keys.ts";
 import WaitingIndicator from "../../misc/WaitingIndicator.vue";
 import useVuelidate from "@vuelidate/core";
 import {required} from '@vuelidate/validators'
@@ -38,6 +38,7 @@ export type PreviewRowWithOriginalState = TurnoverRowPreview & { originalImporta
 
 const api: TurnoversApi | undefined = inject(apiRefKey)?.turnoversApi;
 const categoriesApi: CategoryApi | undefined = inject(apiRefKey)?.categoriesApi;
+const notifierRef = inject(notifierRefKey);
 
 const {isLoading} = defineProps<{
   isLoading?: boolean;
@@ -71,7 +72,6 @@ const v$ = useVuelidate({
 
 const parsedPreview = ref<TurnoverPreview | null>(null);
 const previewedData = ref<PreviewRowWithOriginalState[] | null>(null);
-const errorMessage = ref<string | null>(null);
 const filterShowImportedRows = ref<boolean>(false);
 
 const isImportImpossible = computed(() => {
@@ -132,7 +132,6 @@ const progressHistogram = computed<HistogramValueType[]>(() => {
 })
 
 function loadCategories() {
-
   return categoriesApi?.getCategoriesAsTree()
     .then(res => {
       categories.value = res.data;
@@ -147,9 +146,7 @@ function onStartPreview() {
   isUploading.value = true;
 
   Promise.all([loadCategories(), doPreviewRequest()])
-    .catch(e => {
-      errorMessage.value = e.response.data;
-    })
+    .catch(e => notifierRef?.notifyError("Vorschau konnte nicht geladen werden", e))
     .finally(() => isUploading.value = false)
 }
 
@@ -165,6 +162,7 @@ function doPreviewRequest() {
           originalImportable: row.importable
         }))
     })
+    .catch(e => notifierRef?.notifyError("Vorschau konnte nicht verarbeitet werden", e))
 }
 
 function doImportRequest() {
@@ -185,9 +183,7 @@ function doImportRequest() {
       // this.$refs["file-upload-modal"].hide();
       reset();
     })
-    .catch(e => {
-      errorMessage.value = e.response.data.message;
-    })
+    .catch(e => notifierRef?.notifyError("Umsätze konnten nicht importiert werden", e))
     .finally(() => isUploading.value = false)
 }
 
@@ -199,6 +195,7 @@ function onCreateCategory({categoryName, callback}: { categoryName: string; call
   isUploading.value = true;
 
   return categoriesApi?.createCategory(normalized)
+    .catch(e => notifierRef?.notifyError(`Neue Kategorie ${categoryName} konnte nicht erstellt werden`, e))
     .then(() => loadCategories())
     .then(() => {
       callback?.()
@@ -215,7 +212,6 @@ function reset() {
   fileSelection.value = null;
   parsedPreview.value = null;
   previewedData.value = null;
-  errorMessage.value = null;
   isUploading.value = false;
   // this.$refs["file-upload-modal"].hide();
 }
@@ -241,6 +237,7 @@ onMounted(() => {
         }))
       ];
     })
+    .catch(e => notifierRef?.notifyError("Unterstützte Formate konnten nicht geladen werden", e))
     .finally(() => isUploading.value = false)
 })
 </script>

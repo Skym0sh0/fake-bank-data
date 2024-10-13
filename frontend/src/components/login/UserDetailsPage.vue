@@ -3,9 +3,12 @@ import WaitingIndicator from "../misc/WaitingIndicator.vue";
 import ConfirmationedButton from "../misc/ConfirmationedButton.vue";
 import {inject, onMounted, ref, useTemplateRef} from "vue";
 import {UserAuthApi} from "@api/api.ts";
-import {apiRefKey, authenticationKey} from "../../keys.ts";
+import {apiRefKey, authenticationKey, notifierRefKey} from "../../keys.ts";
 import {VForm} from "vuetify/components";
 import ShowPasswordButton from "./ShowPasswordButton.vue";
+
+const apiRef: UserAuthApi | undefined = inject(apiRefKey)?.authApi
+const notifierRef = inject(notifierRefKey);
 
 const isLoading = ref(false)
 const valid = ref(false)
@@ -32,7 +35,6 @@ const passwordRepeatRules = ref([
   (value: string) => value !== password.value ? "Must match password" : true
 ])
 
-const apiRef: UserAuthApi | undefined = inject(apiRefKey)?.authApi
 const userService = inject(authenticationKey)?.value
 const formRef = useTemplateRef<VForm>('user-details-form')
 
@@ -44,6 +46,7 @@ function onDelete() {
 
   apiRef?.deleteUser(userService.user.id)
     .then(() => reload())
+    .catch(e => notifierRef?.notifyError("User konnte nicht gelöscht werden", e))
     .finally(() => isLoading.value = false)
 }
 
@@ -60,6 +63,7 @@ function onSave() {
     password: password.value,
   })
     .then(res => userService?.login(res.data, password.value))
+    .catch(e => notifierRef?.notifyError("User konnte nicht geändert werden", e))
     .finally(() => isLoading.value = false)
 }
 

@@ -2,10 +2,13 @@
 import WaitingIndicator from "../misc/WaitingIndicator.vue";
 import {inject, onMounted, ref, useTemplateRef} from "vue";
 import {useRouter} from "vue-router";
-import {apiRefKey} from "../../keys.ts";
+import {apiRefKey, notifierRefKey} from "../../keys.ts";
 import {UserAuthApi} from "@api/api.ts";
 import {VForm} from "vuetify/components";
 import ShowPasswordButton from "./ShowPasswordButton.vue";
+
+const apiRef = inject(apiRefKey)
+const notifierRef = inject(notifierRefKey);
 
 const username = ref('')
 const password = ref('')
@@ -31,7 +34,6 @@ const passwordRepeatRules = ref([
   (value: string) => value !== password.value ? "Must match password" : true
 ])
 
-const apiRef = inject(apiRefKey)
 const input = useTemplateRef<VForm>('registration-form')
 const router = useRouter();
 
@@ -49,6 +51,7 @@ function onRegister() {
 
   api?.registerUser({username: username.value, password: password.value})
     .then(() => router.push({name: 'login'}))
+    .catch(e => notifierRef?.notifyError("Registrierung fehlgeschlagen", e))
     .finally(() => isLoading.value = false)
 }
 

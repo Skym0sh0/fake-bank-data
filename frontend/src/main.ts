@@ -9,7 +9,7 @@ import {VDateInput} from 'vuetify/labs/VDateInput'
 import {VTreeview} from 'vuetify/labs/VTreeview'
 
 import App from './App.vue'
-import {authenticationKey, errorRefKey} from "./keys.ts";
+import {authenticationKey, notifierRefKey} from "./keys.ts";
 import {userReference} from "./auth/Authentication.js";
 import {errorReference} from "./auth/ErrorHandler.ts";
 import {router} from "./router.ts";
@@ -28,7 +28,7 @@ const vuetify = createVuetify({
 
 createApp(App)
     .provide(authenticationKey, userReference)
-    .provide(errorRefKey, errorReference)
+    .provide(notifierRefKey, errorReference)
     .use(vuetify)
     .use(router)
     .mount('#app')

@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import {inject, provide} from "vue";
-import {apiRefKey, ApiType, authenticationKey, errorRefKey} from "../keys.ts";
+import {apiRefKey, ApiType, authenticationKey, notifierRefKey} from "../keys.ts";
 import {v4 as uuidv4} from "uuid";
 import {CategoryApi, Configuration, ReportsApi, TurnoversApi, UserAuthApi} from "@api/index.ts"
 import axios, {AxiosError, AxiosInstance} from "axios";
 
 const userRef = inject(authenticationKey)?.value;
-const errorReference = inject(errorRefKey)?.value;
+const errorReference = inject(notifierRefKey)?.value;
 
 const client: AxiosInstance = axios.create({
   headers: {

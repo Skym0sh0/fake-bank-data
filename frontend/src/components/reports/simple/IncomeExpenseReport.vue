@@ -5,10 +5,11 @@ import {MonthlyIncomeExpenseDataPoint, ReportsApi} from "@api/api.ts";
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
 import {DateAxis, XYChart} from "@amcharts/amcharts4/charts";
-import {apiRefKey} from "../../../keys.ts";
+import {apiRefKey, notifierRefKey} from "../../../keys.ts";
 import {DateTime} from "luxon";
 
 const api: ReportsApi | undefined = inject(apiRefKey)?.reportsApi;
+const notifierRef = inject(notifierRefKey);
 
 const {height} = defineProps<{ height: number }>();
 
@@ -228,10 +229,8 @@ function loadData() {
   isLoading.value = true;
 
   api.fetchMonthlyIncomeExpenseReport()
-    .then(res => {
-      incomeExpenses.value = res.data.data ?? [];
-    })
-    .catch(e => console.error(e))
+    .then(res => incomeExpenses.value = res.data.data ?? [])
+    .catch(e => notifierRef?.notifyError("Report konnte nicht geladen werden", e))
     .finally(() => {
       isLoading.value = false;
 

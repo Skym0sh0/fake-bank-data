@@ -8,10 +8,11 @@ import {FlowDataPoint, IncomeExpenseFlowReport, ReportsApi} from "@api/api.ts";
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
 import {SankeyDiagram} from "@amcharts/amcharts4/charts";
-import {apiRefKey} from "../../../keys.ts";
+import {apiRefKey, notifierRefKey} from "../../../keys.ts";
 import {AxiosResponse} from "axios";
 
 const api: ReportsApi | undefined = inject(apiRefKey)?.reportsApi;
+const notifierRef = inject(notifierRefKey);
 
 const {select, height} = defineProps<{
   select: SelectType;
@@ -187,10 +188,8 @@ function loadData() {
   isLoading.value = true
 
   doApiCall?.()
-    ?.then(res => {
-      sankeyData.value = res.data;
-    })
-    ?.catch(e => console.error(e))
+    ?.then(res => sankeyData.value = res.data)
+    ?.catch(e => notifierRef?.notifyError("Report konnte nicht geladen werden", e))
     ?.finally(() => {
       isLoading.value = false
 
