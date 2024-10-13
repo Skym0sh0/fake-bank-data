@@ -1,14 +1,12 @@
 import {ref} from "vue";
-import {Problem} from "@api/api.ts";
 
-const lastError = ref<Problem | undefined>(undefined)
+const lastError = ref<Error | undefined>(undefined)
 
 function resetError() {
   lastError.value = undefined;
 }
 
-function setError(e: Problem) {
-  console.log("new error", e)
+function setError(e: Error) {
   lastError.value = e
 }
 
