@@ -2,13 +2,14 @@
 import Waiter from "../../misc/Waiter.vue";
 import {BalanceDataPoint, ReportsApi} from "@api/index.ts"
 import {computed, inject, nextTick, onMounted, onUnmounted, ref, useTemplateRef} from "vue";
-import {apiRefKey} from "../../../keys.ts";
+import {apiRefKey, notifierRefKey} from "../../../keys.ts";
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
 import {XYChart} from "@amcharts/amcharts4/charts";
 import {DateTime} from "luxon";
 
 const api: ReportsApi | undefined = inject(apiRefKey)?.reportsApi;
+const notifierRef = inject(notifierRefKey);
 
 const {height} = defineProps<{ height: number }>();
 
@@ -116,7 +117,7 @@ function loadData() {
     .then(res => {
       data.value = res.data.data ?? []
     })
-    .catch(e => console.error(e))
+    .catch(e => notifierRef?.notifyError("Report konnte nicht geladen werden", e))
     .finally(() => {
       isLoading.value = false;
 

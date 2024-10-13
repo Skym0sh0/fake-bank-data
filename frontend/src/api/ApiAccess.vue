@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import {inject, provide} from "vue";
-import {apiRefKey, ApiType, authenticationKey, errorRefKey} from "../keys.ts";
+import {apiRefKey, ApiType, authenticationKey} from "../keys.ts";
 import {v4 as uuidv4} from "uuid";
 import {CategoryApi, Configuration, ReportsApi, TurnoversApi, UserAuthApi} from "@api/index.ts"
-import axios, {AxiosInstance} from "axios";
+import axios, {AxiosError, AxiosInstance} from "axios";
 
 const userRef = inject(authenticationKey)?.value;
-const errorReference = inject(errorRefKey)?.value;
 
 const client: AxiosInstance = axios.create({
   headers: {
@@ -29,15 +28,13 @@ client.interceptors.request.use(request => {
 client.interceptors.response.use(response => {
     return response
   },
-  error => {
-    errorReference?.setError(error.response.data);
-
-    if (error.response.status === 401 && !error.request?.responseURL?.endsWith("/api/auth/login")) {
+  (error: AxiosError) => {
+    if (error.response?.status === 401 && !error.request?.responseURL?.endsWith("/api/auth/login")) {
       userRef?.logout();
       location.reload();
     }
 
-    return Promise.reject(error.response.data);
+    return Promise.reject(error);
   })
 
 const config: Configuration = new Configuration({

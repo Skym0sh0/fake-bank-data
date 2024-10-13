@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import {inject, onMounted, ref} from "vue";
 import {TurnoverImport, TurnoversApi} from "@api/api.ts";
-import {apiRefKey} from "../../keys.ts";
+import {apiRefKey, notifierRefKey} from "../../keys.ts";
 import TurnoversList from "./TurnoversList.vue";
 import WaitingIndicator from "../misc/WaitingIndicator.vue";
 import TurnoverImporting from "./importing/TurnoverImporting.vue";
 import type {AxiosResponse} from "axios";
 
 const api: TurnoversApi | undefined = inject(apiRefKey)?.turnoversApi;
+const notifierRef = inject(notifierRefKey);
 
 const isLoading = ref<boolean>(false);
 const turnoverImports = ref<TurnoverImport[]>([]);
@@ -20,6 +21,7 @@ function loadImports() {
 
   api.fetchTurnoverImports()
     .then((res: AxiosResponse<TurnoverImport[]>) => turnoverImports.value = res.data)
+    .catch(e => notifierRef?.notifyError("Umsätze konnten nicht geladen werden", e))
     .finally(() => isLoading.value = false)
 }
 
@@ -33,6 +35,7 @@ function onDelete(fileImport: TurnoverImport) {
     .then(() => {
       turnoverImports.value = turnoverImports.value.filter(i => i.id !== fileImport.id)
     })
+    .catch(e => notifierRef?.notifyError("Umsätze konnte nicht gelöscht werden", e))
     .then(() => loadImports())
     .finally(() => isLoading.value = false)
 }

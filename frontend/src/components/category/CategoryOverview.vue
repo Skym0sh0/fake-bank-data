@@ -2,7 +2,7 @@
 import WaitingIndicator from "../misc/WaitingIndicator.vue";
 import {computed, inject, onMounted, ref, useTemplateRef} from "vue";
 import {Category, CategoryApi, CategoryPatch} from "@api/api.ts";
-import {apiRefKey} from "../../keys.ts";
+import {apiRefKey, notifierRefKey} from "../../keys.ts";
 import CategoryList from "./CategoryList.vue";
 import {CategoriesById, mapCategoriesById} from "../misc/categoryHelpers.ts";
 import {CategoryReassign, NewCategory} from "./CategoryTreeList.vue";
@@ -11,6 +11,7 @@ import CategoryDetails from "./CategoryDetails.vue";
 import {AxiosResponse} from "axios";
 
 const api: CategoryApi | undefined = inject(apiRefKey)?.categoriesApi;
+const notifierRef = inject(notifierRefKey);
 
 type DetailSelectionType = {
   isSelected: boolean;
@@ -52,9 +53,8 @@ function loadCategories() {
 
       categories.value = res.data.flatMap(flatter)
     })
-    .finally(() => {
-      isLoading.value = false
-    })
+    .catch(e => notifierRef?.notifyError("Kategorien konnten nicht geladen werden", e))
+    .finally(() => isLoading.value = false)
 }
 
 function newCategory(parentId: string | null | undefined) {
@@ -138,6 +138,7 @@ function doRestCallForCategory(callback: () => Promise<AxiosResponse<Category>> 
       categories.value.push(res.data)
       openEditView(res.data.id)
     })
+    .catch(e => notifierRef?.notifyError("Kategorie konnte nicht erstellt oder verändert werden", e))
     .then(() => refresh())
     .finally(() => {
       isLoading.value = false
@@ -153,11 +154,10 @@ function deleteCategory(category: Category) {
   api?.deleteCategory(category.id)
     .then(() => {
       categories.value = _.filter(categories.value, cur => cur.id !== category.id)
-      refresh()
     })
-    .finally(() => {
-      isLoading.value = false
-    })
+    .then(() => refresh())
+    .catch(e => notifierRef?.notifyError("Kategorie konnte nicht gelöscht werden", e))
+    .finally(() => isLoading.value = false)
 }
 
 function reassignCategories(payload: CategoryReassign) {
@@ -167,10 +167,10 @@ function reassignCategories(payload: CategoryReassign) {
     payload.sources.map(id => categoriesById.value[id])
       .map(source => api?.reallocateCategory(payload.target.id, source.id))
   )
+    .then(() => notifierRef?.notifySuccess("Kategorien verschoben"))
     .then(() => refresh())
-    .finally(() => {
-      isLoading.value = false
-    })
+    .catch(e => notifierRef?.notifyError("Kategorie konnte nicht verschoben werden", e))
+    .finally(() => isLoading.value = false)
 }
 
 function refresh() {
@@ -178,7 +178,7 @@ function refresh() {
 }
 
 onMounted(() => {
-  loadCategories();
+  refresh();
 })
 </script>
 
@@ -194,9 +194,8 @@ onMounted(() => {
                :loading="isLoading"
                :disabled="selectedForDetails.isSelected"
                prepend-icon="mdi-plus-box-outline"
-               color="primary">
-          Neue Kategorie
-        </v-btn>
+               text="Neue Kategorie"
+               color="primary"/>
       </div>
     </v-card-title>
 

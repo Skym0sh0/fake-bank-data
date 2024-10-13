@@ -3,12 +3,13 @@ import WaitingIndicator from "../../misc/WaitingIndicator.vue";
 import {computed, inject, ref} from "vue";
 import {DateTime} from "luxon";
 import {BasicCoarseInfo, ReportsApi, ReportTimeUnits} from "@api/api.ts";
-import {apiRefKey} from "../../../keys.ts";
+import {apiRefKey, notifierRefKey} from "../../../keys.ts";
 import TimeboxSelector from "./TimeboxSelector.vue";
 import {AssociationsType, BasicInfo, SelectType} from "./types.ts";
 import IncomeExpenseSankeyReport from "./IncomeExpenseSankeyReport.vue";
 
 const api: ReportsApi | undefined = inject(apiRefKey)?.reportsApi;
+const notifierRef = inject(notifierRefKey);
 
 const now = DateTime.now();
 
@@ -50,6 +51,7 @@ function loadBasicInfo() {
       select.value.year = basicInfo.value.latest.year
       select.value.month = undefined
     })
+    .catch(e => notifierRef?.notifyError("Basis Infos konnten nicht geladen werden", e))
     .finally(() => isLoading.value = false)
 }
 

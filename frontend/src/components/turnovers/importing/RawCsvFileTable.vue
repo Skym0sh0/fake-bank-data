@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import {computed, inject, onMounted, ref, watch} from "vue";
 import {RawCsvTable, TurnoversApi} from "@api/api.ts";
-import {apiRefKey} from "../../../keys.ts";
+import {apiRefKey, notifierRefKey} from "../../../keys.ts";
 import * as _ from "lodash";
 
 const api: TurnoversApi | undefined = inject(apiRefKey)?.turnoversApi;
+const notifierRef = inject(notifierRefKey);
 
 const {file, encoding} = defineProps<{
   file?: File;
@@ -44,6 +45,7 @@ function triggerParsing() {
     .then(data => {
       parsedData.value = data.data;
     })
+    .catch(e => notifierRef?.notifyError(`CSV Datei konnte nicht verarbeitet werden`, e))
     .finally(() => emit("isLoading", false))
 }
 

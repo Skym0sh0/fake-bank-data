@@ -12,7 +12,7 @@ import {
 } from "@api/api.ts";
 import {DateTime} from "luxon";
 import {useRouter} from "vue-router";
-import {apiRefKey} from "../../../keys.ts";
+import {apiRefKey, notifierRefKey} from "../../../keys.ts";
 import WaitingIndicator from "../../misc/WaitingIndicator.vue";
 import ConfirmationedButton from "../../misc/ConfirmationedButton.vue";
 import TurnoverRowsTable from "./TurnoverRowsTable.vue";
@@ -20,6 +20,7 @@ import {LookupById} from "../../misc/categoryHelpers.ts";
 
 const api: TurnoversApi | undefined = inject(apiRefKey)?.turnoversApi;
 const categoryApi: CategoryApi | undefined = inject(apiRefKey)?.categoriesApi;
+const notifierRef = inject(notifierRefKey);
 
 const router = useRouter()
 
@@ -79,6 +80,7 @@ function reload() {
   isLoading.value = true
 
   Promise.all([loadCategories(), loadImport()])
+    .catch(e => notifierRef?.notifyError("Daten konnten nicht geladen werden", e))
     .finally(() => isLoading.value = false)
 }
 
@@ -93,9 +95,7 @@ function loadImport() {
 
 function loadCategories() {
   return categoryApi?.getCategoriesAsTree()
-    .then(res => {
-      categories.value = res.data
-    })
+    .then(res => categories.value = res.data)
 }
 
 function onCreateCategory(categoryName: string) {
@@ -105,6 +105,7 @@ function onCreateCategory(categoryName: string) {
 
   isLoading.value = true
   categoryApi?.createCategory(normalized)
+    .catch(e => notifierRef?.notifyError(`Neue Kategorie ${categoryName} konnte nicht erstellt werden`, e))
     .then(() => loadCategories())
     .finally(() => isLoading.value = false)
 }
@@ -147,6 +148,7 @@ function onSave() {
 
   isLoading.value = true
   api?.patchTurnoverImport(id, changes)
+    .catch(e => notifierRef?.notifyError("Umsatz konnte nicht geändert werden", e))
     .then(() => loadImport())
     .finally(() => isLoading.value = false)
 }

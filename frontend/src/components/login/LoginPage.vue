@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import WaitingIndicator from "../misc/WaitingIndicator.vue";
 import {inject, ref} from "vue";
-import {apiRefKey, authenticationKey} from "../../keys.ts";
+import {apiRefKey, authenticationKey, notifierRefKey} from "../../keys.ts";
 import {useRoute, useRouter} from 'vue-router'
 import {UserAuthApi} from "@api/api.ts"
 import ShowPasswordButton from "./ShowPasswordButton.vue";
@@ -36,6 +36,7 @@ const errorMessage = ref<string | null>(null);
 
 const userRef = inject(authenticationKey)?.value
 const apiAccess: UserAuthApi | undefined = inject(apiRefKey)?.authApi
+const notifierRef = inject(notifierRefKey);
 
 function doLogin() {
   if (!username.value || !password.value)
@@ -55,8 +56,8 @@ function doLogin() {
       router.replace({path: path})
     })
     .catch(e => {
-      console.error(e)
       errorMessage.value = e.error;
+      notifierRef?.notifyError("Login fehlgeschlagen", e)
     })
     .finally(() => isLoading.value = false);
 }

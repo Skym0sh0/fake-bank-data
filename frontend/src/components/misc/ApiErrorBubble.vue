@@ -1,77 +1,53 @@
 <script setup lang="ts">
-import {DateTime} from "luxon";
-import {computed, inject} from "vue";
-import {errorRefKey} from "../../keys.ts";
+import {computed, inject, nextTick, ref, watch} from "vue";
+import {notifierRefKey} from "../../keys.ts";
+import {NotificationEvent} from "../../auth/ErrorHandler.ts";
 
-const errorRef = inject(errorRefKey);
+const notifierRef = inject(notifierRefKey);
 
-const hasError = computed(() => {
-  return !!errorRef?.value.lastError;
-})
-const timestamp = computed(() => {
-  if (!hasError.value || !errorRef?.value.lastError?.timestamp)
-    return null;
+const notification = ref<NotificationEvent>()
 
-  return DateTime.fromISO(errorRef.value.lastError.timestamp)
-      .toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS)
+const color = computed(() => {
+  return notification.value?.isError ? "error" : "success";
 })
 
-const status = computed(() => {
-  if (!hasError.value)
-    return null;
-
-  return errorRef?.value.lastError?.status
-})
-
-const target = computed(() => {
-  if (!hasError.value)
-    return null;
-
-  return errorRef?.value.lastError?.path
-})
-
-const error = computed(() => {
-  if (!hasError.value)
-    return null;
-
-  return errorRef?.value.lastError?.error
-})
-
-const details = computed(() => {
-  if (!hasError.value)
-    return null;
-
-  return errorRef?.value.lastError?.errorDetails
-})
-
-function resetError() {
-  errorRef?.value.resetError();
+function reset() {
+  notification.value = undefined
+  notifierRef?.reset()
 }
+
+watch(
+  () => notifierRef?.lastNotification,
+  async () => {
+    notification.value = undefined
+
+    await nextTick()
+    notification.value = notifierRef?.lastNotification;
+  }
+)
 </script>
 
 <template>
-  <v-snackbar :value="hasError"
-              :multi-line="true"
-              color="red"
-              :timeout="-1">
-    <template v-slot:actions>
-      <v-btn
-          variant="text"
-          @click="resetError">
-        Close
-      </v-btn>
+  <v-snackbar :model-value="!!notification"
+              @update:model-value="reset"
+              :multi-line="notification?.isError ?? false"
+              :close-on-content-click="!notification?.isError"
+              :timer="true"
+              :color="color">
+    <template #actions>
+      <v-btn variant="text"
+             icon="mdi-close"
+             size="sm"
+             @click="reset"/>
     </template>
 
-    <template v-slot:default>
-      <h5> {{ error }} - {{ status }} </h5>
-      <h6> {{ target }}</h6>
+    <template #default v-if="notification">
+      <div class="d-flex flex-column justify-start cursor-help">
+        <span class="font-weight-bold">{{ notification.message }}</span>
 
-      <div>
-        {{ details }}
-      </div>
-
-      <div style="font-size: 0.675em">
-        {{ timestamp }}
+        <span v-if="notification.error" class="text-caption text-center">
+          {{ notification.error.message }}
+        </span>
       </div>
     </template>
   </v-snackbar>

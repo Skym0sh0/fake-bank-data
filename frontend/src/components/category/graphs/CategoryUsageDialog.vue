@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {Category, CategoryPatch, TurnoverImportRowsPatch, TurnoverRow, TurnoverRowPatch} from "@api/api.ts";
 import {computed, inject, ref} from "vue";
-import {apiRefKey, ApiType} from "../../../keys.ts";
+import {apiRefKey, ApiType, notifierRefKey} from "../../../keys.ts";
 import TableCellMonetary from "../../misc/TableCellMonetary.vue";
 import TableCellDescription from "../../misc/TableCellDescription.vue";
 import CategoryInput from "../../misc/CategoryInput.vue";
@@ -9,6 +9,7 @@ import {flatCategoryTreeWithParentChain, mapCategoriesById, mapCategoriesByName}
 import type {VDataTable} from "vuetify/components";
 
 const api: ApiType | undefined = inject(apiRefKey);
+const notifierRef = inject(notifierRefKey);
 
 const {category} = defineProps<{
   category: Category;
@@ -104,6 +105,7 @@ function onCreateCategory(id: string, categoryName: string) {
       else
         allCategories.value = [res.data]
     })
+    .catch(e => notifierRef?.notifyError(`Kategorie '${categoryName}' konnte nicht erstellt werden`, e))
     .finally(() => currentLoadingRowId.value = null)
 }
 
@@ -116,16 +118,16 @@ function save() {
   api?.turnoversApi.batchPatchTurnoverImports(patch)
     .then(() => emit("refresh"))
     .then(() => reset())
+    .catch(e => notifierRef?.notifyError(`Kategorie konnte nicht verändert werden`, e))
     .finally(() => isLoading.value = false)
 }
 
 function loadData() {
   isLoading.value = true;
 
-  setTimeout(() => {
-    Promise.all([loadCategories(), loadReferencedRows()])
-      .finally(() => isLoading.value = false)
-  }, 500)
+  Promise.all([loadCategories(), loadReferencedRows()])
+    .catch(e => notifierRef?.notifyError(`Kategorien konnten nicht geladen werden`, e))
+    .finally(() => isLoading.value = false)
 }
 
 function loadCategories() {
