@@ -1,23 +1,22 @@
 <script setup lang="ts">
-import {computed, inject, ref} from "vue";
+import {computed, ref} from "vue";
 import UserAvatar from "./components/login/UserAvatar.vue";
 import WaitingIndicator from "./components/misc/WaitingIndicator.vue";
-import {authenticationKey} from "./keys.ts";
 import ApiErrorBubble from "./components/misc/ApiErrorBubble.vue";
 import ApiAccess from "./api/ApiAccess.vue";
 import SkyNavigation from "./components/layout/SkyNavigation.vue";
 
 import RegularIncomeIcon from './assets/regular-income.svg'
+import {useUserStore} from "./store/user-store.ts";
 
-const userRef = inject(authenticationKey)
-
-userRef?.value?.initUser()
+const userStore = useUserStore();
+userStore.initUser()
 
 const drawer = ref(true)
 const isLoggingOut = ref(false)
 
 const isLoggedIn = computed(() => {
-  return !!userRef?.value.user;
+  return userStore.isLoggedIn
 })
 
 const isDevMode = computed(() => {
@@ -27,7 +26,7 @@ const isDevMode = computed(() => {
 function doLogout() {
   isLoggingOut.value = true
 
-  userRef?.value.logout();
+  userStore.logout()
   location.reload();
 }
 

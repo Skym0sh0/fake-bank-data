@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import {inject, provide} from "vue";
-import {apiRefKey, ApiType, authenticationKey} from "../keys.ts";
+import {provide} from "vue";
+import {apiRefKey, ApiType} from "../keys.ts";
 import {v4 as uuidv4} from "uuid";
 import {CategoryApi, Configuration, ReportsApi, TurnoversApi, UserAuthApi} from "@api/index.ts"
 import axios, {AxiosError, AxiosInstance} from "axios";
-
-const userRef = inject(authenticationKey)?.value;
+import {useUserStore} from "../store/user-store.ts";
 
 const client: AxiosInstance = axios.create({
   headers: {
@@ -14,7 +13,9 @@ const client: AxiosInstance = axios.create({
 });
 
 client.interceptors.request.use(request => {
-  const user = userRef?.user;
+  const userStore = useUserStore()
+
+  const user = userStore.currentUser;
 
   if (user && user.username && user.password) {
     const authdata = window.btoa(user.username + ":" + user.password)
@@ -29,8 +30,10 @@ client.interceptors.response.use(response => {
     return response
   },
   (error: AxiosError) => {
+    const userStore = useUserStore()
+
     if (error.response?.status === 401 && !error.request?.responseURL?.endsWith("/api/auth/login")) {
-      userRef?.logout();
+      userStore.logout();
       location.reload();
     }
 

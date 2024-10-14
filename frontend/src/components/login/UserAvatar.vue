@@ -1,16 +1,16 @@
 <script setup lang="ts">
 
-import {computed, inject} from "vue";
-import {authenticationKey} from "../../keys.ts";
+import {computed} from "vue";
+import {useUserStore} from "../../store/user-store.ts";
 
-const userRef = inject(authenticationKey)
+const userStore = useUserStore();
 
 const username = computed<string>(() => {
-  const fullname = [userRef?.value.user?.firstname ?? '', userRef?.value.user?.lastname ?? ''].join(" ").trim()
+  const fullname = [userStore.currentUser?.firstname ?? '', userStore.currentUser?.lastname ?? ''].join(" ").trim()
   if (fullname)
     return fullname
 
-  return userRef?.value.user?.username ?? '';
+  return userStore.currentUser?.username ?? '';
 })
 
 const avatar = computed(() => {
