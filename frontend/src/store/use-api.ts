@@ -1,5 +1,4 @@
 import {defineStore} from "pinia";
-import {ApiType} from "../keys.ts";
 import {CategoryApi, ReportsApi, TurnoversApi, UserAuthApi} from "@api/api.ts";
 import {Configuration} from "@api/configuration.ts";
 import axios, {AxiosError, AxiosInstance} from "axios";
@@ -48,7 +47,7 @@ export const useApi = defineStore('api', () => {
     basePath: import.meta.env.VITE_BACKEND_BASE_PATH,
   });
 
-  const api: ApiType = {
+  const api = {
     authApi: new UserAuthApi(config, "", client.value),
     reportsApi: new ReportsApi(config, "", client.value),
     categoriesApi: new CategoryApi(config, "", client.value),

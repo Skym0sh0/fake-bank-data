@@ -1,15 +1,13 @@
 <script setup lang="ts">
-import {computed, onMounted, ref, watch} from "vue";
-import {CategoriesById, CategoriesByName, CategoryWithParentNamesChained} from "./categoryHelpers.ts";
+import {computed, nextTick, onMounted, ref, watch} from "vue";
+import {useCategories} from "../../store/use-categories.ts";
+import WaitingIndicator from "./WaitingIndicator.vue";
 
 const {
   id,
   value,
   disabled = false,
   loading = false,
-  flattedCategories,
-  categoriesById,
-  categoriesByName,
   state = true,
   required = true
 } = defineProps<{
@@ -17,17 +15,15 @@ const {
   value?: string | null;
   disabled?: boolean;
   loading?: boolean;
-  flattedCategories: CategoryWithParentNamesChained<string>[];
-  categoriesById: CategoriesById;
-  categoriesByName: CategoriesByName;
   state?: boolean;
   required?: boolean;
 }>();
 
 const emit = defineEmits<{
   (e: "input", id: string | undefined | null): void;
-  (e: "createCategory", name: string): void;
 }>();
+
+const categoriesStore = useCategories();
 
 const currentSearch = ref("");
 const isUnknownCategory = ref(false);
@@ -66,7 +62,7 @@ function onCategoryInput(newValue: string) {
 }
 
 function findOption() {
-  const foundCategory = categoriesByName[currentSearch.value];
+  const foundCategory = categoriesStore.categoriesByName[currentSearch.value];
   if (foundCategory) {
     isUnknownCategory.value = false;
     emit('input', foundCategory.id)
@@ -77,12 +73,18 @@ function findOption() {
 }
 
 function onAddCategory() {
-  emit('createCategory', currentSearch.value)
+  categoriesStore.createCategory(currentSearch.value)
 }
 
 function initWhenOnlyValueIsSet() {
+  console.log("\t", "init", categoriesStore.isLoading, categoriesStore.isInitialized, value)
+  if (categoriesStore.isLoading)
+    return;
+
+  console.log("not loading anymore")
+
   if (value) {
-    const foundCategory = categoriesById[value];
+    const foundCategory = categoriesStore.categoriesById[value];
     if (foundCategory) {
       currentSearch.value = foundCategory.name;
       isUnknownCategory.value = false;
@@ -96,60 +98,79 @@ function initWhenOnlyValueIsSet() {
 }
 
 onMounted(() => {
+  console.log("mounted", categoriesStore.isLoading, categoriesStore.categories.length)
+
   initWhenOnlyValueIsSet();
 })
 
-watch(() => value, () => initWhenOnlyValueIsSet(), {deep: true})
-watch(() => categoriesByName, () => findOption(), {deep: true})
+watch(() => value, () => {
+  console.log("on value watch", value)
+  initWhenOnlyValueIsSet();
+}, {deep: true})
+watch(() => categoriesStore.categoriesById, async () => {
+  console.log("categories id watch", value, categoriesStore.isLoading, categoriesStore.categoriesById)
+  await nextTick()
+  initWhenOnlyValueIsSet();
+}, {deep: true})
+watch(() => categoriesStore.categoriesByName, () => {
+  console.log("categories name watch")
+  findOption();
+}, {deep: true})
 
 </script>
 
 <template>
-  <v-text-field :id="`${id}-category-input`"
-                :list="`${id}-category-input-list`"
-                :value="currentSearch"
-                @update:modelValue="onCategoryInput"
-                :error="!isValidationTrue"
-                :disabled="isDisabled"
-                density="compact"
-                type="text"
-                autocomplete="off"
-                :hide-details="true">
+  <div v-if="categoriesStore.isLoading || loading">
+    <waiting-indicator :is-loading="true"/>
+  </div>
 
-    <template v-slot:append-inner>
-      <v-icon color="success" v-if="isValidationTrue">
-        mdi-check
-      </v-icon>
+  <div v-else>
+    <v-text-field :id="`${id}-category-input`"
+                  :list="`${id}-category-input-list`"
+                  :value="currentSearch"
+                  @update:modelValue="onCategoryInput"
+                  :error="!isValidationTrue"
+                  :disabled="isDisabled"
+                  density="compact"
+                  type="text"
+                  autocomplete="off"
+                  :hide-details="true">
 
-      <v-tooltip v-if="!isValidationTrue">
-        <template v-slot:activator="{ props }">
-          <v-icon color="error" v-bind="props">
-            mdi-alert-circle
-          </v-icon>
-        </template>
+      <template v-slot:append-inner>
+        <v-icon color="success" v-if="isValidationTrue">
+          mdi-check
+        </v-icon>
 
-        Unbekannte Kategorie "{{ currentSearch }}"
-      </v-tooltip>
+        <v-tooltip v-if="!isValidationTrue">
+          <template v-slot:activator="{ props }">
+            <v-icon color="error" v-bind="props">
+              mdi-alert-circle
+            </v-icon>
+          </template>
 
-      <v-btn v-if="!isDisabled"
-             @click="onAddCategory"
-             :disabled="!isAddableCategory || loading"
-             :icon="loading ? 'mdi-timer-sand' : 'mdi-plus'"
-             title="Erstelle diese Kategorie neu"
-             color="primary"
-             size="small"
-             variant="flat"
-             density="compact"/>
-    </template>
+          Unbekannte Kategorie "{{ currentSearch }}"
+        </v-tooltip>
 
-    <template v-slot:append>
+        <v-btn v-if="!isDisabled"
+               @click="onAddCategory"
+               :disabled="!isAddableCategory || loading"
+               :icon="loading ? 'mdi-timer-sand' : 'mdi-plus'"
+               title="Erstelle diese Kategorie neu"
+               color="primary"
+               size="small"
+               variant="flat"
+               density="compact"/>
+      </template>
 
-    </template>
-  </v-text-field>
+      <template v-slot:append>
 
-  <datalist :id="`${id}-category-input-list`">
-    <option v-for="cat in flattedCategories" :key="cat.id" :value="cat.name">
-      {{ cat.parentChain }}
-    </option>
-  </datalist>
+      </template>
+    </v-text-field>
+
+    <datalist :id="`${id}-category-input-list`">
+      <option v-for="cat in categoriesStore.flattedCategories" :key="cat.id" :value="cat.name">
+        {{ cat.parentChain }}
+      </option>
+    </datalist>
+  </div>
 </template>
