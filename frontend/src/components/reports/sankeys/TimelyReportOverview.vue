@@ -2,13 +2,14 @@
 import WaitingIndicator from "../../misc/WaitingIndicator.vue";
 import {computed, inject, ref} from "vue";
 import {DateTime} from "luxon";
-import {BasicCoarseInfo, ReportsApi, ReportTimeUnits} from "@api/api.ts";
-import {apiRefKey, notifierRefKey} from "../../../keys.ts";
+import {BasicCoarseInfo, ReportTimeUnits} from "@api/api.ts";
+import {notifierRefKey} from "../../../keys.ts";
 import TimeboxSelector from "./TimeboxSelector.vue";
 import {AssociationsType, BasicInfo, SelectType} from "./types.ts";
 import IncomeExpenseSankeyReport from "./IncomeExpenseSankeyReport.vue";
+import {useApi} from "../../../store/use-api.ts";
 
-const api: ReportsApi | undefined = inject(apiRefKey)?.reportsApi;
+const api = useApi()
 const notifierRef = inject(notifierRefKey);
 
 const now = DateTime.now();
@@ -35,7 +36,7 @@ const isDataQueryable = computed(() => {
 function loadBasicInfo() {
   isLoading.value = true
 
-  api?.fetchCoarseInfos()
+  api.reportsApi.fetchCoarseInfos()
     .then(resp => {
       const res: BasicCoarseInfo = resp.data;
 

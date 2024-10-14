@@ -7,8 +7,7 @@ import {
   TurnoverImport,
   TurnoverImportRowsPatch,
   TurnoverRow,
-  TurnoverRowPatch,
-  TurnoversApi
+  TurnoverRowPatch
 } from "@api/api.ts";
 import {DateTime} from "luxon";
 import {useRouter} from "vue-router";
@@ -17,8 +16,9 @@ import WaitingIndicator from "../../misc/WaitingIndicator.vue";
 import ConfirmationedButton from "../../misc/ConfirmationedButton.vue";
 import TurnoverRowsTable from "./TurnoverRowsTable.vue";
 import {LookupById} from "../../misc/categoryHelpers.ts";
+import {useApi} from "../../../store/use-api.ts";
 
-const api: TurnoversApi | undefined = inject(apiRefKey)?.turnoversApi;
+const api = useApi()
 const categoryApi: CategoryApi | undefined = inject(apiRefKey)?.categoriesApi;
 const notifierRef = inject(notifierRefKey);
 
@@ -85,7 +85,7 @@ function reload() {
 }
 
 function loadImport() {
-  return api?.fetchTurnoverImport(id)
+  return api.turnoversApi.fetchTurnoverImport(id)
     .then(res => {
       turnoverImport.value = res.data
       deleteRowsWithIds.value = []
@@ -147,7 +147,7 @@ function onSave() {
   };
 
   isLoading.value = true
-  api?.patchTurnoverImport(id, changes)
+  api.turnoversApi.patchTurnoverImport(id, changes)
     .catch(e => notifierRef?.notifyError("Umsatz konnte nicht geändert werden", e))
     .then(() => loadImport())
     .finally(() => isLoading.value = false)

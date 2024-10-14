@@ -2,12 +2,12 @@
 import WaitingIndicator from "../misc/WaitingIndicator.vue";
 import {inject, onMounted, ref, useTemplateRef} from "vue";
 import {useRouter} from "vue-router";
-import {apiRefKey, notifierRefKey} from "../../keys.ts";
-import {UserAuthApi} from "@api/api.ts";
+import {notifierRefKey} from "../../keys.ts";
 import {VForm} from "vuetify/components";
 import ShowPasswordButton from "./ShowPasswordButton.vue";
+import {useApi} from "../../store/use-api.ts";
 
-const apiRef = inject(apiRefKey)
+const api = useApi()
 const notifierRef = inject(notifierRefKey);
 
 const username = ref('')
@@ -47,9 +47,7 @@ function onRegister() {
 
   isLoading.value = true
 
-  const api: UserAuthApi | undefined = apiRef?.authApi;
-
-  api?.registerUser({username: username.value, password: password.value})
+  api.authApi.registerUser({username: username.value, password: password.value})
     .then(() => router.push({name: 'login'}))
     .catch(e => notifierRef?.notifyError("Registrierung fehlgeschlagen", e))
     .finally(() => isLoading.value = false)

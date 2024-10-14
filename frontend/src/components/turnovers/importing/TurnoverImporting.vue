@@ -17,6 +17,7 @@ import {required} from '@vuelidate/validators'
 import RawCsvFileTable from "./RawCsvFileTable.vue";
 import TurnoverPreviewTable from "./TurnoverPreviewTable.vue";
 import Histogram, {HistogramValueType} from "./Histogram.vue";
+import {useApi} from "../../../store/use-api.ts";
 
 function getBankFormatName(frmt: TurnoverImportFormat): string {
   const BANK_FORMAT_NAMES = {
@@ -36,8 +37,7 @@ type SupportedFileType = {
 
 export type PreviewRowWithOriginalState = TurnoverRowPreview & { originalImportable?: boolean; index: number; };
 
-const api: TurnoversApi | undefined = inject(apiRefKey)?.turnoversApi;
-const categoriesApi: CategoryApi | undefined = inject(apiRefKey)?.categoriesApi;
+const api = useApi()
 const notifierRef = inject(notifierRefKey);
 
 const {isLoading} = defineProps<{
@@ -132,10 +132,8 @@ const progressHistogram = computed<HistogramValueType[]>(() => {
 })
 
 function loadCategories() {
-  return categoriesApi?.getCategoriesAsTree()
-    .then(res => {
-      categories.value = res.data;
-    })
+  return api.categoriesApi.getCategoriesAsTree()
+    .then(res => categories.value = res.data)
 }
 
 function onIsLoading(isLoading: boolean) {
@@ -151,7 +149,7 @@ function onStartPreview() {
 }
 
 function doPreviewRequest() {
-  return api?.processPreview(selectedFileType.value!, fileSelection.value!, selectedFileEncoding.value)
+  return api.turnoversApi.processPreview(selectedFileType.value!, fileSelection.value!, selectedFileEncoding.value)
     .then(preview => {
       parsedPreview.value = preview.data;
 
@@ -177,7 +175,7 @@ function doImportRequest() {
     rows: importableRows.value,
   }
 
-  api?.createTurnoverImport(fileSelection.value!, patch)
+  api.turnoversApi.createTurnoverImport(fileSelection.value!, patch)
     .then(() => {
       emit("uploadSucceeded")
       // this.$refs["file-upload-modal"].hide();
@@ -194,7 +192,7 @@ function onCreateCategory({categoryName, callback}: { categoryName: string; call
 
   isUploading.value = true;
 
-  return categoriesApi?.createCategory(normalized)
+  return api.categoriesApi.createCategory(normalized)
     .catch(e => notifierRef?.notifyError(`Neue Kategorie ${categoryName} konnte nicht erstellt werden`, e))
     .then(() => loadCategories())
     .then(() => {
@@ -224,7 +222,7 @@ function openDialog() {
 onMounted(() => {
   isUploading.value = true;
 
-  api?.getSupportedFormats()
+  api.turnoversApi.getSupportedFormats()
     .then(res => {
       supportedFileTypes.value = [
         {

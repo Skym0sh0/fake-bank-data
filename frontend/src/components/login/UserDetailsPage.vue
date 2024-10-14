@@ -2,13 +2,13 @@
 import WaitingIndicator from "../misc/WaitingIndicator.vue";
 import ConfirmationedButton from "../misc/ConfirmationedButton.vue";
 import {inject, onMounted, ref, useTemplateRef} from "vue";
-import {UserAuthApi} from "@api/api.ts";
-import {apiRefKey, notifierRefKey} from "../../keys.ts";
+import {notifierRefKey} from "../../keys.ts";
 import {VForm} from "vuetify/components";
 import ShowPasswordButton from "./ShowPasswordButton.vue";
 import {useUserStore} from "../../store/user-store.ts";
+import {useApi} from "../../store/use-api.ts";
 
-const apiRef: UserAuthApi | undefined = inject(apiRefKey)?.authApi
+const api = useApi()
 const notifierRef = inject(notifierRefKey);
 
 const isLoading = ref(false)
@@ -46,7 +46,7 @@ function onDelete() {
 
   isLoading.value = true
 
-  apiRef?.deleteUser(userStore.currentUser.id)
+  api.authApi.deleteUser(userStore.currentUser.id)
     .then(() => reload())
     .catch(e => notifierRef?.notifyError("User konnte nicht gelöscht werden", e))
     .finally(() => isLoading.value = false)
@@ -58,7 +58,7 @@ function onSave() {
 
   isLoading.value = true
 
-  apiRef?.updateUser(userStore.currentUser.id, {
+  api.authApi.updateUser(userStore.currentUser.id, {
     firstname: firstname.value,
     lastname: lastname.value,
     username: username.value,

@@ -1,37 +1,33 @@
 <script setup lang="ts">
 import {inject, onMounted, ref} from "vue";
-import {TurnoverImport, TurnoversApi} from "@api/api.ts";
-import {apiRefKey, notifierRefKey} from "../../keys.ts";
+import {TurnoverImport} from "@api/api.ts";
+import {notifierRefKey} from "../../keys.ts";
 import TurnoversList from "./TurnoversList.vue";
 import WaitingIndicator from "../misc/WaitingIndicator.vue";
 import TurnoverImporting from "./importing/TurnoverImporting.vue";
 import type {AxiosResponse} from "axios";
+import {useApi} from "../../store/use-api.ts";
 
-const api: TurnoversApi | undefined = inject(apiRefKey)?.turnoversApi;
 const notifierRef = inject(notifierRefKey);
+
+const api = useApi()
 
 const isLoading = ref<boolean>(false);
 const turnoverImports = ref<TurnoverImport[]>([]);
 
 function loadImports() {
-  if (!api)
-    return;
-
   isLoading.value = true;
 
-  api.fetchTurnoverImports()
+  api.turnoversApi.fetchTurnoverImports()
     .then((res: AxiosResponse<TurnoverImport[]>) => turnoverImports.value = res.data)
     .catch(e => notifierRef?.notifyError("Umsätze konnten nicht geladen werden", e))
     .finally(() => isLoading.value = false)
 }
 
 function onDelete(fileImport: TurnoverImport) {
-  if (!api)
-    return;
-
   isLoading.value = true;
 
-  api.deleteTurnoverImport(fileImport.id)
+  api.turnoversApi.deleteTurnoverImport(fileImport.id)
     .then(() => {
       turnoverImports.value = turnoverImports.value.filter(i => i.id !== fileImport.id)
     })

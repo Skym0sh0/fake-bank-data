@@ -1,16 +1,17 @@
 <script setup lang="ts">
 import WaitingIndicator from "../misc/WaitingIndicator.vue";
 import {inject, ref} from "vue";
-import {apiRefKey, notifierRefKey} from "../../keys.ts";
+import {notifierRefKey} from "../../keys.ts";
 import {useRoute, useRouter} from 'vue-router'
-import {UserAuthApi} from "@api/api.ts"
 import ShowPasswordButton from "./ShowPasswordButton.vue";
 import {useUserStore} from "../../store/user-store.ts";
+import {useApi} from "../../store/use-api.ts";
 
 const router = useRouter()
 const route = useRoute()
 
 const userStore = useUserStore();
+const api = useApi()
 
 const nameRules = [
   (value: string) => {
@@ -37,19 +38,16 @@ const passwordVisible = ref(false);
 
 const errorMessage = ref<string | null>(null);
 
-const apiAccess: UserAuthApi | undefined = inject(apiRefKey)?.authApi
 const notifierRef = inject(notifierRefKey);
 
 function doLogin() {
   if (!username.value || !password.value)
     return;
 
-  if (!apiAccess)
-    return;
 
   isLoading.value = true;
 
-  apiAccess.loginUser({username: username.value, password: password.value})
+  api.authApi.loginUser({username: username.value, password: password.value})
     .then(res => {
       userStore.login(res.data, password.value)
 

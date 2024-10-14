@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import {Category, CategoryPatch, TurnoverImportRowsPatch, TurnoverRow, TurnoverRowPatch} from "@api/api.ts";
 import {computed, inject, ref} from "vue";
-import {apiRefKey, ApiType, notifierRefKey} from "../../../keys.ts";
+import {notifierRefKey} from "../../../keys.ts";
 import TableCellMonetary from "../../misc/TableCellMonetary.vue";
 import TableCellDescription from "../../misc/TableCellDescription.vue";
 import CategoryInput from "../../misc/CategoryInput.vue";
 import {flatCategoryTreeWithParentChain, mapCategoriesById, mapCategoriesByName} from "../../misc/categoryHelpers.ts";
 import type {VDataTable} from "vuetify/components";
+import {useApi} from "../../../store/use-api.ts";
 
-const api: ApiType | undefined = inject(apiRefKey);
+const api = useApi()
 const notifierRef = inject(notifierRefKey);
 
 const {category} = defineProps<{
@@ -93,7 +94,7 @@ function onCreateCategory(id: string, categoryName: string) {
 
   currentLoadingRowId.value = id
 
-  api?.categoriesApi.createCategory(normalized)
+  api.categoriesApi.createCategory(normalized)
     .then(res => {
       referencedRows.value.forEach(row => {
         if (row.id === id)
@@ -115,7 +116,7 @@ function save() {
   const patch: TurnoverImportRowsPatch = {
     rows: changedTurnovers.value,
   };
-  api?.turnoversApi.batchPatchTurnoverImports(patch)
+  api.turnoversApi.batchPatchTurnoverImports(patch)
     .then(() => emit("refresh"))
     .then(() => reset())
     .catch(e => notifierRef?.notifyError(`Kategorie konnte nicht verändert werden`, e))
@@ -133,14 +134,14 @@ function loadData() {
 function loadCategories() {
   allCategories.value = null
 
-  return api?.categoriesApi.getCategoriesAsTree()
+  return api.categoriesApi.getCategoriesAsTree()
     .then(res => allCategories.value = res.data)
 }
 
 function loadReferencedRows() {
   referencedRows.value = [];
 
-  return api?.turnoversApi.fetchTurnoversForCategory(category.id)
+  return api.turnoversApi.fetchTurnoversForCategory(category.id)
     .then(res => {
       referencedRows.value = res.data
       originalValues.value = res.data.flatMap(rowToChangeObject)
