@@ -2,7 +2,6 @@
 import {computed, inject, onMounted, ref} from "vue";
 import {
   Category,
-  CategoryApi,
   CategoryPatch,
   TurnoverImport,
   TurnoverImportRowsPatch,
@@ -11,7 +10,7 @@ import {
 } from "@api/api.ts";
 import {DateTime} from "luxon";
 import {useRouter} from "vue-router";
-import {apiRefKey, notifierRefKey} from "../../../keys.ts";
+import {notifierRefKey} from "../../../keys.ts";
 import WaitingIndicator from "../../misc/WaitingIndicator.vue";
 import ConfirmationedButton from "../../misc/ConfirmationedButton.vue";
 import TurnoverRowsTable from "./TurnoverRowsTable.vue";
@@ -19,7 +18,6 @@ import {LookupById} from "../../misc/categoryHelpers.ts";
 import {useApi} from "../../../store/use-api.ts";
 
 const api = useApi()
-const categoryApi: CategoryApi | undefined = inject(apiRefKey)?.categoriesApi;
 const notifierRef = inject(notifierRefKey);
 
 const router = useRouter()
@@ -94,7 +92,7 @@ function loadImport() {
 }
 
 function loadCategories() {
-  return categoryApi?.getCategoriesAsTree()
+  return api.categoriesApi.getCategoriesAsTree()
     .then(res => categories.value = res.data)
 }
 
@@ -104,7 +102,7 @@ function onCreateCategory(categoryName: string) {
   };
 
   isLoading.value = true
-  categoryApi?.createCategory(normalized)
+  api.categoriesApi.createCategory(normalized)
     .catch(e => notifierRef?.notifyError(`Neue Kategorie ${categoryName} konnte nicht erstellt werden`, e))
     .then(() => loadCategories())
     .finally(() => isLoading.value = false)
