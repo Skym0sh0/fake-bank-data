@@ -15,21 +15,29 @@ export const useCategories = defineStore('categories', () => {
 
   const isInitialized = ref(false)
   const isLoading = ref(false)
+  const currentlyLoading = ref<Promise<void>>()
   const categories = ref<Category[]>([])
 
   const reload = () => {
     isLoading.value = true
 
-    return api.categoriesApi.getCategoriesAsTree()
+    const tmp = api.categoriesApi.getCategoriesAsTree()
       .then(res => categories.value = res.data)
-      .then(() => isInitialized.value = true)
+      .then(() => {
+        isInitialized.value = true
+      })
       .catch(e => notifier?.notifyError("Kategorien konnten nicht geladen werden", e))
-      .finally(() => isLoading.value = false)
+      .finally(() => {
+        isLoading.value = false;
+        currentlyLoading.value = undefined
+      })
+
+    currentlyLoading.value = tmp
+
+    return tmp;
   }
 
   const createCategory = (categoryName: string) => {
-    console.log("new category", categoryName)
-
     const normalized: CategoryPatch = {
       name: categoryName,
     };
@@ -59,6 +67,7 @@ export const useCategories = defineStore('categories', () => {
   return {
     isInitialized,
     isLoading,
+    currentlyLoading,
     categories,
     flattedCategories,
     categoriesByName,

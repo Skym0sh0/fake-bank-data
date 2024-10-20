@@ -128,11 +128,7 @@ const columns = computed<ReadonlyDataTableHeader[]>(() => {
     <template v-slot:item.categoryId="row">
       <category-input :id="`category-input-${row.index}`"
                       :value="row.item.categoryId"
-                      @input="newCategoryId => row.item.categoryId = newCategoryId ?? undefined"
-                      @createCategory="onCreateCategory"
-                      :flatted-categories="flattedCategories"
-                      :categories-by-id="categoriesById"
-                      :categories-by-name="categoriesByName"/>
+                      @input="newCategoryId => row.item.categoryId = newCategoryId ?? undefined"/>
     </template>
 
     <template v-slot:item.description="{ index, value }">
