@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import {computed, inject, nextTick, ref, watch} from "vue";
-import {notifierRefKey} from "../../keys.ts";
-import {NotificationEvent} from "../../auth/ErrorHandler.ts";
+import {computed, nextTick, ref, watch} from "vue";
+import {NotificationEvent, useNotification} from "../../store/use-notification.ts";
 
-const notifierRef = inject(notifierRefKey);
+const notifications = useNotification();
 
 const notification = ref<NotificationEvent>()
 
@@ -13,16 +12,16 @@ const color = computed(() => {
 
 function reset() {
   notification.value = undefined
-  notifierRef?.reset()
+  notifications.reset()
 }
 
 watch(
-  () => notifierRef?.lastNotification,
+  () => notifications.lastNotification,
   async () => {
     notification.value = undefined
 
     await nextTick()
-    notification.value = notifierRef?.lastNotification;
+    notification.value = notifications.lastNotification;
   }
 )
 </script>

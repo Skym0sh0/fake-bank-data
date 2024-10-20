@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import Waiter from "../../misc/Waiter.vue";
-import {BalanceDataPoint, ReportsApi} from "@api/index.ts"
-import {computed, inject, nextTick, onMounted, onUnmounted, ref, useTemplateRef} from "vue";
-import {apiRefKey, notifierRefKey} from "../../../keys.ts";
+import {BalanceDataPoint} from "@api/index.ts"
+import {computed, nextTick, onMounted, onUnmounted, ref, useTemplateRef} from "vue";
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
 import {XYChart} from "@amcharts/amcharts4/charts";
 import {DateTime} from "luxon";
+import {useApi} from "../../../store/use-api.ts";
+import {useNotification} from "../../../store/use-notification.ts";
 
-const api: ReportsApi | undefined = inject(apiRefKey)?.reportsApi;
-const notifierRef = inject(notifierRefKey);
+const api = useApi()
+const notification = useNotification();
 
 const {height} = defineProps<{ height: number }>();
 
@@ -113,11 +114,11 @@ function draw() {
 function loadData() {
   isLoading.value = true
 
-  api?.fetchBalanceProgressionReport()
+  api.reportsApi.fetchBalanceProgressionReport()
     .then(res => {
       data.value = res.data.data ?? []
     })
-    .catch(e => notifierRef?.notifyError("Report konnte nicht geladen werden", e))
+    .catch(e => notification.notifyError("Report konnte nicht geladen werden", e))
     .finally(() => {
       isLoading.value = false;
 

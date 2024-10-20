@@ -1,22 +1,14 @@
 <script setup lang="ts">
-import {computed, inject, onMounted, ref} from "vue";
-import {
-  Category,
-  CategoryApi,
-  CategoryPatch,
-  TurnoverImportFormat,
-  TurnoverImportPatch,
-  TurnoverPreview,
-  TurnoverRowPreview,
-  TurnoversApi
-} from "@api/api.ts";
-import {apiRefKey, notifierRefKey} from "../../../keys.ts";
+import {computed, onMounted, ref} from "vue";
+import {TurnoverImportFormat, TurnoverImportPatch, TurnoverPreview, TurnoverRowPreview} from "@api/api.ts";
 import WaitingIndicator from "../../misc/WaitingIndicator.vue";
 import useVuelidate from "@vuelidate/core";
 import {required} from '@vuelidate/validators'
 import RawCsvFileTable from "./RawCsvFileTable.vue";
 import TurnoverPreviewTable from "./TurnoverPreviewTable.vue";
 import Histogram, {HistogramValueType} from "./Histogram.vue";
+import {useApi} from "../../../store/use-api.ts";
+import {useNotification} from "../../../store/use-notification.ts";
 
 function getBankFormatName(frmt: TurnoverImportFormat): string {
   const BANK_FORMAT_NAMES = {
@@ -36,9 +28,8 @@ type SupportedFileType = {
 
 export type PreviewRowWithOriginalState = TurnoverRowPreview & { originalImportable?: boolean; index: number; };
 
-const api: TurnoversApi | undefined = inject(apiRefKey)?.turnoversApi;
-const categoriesApi: CategoryApi | undefined = inject(apiRefKey)?.categoriesApi;
-const notifierRef = inject(notifierRefKey);
+const api = useApi()
+const notification = useNotification();
 
 const {isLoading} = defineProps<{
   isLoading?: boolean;
@@ -51,7 +42,6 @@ const emit = defineEmits<{
 const isDialogOpen = ref<boolean>(false);
 
 const isUploading = ref<boolean>(false);
-const categories = ref<Category[] | null>(null);
 
 const supportedFileTypes = ref<SupportedFileType[]>([]);
 const supportedFileEncodings = ref(["UTF-8", "Windows-1250", "UTF-16", "UTF-32"]);
@@ -98,7 +88,7 @@ const rowsTodo = computed(() => {
 })
 
 const isReadilyLoaded = computed(() => {
-  return fileSelection.value && previewedData.value && categories.value
+  return fileSelection.value && previewedData.value
 })
 
 const importablesHistogram = computed<HistogramValueType[]>(() => {
@@ -131,13 +121,6 @@ const progressHistogram = computed<HistogramValueType[]>(() => {
   ]
 })
 
-function loadCategories() {
-  return categoriesApi?.getCategoriesAsTree()
-    .then(res => {
-      categories.value = res.data;
-    })
-}
-
 function onIsLoading(isLoading: boolean) {
   isUploading.value = isLoading
 }
@@ -145,13 +128,13 @@ function onIsLoading(isLoading: boolean) {
 function onStartPreview() {
   isUploading.value = true;
 
-  Promise.all([loadCategories(), doPreviewRequest()])
-    .catch(e => notifierRef?.notifyError("Vorschau konnte nicht geladen werden", e))
+  Promise.all([doPreviewRequest()])
+    .catch(e => notification.notifyError("Vorschau konnte nicht geladen werden", e))
     .finally(() => isUploading.value = false)
 }
 
 function doPreviewRequest() {
-  return api?.processPreview(selectedFileType.value!, fileSelection.value!, selectedFileEncoding.value)
+  return api.turnoversApi.processPreview(selectedFileType.value!, fileSelection.value!, selectedFileEncoding.value)
     .then(preview => {
       parsedPreview.value = preview.data;
 
@@ -162,7 +145,7 @@ function doPreviewRequest() {
           originalImportable: row.importable
         }))
     })
-    .catch(e => notifierRef?.notifyError("Vorschau konnte nicht verarbeitet werden", e))
+    .catch(e => notification.notifyError("Vorschau konnte nicht verarbeitet werden", e))
 }
 
 function doImportRequest() {
@@ -177,36 +160,19 @@ function doImportRequest() {
     rows: importableRows.value,
   }
 
-  api?.createTurnoverImport(fileSelection.value!, patch)
+  api.turnoversApi.createTurnoverImport(fileSelection.value!, patch)
     .then(() => {
       emit("uploadSucceeded")
       // this.$refs["file-upload-modal"].hide();
       reset();
     })
-    .catch(e => notifierRef?.notifyError("Umsätze konnten nicht importiert werden", e))
-    .finally(() => isUploading.value = false)
-}
-
-function onCreateCategory({categoryName, callback}: { categoryName: string; callback?: () => void; }) {
-  const normalized: CategoryPatch = {
-    name: categoryName,
-  };
-
-  isUploading.value = true;
-
-  return categoriesApi?.createCategory(normalized)
-    .catch(e => notifierRef?.notifyError(`Neue Kategorie ${categoryName} konnte nicht erstellt werden`, e))
-    .then(() => loadCategories())
-    .then(() => {
-      callback?.()
-    })
+    .catch(e => notification.notifyError("Umsätze konnten nicht importiert werden", e))
     .finally(() => isUploading.value = false)
 }
 
 function reset() {
   isDialogOpen.value = false;
 
-  categories.value = null;
   // this.selectedFileType = null;
   // this.selectedFileEncoding = "UTF-8";
   fileSelection.value = null;
@@ -224,7 +190,7 @@ function openDialog() {
 onMounted(() => {
   isUploading.value = true;
 
-  api?.getSupportedFormats()
+  api.turnoversApi.getSupportedFormats()
     .then(res => {
       supportedFileTypes.value = [
         {
@@ -237,7 +203,7 @@ onMounted(() => {
         }))
       ];
     })
-    .catch(e => notifierRef?.notifyError("Unterstützte Formate konnten nicht geladen werden", e))
+    .catch(e => notification.notifyError("Unterstützte Formate konnten nicht geladen werden", e))
     .finally(() => isUploading.value = false)
 })
 </script>
@@ -334,11 +300,9 @@ onMounted(() => {
               </v-card-title>
 
               <v-card-text id="preview-card-body">
-                <turnover-preview-table v-if="previewedData && categories"
+                <turnover-preview-table v-if="previewedData"
                                         v-model:value="previewedData"
-                                        :show-already-imported-row="filterShowImportedRows"
-                                        :categories="categories"
-                                        @onCreateCategory="onCreateCategory"/>
+                                        :show-already-imported-row="filterShowImportedRows"/>
               </v-card-text>
             </v-card>
           </div>

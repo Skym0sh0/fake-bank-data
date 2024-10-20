@@ -11,6 +11,7 @@ const {categories, categoriesById} = defineProps<{
 
 const emit = defineEmits<{
   (e: 'edit', id: string): void;
+  (e: 'refresh'): void;
   (e: 'newCategory', cat: NewCategory): void;
   (e: 'deleteCategory', cat: Category): void;
   (e: 'onReassign', assignment: CategoryReassign): void;
@@ -42,6 +43,10 @@ function onDeleteCategory(c: Category) {
 function onReassign(reassignment: CategoryReassign) {
   emit("onReassign", reassignment);
 }
+
+function onRefresh() {
+  emit("refresh");
+}
 </script>
 
 <template>
@@ -65,7 +70,8 @@ function onReassign(reassignment: CategoryReassign) {
                           @newCategory="onNewCategory"
                           @deleteCategory="onDeleteCategory"
                           @onReassign="onReassign"
-                          @edit="onEdit"/>
+                          @edit="onEdit"
+                          @refresh="onRefresh"/>
     </v-col>
   </v-row>
 </template>
