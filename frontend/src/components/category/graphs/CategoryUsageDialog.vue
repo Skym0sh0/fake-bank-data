@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import {Category, CategoryPatch, TurnoverImportRowsPatch, TurnoverRow, TurnoverRowPatch} from "@api/api.ts";
-import {computed, inject, ref} from "vue";
-import {apiRefKey, ApiType, notifierRefKey} from "../../../keys.ts";
+import {Category, TurnoverImportRowsPatch, TurnoverRow, TurnoverRowPatch} from "@api/api.ts";
+import {computed, ref} from "vue";
 import TableCellMonetary from "../../misc/TableCellMonetary.vue";
 import TableCellDescription from "../../misc/TableCellDescription.vue";
 import CategoryInput from "../../misc/CategoryInput.vue";
-import {flatCategoryTreeWithParentChain, mapCategoriesById, mapCategoriesByName} from "../../misc/categoryHelpers.ts";
 import type {VDataTable} from "vuetify/components";
+import {useApi} from "../../../store/use-api.ts";
+import {useNotification} from "../../../store/use-notification.ts";
 
-const api: ApiType | undefined = inject(apiRefKey);
-const notifierRef = inject(notifierRefKey);
+const api = useApi()
+const notification = useNotification();
 
 const {category} = defineProps<{
   category: Category;
@@ -25,8 +25,6 @@ const isEditing = ref(false)
 const isLoading = ref(false)
 const referencedRows = ref<TurnoverRow[]>([])
 const originalValues = ref<TurnoverRowPatch[] | null>(null)
-const allCategories = ref<Category[] | null>(null)
-const currentLoadingRowId = ref<string | null>(null)
 
 // see https://stackoverflow.com/a/75993081
 type ReadonlyHeaders = VDataTable['$props']['headers']
@@ -35,18 +33,6 @@ type ReadonlyDataTableHeader = UnwrapReadonlyArray<ReadonlyHeaders>;
 
 const items = computed(() => {
   return referencedRows.value;
-})
-
-const flattedCategories = computed(() => {
-  return flatCategoryTreeWithParentChain(allCategories.value ?? [], parents => parents.join(" > "))
-})
-
-const categoriesById = computed(() => {
-  return mapCategoriesById(flattedCategories.value)
-})
-
-const categoriesByName = computed(() => {
-  return mapCategoriesByName(flattedCategories.value)
 })
 
 const changedTurnovers = computed<TurnoverRowPatch[]>(() => {
@@ -68,8 +54,6 @@ function reset() {
   isEditing.value = false
   isLoading.value = false
   referencedRows.value = []
-  allCategories.value = null
-  currentLoadingRowId.value = null
 
   isModalOpen.value = false
 }
@@ -86,65 +70,31 @@ function onChangeCategory(turnoverId: string | undefined, newCategoryId: string 
   })
 }
 
-function onCreateCategory(id: string, categoryName: string) {
-  const normalized: CategoryPatch = {
-    name: categoryName,
-  };
-
-  currentLoadingRowId.value = id
-
-  api?.categoriesApi.createCategory(normalized)
-    .then(res => {
-      referencedRows.value.forEach(row => {
-        if (row.id === id)
-          row.categoryId = res.data.id;
-      })
-
-      if (allCategories.value)
-        allCategories.value.push(res.data)
-      else
-        allCategories.value = [res.data]
-    })
-    .catch(e => notifierRef?.notifyError(`Kategorie '${categoryName}' konnte nicht erstellt werden`, e))
-    .finally(() => currentLoadingRowId.value = null)
-}
-
 function save() {
   isLoading.value = true
 
   const patch: TurnoverImportRowsPatch = {
     rows: changedTurnovers.value,
   };
-  api?.turnoversApi.batchPatchTurnoverImports(patch)
+  api.turnoversApi.batchPatchTurnoverImports(patch)
     .then(() => emit("refresh"))
     .then(() => reset())
-    .catch(e => notifierRef?.notifyError(`Kategorie konnte nicht verändert werden`, e))
+    .catch(e => notification.notifyError(`Kategorie konnte nicht verändert werden`, e))
     .finally(() => isLoading.value = false)
 }
 
 function loadData() {
   isLoading.value = true;
 
-  Promise.all([loadCategories(), loadReferencedRows()])
-    .catch(e => notifierRef?.notifyError(`Kategorien konnten nicht geladen werden`, e))
-    .finally(() => isLoading.value = false)
-}
-
-function loadCategories() {
-  allCategories.value = null
-
-  return api?.categoriesApi.getCategoriesAsTree()
-    .then(res => allCategories.value = res.data)
-}
-
-function loadReferencedRows() {
   referencedRows.value = [];
 
-  return api?.turnoversApi.fetchTurnoversForCategory(category.id)
+  api.turnoversApi.fetchTurnoversForCategory(category.id)
     .then(res => {
       referencedRows.value = res.data
       originalValues.value = res.data.flatMap(rowToChangeObject)
     })
+    .catch(e => notification.notifyError(`Kategorien konnten nicht geladen werden`, e))
+    .finally(() => isLoading.value = false)
 }
 
 function rowToChangeObject(row: TurnoverRow): TurnoverRowPatch[] {
@@ -237,12 +187,7 @@ const columns = computed<ReadonlyDataTableHeader[]>(() => {
           <template v-slot:item.newCategory="row" v-if="isEditing">
             <category-input :id="`${row.item.id}`"
                             :value="row.item.categoryId"
-                            :loading="row.item.id === currentLoadingRowId"
-                            :flatted-categories="flattedCategories"
-                            :categories-by-id="categoriesById"
-                            :categories-by-name="categoriesByName"
-                            @input="newCategoryId => onChangeCategory(row.item.id, newCategoryId)"
-                            @createCategory="name => onCreateCategory(row.item.id, name)"/>
+                            @input="newCategoryId => onChangeCategory(row.item.id, newCategoryId)"/>
           </template>
         </v-data-table>
       </v-card-text>
@@ -263,7 +208,7 @@ const columns = computed<ReadonlyDataTableHeader[]>(() => {
 
           <v-btn v-if="isEditing"
                  @click="save"
-                 :disabled="!changedTurnovers.length || !!currentLoadingRowId"
+                 :disabled="!changedTurnovers.length"
                  color="success">
             Speichern
           </v-btn>

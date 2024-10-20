@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import WaitingIndicator from "../../misc/WaitingIndicator.vue";
-import {computed, inject, ref} from "vue";
+import {computed, ref} from "vue";
 import {DateTime} from "luxon";
-import {BasicCoarseInfo, ReportsApi, ReportTimeUnits} from "@api/api.ts";
-import {apiRefKey, notifierRefKey} from "../../../keys.ts";
+import {BasicCoarseInfo, ReportTimeUnits} from "@api/api.ts";
 import TimeboxSelector from "./TimeboxSelector.vue";
 import {AssociationsType, BasicInfo, SelectType} from "./types.ts";
 import IncomeExpenseSankeyReport from "./IncomeExpenseSankeyReport.vue";
+import {useApi} from "../../../store/use-api.ts";
+import {useNotification} from "../../../store/use-notification.ts";
 
-const api: ReportsApi | undefined = inject(apiRefKey)?.reportsApi;
-const notifierRef = inject(notifierRefKey);
+const api = useApi()
+const notification = useNotification();
 
 const now = DateTime.now();
 
@@ -35,7 +36,7 @@ const isDataQueryable = computed(() => {
 function loadBasicInfo() {
   isLoading.value = true
 
-  api?.fetchCoarseInfos()
+  api.reportsApi.fetchCoarseInfos()
     .then(resp => {
       const res: BasicCoarseInfo = resp.data;
 
@@ -51,7 +52,7 @@ function loadBasicInfo() {
       select.value.year = basicInfo.value.latest.year
       select.value.month = undefined
     })
-    .catch(e => notifierRef?.notifyError("Basis Infos konnten nicht geladen werden", e))
+    .catch(e => notification.notifyError("Basis Infos konnten nicht geladen werden", e))
     .finally(() => isLoading.value = false)
 }
 
