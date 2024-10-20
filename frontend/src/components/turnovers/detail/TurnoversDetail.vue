@@ -1,13 +1,6 @@
 <script setup lang="ts">
 import {computed, onMounted, ref} from "vue";
-import {
-  Category,
-  CategoryPatch,
-  TurnoverImport,
-  TurnoverImportRowsPatch,
-  TurnoverRow,
-  TurnoverRowPatch
-} from "@api/api.ts";
+import {TurnoverImport, TurnoverImportRowsPatch, TurnoverRow, TurnoverRowPatch} from "@api/api.ts";
 import {DateTime} from "luxon";
 import {useRouter} from "vue-router";
 import WaitingIndicator from "../../misc/WaitingIndicator.vue";
@@ -28,7 +21,6 @@ const {id} = defineProps<{
 
 const isLoading = ref(false)
 const turnoverImport = ref<TurnoverImport | null>(null)
-const categories = ref<Category[]>([])
 const initialTurnoverRowsCategories = ref<TurnoverRowPatch[]>([])
 const deleteRowsWithIds = ref<string[]>([])
 
@@ -77,7 +69,7 @@ const isValidToSave = computed(() => {
 function reload() {
   isLoading.value = true
 
-  Promise.all([loadCategories(), loadImport()])
+  loadImport()
     .catch(e => notification.notifyError("Daten konnten nicht geladen werden", e))
     .finally(() => isLoading.value = false)
 }
@@ -89,23 +81,6 @@ function loadImport() {
       deleteRowsWithIds.value = []
       initialTurnoverRowsCategories.value = extractTurnoverRowsWithCategories(res.data)
     })
-}
-
-function loadCategories() {
-  return api.categoriesApi.getCategoriesAsTree()
-    .then(res => categories.value = res.data)
-}
-
-function onCreateCategory(categoryName: string) {
-  const normalized: CategoryPatch = {
-    name: categoryName,
-  };
-
-  isLoading.value = true
-  api.categoriesApi.createCategory(normalized)
-    .catch(e => notification.notifyError(`Neue Kategorie ${categoryName} konnte nicht erstellt werden`, e))
-    .then(() => loadCategories())
-    .finally(() => isLoading.value = false)
 }
 
 function onDeleteTurnover(row: TurnoverRow) {
@@ -193,12 +168,10 @@ onMounted(() => {
       </v-card-subtitle>
 
       <v-card-text>
-        <turnover-rows-table v-if="categories.length > 0 && turnoverImport"
+        <turnover-rows-table v-if="turnoverImport"
                              :rows="turnoverImport.turnovers"
                              :touchedRowsIdsById="currentRowCategoryChangesById"
                              :deletedRowsIdsById="currentDeletedRowsById"
-                             :categories="categories"
-                             @onCreateCategory="onCreateCategory"
                              @deleteTurnover="onDeleteTurnover"
                              @undoDeleteTurnover="onUndoDeleteTurnover"/>
       </v-card-text>

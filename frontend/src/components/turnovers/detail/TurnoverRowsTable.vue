@@ -1,46 +1,23 @@
 <script setup lang="ts">
-import {Category, TurnoverRow, TurnoverRowPatch} from "@api/api.ts";
+import {TurnoverRow, TurnoverRowPatch} from "@api/api.ts";
 import {computed} from "vue";
-import {
-  flatCategoryTreeWithParentChain,
-  LookupById,
-  mapCategoriesById,
-  mapCategoriesByName
-} from "../../misc/categoryHelpers.ts";
+import {LookupById} from "../../misc/categoryHelpers.ts";
 import TableCellMonetary from "../../misc/TableCellMonetary.vue";
 import CategoryInput from "../../misc/CategoryInput.vue";
 import type {VDataTable} from "vuetify/components";
 import {DateTime} from "luxon";
 import TableCellDescription from "../../misc/TableCellDescription.vue";
 
-const {categories, rows, touchedRowsIdsById, deletedRowsIdsById} = defineProps<{
-  categories: Category[];
+const {rows, touchedRowsIdsById, deletedRowsIdsById} = defineProps<{
   rows: TurnoverRow[];
   touchedRowsIdsById: LookupById<TurnoverRowPatch>;
   deletedRowsIdsById: LookupById<string>;
 }>();
 
 const emit = defineEmits<{
-  (e: 'onCreateCategory', categoryName: string): void;
   (e: 'deleteTurnover', row: TurnoverRow): void;
   (e: 'undoDeleteTurnover', row: TurnoverRow): void;
 }>();
-
-const flattedCategories = computed(() => {
-  return flatCategoryTreeWithParentChain(categories, parents => parents.join(" > "));
-})
-
-const categoriesByName = computed(() => {
-  return mapCategoriesByName(flattedCategories.value)
-})
-
-const categoriesById = computed(() => {
-  return mapCategoriesById(flattedCategories.value)
-})
-
-function onCreateCategory(categoryName: string) {
-  emit("onCreateCategory", categoryName)
-}
 
 // see https://stackoverflow.com/a/75993081
 type ReadonlyHeaders = VDataTable['$props']['headers']
