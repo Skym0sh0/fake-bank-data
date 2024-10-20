@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import Waiter from "../../misc/Waiter.vue";
-import {computed, inject, nextTick, onMounted, onUnmounted, ref, useTemplateRef} from "vue";
+import {computed, nextTick, onMounted, onUnmounted, ref, useTemplateRef} from "vue";
 import {MonthlyIncomeExpenseDataPoint} from "@api/api.ts";
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
 import {DateAxis, XYChart} from "@amcharts/amcharts4/charts";
-import {notifierRefKey} from "../../../keys.ts";
 import {DateTime} from "luxon";
 import {useApi} from "../../../store/use-api.ts";
+import {useNotification} from "../../../store/use-notification.ts";
 
 const api = useApi()
-const notifierRef = inject(notifierRefKey);
+const notification = useNotification();
 
 const {height} = defineProps<{ height: number }>();
 
@@ -228,7 +228,7 @@ function loadData() {
 
   api.reportsApi.fetchMonthlyIncomeExpenseReport()
     .then(res => incomeExpenses.value = res.data.data ?? [])
-    .catch(e => notifierRef?.notifyError("Report konnte nicht geladen werden", e))
+    .catch(e => notification.notifyError("Report konnte nicht geladen werden", e))
     .finally(() => {
       isLoading.value = false;
 

@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import WaitingIndicator from "../misc/WaitingIndicator.vue";
 import ConfirmationedButton from "../misc/ConfirmationedButton.vue";
-import {inject, onMounted, ref, useTemplateRef} from "vue";
-import {notifierRefKey} from "../../keys.ts";
+import {onMounted, ref, useTemplateRef} from "vue";
 import {VForm} from "vuetify/components";
 import ShowPasswordButton from "./ShowPasswordButton.vue";
 import {useUserStore} from "../../store/user-store.ts";
 import {useApi} from "../../store/use-api.ts";
+import {useNotification} from "../../store/use-notification.ts";
 
 const api = useApi()
-const notifierRef = inject(notifierRefKey);
+const notification = useNotification();
 
 const isLoading = ref(false)
 const valid = ref(false)
@@ -48,7 +48,7 @@ function onDelete() {
 
   api.authApi.deleteUser(userStore.currentUser.id)
     .then(() => reload())
-    .catch(e => notifierRef?.notifyError("User konnte nicht gelöscht werden", e))
+    .catch(e => notification.notifyError("User konnte nicht gelöscht werden", e))
     .finally(() => isLoading.value = false)
 }
 
@@ -65,7 +65,7 @@ function onSave() {
     password: password.value,
   })
     .then(res => userStore.login(res.data, password.value))
-    .catch(e => notifierRef?.notifyError("User konnte nicht geändert werden", e))
+    .catch(e => notification.notifyError("User konnte nicht geändert werden", e))
     .finally(() => isLoading.value = false)
 }
 

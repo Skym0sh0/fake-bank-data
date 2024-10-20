@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import WaitingIndicator from "../misc/WaitingIndicator.vue";
-import {computed, inject, onMounted, ref, useTemplateRef} from "vue";
+import {computed, onMounted, ref, useTemplateRef} from "vue";
 import {Category, CategoryPatch} from "@api/api.ts";
-import {notifierRefKey} from "../../keys.ts";
 import CategoryList from "./CategoryList.vue";
 import {CategoriesById, mapCategoriesById} from "../misc/categoryHelpers.ts";
 import {CategoryReassign, NewCategory} from "./CategoryTreeList.vue";
@@ -10,9 +9,10 @@ import * as _ from "lodash";
 import CategoryDetails from "./CategoryDetails.vue";
 import {AxiosResponse} from "axios";
 import {useApi} from "../../store/use-api.ts";
+import {useNotification} from "../../store/use-notification.ts";
 
 const api = useApi();
-const notifierRef = inject(notifierRefKey);
+const notification = useNotification();
 
 type DetailSelectionType = {
   isSelected: boolean;
@@ -54,7 +54,7 @@ function loadCategories() {
 
       categories.value = res.data.flatMap(flatter)
     })
-    .catch(e => notifierRef?.notifyError("Kategorien konnten nicht geladen werden", e))
+    .catch(e => notification.notifyError("Kategorien konnten nicht geladen werden", e))
     .finally(() => isLoading.value = false)
 }
 
@@ -139,7 +139,7 @@ function doRestCallForCategory(callback: () => Promise<AxiosResponse<Category>> 
       categories.value.push(res.data)
       openEditView(res.data.id)
     })
-    .catch(e => notifierRef?.notifyError("Kategorie konnte nicht erstellt oder verändert werden", e))
+    .catch(e => notification?.notifyError("Kategorie konnte nicht erstellt oder verändert werden", e))
     .then(() => refresh())
     .finally(() => {
       isLoading.value = false
@@ -157,7 +157,7 @@ function deleteCategory(category: Category) {
       categories.value = _.filter(categories.value, cur => cur.id !== category.id)
     })
     .then(() => refresh())
-    .catch(e => notifierRef?.notifyError("Kategorie konnte nicht gelöscht werden", e))
+    .catch(e => notification?.notifyError("Kategorie konnte nicht gelöscht werden", e))
     .finally(() => isLoading.value = false)
 }
 
@@ -168,9 +168,9 @@ function reassignCategories(payload: CategoryReassign) {
     payload.sources.map(id => categoriesById.value[id])
       .map(source => api.categoriesApi.reallocateCategory(payload.target.id, source.id))
   )
-    .then(() => notifierRef?.notifySuccess("Kategorien verschoben"))
+    .then(() => notification?.notifySuccess("Kategorien verschoben"))
     .then(() => refresh())
-    .catch(e => notifierRef?.notifyError("Kategorie konnte nicht verschoben werden", e))
+    .catch(e => notification?.notifyError("Kategorie konnte nicht verschoben werden", e))
     .finally(() => isLoading.value = false)
 }
 

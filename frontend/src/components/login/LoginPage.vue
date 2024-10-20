@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import WaitingIndicator from "../misc/WaitingIndicator.vue";
-import {inject, ref} from "vue";
-import {notifierRefKey} from "../../keys.ts";
+import {ref} from "vue";
 import {useRoute, useRouter} from 'vue-router'
 import ShowPasswordButton from "./ShowPasswordButton.vue";
 import {useUserStore} from "../../store/user-store.ts";
 import {useApi} from "../../store/use-api.ts";
+import {useNotification} from "../../store/use-notification.ts";
 
 const router = useRouter()
 const route = useRoute()
@@ -38,7 +38,7 @@ const passwordVisible = ref(false);
 
 const errorMessage = ref<string | null>(null);
 
-const notifierRef = inject(notifierRefKey);
+const notification = useNotification();
 
 function doLogin() {
   if (!username.value || !password.value)
@@ -57,7 +57,7 @@ function doLogin() {
     })
     .catch(e => {
       errorMessage.value = e.error;
-      notifierRef?.notifyError("Login fehlgeschlagen", e)
+      notification.notifyError("Login fehlgeschlagen", e)
     })
     .finally(() => isLoading.value = false);
 }

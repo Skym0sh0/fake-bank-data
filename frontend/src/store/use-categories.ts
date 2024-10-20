@@ -1,17 +1,17 @@
 import {defineStore} from "pinia";
 import {Category, CategoryPatch} from "@api/api.ts";
-import {computed, inject, ref} from "vue";
+import {computed, ref} from "vue";
 import {
   flatCategoryTreeWithParentChain,
   mapCategoriesById,
   mapCategoriesByName
 } from "../components/misc/categoryHelpers.ts";
-import {notifierRefKey} from "../keys.ts";
 import {useApi} from "./use-api.ts";
+import {useNotification} from "./use-notification.ts";
 
 export const useCategories = defineStore('categories', () => {
   const api = useApi()
-  const notifier = inject(notifierRefKey);
+  const notifications = useNotification();
 
   const isInitialized = ref(false)
   const isLoading = ref(false)
@@ -26,7 +26,7 @@ export const useCategories = defineStore('categories', () => {
       .then(() => {
         isInitialized.value = true
       })
-      .catch(e => notifier?.notifyError("Kategorien konnten nicht geladen werden", e))
+      .catch(e => notifications.notifyError("Kategorien konnten nicht geladen werden", e))
       .finally(() => {
         isLoading.value = false;
         currentlyLoading.value = undefined
@@ -44,7 +44,7 @@ export const useCategories = defineStore('categories', () => {
 
     isLoading.value = true
     return api.categoriesApi.createCategory(normalized)
-      .catch(e => notifier?.notifyError(`Neue Kategorie ${categoryName} konnte nicht erstellt werden`, e))
+      .catch(e => notifications.notifyError(`Neue Kategorie ${categoryName} konnte nicht erstellt werden`, e))
       .then(() => reload())
       .finally(() => isLoading.value = false)
   }

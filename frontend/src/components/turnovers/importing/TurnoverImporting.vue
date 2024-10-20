@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import {computed, inject, onMounted, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import {TurnoverImportFormat, TurnoverImportPatch, TurnoverPreview, TurnoverRowPreview} from "@api/api.ts";
-import {notifierRefKey} from "../../../keys.ts";
 import WaitingIndicator from "../../misc/WaitingIndicator.vue";
 import useVuelidate from "@vuelidate/core";
 import {required} from '@vuelidate/validators'
@@ -9,6 +8,7 @@ import RawCsvFileTable from "./RawCsvFileTable.vue";
 import TurnoverPreviewTable from "./TurnoverPreviewTable.vue";
 import Histogram, {HistogramValueType} from "./Histogram.vue";
 import {useApi} from "../../../store/use-api.ts";
+import {useNotification} from "../../../store/use-notification.ts";
 
 function getBankFormatName(frmt: TurnoverImportFormat): string {
   const BANK_FORMAT_NAMES = {
@@ -29,7 +29,7 @@ type SupportedFileType = {
 export type PreviewRowWithOriginalState = TurnoverRowPreview & { originalImportable?: boolean; index: number; };
 
 const api = useApi()
-const notifierRef = inject(notifierRefKey);
+const notification = useNotification();
 
 const {isLoading} = defineProps<{
   isLoading?: boolean;
@@ -129,7 +129,7 @@ function onStartPreview() {
   isUploading.value = true;
 
   Promise.all([doPreviewRequest()])
-    .catch(e => notifierRef?.notifyError("Vorschau konnte nicht geladen werden", e))
+    .catch(e => notification.notifyError("Vorschau konnte nicht geladen werden", e))
     .finally(() => isUploading.value = false)
 }
 
@@ -145,7 +145,7 @@ function doPreviewRequest() {
           originalImportable: row.importable
         }))
     })
-    .catch(e => notifierRef?.notifyError("Vorschau konnte nicht verarbeitet werden", e))
+    .catch(e => notification.notifyError("Vorschau konnte nicht verarbeitet werden", e))
 }
 
 function doImportRequest() {
@@ -166,7 +166,7 @@ function doImportRequest() {
       // this.$refs["file-upload-modal"].hide();
       reset();
     })
-    .catch(e => notifierRef?.notifyError("Umsätze konnten nicht importiert werden", e))
+    .catch(e => notification.notifyError("Umsätze konnten nicht importiert werden", e))
     .finally(() => isUploading.value = false)
 }
 
@@ -203,7 +203,7 @@ onMounted(() => {
         }))
       ];
     })
-    .catch(e => notifierRef?.notifyError("Unterstützte Formate konnten nicht geladen werden", e))
+    .catch(e => notification.notifyError("Unterstützte Formate konnten nicht geladen werden", e))
     .finally(() => isUploading.value = false)
 })
 </script>

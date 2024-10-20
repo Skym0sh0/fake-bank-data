@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import {Category, TurnoverImportRowsPatch, TurnoverRow, TurnoverRowPatch} from "@api/api.ts";
-import {computed, inject, ref} from "vue";
-import {notifierRefKey} from "../../../keys.ts";
+import {computed, ref} from "vue";
 import TableCellMonetary from "../../misc/TableCellMonetary.vue";
 import TableCellDescription from "../../misc/TableCellDescription.vue";
 import CategoryInput from "../../misc/CategoryInput.vue";
 import type {VDataTable} from "vuetify/components";
 import {useApi} from "../../../store/use-api.ts";
+import {useNotification} from "../../../store/use-notification.ts";
 
 const api = useApi()
-const notifierRef = inject(notifierRefKey);
+const notification = useNotification();
 
 const {category} = defineProps<{
   category: Category;
@@ -79,7 +79,7 @@ function save() {
   api.turnoversApi.batchPatchTurnoverImports(patch)
     .then(() => emit("refresh"))
     .then(() => reset())
-    .catch(e => notifierRef?.notifyError(`Kategorie konnte nicht verändert werden`, e))
+    .catch(e => notification.notifyError(`Kategorie konnte nicht verändert werden`, e))
     .finally(() => isLoading.value = false)
 }
 
@@ -93,7 +93,7 @@ function loadData() {
       referencedRows.value = res.data
       originalValues.value = res.data.flatMap(rowToChangeObject)
     })
-    .catch(e => notifierRef?.notifyError(`Kategorien konnten nicht geladen werden`, e))
+    .catch(e => notification.notifyError(`Kategorien konnten nicht geladen werden`, e))
     .finally(() => isLoading.value = false)
 }
 

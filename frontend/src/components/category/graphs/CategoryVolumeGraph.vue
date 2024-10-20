@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import {Category, CategoryTurnoverReportDatapoint} from "@api/api.ts";
-import {computed, inject, ref, watch} from "vue";
-import {notifierRefKey} from "../../../keys.ts";
+import {computed, ref, watch} from "vue";
 import {DateTime} from "luxon";
 import Waiter from "../../misc/Waiter.vue";
 import CategoryGraph from "./CategoryGraph.vue";
 import {useApi} from "../../../store/use-api.ts";
+import {useNotification} from "../../../store/use-notification.ts";
 
 const api = useApi();
-const notifierRef = inject(notifierRefKey);
+const notification = useNotification();
 
 const {category} = defineProps<{
   category: Category;
@@ -58,10 +58,9 @@ function loadData() {
 
   api.turnoversApi.fetchTurnoversReportForCategory(category.id, grouping.value, includeSubcategories.value ? 1 << 16 : 1)
     .then(res => referencedRows.value = res.data.datapoints ?? [])
-    .catch(e => notifierRef?.notifyError("Umsätze konnten nicht geladen werden", e))
+    .catch(e => notification.notifyError("Umsätze konnten nicht geladen werden", e))
     .finally(() => isLoading.value = false)
 }
-
 
 watch(() => includeSubcategories.value, () => loadData())
 watch(() => grouping.value, () => loadData())

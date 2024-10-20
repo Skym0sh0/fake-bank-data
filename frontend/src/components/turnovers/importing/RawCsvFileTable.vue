@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import {computed, inject, onMounted, ref, watch} from "vue";
+import {computed, onMounted, ref, watch} from "vue";
 import {RawCsvTable} from "@api/api.ts";
-import {notifierRefKey} from "../../../keys.ts";
 import * as _ from "lodash";
 import {useApi} from "../../../store/use-api.ts";
+import {useNotification} from "../../../store/use-notification.ts";
 
 const api = useApi()
-const notifierRef = inject(notifierRefKey);
+const notification = useNotification();
 
 const {file, encoding} = defineProps<{
   file?: File;
@@ -46,7 +46,7 @@ function triggerParsing() {
     .then(data => {
       parsedData.value = data.data;
     })
-    .catch(e => notifierRef?.notifyError(`CSV Datei konnte nicht verarbeitet werden`, e))
+    .catch(e => notification.notifyError(`CSV Datei konnte nicht verarbeitet werden`, e))
     .finally(() => emit("isLoading", false))
 }
 

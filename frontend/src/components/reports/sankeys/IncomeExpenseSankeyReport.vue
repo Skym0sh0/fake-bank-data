@@ -3,17 +3,17 @@
 import {AssociationsType, SelectType} from "./types.ts";
 import {DateTime} from "luxon";
 import Waiter from "../../misc/Waiter.vue";
-import {computed, inject, nextTick, onBeforeUnmount, ref, useTemplateRef, watch} from "vue";
+import {computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch} from "vue";
 import {FlowDataPoint, IncomeExpenseFlowReport} from "@api/api.ts";
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
 import {SankeyDiagram} from "@amcharts/amcharts4/charts";
-import {notifierRefKey} from "../../../keys.ts";
 import {AxiosResponse} from "axios";
 import {useApi} from "../../../store/use-api.ts";
+import {useNotification} from "../../../store/use-notification.ts";
 
 const api = useApi()
-const notifierRef = inject(notifierRefKey);
+const notification = useNotification();
 
 const {select, height} = defineProps<{
   select: SelectType;
@@ -190,7 +190,7 @@ function loadData() {
 
   doApiCall?.()
     ?.then(res => sankeyData.value = res.data)
-    ?.catch(e => notifierRef?.notifyError("Report konnte nicht geladen werden", e))
+    ?.catch(e => notification.notifyError("Report konnte nicht geladen werden", e))
     ?.finally(() => {
       isLoading.value = false
 

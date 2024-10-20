@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {computed, inject, onMounted, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import {
   Category,
   CategoryPatch,
@@ -10,15 +10,15 @@ import {
 } from "@api/api.ts";
 import {DateTime} from "luxon";
 import {useRouter} from "vue-router";
-import {notifierRefKey} from "../../../keys.ts";
 import WaitingIndicator from "../../misc/WaitingIndicator.vue";
 import ConfirmationedButton from "../../misc/ConfirmationedButton.vue";
 import TurnoverRowsTable from "./TurnoverRowsTable.vue";
 import {LookupById} from "../../misc/categoryHelpers.ts";
 import {useApi} from "../../../store/use-api.ts";
+import {useNotification} from "../../../store/use-notification.ts";
 
 const api = useApi()
-const notifierRef = inject(notifierRefKey);
+const notification = useNotification();
 
 const router = useRouter()
 
@@ -78,7 +78,7 @@ function reload() {
   isLoading.value = true
 
   Promise.all([loadCategories(), loadImport()])
-    .catch(e => notifierRef?.notifyError("Daten konnten nicht geladen werden", e))
+    .catch(e => notification.notifyError("Daten konnten nicht geladen werden", e))
     .finally(() => isLoading.value = false)
 }
 
@@ -103,7 +103,7 @@ function onCreateCategory(categoryName: string) {
 
   isLoading.value = true
   api.categoriesApi.createCategory(normalized)
-    .catch(e => notifierRef?.notifyError(`Neue Kategorie ${categoryName} konnte nicht erstellt werden`, e))
+    .catch(e => notification.notifyError(`Neue Kategorie ${categoryName} konnte nicht erstellt werden`, e))
     .then(() => loadCategories())
     .finally(() => isLoading.value = false)
 }
@@ -146,7 +146,7 @@ function onSave() {
 
   isLoading.value = true
   api.turnoversApi.patchTurnoverImport(id, changes)
-    .catch(e => notifierRef?.notifyError("Umsatz konnte nicht geändert werden", e))
+    .catch(e => notification.notifyError("Umsatz konnte nicht geändert werden", e))
     .then(() => loadImport())
     .finally(() => isLoading.value = false)
 }
