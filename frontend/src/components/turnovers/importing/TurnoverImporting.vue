@@ -1,16 +1,7 @@
 <script setup lang="ts">
 import {computed, inject, onMounted, ref} from "vue";
-import {
-  Category,
-  CategoryApi,
-  CategoryPatch,
-  TurnoverImportFormat,
-  TurnoverImportPatch,
-  TurnoverPreview,
-  TurnoverRowPreview,
-  TurnoversApi
-} from "@api/api.ts";
-import {apiRefKey, notifierRefKey} from "../../../keys.ts";
+import {TurnoverImportFormat, TurnoverImportPatch, TurnoverPreview, TurnoverRowPreview} from "@api/api.ts";
+import {notifierRefKey} from "../../../keys.ts";
 import WaitingIndicator from "../../misc/WaitingIndicator.vue";
 import useVuelidate from "@vuelidate/core";
 import {required} from '@vuelidate/validators'
@@ -51,7 +42,6 @@ const emit = defineEmits<{
 const isDialogOpen = ref<boolean>(false);
 
 const isUploading = ref<boolean>(false);
-const categories = ref<Category[] | null>(null);
 
 const supportedFileTypes = ref<SupportedFileType[]>([]);
 const supportedFileEncodings = ref(["UTF-8", "Windows-1250", "UTF-16", "UTF-32"]);
@@ -98,7 +88,7 @@ const rowsTodo = computed(() => {
 })
 
 const isReadilyLoaded = computed(() => {
-  return fileSelection.value && previewedData.value && categories.value
+  return fileSelection.value && previewedData.value
 })
 
 const importablesHistogram = computed<HistogramValueType[]>(() => {
@@ -131,11 +121,6 @@ const progressHistogram = computed<HistogramValueType[]>(() => {
   ]
 })
 
-function loadCategories() {
-  return api.categoriesApi.getCategoriesAsTree()
-    .then(res => categories.value = res.data)
-}
-
 function onIsLoading(isLoading: boolean) {
   isUploading.value = isLoading
 }
@@ -143,7 +128,7 @@ function onIsLoading(isLoading: boolean) {
 function onStartPreview() {
   isUploading.value = true;
 
-  Promise.all([loadCategories(), doPreviewRequest()])
+  Promise.all([doPreviewRequest()])
     .catch(e => notifierRef?.notifyError("Vorschau konnte nicht geladen werden", e))
     .finally(() => isUploading.value = false)
 }
@@ -185,26 +170,9 @@ function doImportRequest() {
     .finally(() => isUploading.value = false)
 }
 
-function onCreateCategory({categoryName, callback}: { categoryName: string; callback?: () => void; }) {
-  const normalized: CategoryPatch = {
-    name: categoryName,
-  };
-
-  isUploading.value = true;
-
-  return api.categoriesApi.createCategory(normalized)
-    .catch(e => notifierRef?.notifyError(`Neue Kategorie ${categoryName} konnte nicht erstellt werden`, e))
-    .then(() => loadCategories())
-    .then(() => {
-      callback?.()
-    })
-    .finally(() => isUploading.value = false)
-}
-
 function reset() {
   isDialogOpen.value = false;
 
-  categories.value = null;
   // this.selectedFileType = null;
   // this.selectedFileEncoding = "UTF-8";
   fileSelection.value = null;
@@ -332,11 +300,9 @@ onMounted(() => {
               </v-card-title>
 
               <v-card-text id="preview-card-body">
-                <turnover-preview-table v-if="previewedData && categories"
+                <turnover-preview-table v-if="previewedData"
                                         v-model:value="previewedData"
-                                        :show-already-imported-row="filterShowImportedRows"
-                                        :categories="categories"
-                                        @onCreateCategory="onCreateCategory"/>
+                                        :show-already-imported-row="filterShowImportedRows"/>
               </v-card-text>
             </v-card>
           </div>

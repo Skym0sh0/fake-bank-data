@@ -43,7 +43,7 @@ export const useCategories = defineStore('categories', () => {
     };
 
     isLoading.value = true
-    api.categoriesApi.createCategory(normalized)
+    return api.categoriesApi.createCategory(normalized)
       .catch(e => notifier?.notifyError(`Neue Kategorie ${categoryName} konnte nicht erstellt werden`, e))
       .then(() => reload())
       .finally(() => isLoading.value = false)

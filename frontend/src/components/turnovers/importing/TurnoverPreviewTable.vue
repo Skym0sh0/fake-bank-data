@@ -1,13 +1,5 @@
 <script setup lang="ts">
-import {Category} from "@api/api.ts";
 import {computed, ref} from "vue";
-import {
-  CategoriesById,
-  CategoriesByName,
-  flatCategoryTreeWithParentChain,
-  mapCategoriesById,
-  mapCategoriesByName
-} from "../../misc/categoryHelpers.ts";
 import {PreviewRowWithOriginalState} from "./TurnoverImporting.vue";
 import type {VDataTable} from "vuetify/components";
 import TableCellDescription from "../../misc/TableCellDescription.vue";
@@ -16,31 +8,17 @@ import CategoryInput from "../../misc/CategoryInput.vue";
 import {DateTime} from "luxon";
 import * as _ from "lodash";
 import CategorySuggestion, {CategorySelectionType} from "./CategorySuggestion.vue";
+import {useCategories} from "../../../store/use-categories.ts";
 
-const {value, categories, showAlreadyImportedRow} = defineProps<{
+const {value, showAlreadyImportedRow} = defineProps<{
   value: PreviewRowWithOriginalState[];
-  categories: Category[];
   showAlreadyImportedRow?: boolean;
 }>();
 
-const emit = defineEmits<{
-  (e: 'onCreateCategory', item: { categoryName: string; callback?: () => void; }): void;
-}>();
+const categoriesStore = useCategories()
 
 const searchString = ref("some-dummy-value-to-activate-table-filtering");
 const showOnlyMissingCategories = ref(false);
-
-const flattedCategories = computed(() => {
-  return flatCategoryTreeWithParentChain(categories, parents => parents.join(" > "));
-})
-
-const categoriesByName = computed<CategoriesByName>(() => {
-  return mapCategoriesByName(flattedCategories.value)
-})
-
-const categoriesById = computed<CategoriesById>(() => {
-  return mapCategoriesById(flattedCategories.value)
-})
 
 const hasSuggestions = computed<boolean>(() => {
   return value.some(r => !!r.suggestedCategory);
@@ -87,18 +65,11 @@ function onSelectCategory(select: CategorySelectionType) {
     .forEach(row => row.categoryId = select.categoryId)
 }
 
-function onCreateCategory(categoryName: string) {
-  emit("onCreateCategory", {
-    categoryName: categoryName,
-    callback: undefined
-  })
-}
-
 function onCreateSuggestedCategory(categoryName: string) {
-  emit("onCreateCategory", {
-    categoryName: categoryName,
-    callback: () => {
-      const newlyCreatedCategory = categories.find(cat => cat.name === categoryName)
+  categoriesStore.createCategory(categoryName)
+    .then(() => {
+      const newlyCreatedCategory = categoriesStore.categoriesByName[categoryName]
+
       if (!newlyCreatedCategory)
         return;
 
@@ -106,8 +77,7 @@ function onCreateSuggestedCategory(categoryName: string) {
         if (row.suggestedCategory === categoryName && !row.categoryId)
           row.categoryId = newlyCreatedCategory.id;
       })
-    }
-  })
+    })
 }
 
 // see https://stackoverflow.com/a/75993081
@@ -229,10 +199,6 @@ const fields = computed<ReadonlyDataTableHeader[]>(() => {
       <category-input :id="`csv-category-input-${row.index}`"
                       :value="row.item.categoryId"
                       @input="newId => row.item.categoryId = newId ?? undefined"
-                      @createCategory="onCreateCategory"
-                      :flatted-categories="flattedCategories"
-                      :categories-by-id="categoriesById"
-                      :categories-by-name="categoriesByName"
                       :required="row.item.importable"
                       :disabled="!row.item.importable"/>
     </template>
@@ -258,16 +224,17 @@ const fields = computed<ReadonlyDataTableHeader[]>(() => {
     </template>
 
     <template v-slot:item.suggestedCategories="row">
-      <category-suggestion :checksum="row.item.checksum"
+      <category-suggestion v-if="categoriesStore.isInitialized"
+                           :checksum="row.item.checksum"
                            :suggestions="row.item.suggestedCategories || []"
-                           :categories-by-id="categoriesById"
-                           :disabled="!row.item.importable"
+                           :categories-by-id="categoriesStore.categoriesById"
+                           :disabled="!row.item.importable || categoriesStore.isLoading"
                            :selected-category-id="row.item.categoryId"
                            @select="onSelectCategory"/>
     </template>
 
-    <template v-slot:item.suggestedCategory="row" v-if="hasSuggestions">
-      <v-btn v-if="row.item.suggestedCategory && !categoriesByName[row.item.suggestedCategory]"
+    <template v-if="hasSuggestions" v-slot:item.suggestedCategory="row">
+      <v-btn v-if="row.item.suggestedCategory && !categoriesStore.categoriesByName[row.item.suggestedCategory]"
              @click="onCreateSuggestedCategory(row.item.suggestedCategory)"
              :disabled="!row.item.importable"
              class="p-0"
