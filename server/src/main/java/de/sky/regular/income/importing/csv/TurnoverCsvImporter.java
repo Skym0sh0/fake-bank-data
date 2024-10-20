@@ -113,7 +113,7 @@ public class TurnoverCsvImporter {
         });
     }
 
-    public List<de.sky.regular.income.api.TurnoverRow> fetchTurnoversForImport(UUID categoryId) {
+    public List<de.sky.regular.income.api.TurnoverRow> fetchTurnoversForCategory(UUID categoryId) {
         return db.transactionWithResult(ctx -> {
             UUID userId = user.getCurrentUser(ctx).getId();
 

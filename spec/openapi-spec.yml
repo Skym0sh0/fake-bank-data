@@ -489,6 +489,22 @@ paths:
         204:
           description: Successful operation
 
+  /api/turnover/rows:
+    get:
+      tags:
+        - Turnovers
+      summary: Fetch Turnover Rows
+      operationId: fetchTurnoverRows
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TurnoverRow"
+
   /api/turnover-import/category/{category-id}:
     get:
       tags:

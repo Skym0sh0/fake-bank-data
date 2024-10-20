@@ -4,6 +4,7 @@ import com.google.common.base.Stopwatch;
 import de.sky.regular.income.api.CategoryTurnoverReport;
 import de.sky.regular.income.api.RawCsvTable;
 import de.sky.regular.income.api.TurnoverImport;
+import de.sky.regular.income.api.TurnoverRow;
 import de.sky.regular.income.api.TurnoverImportFormat;
 import de.sky.regular.income.api.TurnoverImportPatch;
 import de.sky.regular.income.api.TurnoverImportRowsPatch;
@@ -13,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jooq.DatePart;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
@@ -94,6 +95,17 @@ public class TurnoversController implements generated.sky.regular.income.api.res
     }
 
     @Override
+    public ResponseEntity<List<TurnoverRow>> fetchTurnoverRows() {
+        var rows = importer.fetchTurnoverImports()
+                .stream()
+                .map(TurnoverImport::getTurnovers)
+                .flatMap(Collection::stream)
+                .toList();
+
+        return ResponseEntity.ok(rows);
+    }
+
+    @Override
     public ResponseEntity<TurnoverImport> fetchTurnoverImport(UUID id) {
         return ResponseEntity.ok(importer.fetchTurnoverImport(id));
     }
@@ -118,8 +130,8 @@ public class TurnoversController implements generated.sky.regular.income.api.res
     }
 
     @Override
-    public ResponseEntity<List<de.sky.regular.income.api.TurnoverRow>> fetchTurnoversForCategory(UUID categoryId) {
-        return ResponseEntity.ok(importer.fetchTurnoversForImport(categoryId));
+    public ResponseEntity<List<TurnoverRow>> fetchTurnoversForCategory(UUID categoryId) {
+        return ResponseEntity.ok(importer.fetchTurnoversForCategory(categoryId));
     }
 
     @Override
