@@ -56,11 +56,12 @@ onMounted(() => {
     <v-card-title>
       <div class="d-flex justify-space-between align-items-center">
         <h4>
-          Überblick Umsätze
+          Überblick importierte Umsätze
         </h4>
 
         <div class="d-flex justify-space-between align-center ga-1">
-          <v-btn size="small"
+          <v-btn v-if="false"
+                 size="small"
                  color="secondary"
                  @click="onReload"
                  :disabled="isLoading"

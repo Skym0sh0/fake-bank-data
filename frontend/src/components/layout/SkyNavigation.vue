@@ -9,17 +9,6 @@ const links = computed(() => {
 
 <template>
   <v-list :nav="true">
-    <v-list-item>
-      <v-list-item-title>
-        Topics
-      </v-list-item-title>
-      <v-list-item-subtitle>
-        Table of Content
-      </v-list-item-subtitle>
-    </v-list-item>
-
-    <v-divider/>
-
     <v-list-item v-for="link in links"
                  :key="link.link"
                  :to="link.link">
@@ -34,7 +23,5 @@ const links = computed(() => {
         {{ link.shortDescription }}
       </v-list-item-subtitle>
     </v-list-item>
-
-    <v-divider/>
   </v-list>
 </template>

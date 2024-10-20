@@ -50,11 +50,11 @@ const routes: RouterPage[] = [
   },
 
   {
-    path: '/turnovers/',
-    name: 'turnover-overview',
+    path: '/turnover-imports/',
+    name: 'turnover-imports-overview',
     component: TurnoverOverview,
     page: {
-      title: "Umsätze",
+      title: "Umsatz Importe",
       shortDescription: "Umsätze eintragen",
       icon: 'mdi-cash-multiple',
     }
