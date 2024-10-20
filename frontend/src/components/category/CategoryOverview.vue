@@ -206,6 +206,7 @@ onMounted(() => {
           <v-col :cols="showDetails ? 8 : 12">
             <category-list :categories-by-id="categoriesById"
                            :categories="categories"
+                           @refresh="refresh"
                            @edit="openEditView"
                            @newCategory="addNewCategoryTo"
                            @deleteCategory="deleteCategory"

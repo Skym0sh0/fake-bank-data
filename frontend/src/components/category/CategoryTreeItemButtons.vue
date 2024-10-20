@@ -9,6 +9,7 @@ const {category} = defineProps<{
 }>();
 
 const emit = defineEmits<{
+  (e: 'refresh'): void;
   (e: 'editCategory', categoryId: string): void;
   (e: 'addNewChildCategory', categoryId: string): void;
   (e: 'deleteCategory', categoryId: string): void;
@@ -41,6 +42,10 @@ const deletionButtonTooltip = computed<string>(() => {
 
   return `Die Kategorie kann nicht gelöscht werden, da sie noch in ${category.usageCount} Turnovers benutzt wird.`;
 })
+
+function onRefresh() {
+  emit("refresh")
+}
 
 function editCategory() {
   if (category.id)
@@ -77,7 +82,7 @@ function deleteCategory() {
         </template>
       </category-volume-graph>
 
-      <category-usage-dialog :category="category">
+      <category-usage-dialog :category="category" @refresh="onRefresh">
         <template v-slot:button="{ clickCallback }">
           <v-tooltip location="top">
             <template v-slot:activator="{ props }">
