@@ -58,7 +58,7 @@ dependencies {
     implementation group: "org.jooq", name: "jooq", version: jooq_version
     implementation group: "org.flywaydb", name: "flyway-core", version: flyway_version
     implementation group: "org.flywaydb", name: "flyway-database-postgresql", version: flyway_version
-    implementation group: "com.zaxxer", name: "HikariCP", version: "6.0.0"
+    implementation group: "com.zaxxer", name: "HikariCP", version: "6.2.0"
     runtimeOnly group: "org.postgresql", name: "postgresql", version: "42.7.4"
 
     implementation("io.swagger.core.v3:swagger-models:2.2.25")
