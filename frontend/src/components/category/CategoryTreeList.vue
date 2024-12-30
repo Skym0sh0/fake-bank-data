@@ -20,6 +20,7 @@ export type NewCategory = { parentId: string };
 export type CategoryReassign = { sources: string[]; target: Category };
 
 const emit = defineEmits<{
+  (e: 'refresh'): void;
   (e: 'edit', id: string): void;
   (e: 'newCategory', cat: NewCategory): void;
   (e: 'deleteCategory', cat: Category): void;
@@ -64,6 +65,10 @@ function setOpenRecursively(id: string) {
   }
 
   opened.value = [...newlyOpened]
+}
+
+function onRefresh() {
+  emit("refresh")
 }
 
 function editCategory(id: string) {
@@ -153,6 +158,7 @@ watch(() => categories, () => clearSelection(), {deep: true})
 
     <template v-slot:append="{ item }">
       <category-tree-item-buttons :category="item"
+                                  @refresh="onRefresh"
                                   @editCategory="editCategory"
                                   @addNewChildCategory="addNewCategoryTo"
                                   @deleteCategory="deleteCategory"/>

@@ -1,6 +1,4 @@
 import {createRouter, createWebHistory, RouteRecordRaw} from 'vue-router'
-import {inject} from "vue";
-import {authenticationKey} from "./keys.ts";
 import Home from "./components/Home.vue";
 import LoginPage from "./components/login/LoginPage.vue";
 import RegisterPage from "./components/login/RegisterPage.vue";
@@ -9,8 +7,9 @@ import About from "./components/About.vue";
 import ReportOverview from "./components/reports/simple/ReportOverview.vue";
 import TimelyReportOverview from "./components/reports/sankeys/TimelyReportOverview.vue";
 import CategoryOverview from "./components/category/CategoryOverview.vue";
-import TurnoverOverview from "./components/turnovers/TurnoverOverview.vue";
+import TurnoverImportsOverview from "./components/turnovers/TurnoverImportsOverview.vue";
 import TurnoversDetail from "./components/turnovers/detail/TurnoversDetail.vue";
+import {useUserStore} from "./store/user-store.ts";
 
 export type Page = {
   link: string;
@@ -51,11 +50,11 @@ const routes: RouterPage[] = [
   },
 
   {
-    path: '/turnovers/',
-    name: 'turnover-overview',
-    component: TurnoverOverview,
+    path: '/turnover-imports/',
+    name: 'turnover-imports-overview',
+    component: TurnoverImportsOverview,
     page: {
-      title: "Umsätze",
+      title: "Umsatz Importe",
       shortDescription: "Umsätze eintragen",
       icon: 'mdi-cash-multiple',
     }
@@ -116,13 +115,13 @@ const router = createRouter({
 router.beforeEach((to, _, next) => {
   const publicPages = ['/login', '/register'];
   const authRequired = !publicPages.includes(to.path);
-  const userService = inject(authenticationKey)?.value
-  const loggedIn = !!userService?.getUser();
+
+  const userStore = useUserStore();
 
   if (!to.matched.length)
     return next({name: "home"});
 
-  if (authRequired && !loggedIn) {
+  if (authRequired && !userStore.isLoggedIn) {
     return next({
       name: 'login',
       query: {

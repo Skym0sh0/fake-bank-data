@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import {Category, CategoryTurnoverReportDatapoint, TurnoversApi} from "@api/api.ts";
-import {computed, inject, ref, watch} from "vue";
-import {apiRefKey} from "../../../keys.ts";
+import {Category, CategoryTurnoverReportDatapoint} from "@api/api.ts";
+import {computed, ref, watch} from "vue";
 import {DateTime} from "luxon";
 import Waiter from "../../misc/Waiter.vue";
 import CategoryGraph from "./CategoryGraph.vue";
+import {useApi} from "../../../store/use-api.ts";
+import {useNotification} from "../../../store/use-notification.ts";
 
-const api: TurnoversApi | undefined = inject(apiRefKey)?.turnoversApi;
+const api = useApi();
+const notification = useNotification();
 
 const {category} = defineProps<{
   category: Category;
@@ -54,13 +56,11 @@ function loadData() {
 
   referencedRows.value = [];
 
-  api?.fetchTurnoversReportForCategory(category.id, grouping.value, includeSubcategories.value ? 1 << 16 : 1)
-    .then(res => {
-      referencedRows.value = res.data.datapoints ?? []
-    })
+  api.turnoversApi.fetchTurnoversReportForCategory(category.id, grouping.value, includeSubcategories.value ? 1 << 16 : 1)
+    .then(res => referencedRows.value = res.data.datapoints ?? [])
+    .catch(e => notification.notifyError("Umsätze konnten nicht geladen werden", e))
     .finally(() => isLoading.value = false)
 }
-
 
 watch(() => includeSubcategories.value, () => loadData())
 watch(() => grouping.value, () => loadData())

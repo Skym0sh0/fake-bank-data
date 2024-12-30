@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import WaitingIndicator from "../misc/WaitingIndicator.vue";
-import {inject, ref} from "vue";
-import {apiRefKey, authenticationKey} from "../../keys.ts";
+import {ref} from "vue";
 import {useRoute, useRouter} from 'vue-router'
-import {UserAuthApi} from "@api/api.ts"
 import ShowPasswordButton from "./ShowPasswordButton.vue";
+import {useUserStore} from "../../store/user-store.ts";
+import {useApi} from "../../store/use-api.ts";
+import {useNotification} from "../../store/use-notification.ts";
 
 const router = useRouter()
 const route = useRoute()
+
+const userStore = useUserStore();
+const api = useApi()
 
 const nameRules = [
   (value: string) => {
@@ -34,29 +38,26 @@ const passwordVisible = ref(false);
 
 const errorMessage = ref<string | null>(null);
 
-const userRef = inject(authenticationKey)?.value
-const apiAccess: UserAuthApi | undefined = inject(apiRefKey)?.authApi
+const notification = useNotification();
 
 function doLogin() {
   if (!username.value || !password.value)
     return;
 
-  if (!apiAccess)
-    return;
 
   isLoading.value = true;
 
-  apiAccess.loginUser({username: username.value, password: password.value})
+  api.authApi.loginUser({username: username.value, password: password.value})
     .then(res => {
-      userRef?.login(res.data, password.value)
+      userStore.login(res.data, password.value)
 
       const path: string = route.query['returnUrl']?.toString() ?? '/';
 
       router.replace({path: path})
     })
     .catch(e => {
-      console.error(e)
       errorMessage.value = e.error;
+      notification.notifyError("Login fehlgeschlagen", e)
     })
     .finally(() => isLoading.value = false);
 }

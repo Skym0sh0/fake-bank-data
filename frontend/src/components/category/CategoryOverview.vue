@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import WaitingIndicator from "../misc/WaitingIndicator.vue";
-import {computed, inject, onMounted, ref, useTemplateRef} from "vue";
-import {Category, CategoryApi, CategoryPatch} from "@api/api.ts";
-import {apiRefKey} from "../../keys.ts";
+import {computed, onMounted, ref, useTemplateRef} from "vue";
+import {Category, CategoryPatch} from "@api/api.ts";
 import CategoryList from "./CategoryList.vue";
 import {CategoriesById, mapCategoriesById} from "../misc/categoryHelpers.ts";
 import {CategoryReassign, NewCategory} from "./CategoryTreeList.vue";
 import * as _ from "lodash";
 import CategoryDetails from "./CategoryDetails.vue";
 import {AxiosResponse} from "axios";
+import {useApi} from "../../store/use-api.ts";
+import {useNotification} from "../../store/use-notification.ts";
 
-const api: CategoryApi | undefined = inject(apiRefKey)?.categoriesApi;
+const api = useApi();
+const notification = useNotification();
 
 type DetailSelectionType = {
   isSelected: boolean;
@@ -41,7 +43,7 @@ const showDetails = computed(() => {
 function loadCategories() {
   isLoading.value = true
 
-  return api?.getCategoriesAsTree()
+  return api.categoriesApi.getCategoriesAsTree()
     .then(res => {
       const flatter = (cat: Category): Category[] => {
         return [
@@ -52,9 +54,8 @@ function loadCategories() {
 
       categories.value = res.data.flatMap(flatter)
     })
-    .finally(() => {
-      isLoading.value = false
-    })
+    .catch(e => notification.notifyError("Kategorien konnten nicht geladen werden", e))
+    .finally(() => isLoading.value = false)
 }
 
 function newCategory(parentId: string | null | undefined) {
@@ -101,7 +102,7 @@ function cancelActiveForm() {
 
 function createNewRootCategory(cat: CategoryPatch) {
   doRestCallForCategory(() => {
-    return api?.createCategory(cat);
+    return api.categoriesApi.createCategory(cat);
   })
 }
 
@@ -110,7 +111,7 @@ function createNewChildCategory(cat: CategoryPatch) {
     return;
 
   doRestCallForCategory(() => {
-      return api?.createCategoryAsChild(selectedForDetails.value.parentId!, cat);
+      return api.categoriesApi.createCategoryAsChild(selectedForDetails.value.parentId!, cat);
     }
   );
 }
@@ -120,7 +121,7 @@ function updateCategory(cat: CategoryPatch) {
     return;
 
   doRestCallForCategory(() => {
-    return api?.updateCategory(cat.id!, cat)
+    return api.categoriesApi.updateCategory(cat.id!, cat)
       .then(res => {
         categories.value = _.filter(categories.value, cur => cur.id !== res.data.id)
 
@@ -138,6 +139,7 @@ function doRestCallForCategory(callback: () => Promise<AxiosResponse<Category>> 
       categories.value.push(res.data)
       openEditView(res.data.id)
     })
+    .catch(e => notification?.notifyError("Kategorie konnte nicht erstellt oder verändert werden", e))
     .then(() => refresh())
     .finally(() => {
       isLoading.value = false
@@ -150,14 +152,13 @@ function deleteCategory(category: Category) {
   if (selectedForDetails.value.entity && selectedForDetails.value.entity.id === category.id)
     cancelActiveForm()
 
-  api?.deleteCategory(category.id)
+  api.categoriesApi.deleteCategory(category.id)
     .then(() => {
       categories.value = _.filter(categories.value, cur => cur.id !== category.id)
-      refresh()
     })
-    .finally(() => {
-      isLoading.value = false
-    })
+    .then(() => refresh())
+    .catch(e => notification?.notifyError("Kategorie konnte nicht gelöscht werden", e))
+    .finally(() => isLoading.value = false)
 }
 
 function reassignCategories(payload: CategoryReassign) {
@@ -165,12 +166,12 @@ function reassignCategories(payload: CategoryReassign) {
 
   Promise.all(
     payload.sources.map(id => categoriesById.value[id])
-      .map(source => api?.reallocateCategory(payload.target.id, source.id))
+      .map(source => api.categoriesApi.reallocateCategory(payload.target.id, source.id))
   )
+    .then(() => notification?.notifySuccess("Kategorien verschoben"))
     .then(() => refresh())
-    .finally(() => {
-      isLoading.value = false
-    })
+    .catch(e => notification?.notifyError("Kategorie konnte nicht verschoben werden", e))
+    .finally(() => isLoading.value = false)
 }
 
 function refresh() {
@@ -178,7 +179,7 @@ function refresh() {
 }
 
 onMounted(() => {
-  loadCategories();
+  refresh();
 })
 </script>
 
@@ -194,9 +195,8 @@ onMounted(() => {
                :loading="isLoading"
                :disabled="selectedForDetails.isSelected"
                prepend-icon="mdi-plus-box-outline"
-               color="primary">
-          Neue Kategorie
-        </v-btn>
+               text="Neue Kategorie"
+               color="primary"/>
       </div>
     </v-card-title>
 
@@ -206,6 +206,7 @@ onMounted(() => {
           <v-col :cols="showDetails ? 8 : 12">
             <category-list :categories-by-id="categoriesById"
                            :categories="categories"
+                           @refresh="refresh"
                            @edit="openEditView"
                            @newCategory="addNewCategoryTo"
                            @deleteCategory="deleteCategory"

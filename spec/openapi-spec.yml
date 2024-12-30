@@ -10,6 +10,8 @@ tags:
     description: Everything about Categories
   - name: Turnovers
     description: Everything about Turnovers
+  - name: TurnoverImports
+    description: Everything about TurnoverImports
   - name: Reports
     description: Everything about Reports
 
@@ -286,6 +288,7 @@ paths:
     post:
       tags:
         - Turnovers
+      deprecated: true
       summary: previews a CSV file to a import preview
       operationId: processCsvPreview
       parameters:
@@ -325,6 +328,7 @@ paths:
     post:
       tags:
         - Turnovers
+      deprecated: true
       summary: Processes a preview to a turnover import
       operationId: processPreview
       parameters:
@@ -849,6 +853,7 @@ components:
           $ref: "#/components/schemas/ID"
     TurnoverPreview:
       type: object
+      deprecated: true
       required:
         - filename
         - format

@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import WaitingIndicator from "../misc/WaitingIndicator.vue";
 import ConfirmationedButton from "../misc/ConfirmationedButton.vue";
-import {inject, onMounted, ref, useTemplateRef} from "vue";
-import {UserAuthApi} from "@api/api.ts";
-import {apiRefKey, authenticationKey} from "../../keys.ts";
+import {onMounted, ref, useTemplateRef} from "vue";
 import {VForm} from "vuetify/components";
 import ShowPasswordButton from "./ShowPasswordButton.vue";
+import {useUserStore} from "../../store/user-store.ts";
+import {useApi} from "../../store/use-api.ts";
+import {useNotification} from "../../store/use-notification.ts";
+
+const api = useApi()
+const notification = useNotification();
 
 const isLoading = ref(false)
 const valid = ref(false)
@@ -32,40 +36,42 @@ const passwordRepeatRules = ref([
   (value: string) => value !== password.value ? "Must match password" : true
 ])
 
-const apiRef: UserAuthApi | undefined = inject(apiRefKey)?.authApi
-const userService = inject(authenticationKey)?.value
+const userStore = useUserStore();
+
 const formRef = useTemplateRef<VForm>('user-details-form')
 
 function onDelete() {
-  if (!userService?.user?.id)
+  if (!userStore.currentUser?.id)
     return;
 
   isLoading.value = true
 
-  apiRef?.deleteUser(userService.user.id)
+  api.authApi.deleteUser(userStore.currentUser.id)
     .then(() => reload())
+    .catch(e => notification.notifyError("User konnte nicht gelöscht werden", e))
     .finally(() => isLoading.value = false)
 }
 
 function onSave() {
-  if (!userService?.user?.id)
+  if (!userStore.currentUser?.id)
     return;
 
   isLoading.value = true
 
-  apiRef?.updateUser(userService.user.id, {
+  api.authApi.updateUser(userStore.currentUser.id, {
     firstname: firstname.value,
     lastname: lastname.value,
     username: username.value,
     password: password.value,
   })
-    .then(res => userService?.login(res.data, password.value))
+    .then(res => userStore.login(res.data, password.value))
+    .catch(e => notification.notifyError("User konnte nicht geändert werden", e))
     .finally(() => isLoading.value = false)
 }
 
 function reload() {
   setTimeout(() => {
-    userService?.logout()
+    userStore.logout()
     location.reload()
 
     setTimeout(() => isLoading.value = false, 500)
@@ -77,13 +83,13 @@ function validate() {
 }
 
 onMounted(() => {
-  username.value = userService?.user?.username ?? '';
+  username.value = userStore.currentUser?.username ?? '';
 
-  password.value = userService?.user?.password ?? '';
-  passwordRepeat.value = userService?.user?.password ?? '';
+  password.value = userStore.currentUser?.password ?? '';
+  passwordRepeat.value = userStore.currentUser?.password ?? '';
 
-  firstname.value = userService?.user?.firstname ?? '';
-  lastname.value = userService?.user?.lastname ?? '';
+  firstname.value = userStore.currentUser?.firstname ?? '';
+  lastname.value = userStore.currentUser?.lastname ?? '';
 })
 
 </script>

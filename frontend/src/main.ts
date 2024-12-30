@@ -9,26 +9,25 @@ import {VDateInput} from 'vuetify/labs/VDateInput'
 import {VTreeview} from 'vuetify/labs/VTreeview'
 
 import App from './App.vue'
-import {authenticationKey, errorRefKey} from "./keys.ts";
-import {userReference} from "./auth/Authentication.js";
-import {errorReference} from "./auth/ErrorHandler.ts";
 import {router} from "./router.ts";
+import {createPinia} from "pinia";
 
 const vuetify = createVuetify({
-    components: {
-        ...components,
-        VDateInput,
-        VTreeview,
-    },
-    directives,
-    icons: {
-        defaultSet: 'mdi',
-    },
+  components: {
+    ...components,
+    VDateInput,
+    VTreeview,
+  },
+  directives,
+  icons: {
+    defaultSet: 'mdi',
+  },
 })
 
+const pinia = createPinia()
+
 createApp(App)
-    .provide(authenticationKey, userReference)
-    .provide(errorRefKey, errorReference)
-    .use(vuetify)
-    .use(router)
-    .mount('#app')
+  .use(vuetify)
+  .use(pinia)
+  .use(router)
+  .mount('#app')

@@ -3,15 +3,17 @@
 import {AssociationsType, SelectType} from "./types.ts";
 import {DateTime} from "luxon";
 import Waiter from "../../misc/Waiter.vue";
-import {computed, inject, nextTick, onBeforeUnmount, ref, useTemplateRef, watch} from "vue";
-import {FlowDataPoint, IncomeExpenseFlowReport, ReportsApi} from "@api/api.ts";
+import {computed, nextTick, onBeforeUnmount, ref, useTemplateRef, watch} from "vue";
+import {FlowDataPoint, IncomeExpenseFlowReport} from "@api/api.ts";
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
 import {SankeyDiagram} from "@amcharts/amcharts4/charts";
-import {apiRefKey} from "../../../keys.ts";
 import {AxiosResponse} from "axios";
+import {useApi} from "../../../store/use-api.ts";
+import {useNotification} from "../../../store/use-notification.ts";
 
-const api: ReportsApi | undefined = inject(apiRefKey)?.reportsApi;
+const api = useApi()
+const notification = useNotification();
 
 const {select, height} = defineProps<{
   select: SelectType;
@@ -172,13 +174,13 @@ function loadData() {
 
   const doApiCall: () => Promise<AxiosResponse<IncomeExpenseFlowReport>> | undefined = () => {
     if (isAbsolutTimespan.value)
-      return api?.fetchIncomeExpenseFlowReport(select.year, select.month)
+      return api.reportsApi.fetchIncomeExpenseFlowReport(select.year, select.month)
 
     if (isRelativeTimespan.value) {
       if (!select.timeunit || select.units <= 0)
         return undefined;
 
-      return api?.fetchIncomeExpenseFlowSlidingWindowReport(select.timeunit, select.units, select.referenceDate.toISODate() ?? undefined)
+      return api.reportsApi.fetchIncomeExpenseFlowSlidingWindowReport(select.timeunit, select.units, select.referenceDate.toISODate() ?? undefined)
     }
 
     throw new Error("Unknown Timespan type: " + select.mode);
@@ -187,10 +189,8 @@ function loadData() {
   isLoading.value = true
 
   doApiCall?.()
-    ?.then(res => {
-      sankeyData.value = res.data;
-    })
-    ?.catch(e => console.error(e))
+    ?.then(res => sankeyData.value = res.data)
+    ?.catch(e => notification.notifyError("Report konnte nicht geladen werden", e))
     ?.finally(() => {
       isLoading.value = false
 
