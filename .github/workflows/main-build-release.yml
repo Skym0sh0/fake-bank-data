@@ -62,10 +62,8 @@ jobs:
         run: |
           new_version=$RELEASE_VERSION_TAG
           echo "Releasing Version $new_version"
-          ./gradlew jibBuildTar jib --info --stacktrace
+          ./gradlew jib --info --stacktrace
           gh release create "$new_version" -t "$new_version" -n "Release $new_version"
-          gh release upload "$new_version" "server/build/jib-image.tar"
-          gh release upload "$new_version" "server/build/jib-image.json"
         env:
           RELEASE_VERSION: ${{ steps.get_release_version.outputs.version }}
           RELEASE_VERSION_TAG: ${{ steps.get_release_version.outputs.version_tag }}
