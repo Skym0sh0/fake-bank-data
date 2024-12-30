@@ -7,7 +7,7 @@ import About from "./components/About.vue";
 import ReportOverview from "./components/reports/simple/ReportOverview.vue";
 import TimelyReportOverview from "./components/reports/sankeys/TimelyReportOverview.vue";
 import CategoryOverview from "./components/category/CategoryOverview.vue";
-import TurnoverOverview from "./components/turnovers/TurnoverOverview.vue";
+import TurnoverImportsOverview from "./components/turnovers/TurnoverImportsOverview.vue";
 import TurnoversDetail from "./components/turnovers/detail/TurnoversDetail.vue";
 import {useUserStore} from "./store/user-store.ts";
 
@@ -52,7 +52,7 @@ const routes: RouterPage[] = [
   {
     path: '/turnover-imports/',
     name: 'turnover-imports-overview',
-    component: TurnoverOverview,
+    component: TurnoverImportsOverview,
     page: {
       title: "Umsatz Importe",
       shortDescription: "Umsätze eintragen",
