@@ -2,10 +2,12 @@ package de.sky.regular.income.importing.csv.parsers;
 
 import com.univocity.parsers.annotations.Convert;
 import com.univocity.parsers.annotations.Parsed;
-import com.univocity.parsers.common.processor.BeanListProcessor;
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 import de.sky.regular.income.api.TurnoverImportFormat;
+import de.sky.regular.income.importing.csv.parsers.common.BeanWithMetaDataProcessor;
+import de.sky.regular.income.importing.csv.parsers.common.CsvProcessorConverters;
+import de.sky.regular.income.importing.csv.parsers.common.CsvRecordWithMetadata;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -26,7 +28,7 @@ public class VRBankTurnoverCsvParser implements TurnoverParser {
 
     public List<TurnoverRecord> parseCsv(Reader reader) {
         log.info("Preparing CSV parser...");
-        var proc = new BeanListProcessor<>(VRBankRecord.class, 1000);
+        var proc = new BeanWithMetaDataProcessor<>(VRBankRecord.class);
 
         var settings = new CsvParserSettings();
         settings.setHeaderExtractionEnabled(true);
@@ -42,12 +44,12 @@ public class VRBankTurnoverCsvParser implements TurnoverParser {
 
         log.info("CSV parsed successfully");
 
-        var result = proc.getBeans();
+        var result = proc.getRows();
 
         log.info("Found {} records", result.size());
 
         return result.stream()
-                .map(VRBankRecord::toTurnOverRecord)
+                .map(CsvRecordWithMetadata.map(VRBankRecord::toTurnOverRecord))
                 .toList();
     }
 
@@ -77,7 +79,7 @@ public class VRBankTurnoverCsvParser implements TurnoverParser {
         @Parsed(field = "Kategorie")
         private String category;
 
-        public TurnoverRecord toTurnOverRecord() {
+        public TurnoverRecord toTurnOverRecord(TurnoverRecord.TurnoverRecordBuilder builder) {
             var desc = Stream.of(
                             getDescription(),
                             getCategory(),
@@ -87,8 +89,7 @@ public class VRBankTurnoverCsvParser implements TurnoverParser {
                     .findFirst()
                     .orElse("<nicht gesetzt>");
 
-            return TurnoverRecord.builder()
-                    .date(this.getDate())
+            return builder.date(this.getDate())
                     .amountInCents(this.getAmountInCents())
                     .description(desc)
                     .suggestedCategory(this.getCategory())

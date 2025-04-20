@@ -2,10 +2,12 @@ package de.sky.regular.income.importing.csv.parsers;
 
 import com.univocity.parsers.annotations.Convert;
 import com.univocity.parsers.annotations.Parsed;
-import com.univocity.parsers.common.processor.BeanListProcessor;
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 import de.sky.regular.income.api.TurnoverImportFormat;
+import de.sky.regular.income.importing.csv.parsers.common.BeanWithMetaDataProcessor;
+import de.sky.regular.income.importing.csv.parsers.common.CsvProcessorConverters;
+import de.sky.regular.income.importing.csv.parsers.common.CsvRecordWithMetadata;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -32,7 +34,7 @@ public class PaypalTurnoverParser implements TurnoverParser {
     @Override
     public List<TurnoverRecord> parseCsv(Reader reader) throws Exception {
         log.info("Preparing CSV parser...");
-        var proc = new BeanListProcessor<>(PaypalRecord.class, 1000);
+        var proc = new BeanWithMetaDataProcessor<>(PaypalRecord.class);
 
         var settings = new CsvParserSettings();
         settings.setHeaderExtractionEnabled(true);
@@ -48,12 +50,12 @@ public class PaypalTurnoverParser implements TurnoverParser {
 
         log.info("CSV parsed successfully");
 
-        var result = proc.getBeans();
+        var result = proc.getRows();
 
         log.info("Found {} records", result.size());
 
         return result.stream()
-                .map(PaypalRecord::toTurnOverRecord)
+                .map(CsvRecordWithMetadata.map(PaypalRecord::toTurnOverRecord))
                 .toList();
     }
 
@@ -124,9 +126,8 @@ public class PaypalTurnoverParser implements TurnoverParser {
             return ObjectUtils.firstNonNull(this.getSenderName(), getSenderEmail(), this.getBankName());
         }
 
-        public TurnoverRecord toTurnOverRecord() {
-            return TurnoverRecord.builder()
-                    .date(this.getTimestamp().toLocalDate())
+        public TurnoverRecord toTurnOverRecord(TurnoverRecord.TurnoverRecordBuilder builder) {
+            return builder.date(this.getTimestamp().toLocalDate())
                     .amountInCents(this.getBruttoAmountInCents())
                     .description(this.getCombinedDescription())
                     .suggestedCategory(null)

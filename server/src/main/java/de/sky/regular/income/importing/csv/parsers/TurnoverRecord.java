@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Value;
 
 import java.time.LocalDate;
+import java.util.Map;
 
 @Value
 @Builder
@@ -14,4 +15,7 @@ public class TurnoverRecord {
     String description;
     String suggestedCategory;
     String recipient;
+
+    Long lineNumber;
+    Map<String, String> rawValuePairs;
 }

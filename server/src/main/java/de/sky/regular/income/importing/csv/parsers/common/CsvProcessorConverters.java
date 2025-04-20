@@ -1,4 +1,4 @@
-package de.sky.regular.income.importing.csv.parsers;
+package de.sky.regular.income.importing.csv.parsers.common;
 
 import com.univocity.parsers.conversions.ObjectConversion;
 import lombok.AccessLevel;

@@ -2,13 +2,16 @@ package de.sky.regular.income.importing.csv.parsers;
 
 import com.univocity.parsers.annotations.Convert;
 import com.univocity.parsers.annotations.Parsed;
-import com.univocity.parsers.common.processor.BeanListProcessor;
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 import de.sky.regular.income.api.TurnoverImportFormat;
+import de.sky.regular.income.importing.csv.parsers.common.BeanWithMetaDataProcessor;
+import de.sky.regular.income.importing.csv.parsers.common.CsvProcessorConverters;
+import de.sky.regular.income.importing.csv.parsers.common.CsvRecordWithMetadata;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -28,9 +31,11 @@ public class DKBTurnoverCsvParser implements TurnoverParser {
 
     @Override
     public List<TurnoverRecord> parseCsv(Reader rawReader) throws Exception {
-        try (var reader = skipBeginningRubbish(rawReader)) {
+        var lineOffset = new MutableLong(0);
+
+        try (var reader = skipBeginningRubbish(rawReader, lineOffset)) {
             log.info("Preparing CSV parser...");
-            var proc = new BeanListProcessor<>(DKBRecord.class, 1000);
+            var proc = new BeanWithMetaDataProcessor<>(DKBRecord.class, lineOffset.getValue());
 
             var settings = new CsvParserSettings();
             settings.setHeaderExtractionEnabled(true);
@@ -47,18 +52,18 @@ public class DKBTurnoverCsvParser implements TurnoverParser {
 
             log.info("CSV parsed successfully");
 
-            var result = proc.getBeans();
+            var result = proc.getRows();
 
             log.info("Found {} records", result.size());
 
             return result.stream()
-                    .filter(r -> !Objects.equals(r.getType(), "Abschluss"))
-                    .map(DKBRecord::toTurnOverRecord)
+                    .filter(r -> !Objects.equals(r.bean().getType(), "Abschluss"))
+                    .map(CsvRecordWithMetadata.map(DKBRecord::toTurnOverRecord))
                     .toList();
         }
     }
 
-    private Reader skipBeginningRubbish(Reader reader) throws Exception {
+    private Reader skipBeginningRubbish(Reader reader, MutableLong offset) throws Exception {
         var buffered = new BufferedReader(reader, 8192);
 
         while (true) {
@@ -72,6 +77,8 @@ public class DKBTurnoverCsvParser implements TurnoverParser {
                 buffered.reset();
                 return buffered;
             }
+
+            offset.increment();
         }
     }
 
@@ -113,7 +120,7 @@ public class DKBTurnoverCsvParser implements TurnoverParser {
         @Parsed(field = "Verwendungszweck")
         private String description;
 
-        public TurnoverRecord toTurnOverRecord() {
+        public TurnoverRecord toTurnOverRecord(TurnoverRecord.TurnoverRecordBuilder builder) {
             var desc = Stream.of(
                             getDescription(),
                             getMandatRef(),
@@ -124,8 +131,7 @@ public class DKBTurnoverCsvParser implements TurnoverParser {
                     .findFirst()
                     .orElse("<nicht gesetzt>");
 
-            return TurnoverRecord.builder()
-                    .date(getDate())
+            return builder.date(getDate())
                     .amountInCents(getAmountInCents())
                     .description(desc)
                     .suggestedCategory(null)

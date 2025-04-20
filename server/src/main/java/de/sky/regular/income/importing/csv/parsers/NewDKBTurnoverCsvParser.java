@@ -2,13 +2,16 @@ package de.sky.regular.income.importing.csv.parsers;
 
 import com.univocity.parsers.annotations.Convert;
 import com.univocity.parsers.annotations.Parsed;
-import com.univocity.parsers.common.processor.BeanListProcessor;
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 import de.sky.regular.income.api.TurnoverImportFormat;
+import de.sky.regular.income.importing.csv.parsers.common.BeanWithMetaDataProcessor;
+import de.sky.regular.income.importing.csv.parsers.common.CsvProcessorConverters;
+import de.sky.regular.income.importing.csv.parsers.common.CsvRecordWithMetadata;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -27,12 +30,16 @@ public class NewDKBTurnoverCsvParser implements TurnoverParser {
 
     @Override
     public List<TurnoverRecord> parseCsv(Reader rawReader) throws Exception {
-        try (var reader = skipBeginningRubbish(rawReader)) {
+        var lineOffset = new MutableLong(0);
+
+        try (var reader = skipBeginningRubbish(rawReader, lineOffset)) {
             log.info("Preparing NewDKB CSV parser...");
-            var proc = new BeanListProcessor<>(DKBRecord.class, 1000);
+            var proc = new BeanWithMetaDataProcessor<>(DKBRecord.class, lineOffset.getValue());
+
 
             var settings = new CsvParserSettings();
             settings.setHeaderExtractionEnabled(true);
+            settings.setProcessor(proc);
             settings.setProcessor(proc);
             settings.setDelimiterDetectionEnabled(true);
             settings.setLineSeparatorDetectionEnabled(true);
@@ -46,17 +53,17 @@ public class NewDKBTurnoverCsvParser implements TurnoverParser {
 
             log.info("NewDKB CSV parsed successfully");
 
-            var result = proc.getBeans();
+            var result = proc.getRows();
 
             log.info("Found {} NewDKB records", result.size());
 
             return result.stream()
-                    .map(DKBRecord::toTurnOverRecord)
+                    .map(CsvRecordWithMetadata.map(DKBRecord::toTurnOverRecord))
                     .toList();
         }
     }
 
-    private Reader skipBeginningRubbish(Reader reader) throws Exception {
+    private Reader skipBeginningRubbish(Reader reader, MutableLong offset) throws Exception {
         var buffered = new BufferedReader(reader, 8192);
 
         while (true) {
@@ -66,10 +73,13 @@ public class NewDKBTurnoverCsvParser implements TurnoverParser {
             if (line == null)
                 return buffered;
 
+
             if (line.contains("Buchungsdatum") && line.contains("Wertstellung")) {
                 buffered.reset();
                 return buffered;
             }
+
+            offset.increment();
         }
     }
 
@@ -104,7 +114,7 @@ public class NewDKBTurnoverCsvParser implements TurnoverParser {
         @Parsed(field = "Kundenreferenz")
         private String kundenreferenz;
 
-        public TurnoverRecord toTurnOverRecord() {
+        public TurnoverRecord toTurnOverRecord(TurnoverRecord.TurnoverRecordBuilder builder) {
             var desc = Stream.of(
                             getVerwendungszweck(),
                             getMandatsreferenz(),
@@ -115,8 +125,7 @@ public class NewDKBTurnoverCsvParser implements TurnoverParser {
                     .findFirst()
                     .orElse("<nicht gesetzt>");
 
-            return TurnoverRecord.builder()
-                    .date(getBuchungsdatum())
+            return builder.date(getBuchungsdatum())
                     .amountInCents(getBetragEurCent())
                     .description(desc)
                     .suggestedCategory(null)
