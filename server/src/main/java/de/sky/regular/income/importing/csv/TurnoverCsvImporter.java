@@ -10,9 +10,11 @@ import de.sky.regular.income.api.TurnoverImportFormat;
 import de.sky.regular.income.api.TurnoverImportPatch;
 import de.sky.regular.income.api.TurnoverImportRowsPatch;
 import de.sky.regular.income.api.TurnoverRow;
+import de.sky.regular.income.api.TurnoverRowMetaData;
 import de.sky.regular.income.api.TurnoverRowPreview;
-import de.sky.regular.income.database.DatabaseConnection;
+import de.sky.regular.income.api.TurnoverRowRawCellData;
 import de.sky.regular.income.dao.CategoryDAO;
+import de.sky.regular.income.database.DatabaseConnection;
 import de.sky.regular.income.database.DatabaseSupplier;
 import de.sky.regular.income.importing.csv.parsers.TurnoverRecord;
 import de.sky.regular.income.users.UserProvider;
@@ -33,10 +35,19 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Stream;
 
-import static generated.sky.regular.income.Tables.*;
+import static generated.sky.regular.income.Tables.CATEGORY;
+import static generated.sky.regular.income.Tables.TURNOVER_FILE_IMPORT;
+import static generated.sky.regular.income.Tables.TURNOVER_ROW;
 import static org.jooq.impl.DSL.and;
 import static org.jooq.impl.DSL.selectFrom;
 
@@ -388,6 +399,22 @@ public class TurnoverCsvImporter {
                 .categoryId(null)
                 .importable(!alreadyExistentRowChecksums.contains(checksum))
                 .suggestedCategories(categorySuggester.findSuggestions(rec, similarityChecksum))
+                .metadata(
+                        TurnoverRowMetaData.builder()
+                                .lineNumber(rec.getLineNumber())
+                                .cellValues(
+                                        rec.getRawValues()
+                                                .stream()
+                                                .map(c ->
+                                                        TurnoverRowRawCellData.builder()
+                                                                .column(c.column())
+                                                                .value(c.value())
+                                                                .build()
+                                                )
+                                                .toList()
+                                )
+                                .build()
+                )
                 .build();
     }
 

@@ -9,7 +9,7 @@ public record CsvRecordWithMetadata<T>(T bean, RawMetaDataProcessor.RowMetaData 
     public TurnoverRecord toTurnOverRecord(BiFunction<T, TurnoverRecord.TurnoverRecordBuilder, TurnoverRecord> mapper) {
         var builder = TurnoverRecord.builder()
                 .lineNumber(metaData().lineNumber())
-                .rawValuePairs(metaData.row());
+                .rawValues(metaData.cellValue());
 
         return mapper.apply(bean, builder);
     }

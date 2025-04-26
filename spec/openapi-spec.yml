@@ -931,6 +931,31 @@ components:
           type: string
         recipient:
           type: string
+        metadata:
+          $ref: "#/components/schemas/TurnoverRowMetaData"
+    TurnoverRowMetaData:
+      type: object
+      required:
+        - lineNumber
+        - cellValues
+      properties:
+        lineNumber:
+          type: integer
+          format: int64
+        cellValues:
+          type: array
+          items:
+            $ref: "#/components/schemas/TurnoverRowRawCellData"
+    TurnoverRowRawCellData:
+      type: object
+      required:
+        - column
+      properties:
+        column:
+          type: string
+        value:
+          type: string
+
     TurnoverImportFormat:
       type: string
       enum:

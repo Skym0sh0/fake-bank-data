@@ -2,8 +2,13 @@ package de.sky.regular.income.importing.csv.parsers.common;
 
 import com.univocity.parsers.common.ParsingContext;
 import com.univocity.parsers.common.processor.AbstractRowProcessor;
+import de.sky.regular.income.importing.csv.parsers.TurnoverRecord;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.IntStream;
 
 class RawMetaDataProcessor extends AbstractRowProcessor {
     private final long lineNumberOffset;
@@ -33,16 +38,16 @@ class RawMetaDataProcessor extends AbstractRowProcessor {
         if (headers.length != row.length)
             throw new IllegalStateException("Headers do not match row length " + Arrays.toString(headers) + " vs " + Arrays.toString(row));
 
-        var map = new LinkedHashMap<String, String>();
-        for (int i = 0; i < headers.length; i++) {
-            map.put(headers[i], row[i]);
-        }
+        var cells = IntStream.range(0, headers.length)
+                .mapToObj(i -> new TurnoverRecord.TurnoverRawRecordValues(headers[i], row[i]))
+                .toList();
 
-        rows.add(new RowMetaData(lineNumberOffset + context.currentLine(), map));
+        rows.add(new RowMetaData(lineNumberOffset + context.currentLine(), cells));
     }
 
-    public record RowMetaData(long lineNumber, Map<String, String> row) {
+    public record RowMetaData(long lineNumber, List<TurnoverRecord.TurnoverRawRecordValues> cellValue) {
     }
+
 
     public List<RowMetaData> getRows() {
         return Collections.unmodifiableList(rows);
